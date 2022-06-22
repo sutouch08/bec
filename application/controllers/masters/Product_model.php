@@ -7,6 +7,7 @@ class Product_model extends PS_Controller
 	public $menu_group_code = 'DB';
   public $menu_sub_group_code = 'PRODUCT';
 	public $title = 'Product Model';
+	public $segment = 4;
 
   public function __construct()
   {
@@ -19,57 +20,158 @@ class Product_model extends PS_Controller
   public function index()
   {
     $filter = array(
-      'code'      => get_filter('code', 'model_code', ''),
       'name'      => get_filter('name', 'model_name', '')
     );
 
 		//--- แสดงผลกี่รายการต่อหน้า
 		$perpage = get_rows();
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
-		if($perpage > 300)
-		{
-			$perpage = 20;
-		}
 
-		$segment  = 4; //-- url segment
 		$rows     = $this->product_model_model->count_rows($filter);
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-		$model    = $this->product_model_model->get_list($filter, $perpage, $this->uri->segment($segment));
-
-    $data = array();
-
-
-    $filter['data'] = $model;
+		$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
+		$filter['data'] = $this->product_model_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
 
 		$this->pagination->initialize($init);
     $this->load->view('masters/product_model/product_model_list', $filter);
   }
 
 
-  public function add_new()
+	public function add_new()
+	{
+		$this->load->view('masters/product_model/product_model_add');
+	}
+
+
+	public function add()
+	{
+		$sc = TRUE;
+		$name = trim($this->input->post('name'));
+
+		if( ! empty($name))
+		{
+			if( ! $this->product_model_model->is_exists_name($name))
+			{
+				$arr = array(
+					'name' => $name
+				);
+
+				if( ! $this->product_model_model->add($arr))
+				{
+					$sc = FALSE;
+					set_error('insert');
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				set_error('exists', $name);
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('required');
+		}
+
+		$this->_response($sc);
+	}
+
+
+	public function edit($id)
   {
-    $this->title = 'Add Product Model';
-    $this->load->view('masters/product_model/product_model_add_view');
+    $data = $this->product_model_model->get($id);
+    $this->load->view('masters/product_model/product_model_edit', $data);
   }
 
 
 
-  public function edit($code)
-  {
-    $this->title = 'Edit Product Model';
-    $data = $this->product_model_model->get($code);
+	public function update()
+	{
+		$sc = TRUE;
 
-    $this->load->view('masters/product_model/product_model_edit_view', $data);
-  }
+		$id = $this->input->post('id');
+		$name = trim($this->input->post('name'));
+
+		if($this->product_model_model->is_exists_name($name, $id))
+		{
+			$sc = FALSE;
+			set_error('exists', $name);
+		}
+		else
+		{
+			$arr = array(
+				'name' => $name
+			);
+
+			if( ! $this->product_model_model->update($id, $arr))
+			{
+				$sc = FALSE;
+				set_error('update');
+			}
+		}
+
+		//--- send update to SAP
+		$this->update_sap($id, $name);
+
+		$this->_response($sc);
+	}
 
 
 
+	public function sync_data()
+	{
+		$sc = TRUE;
+
+		$response = json_encode(array(
+			array('id' => 1, 'name' => 'โคมไฟติดลอย รุ่น SJ6371/6C'),
+			array('id' => 2, 'name' => 'โคมฉาย LED รุ่น ZONIC'),
+			array('id' => 3, 'name' => 'โคมไฟฟลัดไลท์ LED STEEM'),
+			array('id' => 4, 'name' => 'เก้าอี้ปรับเอนนอน La-Z-Boy รุ่น 1PT-505 Rialto')
+		));
+
+		$res = json_decode($response);
+
+
+		if(! empty($res))
+		{
+			foreach($res as $rs)
+			{
+				$cr = $this->product_model_model->get($rs->id);
+
+				if(empty($cr))
+				{
+					$arr = array(
+						"id" => $rs->id,
+						"name" => $rs->name
+					);
+
+					$this->product_model_model->add($arr);
+				}
+				else
+				{
+					$arr = array(
+						"name" => $rs->name
+					);
+
+					$this->product_model_model->update($rs->id, $arr);
+				}
+			}
+		}
+
+		$this->_response($sc);
+	}
+
+
+
+	private function update_sap($id, $name)
+	{
+		return TRUE;
+	}
 
 
   public function clear_filter()
 	{
-		return clear_filter(array('model_code', 'model_name'));
+		return clear_filter(array('model_name'));
 	}
 
 

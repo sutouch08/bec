@@ -1,6 +1,7 @@
 <?php
 class Customer_group_model extends CI_Model
 {
+  private $tb = "customer_group";
   public function __construct()
   {
     parent::__construct();
@@ -11,7 +12,7 @@ class Customer_group_model extends CI_Model
   {
     if(!empty($ds))
     {
-      return  $this->db->insert('customer_group', $ds);
+      return  $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -24,36 +25,54 @@ class Customer_group_model extends CI_Model
     if(!empty($ds))
     {
       $this->db->where('code', $code);
-      return $this->db->update('customer_group', $ds);
+      return $this->db->update($this->tb, $ds);
     }
 
     return FALSE;
   }
 
 
-  public function delete($code)
+
+
+  public function count_rows(array $ds = array())
   {
-    return $this->db->where('code', $code)->delete('customer_group');
+
+    if( ! empty($ds['code']))
+    {
+      $this->db->like('code', $ds['code']);
+    }
+
+    if( ! empty($ds['name']))
+    {
+      $this->db->like('name', $ds['name']);
+    }
+
+    return $this->db->count_all_results($this->tb);
   }
 
 
-  public function count_rows($code = '', $name = '')
+
+
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
-    $this->db->select('code');
-
-    if($code != '')
+    if( ! empty($ds['code']))
     {
-      $this->db->like('code', $code);
+      $this->db->like('code', $ds['code']);
     }
 
-    if($name != '')
+    if( ! empty($ds['name']))
     {
-      $this->db->like('name', $name);
+      $this->db->like('name', $ds['name']);
     }
 
-    $rs = $this->db->get('customer_group');
+    $rs = $this->db->limit($perpage, $offset)->get($this->tb);
 
-    return $rs->num_rows();
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
@@ -61,7 +80,7 @@ class Customer_group_model extends CI_Model
 
   public function get($code)
   {
-    $rs = $this->db->where('code', $code)->get('customer_group');
+    $rs = $this->db->where('code', $code)->get($this->tb);
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -74,12 +93,7 @@ class Customer_group_model extends CI_Model
 
   public function get_name($code)
   {
-    if($code === NULL OR $code === '')
-    {
-      return $code;
-    }
-
-    $rs = $this->db->select('name')->where('code', $code)->get('customer_group');
+    $rs = $this->db->select('name')->where('code', $code)->get($this->tb);
     if($rs->num_rows() === 1)
     {
       return $rs->row()->name;
@@ -89,43 +103,11 @@ class Customer_group_model extends CI_Model
   }
 
 
-
-  public function get_data($code = '', $name = '', $perpage = '', $offset = '')
+  public function is_exists($code)
   {
-    if($code != '')
-    {
-      $this->db->like('code', $code);
-    }
+    $count = $this->db->where('code', $code)->count_all_results($this->tb);
 
-    if($name != '')
-    {
-      $this->db->like('name', $name);
-    }
-
-    if($perpage != '')
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
-
-    $rs = $this->db->get('customer_group');
-
-    return $rs->result();
-  }
-
-
-
-
-  public function is_exists($code, $old_code = '')
-  {
-    if($old_code != '')
-    {
-      $this->db->where('code !=', $old_code);
-    }
-
-    $rs = $this->db->where('code', $code)->get('customer_group');
-
-    if($rs->num_rows() > 0)
+    if($count > 0)
     {
       return TRUE;
     }
@@ -134,25 +116,16 @@ class Customer_group_model extends CI_Model
   }
 
 
-
-  public function is_exists_name($name, $old_name = '')
+  public function get_all()
   {
-    if($old_name != '')
-    {
-      $this->db->where('name !=', $old_name);
-    }
-
-    $rs = $this->db->where('name', $name)->get('customer_group');
+    $rs = $this->db->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
-      return TRUE;
+      return $rs->result();
     }
 
-    return FALSE;
+    return NULL;
   }
-
-
-
 }
 ?>

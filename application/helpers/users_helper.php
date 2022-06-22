@@ -16,6 +16,7 @@ function get_permission($menu, $uid = NULL, $id_profile = NULL)
 
   $uid = $uid === NULL ? get_cookie('uid') : $uid;
   $user = $CI->user_model->get_user_by_uid($uid);
+
   if(empty($user))
   {
     return reject_permission();
@@ -33,7 +34,8 @@ function get_permission($menu, $uid = NULL, $id_profile = NULL)
   }
   else
   {
-    $pm = $CI->user_model->get_permission($menu, $uid, $user->id_profile);
+    $pm = $CI->user_model->get_permission($menu, $user->id_profile);
+
     if(empty($pm))
     {
       return reject_permission();
@@ -66,6 +68,78 @@ function reject_permission()
   return $pm;
 }
 
+
+function select_sales_team($id = NULL)
+{
+  $CI =& get_instance();
+  $CI->load->model('masters/sales_team_model');
+  $result = $CI->sales_team_model->get_all();
+  $ds = '';
+  if(!empty($result))
+  {
+    foreach($result as $rs)
+    {
+      $ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $id).'>'.$rs->name.'</option>';
+    }
+  }
+
+  return $ds;
+}
+
+
+
+function select_employee($empID = NULL)
+{
+  $ds = '';
+  $CI =& get_instance();
+  $qs = $CI->user_model->get_all_employee();
+  if(!empty($qs))
+  {
+    foreach($qs as $rs)
+    {
+      $ds .= '<option value="'.$rs->empID.'" '.is_selected($rs->empID, $empID).'>'.$rs->firstName.' '.$rs->lastName.'</option>';
+    }
+  }
+
+  return $ds;
+}
+
+
+
+function select_saleman($sale_id = '')
+{
+  $ds = '';
+  $CI =& get_instance();
+	$CI->load->model('masters/sales_person_model');
+  $qs = $CI->sales_person_model->get_all();
+  if(!empty($qs))
+  {
+    foreach($qs as $rs)
+    {
+      $ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $sale_id).'>'.$rs->name.'</option>';
+    }
+  }
+
+  return $ds;
+}
+
+
+function select_profile($id_profile = '')
+{
+  $ds = '';
+  $CI =& get_instance();
+	$CI->load->model('users/profile_model');
+  $qs = $CI->profile_model->get_all();
+  if(!empty($qs))
+  {
+    foreach($qs as $rs)
+    {
+      $ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $id_profile).'>'.$rs->name.'</option>';
+    }
+  }
+
+  return $ds;
+}
 
 function _can_view_page($can_view)
 {

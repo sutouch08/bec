@@ -7,53 +7,116 @@ class Product_category extends PS_Controller
 	public $menu_group_code = 'DB';
   public $menu_sub_group_code = 'PRODUCT';
 	public $title = 'Product Category';
+	public $segment = 4;
 
   public function __construct()
   {
     parent::__construct();
     $this->home = base_url().'masters/product_category';
     $this->load->model('masters/product_category_model');
+		$this->load->helper('product_category');
   }
 
 
   public function index()
   {
-		$code = "";
-		$name = "";
+		$filter = array(
+			'name' => get_filter('name', 'caName', ''),
+			'level' => get_filter('level', 'caLevel', 'all'),
+			'parent' => get_filter('parent', 'caParent', 'all')
+		);
+
 		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_filter('set_rows', 'rows', 20);
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
+		$perpage = get_rows();
 
-		$segment = 4; //-- url segment
-		$rows = $this->product_category_model->count_rows($code, $name);
+		$rows = $this->product_category_model->count_rows($filter);
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-		$data = $this->product_category_model->get_data($code, $name, $perpage, $this->uri->segment($segment));
+		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
 
-    $ds = array(
-			'data' => $data
-    );
+		$filter['data'] = $this->product_category_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
 
 		$this->pagination->initialize($init);
-    $this->load->view('masters/product_category/product_category_view', $ds);
+
+    $this->load->view('masters/product_category/category_list', $filter);
   }
 
 
   public function add_new()
   {
-    $this->title = 'Add Category';
-    $this->load->view('masters/product_category/product_category_add_view');
+    $this->title = 'New Category';
+    $this->load->view('masters/product_category/category_add');
   }
 
 
-
-  public function edit($code)
+	public function edit($id)
   {
     $this->title = 'Edit Category';
-    $data = $this->product_category_model->get($code);
 
-    $this->load->view('masters/product_category/product_category_edit_view', $data);
+		if($this->pm->can_edit)
+		{
+			$data = $this->product_category_model->get($id);
+			$this->load->view('masters/product_category/category_edit', $data);
+		}
+		else
+		{
+			$this->permission_deny();
+		}
   }
+
+
+
+	public function view_detail($id)
+	{
+		$data = $this->product_category_model->get($id);
+		$this->load->view('masters/product_category/category_detail', $data);
+	}
+
+
+
+	public function add()
+	{
+		$sc = TRUE;
+		$name = trim($this->input->post('name'));
+		$parent_id = $this->input->post('parent_id');
+
+		if($this->pm->can_add)
+		{
+			if( ! $this->product_category_model->is_exists_name($name))
+			{
+				$parent = $this->product_category_model->get($parent_id);
+
+				$level = (empty($parent) ? 1 : $parent->level + 1);
+
+				$arr = array(
+					'name' => $name,
+					'level' => $level,
+					'parent_id' => $parent_id
+				);
+
+				if( ! $this->product_category_model->add($arr))
+				{
+					$sc = FALSE;
+					set_error('insert');
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				set_error('exists', $name);
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('permission');
+		}
+
+		$this->_response($sc);
+	}
+
+
+
+
 
 
 
@@ -61,127 +124,83 @@ class Product_category extends PS_Controller
   {
     $sc = TRUE;
 
-    if($this->input->post('code'))
+    if($this->input->post('id'))
     {
-      $old_code = $this->input->post('product_category_code');
-      $old_name = $this->input->post('product_category_name');
-      $code = $this->input->post('code');
-      $name = $this->input->post('name');
+			$id = $this->input->post('id');
+      $name = trim($this->input->post('name'));
+			$parent_id = $this->input->post('parent_id');
 
-      $ds = array(
-        'code' => $code,
-        'name' => $name,
-        'old_code' => $old_code
-      );
+			//--- check name
+			if( ! $this->product_category_model->is_exists_name($name, $id))
+			{
+				$parent = $this->product_category_model->get($parent_id);
+				$level = empty($parent) ? 1 : $parent->level + 1;
 
-      if($sc === TRUE && $this->product_category_model->is_exists($code, $old_code) === TRUE)
-      {
-        $sc = FALSE;
-        set_error("'".$code."' มีอยู่ในระบบแล้ว โปรดใช้รหัสอื่น");
-      }
+				$arr = array(
+					'name' => $name,
+					'level' => $level,
+					'parent_id' => $parent_id
+				);
 
-      if($sc === TRUE && $this->product_category_model->is_exists_name($name, $old_name) === TRUE)
-      {
-        $sc = FALSE;
-        set_error("'".$name."' มีอยู่ในระบบแล้ว โปรดใช้ชื่ออื่น");
-      }
-
-      if($sc === TRUE)
-      {
-        if($this->product_category_model->update($old_code, $ds) === TRUE)
-        {
-          $this->export_to_sap($code, $old_code);
-
-          set_message('ปรับปรุงข้อมูลเรียบร้อยแล้ว');
-        }
-        else
-        {
-          $sc = FALSE;
-          set_error('ปรับปรุงข้อมูลไม่สำเร็จ');
-        }
-      }
+				if(! $this->product_category_model->update($id, $arr))
+				{
+					$sc = FALSE;
+					set_error('update');
+				}
+				else
+				{
+					$this->update_child_level($id);
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				set_error('exists', $name);
+			}
 
     }
     else
     {
       $sc = FALSE;
-      set_error('ไม่พบข้อมูล');
+      set_error('required');
     }
 
-    if($sc === FALSE)
-    {
-      $code = $this->input->post('product_category_code');
-    }
-
-    redirect($this->home.'/edit/'.$code);
+		$this->_response($sc);
   }
 
 
 
-  public function delete($code)
-  {
-    if($code != '')
-    {
-      if($this->product_category_model->delete($code))
-      {
-        set_message('ลบข้อมูลเรียบร้อยแล้ว');
-      }
-      else
-      {
-        set_error('ลบข้อมูลไม่สำเร็จ');
-      }
-    }
-    else
-    {
-      set_error('ไม่พบข้อมูล');
-    }
+	private function update_child_level($id)
+	{
+		$cate = $this->product_category_model->get($id);
 
-    redirect($this->home);
-  }
+		if( ! empty($cate))
+		{
+			if($this->product_category_model->has_child($id))
+			{
+				$child = $this->product_category_model->get_by_parent($id);
 
+				if(!empty($child))
+				{
+					foreach($child as $rs)
+					{
+						$arr = array(
+							'level' => $cate->level + 1
+						);
 
+						$this->product_category_model->update($rs->id, $arr);
 
-  public function export_to_sap($code, $old_code)
-  {
-    $rs = $this->product_category_model->get($code);
-    if(!empty($rs))
-    {
-      $ext = $this->product_category_model->is_sap_exists($old_code);
-
-      $arr = array(
-        'Code' => $rs->code,
-        'Name' => $rs->name,
-        'UpdateDate' => sap_date(now(), TRUE)
-      );
-
-      if($ext)
-      {
-        $arr['Flag'] = 'U';
-        if($code !== $old_code)
-        {
-          $arr['OLDCODE'] = $old_code;
-        }
-
-        //return $this->product_category_model->update_sap_cate($old_code, $arr);
-      }
-      else
-      {
-        $arr['Flag'] = 'A';
-
-        //return $this->product_category_model->add_sap_cate($arr);
-      }
-
-      return $this->product_category_model->add_sap_cate($arr);
-    }
-
-    return FALSE;
-  }
-
+						$this->update_child_level($rs->id);
+					}
+				}
+			}
+		}
+	}
 
 
   public function clear_filter()
 	{
-		$filter = array('code', 'name');
+		$filter = array('caName', 'caLevel', 'caParent');
     clear_filter($filter);
 	}
 

@@ -1,39 +1,179 @@
-function addNew(){
-  window.location.href = BASE_URL + 'masters/channels/add_new';
-}
-
-
+var HOME = BASE_URL + 'masters/channels/';
 
 function goBack(){
-  window.location.href = BASE_URL + 'masters/channels';
+  window.location.href = HOME;
 }
 
 
-function getEdit(code){
-  window.location.href = BASE_URL + 'masters/channels/edit/'+code;
+function syncData(){
+	load_in();
+
+	$.ajax({
+		url:HOME + 'sync_data',
+		type:'GET',
+		cache:false,
+		success:function(rs) {
+			load_out();
+
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+
+				setTimeout(function() {
+					goBack();
+				}, 1200);
+			}
+			else {
+				swal({
+					titl:"Error!",
+					text: rs,
+					type:'error'
+				})
+			}
+		}
+	})
 }
 
 
-function clearFilter(){
-  var url = BASE_URL + 'masters/channels/clear_filter';
-  var page = BASE_URL + 'masters/channels';
-  $.get(url, function(rs){
-    window.location.href = page;
-  });
-}
-
-function save() {
-		swal({
-			title:'Success',
-			type:'success',
-			timer:1000
-		});
+function getEdit(id){
+  window.location.href = HOME + 'edit/'+id;
 }
 
 
-function getDelete(code, name){
+function saveAdd() {
+	const name = $.trim($('#name').val());
+	const pos = $('#position').val();
+	const active = $('#active').is(':checked') ? 1 : 0;
+	const is_default = $('#is_default').is(':checked') ? 1 : 0;
+
+	if(name.length == 0) {
+		set_error($('#name'), $('#name-error'), "Required!");
+		return false;
+	}
+	else {
+		clear_error($('#name'), $('#name-error'));
+	}
+
+	$.ajax({
+		url:HOME + 'is_exists',
+		type:'POST',
+		cache:false,
+		data:{
+			'name' : name
+		},
+		success:function(rs) {
+			if(rs === 'exists') {
+				set_error($('#name'), $('#name-error'), name + " already exists.");
+				return false;
+			}
+			else {
+				$.ajax({
+					url:HOME + 'add',
+					type:'POST',
+					cache:false,
+					data:{
+						'name' : name,
+						'position' : pos,
+						'active' : active,
+						'is_default' : is_default
+					},
+					success:function(rs) {
+						if(rs === 'success') {
+							swal({
+								title:'Success',
+								type:'success',
+								timer:1000
+							});
+
+							setTimeout(function() {
+								addNew();
+							}, 1500);
+						}
+						else {
+							swal({
+								title:"Error!",
+								text: rs,
+								type:"error"
+							});
+						}
+					}
+				});
+			}
+		}
+	});
+}
+
+
+
+function update() {
+	const id = $('#id').val();
+	const name = $.trim($('#name').val());
+	const pos = $('#position').val();
+	const active = $('#active').is(':checked') ? 1 : 0;
+	const is_default = $('#is_default').is(':checked') ? 1 : 0;
+
+	if(name.length == 0) {
+		set_error($('#name'), $('#name-error'), "Required!");
+		return false;
+	}
+	else {
+		clear_error($('#name'), $('#name-error'));
+	}
+
+	$.ajax({
+		url:HOME + 'is_exists',
+		type:'POST',
+		cache:false,
+		data:{
+			'name' : name,
+			'id' : id
+		},
+		success:function(rs) {
+			if(rs === 'exists') {
+				set_error($('#name'), $('#name-error'), name + " already exists.");
+				return false;
+			}
+			else {
+				$.ajax({
+					url:HOME + 'update',
+					type:'POST',
+					cache:false,
+					data:{
+						'id' : id,
+						'name' : name,
+						'position' : pos,
+						'active' : active,
+						'is_default' : is_default
+					},
+					success:function(rs) {
+						if(rs === 'success') {
+							swal({
+								title:'Success',
+								type:'success',
+								timer:1000
+							});
+						}
+						else {
+							swal({
+								title:"Error!",
+								text: rs,
+								type:"error"
+							});
+						}
+					}
+				});
+			}
+		}
+	});
+}
+
+
+function getDelete(id, name){
   swal({
-    title:'Are sure ?',
+    title:'คุณแน่ใจ ?',
     text:'ต้องการลบ ' + name + ' หรือไม่ ?',
     type:'warning',
     showCancelButton: true,
@@ -42,10 +182,33 @@ function getDelete(code, name){
 		cancelButtonText: 'ยกเลิก',
 		closeOnConfirm: false
   },function(){
-    swal({
-			title:'Deleted',
-			type:'success',
-			title:1000
+    $.ajax({
+			url:HOME + 'delete',
+			type:'POST',
+			cache:false,
+			data:{
+				"id" : id
+			},
+			success:function(rs) {
+				if(rs === 'success') {
+					swal({
+						title:'Deleted',
+						type:'success',
+						timer:1000
+					});
+
+					setTimeout(function() {
+						goBack();
+					}, 1500);
+				}
+				else {
+					swal({
+						title:'Error!',
+						text: rs,
+						type:'error'
+					});
+				}
+			}
 		});
-  })
+  });
 }

@@ -1,6 +1,8 @@
 <?php
 class Customer_area_model extends CI_Model
 {
+  public $tb = "customer_area";
+
   public function __construct()
   {
     parent::__construct();
@@ -11,7 +13,7 @@ class Customer_area_model extends CI_Model
   {
     if(!empty($ds))
     {
-      return  $this->db->insert('customer_area', $ds);
+      return  $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -19,108 +21,91 @@ class Customer_area_model extends CI_Model
 
 
 
-  public function update($code, array $ds = array())
+  public function update($id, array $ds = array())
   {
     if(!empty($ds))
     {
-      $this->db->where('code', $code);
-      return $this->db->update('customer_area', $ds);
+      $this->db->where('id', $id);
+      return $this->db->update($this->tb, $ds);
     }
 
     return FALSE;
   }
 
 
-  public function delete($code)
+  public function delete($id)
   {
-    return $this->db->where('code', $code)->delete('customer_area');
-  }
-
-
-  public function count_rows($code = '', $name = '')
-  {
-    $this->db->select('code');
-
-    if($code != '')
-    {
-      $this->db->like('code', $code);
-    }
-
-    if($name != '')
-    {
-      $this->db->like('name', $name);
-    }
-
-    $rs = $this->db->get('customer_area');
-
-    return $rs->num_rows();
+    return $this->db->where('id', $id)->delete($this->tb);
   }
 
 
 
-
-  public function get($code)
+  public function count_rows(array $ds = array())
   {
-    $rs = $this->db->where('code', $code)->get('customer_area');
+    if($ds['name'] != "")
+    {
+      $this->db->like("name", $ds['name']);
+    }
+
+    return $this->db->count_all_results($this->tb);
+  }
+
+
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
+  {
+    if($ds['name'] != "")
+    {
+      $this->db->like('name', $ds['name']);
+    }
+
+    $rs = $this->db->order_by('name', 'ASC')->limit($perpage, $offset)->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+
+  public function get($id)
+  {
+    $rs = $this->db->where('id', $id)->get($this->tb);
+
     if($rs->num_rows() === 1)
     {
       return $rs->row();
     }
-    return FALSE;
+
+    return NULL;
   }
 
 
-  public function get_name($code)
+	public function get_all()
+	{
+		$rs = $this->db->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+
+
+  public function is_exists($name, $id = NULL)
   {
-    if($code === NULL OR $code === '')
+    if( ! empty($id))
     {
-      return $code;
+      $this->db->where('id !=', $id);
     }
 
-    $rs = $this->db->select('name')->where('code', $code)->get('customer_area');
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row()->name;
-    }
-
-    return NULL;  
-  }
-
-
-  public function get_data($code = '', $name = '', $perpage = '', $offset = '')
-  {
-    if($code != '')
-    {
-      $this->db->like('code', $code);
-    }
-
-    if($name != '')
-    {
-      $this->db->like('name', $name);
-    }
-
-    if($perpage != '')
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
-
-    $rs = $this->db->get('customer_area');
-
-    return $rs->result();
-  }
-
-
-
-
-  public function is_exists($code, $old_code = '')
-  {
-    if($old_code != '')
-    {
-      $this->db->where('code !=', $old_code);
-    }
-
-    $rs = $this->db->where('code', $code)->get('customer_area');
+    $rs = $this->db->where('id', $id)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -129,27 +114,6 @@ class Customer_area_model extends CI_Model
 
     return FALSE;
   }
-
-
-
-  public function is_exists_name($name, $old_name = '')
-  {
-    if($old_name != '')
-    {
-      $this->db->where('name !=', $old_name);
-    }
-
-    $rs = $this->db->where('name', $name)->get('customer_area');
-
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
-  }
-
-
 
 }
 ?>

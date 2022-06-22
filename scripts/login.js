@@ -1,79 +1,59 @@
-function doLogin(){
-  var pwd = $('#txtPassword').val();
-  var user = $('#txtUserName').val();
-  var remember = 0;
-  var err = $('#error');
 
-  if($('#remember').is(":checked")){
-    remember = 1;
-  }
+function doLogin() {
+	const uname = $('#uname').val();
+	const pwd = $('#pwd').val();
+	const ipwd = $('#ipwd').text();
+	const remember = $('#remember').is(':checked') ? 1 : 0;
 
-  if(user.length == 0) {
-    err.text('Empty Username!');
-    return false;
-  }
-  else {
-    err.text('');
-  }
+	if(uname.length == 0) {
+		$('#uname').focus();
+		return false;
+	}
 
+	if(pwd.length == 0) {
+		$('#pwd').focus();
+		return false;
+	}
 
-  if(pwd.length == 0){
-    err.text('Empty password!');
-    return false;
-  }
-  else {
-    err.text('');
-  }
+	if(pwd != ipwd) {
+		return false;
+	}
 
-  $.ajax({
-    url: BASE_URL + 'users/authentication/validate_credentials',
-    type:'POST',
-    cache:false,
-    data:{
-      'user_name' : user,
-      'password' : pwd,
-      'remember' : remember
-    }, success:function(rs) {
-      var rs = $.trim(rs);
-      if(rs === 'success') {
-        window.location.href = BASE_URL + "main";
-      }
-      else {
-        err.text(rs);
-      }
-    }
-  })
+	$.ajax({
+		url:BASE_URL + 'users/authentication/validate_credentials',
+		type:'POST',
+		cache:false,
+		data:{
+			'uname' : uname,
+			'pwd' : ipwd
+		},
+		success:function(rs) {
+			rs = $.trim(rs);
+
+			if(rs === 'success') {
+				window.location.href = BASE_URL;
+			}
+			else {
+				$('#error-label').text(rs);
+			}
+		}
+	});
 }
 
 
-$('#txtUserName').keyup(function(e){
-  if(e.keyCode === 13) {
 
-    let user = $(this).val();
-    let pwd = $('#txtPassword').val();
-
-    if(user.length > 0) {
-      if(pwd.length === 0) {
-        $('#txtPassword').focus();
-      }
-      else {
-        doLogin();
-      }
-    }
-  }
+$('#pwd').keyup(function(e) {
+	if(e.keyCode === 13) {
+		doLogin();
+	}
+	else {
+		$('#ipwd').text($(this).val());
+	}
 });
 
 
-$('#txtPassword').keyup(function(e) {
-  if(e.keyCode === 13) {
-    let user = $('#txtUserName').val();
-    let pwd = $(this).val();
-
-    if(user.length === 0) {
-      $('#txtUserName').focus();
-    }
-    else {
-      doLogin();
-    }
-  }
-})
+$('#uname').keyup(function(e) {
+	if(e.keyCode === 13) {
+		doLogin();
+	}
+});

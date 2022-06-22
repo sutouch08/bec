@@ -1,57 +1,87 @@
-function addNew(){
-  window.location.href = BASE_URL + 'masters/customer_area/add_new';
+var HOME = BASE_URL + 'masters/customer_area/';
+
+
+function syncData() {
+	load_in();
+
+	$.ajax({
+		url:HOME + 'sync_data',
+		type:'GET',
+		cache:false,
+		success:function(rs) {
+			load_out();
+
+			if(rs == 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+
+				setTimeout(function() {
+					window.location.reload();
+				}, 1200);
+			}
+			else {
+				swal({
+					title:"Error!",
+					type:"error",
+					text: rs
+				});
+			}
+		}
+	});
 }
 
 
 
-function goBack(){
-  window.location.href = BASE_URL + 'masters/customer_area';
+function goBack() {
+  window.location.href = HOME;
 }
 
 
-function getEdit(code){
-  window.location.href = BASE_URL + 'masters/customer_area/edit/'+code;
+function getEdit(id){
+  window.location.href = HOME + 'edit/'+id;
 }
 
 
-function clearFilter(){
-  var url = BASE_URL + 'masters/customer_area/clear_filter';
-  var page = BASE_URL + 'masters/customer_area';
-  $.get(url, function(rs){
-    window.location.href = page;
-  });
-}
+function update() {
+	let id = $('#id').val();
+	let name = $('#name').val();
 
-function save() {
-		swal({
-			title:'Success',
-			type:'success',
-			timer: 1000
-		})
-}
+	if(name.length == 0) {
+		set_error($('#name'), $('#name-error'), 'Required');
+		return false;
+	}
+	else {
+		clear_error($('#name'), $('#name-error'));
+	}
 
+	$.ajax({
+		url:HOME + 'update',
+		type:'POST',
+		cache:false,
+		data:{
+			'id' : id,
+			'name' : name
+		},
+		success:function(rs) {
+			var rs = $.trim(rs);
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+			}
+			else {
+				swal({
+					title:'Error!',
+					text:rs,
+					type:'error'
+				});
+			}
+		}
+	})
 
-function getDelete(code, name){
-  swal({
-    title:'Are sure ?',
-    text:'ต้องการลบ ' + name + ' หรือไม่ ?',
-    type:'warning',
-    showCancelButton: true,
-		confirmButtonColor: '#FA5858',
-		confirmButtonText: 'ใช่, ฉันต้องการลบ',
-		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
-  },function(){
-    swal({
-			title:'Deleted',
-			type:'success',
-			timer:1000
-		})
-  })
-}
-
-
-
-function getSearch(){
-  $('#searchForm').submit();
 }

@@ -1,43 +1,55 @@
-function addNew(){
-  window.location.href = BASE_URL + 'masters/customers/add_new';
-}
-
+var HOME = BASE_URL + 'masters/customers/';
 
 
 function goBack(){
-  window.location.href = BASE_URL + 'masters/customers';
+  window.location.href = HOME;
 }
 
 
-function getEdit(){
-  window.location.href = BASE_URL + 'masters/customers/edit/';
+function getEdit(id){
+  window.location.href = HOME + 'edit/'+id;
 }
 
+function update() {
+	let id = $('#id').val();
+	let type = $('#TypeCode').val();
+	let grade = $('#GradeCode').val();
+	let region = $('#RegionCode').val();
+	let area = $('#AreaCode').val();
 
-function getDelete(){
-  swal({
-    title:'Are sure ?',
-    text:'ต้องการลบลูกค้าหรือไม่ ?',
-    type:'warning',
-    showCancelButton: true,
-		confirmButtonColor: '#FA5858',
-		confirmButtonText: 'ใช่, ฉันต้องการลบ',
-		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
-  },function(){
-    swal({
-			title:'Deleted',
-			type:'success',
-			timer:1000
-		})
-  })
+	load_in();
+
+	$.ajax({
+		url:HOME + 'update',
+		type:'POST',
+		cache:false,
+		data:{
+			'id' : id,
+			'TypeCode' : type,
+			'GradeCode' : grade,
+			'RegionCode' : region,
+			'AreaCode' : area
+		},
+		success:function(rs) {
+			load_out();
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+			}
+			else {
+				swal({
+					title:'Error!',
+					text: rs,
+					type:'error'
+				});
+			}
+		}
+	});
+
 }
-
-
-
-
-$('#date').datepicker();
-
 
 function getSearch(){
   $('#searchForm').submit();

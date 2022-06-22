@@ -1,27 +1,3 @@
-function go_to(page){
-	window.location.href = BASE_URL + page;
-}
-
-
-function checkError(){
-	if($('#error').length){
-		swal({
-			title:'Error!',
-			text: $('#error').val(),
-			type:'error'
-		})
-	}
-
-	if($('#success').length){
-			swal({
-				title:'Success',
-				text:$('#success').val(),
-				type:'success',
-				timer:1500
-			});
-	}
-}
-
 
 //--- save side bar layout to cookie
 function toggle_layout(){
@@ -148,7 +124,7 @@ function set_rows()
 {
 	var rows = $('#set_rows').val();
 	$.ajax({
-		url:BASE_URL+'tools/set_rows',
+		url:BASE_URL+'main/set_rows',
 		type:'POST',
 		cache:false,
 		data:{
@@ -297,17 +273,37 @@ function parseDiscount(discount_label, price)
 	return discLabel;
 }
 
-function sort(field){
-	var sort_by = "";
-	if(field === 'date_add'){
-		el = $('#sort_date_add');
-		sort_by = el.hasClass('sorting_desc') ? 'ASC' : 'DESC';
-		sort_class = el.hasClass('sorting_desc') ? 'sorting_asc' : 'sorting_desc';
-	}else{
-		el = $('#sort_code');
-		sort_by = el.hasClass('sorting_desc') ? 'ASC' : 'DESC';
-		sort_class = el.hasClass('sorting_desc') ? 'sorting_asc' : 'sorting_desc';
+
+function getSearch() {
+  $('#searchForm').submit();
+}
+
+
+
+
+$('.search-box').keyup(function(e){
+	if(e.keyCode === 13) {
+		getSearch();
 	}
+});
+
+
+$('.filter').change(function() {
+	getSearch();
+})
+
+
+function clearFilter() {
+	let url = HOME + 'clear_filter';
+	$.get(url, function(rs){ goBack(); });
+}
+
+function sort(field){
+	var el = $("#sort_"+field);
+	var sort_by = "";
+
+	sort_by = el.hasClass('sorting_desc') ? 'ASC' : 'DESC';
+	sort_class = el.hasClass('sorting_desc') ? 'sorting_asc' : 'sorting_desc';
 
 	$('.sorting').removeClass('sorting_desc');
 	$('.sorting').removeClass('sorting_asc');
@@ -317,4 +313,16 @@ function sort(field){
 	$('#order_by').val(field);
 
 	getSearch();
+}
+
+
+function validCode(input, regex){
+  var regex = regex === undefined ? /[^a-z0-9-_.@]+/gi : regex;
+  input.value = input.value.replace(regex, '');
+}
+
+
+function changeUserPwd()
+{
+	window.location.href = BASE_URL + 'user_pwd';
 }

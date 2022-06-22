@@ -9119,7 +9119,7 @@ input[type=radio].ace + .lbl::before {
   min-width: 17px;
 }
 input[type=radio].ace:checked + .lbl::before {
-  content: "\f111";
+  content: "\f00c";
 }
 input[type=checkbox].ace.input-lg + .lbl::before {
   border-radius: 4px;

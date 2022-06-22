@@ -1,6 +1,7 @@
 <?php
 class Authentication extends CI_Controller
 {
+	public $error;
 
   public function __construct()
 	{
@@ -19,69 +20,57 @@ class Authentication extends CI_Controller
 	public function validate_credentials()
 	{
     $sc = TRUE;
-    $user_name = $this->input->post('user_name');
-    $pwd = $this->input->post('password');
+    $user_name = $this->input->post('uname');
+    $pwd = $this->input->post('pwd');
+		$rem = $this->input->post('remember') == 1 ? TRUE : FALSE;
 
 		$rs = $this->user_model->get_user_credentials($user_name);
 
     if(! empty($rs))
     {
-      if($rs->active == 0 )
-      {
-        $sc = FALSE;
-        $message = 'Your account has been suspended';
-        $this->session->set_flashdata('error_message', $message);
-      }
-      else if(password_verify($pwd, $rs->pwd))
-      {
-				$ds = array(
-					'uid' => $rs->uid,
-					'uname' => $rs->uname,
-					'displayName' => $rs->name,
-					'id_profile' => $rs->id_profile
-				);
+			if(password_verify($pwd, $rs->pwd))
+			{
+				if($rs->active == 0)
+				{
+					$sc = FALSE;
+	        $this->error = 'Your account has been suspended';
+				}
+				else
+				{
+					$ds = array(
+						'uid' => $rs->uid,
+						'uname' => $rs->uname,
+						'displayName' => $rs->name,
+						'id_profile' => $rs->id_profile
+					);
 
-				$this->create_user_data($ds);
-      }
-      else
-      {
-        $sc = FALSE;
-        $message = 'Username or password is incorrect';
-        $this->session->set_flashdata('error_message', $message);
-      }
+					$this->create_user_data($ds, $rem);
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+        $this->error = 'Username or password is incorrect';
+			}
     }
     else
     {
-      $sc = FALSE;
-      $message = 'Username or password is incorrect';
-      $this->session->set_flashdata('error_message', $message);
+			$sc = FALSE;
+			$this->error = 'Username or password is incorrect';
     }
 
-    if($sc === TRUE)
-    {
-      if($rs->is_viewer == 1)
-      {
-        redirect(base_url().'view_stock');
-      }
-      else
-      {
-        redirect(base_url().'main');
-      }
-
-    }
-    else
-    {
-      redirect($this->home);
-    }
+		echo $sc === TRUE ? 'success' : $this->error;
 	}
 
 
 
-  public function create_user_data(array $ds = array() )
+  public function create_user_data(array $ds = array(), $remember = FALSE )
   {
     if(!empty($ds))
     {
-      $times = intval(60*60*8*100);
+      $times = intval(86400); //-- 1 days
+
+			$times = $remember ? $time * 30 : $times;
 
       foreach($ds as $key => $val)
       {

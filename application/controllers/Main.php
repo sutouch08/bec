@@ -1,16 +1,20 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Main extends PS_Controller
+class Main extends CI_Controller
 {
 	public $title = 'Welcome';
 	public $menu_code = '';
 	public $menu_group_code = '';
-	public $error;
+	public $home;
 
 	public function __construct()
 	{
 		parent::__construct();
+		_check_login();
+		$this->pm = new stdClass();
+		$this->pm->can_view = 1;
+		$this->home = base_url()."main";
 	}
 
 
@@ -18,5 +22,22 @@ class Main extends PS_Controller
 	{
 		$this->load->view('main_view');
 	}
+
+
+	public function set_rows()
+  {
+    if($this->input->post('set_rows') && $this->input->post('set_rows') > 0)
+    {
+      $rows = intval($this->input->post('set_rows'));
+      $cookie = array(
+        'name' => 'rows',
+        'value' => $rows > 300 ? 300 : $rows,
+        'expire' => 2592000, //--- 30 days
+        'path' => '/'
+      );
+
+      $this->input->set_cookie($cookie);
+    }
+  }
 
 } //--- end class

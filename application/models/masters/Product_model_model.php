@@ -1,39 +1,64 @@
 <?php
 class Product_model_model extends CI_Model
 {
-	public $tb = "product_model";
+	private $tb = "product_model";
 
-	public function __construct()
-	{
-		parent::__construct();
-	}
+  public function __construct()
+  {
+    parent::__construct();
+  }
 
 
-	public function get($code)
-	{
-		$rs = $this->db->where('code', $code)->get($this->tb);
+  public function add(array $ds = array())
+  {
+    if(!empty($ds))
+    {
+      return  $this->db->insert($this->tb, $ds);
+    }
 
-		if($rs->num_rows() === 1)
-		{
-			return $rs->row();
-		}
+    return FALSE;
+  }
 
-		return NULL;
-	}
 
-	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
-	{
-		if(!empty($ds['code']))
-		{
-			$this->db->like('code', $ds['code']);
-		}
 
-		if(!empty($ds['name']))
+  public function update($id, array $ds = array())
+  {
+    if(!empty($ds))
+    {
+      return $this->db->where('id', $id)->update($this->tb, $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function delete($id)
+  {
+    return $this->db->where('id', $id)->delete($this->tb);
+  }
+
+
+
+  public function count_rows(array $ds = array())
+  {
+    if(isset($ds['name']) && $ds['name'] != "")
 		{
 			$this->db->like('name', $ds['name']);
 		}
 
-		$rs = $this->db->order_by('code', 'DESC')->limit($perpage, $offset)->get($this->tb);
+		return $this->db->count_all_results($this->tb);
+  }
+
+
+
+	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
+	{
+		if(isset($ds['name']) && $ds['name'] != "")
+		{
+			$this->db->like('name', $ds['name']);
+		}
+
+		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -44,19 +69,68 @@ class Product_model_model extends CI_Model
 	}
 
 
-	public function count_rows(array $ds = array())
-	{
-		if(!empty($ds['code']))
+
+
+  public function get($id)
+  {
+    $rs = $this->db->where('id', $id)->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return FALSE;
+  }
+
+
+
+  public function get_name($id)
+  {
+    $rs = $this->db->where('id', $id)->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->name;
+    }
+
+    return NULL;
+  }
+
+
+
+
+  public function get_all()
+  {
+  	$rs = $this->db->get($this->tb);
+
+		if($rs->num_rows() > 0)
 		{
-			$this->db->like('code', $ds['code']);
+			return $rs->result();
 		}
 
-		if(!empty($ds['name']))
+		return NULL;
+  }
+
+
+
+
+  public function is_exists_name($name, $id = NULL)
+  {
+    if( ! empty($id))
 		{
-			$this->db->like('name', $ds['name']);
+			$this->db->where('id !=', $id);
 		}
 
-	return $this->db->count_all_results($this->tb);
-	}
-} //--- end class
+    $count = $this->db->where('name', $name)->count_all_results($this->tb);
+
+    if($count > 0)
+    {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+}
 ?>

@@ -9,31 +9,18 @@
 
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.css" />
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/font-awesome.css" />
-
-		<!-- text fonts -->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-fonts.css" />
-
-		<!-- ace styles -->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace.css" />
-
-		<!--[if lte IE 9]>
-			<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-part2.css" />
-		<![endif]-->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-rtl.css" />
-
-		<!--[if lte IE 9]>
-		  <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-ie.css" />
-		<![endif]-->
-
-		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-
-		<!--[if lt IE 9]>
-		<script src="<?php echo base_url(); ?>assets/js/html5shiv.js"></script>
-		<script src="<?php echo base_url(); ?>assets/js/respond.js"></script>
-		<![endif]-->
+		<script src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
 	</head>
 
 	<body class="login-layout blur-login">
+
+		<script>
+			var BASE_URL = <?php echo base_url(); ?>;
+		</script>
+
 		<div class="main-container">
 			<div class="main-content">
 				<div class="row">
@@ -42,7 +29,7 @@
 							<div class="center">
 								<h1>
 									<span class="orange"><?php echo getConfig('COMPANY_NAME'); ?></span>
-									<span class="white" id="id-text2">Application</span>
+									<span class="white" id="id-text2">Web Sales</span>
 								</h1>
 								<h4 class="blue" id="id-company-text">&copy; <?php echo getConfig('COMPANY_FULL_NAME');?></h4>
 							</div>
@@ -53,26 +40,23 @@
 								<div id="login-box" class="login-box visible widget-box no-border">
 									<div class="widget-body">
 										<div class="widget-main">
-											<h4 class="header blue lighter bigger">
-
-												Please Enter Your Information
-											</h4>
+											<h4 class="header blue lighter bigger">Please Enter Your Information</h4>
 
 											<div class="space-6"></div>
 
-											<form method="post" action="authentication/validate_credentials">
+											<form method="post">
 												<fieldset>
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="text" name="user_name" class="form-control" placeholder="Username" autocomplete="off" autofocus required />
+															<input type="text" id="uname" class="form-control" placeholder="Username" autocomplete="off" autofocus />
 															<i class="ace-icon fa fa-user"></i>
 														</span>
 													</label>
 
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<input type="password" name="password" class="form-control" placeholder="Password" required />
-															<i class="ace-icon fa fa-lock"></i>
+															<input type="password" id="pwd" class="form-control" placeholder="Password" />
+															<i class="ace-icon fa fa-key"></i>
 														</span>
 													</label>
 
@@ -85,7 +69,7 @@
 															<span class="lbl"> Remember Me</span>
 														</label>
 
-														<button type="submit" id="login_btn" class="width-35 pull-right btn btn-sm btn-primary">
+														<button type="button" id="login_btn" onclick="doLogin()" class="width-35 pull-right btn btn-sm btn-primary">
 															<i class="ace-icon fa fa-key"></i>
 															<span class="bigger-110">Login</span>
 														</button>
@@ -95,48 +79,24 @@
 													<div class="clearfix">
 														<div class="space-4"></div>
 														<div class="space-4"></div>
-														<p style="color:red">
-														<?php
-														if($this->session->flashdata('error_message'))
-														{
-															echo $this->session->flashdata('error_message');
-														}
-
-														?>
-
-														</p>
+														<!-- error message goes here -->
+														<p id="error-label" style="color:red; text-align:center;"></p>
 													</div>
 												</fieldset>
-
 											</form>
 
-
+											<!-- Bypass robot-->
+											<span style="display:none;" id="ipwd"></span>
 										</div><!-- /.widget-main -->
-
 									</div><!-- /.widget-body -->
 								</div><!-- /.login-box -->
-
-
 							</div><!-- /.position-relative -->
-
-							<div class="navbar-fixed-top align-right">
-								<br />
-								&nbsp;
-								<a id="btn-login-dark" href="#">Dark</a>
-								&nbsp;
-								<span class="blue">/</span>
-								&nbsp;
-								<a id="btn-login-blur" href="#">Blur</a>
-								&nbsp;
-								<span class="blue">/</span>
-								&nbsp;
-								<a id="btn-login-light" href="#">Light</a>
-								&nbsp; &nbsp; &nbsp;
-							</div>
 						</div>
 					</div><!-- /.col -->
 				</div><!-- /.row -->
 			</div><!-- /.main-content -->
 		</div><!-- /.main-container -->
+
+		<script src="<?php echo base_url(); ?>scripts/login.js?v=<?php echo date('Ymd'); ?>"></script>
 	</body>
 </html>

@@ -1,17 +1,33 @@
 <?php
 class Channels_model extends CI_Model
 {
+	private $tb = "channels";
+
   public function __construct()
   {
     parent::__construct();
   }
 
 
+
+	public function get($id)
+	{
+		$rs = $this->db->where('id', $id)->get($this->tb);
+		if($rs->num_rows() == 1 )
+		{
+			return $rs->row();
+		}
+
+		return FALSE;
+	}
+
+
+
   public function add(array $ds = array())
   {
     if(!empty($ds))
     {
-      return  $this->db->insert('channels', $ds);
+      return $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -19,73 +35,61 @@ class Channels_model extends CI_Model
 
 
 
-  public function update($code, array $ds = array())
+  public function update($id, array $ds = array())
   {
     if(!empty($ds))
     {
-      $this->db->where('code', $code);
-      return $this->db->update('channels', $ds);
+      $this->db->where('id', $id);
+      return $this->db->update($this->tb, $ds);
     }
 
     return FALSE;
   }
 
 
-  public function delete($code)
+
+  public function delete($id)
   {
-    return $this->db->where('code', $code)->delete('channels');
-  }
-
-
-  public function count_rows($c_code = '', $c_name = '')
-  {
-    $this->db->select('code');
-    if($c_code != '')
-    {
-      $this->db->like('code', $c_code);
-    }
-
-    if($c_name != '')
-    {
-      $this->db->like('name', $c_name);
-    }
-
-    $rs = $this->db->get('channels');
-
-    return $rs->num_rows();
+    return $this->db->where('id', $id)->delete($this->tb);
   }
 
 
 
+	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
+	{
+		if( ! empty($ds['name']))
+		{
+			$this->db->like('name', $ds['name']);
+		}
 
-  public function get_channels($code)
+		$rs = $this->db->order_by('position', 'ASC')->limit($perpage, $offset)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+
+  public function count_rows(array $ds = array())
   {
-    $rs = $this->db->where('code', $code)->get('channels');
-    if($rs->num_rows() == 1 )
-    {
-      return $rs->row();
-    }
+		if( ! empty($ds['name']))
+		{
+			$this->db->like('name', $ds['name']);
+		}
 
-    return array();
-  }
-
-
-  public function get($code)
-  {
-    $rs = $this->db->where('code', $code)->get('channels');
-    if($rs->num_rows() == 1 )
-    {
-      return $rs->row();
-    }
-
-    return FALSE;
+		return $this->db->count_all_results($this->tb);
   }
 
 
 
   public function get_default()
   {
-    $rs = $this->db->where('is_default', 1)->get('channels');
+    $rs = $this->db->where('is_default', 1)->get($this->tb);
+
     if($rs->num_rows() == 1)
     {
       return $rs->row();
@@ -95,23 +99,11 @@ class Channels_model extends CI_Model
   }
 
 
-  public function get_online_list()
+
+  public function get_name($id)
   {
-    $rs = $this->db->where('is_online', 1)->get('channels');
+    $rs = $this->db->select('name')->where('id', $id)->get($this->tb);
 
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-
-  public function get_name($code)
-  {
-    $rs = $this->db->select('name')->where('code', $code)->get('channels');
     if($rs->num_rows() > 0)
     {
       return $rs->row()->name;
@@ -121,87 +113,71 @@ class Channels_model extends CI_Model
   }
 
 
-  public function get_data($c_code = '', $c_name = '', $perpage = '', $offset = '')
-  {
-    if($c_code != '')
-    {
-      $this->db->like('code', $c_code);
-    }
 
-    if($c_name != '')
-    {
-      $this->db->like('name', $c_name);
-    }
-
-    if($perpage != '')
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
-
-    $rs = $this->db->get('channels');
-
-    return $rs->result();
-  }
-
-
-
-
-  public function is_exists($code, $old_code = '')
-  {
-    if($old_code != '')
-    {
-      $this->db->where('code !=', $old_code);
-    }
-
-    $rs = $this->db->where('code', $code)->get('channels');
-
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
-  }
-
-
-
-  public function is_exists_name($name, $old_name = '')
-  {
-    if($old_name != '')
-    {
-      $this->db->where('name !=', $old_name);
-    }
-
-    $rs = $this->db->where('name', $name)->get('channels');
-
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
-  }
-
-
-	public function get_channels_array()
+	public function get_all()
 	{
-		$rs = $this->db->get('channels');
+		$rs = $this->db->order_by('position', 'ASC')->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
-			$arr = array();
-			foreach($rs->result() as $ds)
-			{
-				$arr[$ds->code] = $ds->name;
-			}
-
-			return $arr;
+			return $rs->result();
 		}
 
 		return NULL;
 	}
 
 
+
+  public function is_exists($name, $id = NULL)
+  {
+    if( ! empty($id))
+		{
+			$this->db->where('id !=', $id);
+		}
+
+		$count = $this->db->where('name', $name)->count_all_results($this->tb);
+
+		if($count > 0)
+		{
+			return TRUE;
+		}
+
+		return FALSE;
+  }
+
+
+
+	public function get_top_position()
+	{
+		$rs = $this->db->select_max('position')->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->position + 1;
+		}
+
+		return 1;
+	}
+
+
+
+	public function unset_default()
+	{
+		return $this->db->set('is_default', 0)->where('is_default', 1)->update($this->tb);
+	}
+
+
+
+	public function set_default($id)
+	{
+		return $this->db->set('is_default', 1)->where('id', $id)->update($this->tb);
+	}
+
+
+
+	public function has_transection($id)
+	{
+		return TRUE;
+	}
 }
 ?>

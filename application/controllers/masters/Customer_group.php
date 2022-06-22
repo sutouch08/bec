@@ -7,6 +7,7 @@ class Customer_group extends PS_Controller
 	public $menu_group_code = 'DB';
   public $menu_sub_group_code = 'CUSTOMER';
 	public $title = 'Customer Group';
+	public $segment = 4;
 
   public function __construct()
   {
@@ -18,50 +19,72 @@ class Customer_group extends PS_Controller
 
   public function index()
   {
-		$code = get_filter('code', 'group_code', '');
-		$name = get_filter('name', 'group_name', '');
+		$filter = array(
+			'code' => get_filter('code', 'group_code', ''),
+			'name' => get_filter('name', 'group_name', '')
+		);
 
 		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_filter('set_rows', 'rows', 20);
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
-		if($perpage > 300)
-		{
-			$perpage = get_filter('rows', 'rows', 300);
-		}
+		$perpage = get_rows();
 
-		$segment = 4; //-- url segment
-		$rows = $this->customer_group_model->count_rows($code, $name);
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-		$rs = $this->customer_group_model->get_data($code, $name, $perpage, $this->uri->segment($segment));
-    $ds = array(
-      'code' => $code,
-      'name' => $name,
-			'data' => $rs
-    );
+		$rows = $this->customer_group_model->count_rows($filter);
+
+		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
+
+		$filter['data'] = $this->customer_group_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
 
 		$this->pagination->initialize($init);
-    $this->load->view('masters/customer_group/customer_group_view', $ds);
+
+    $this->load->view('masters/customer_group/group_list', $filter);
   }
 
 
-  public function add_new()
-  {
-    $this->title = 'Add customer group';
-    $this->load->view('masters/customer_group/customer_group_add_view');
-  }
+	public function sync_data()
+	{
+		$sc = TRUE;
 
-  public function edit($code)
-  {
-    $this->title = 'Edit customer group';
-    $rs = $this->customer_group_model->get($code);
-    $data = array(
-      'code' => $rs->code,
-      'name' => $rs->name
-    );
+		$response = json_encode(array(
+			array("GroupCode" => 100, "GroupName" => "AR-Customer", "GroupType" => 'C'),
+			array("GroupCode" => 101, "GroupName" => "AR-Vender", "GroupType" => 'C'),
+			array("GroupCode" => 102, "GroupName" => "AR-Employee", "GroupType" => 'C'),
+			array("GroupCode" => 103, "GroupName" => "AR-Online", "GroupType" => 'C'),
+			array("GroupCode" => 104, "GroupName" => "AR-Contact", "GroupType" => 'C')
+		));
 
-    $this->load->view('masters/customer_group/customer_group_edit_view', $data);
-  }
+		$res = json_decode($response);
+
+
+		if(! empty($res))
+		{
+			foreach($res as $rs)
+			{
+				$cr = $this->customer_group_model->get($rs->GroupCode);
+
+				if(empty($cr))
+				{
+					$arr = array(
+						"code" => $rs->GroupCode,
+						"name" => $rs->GroupName,
+						"type" => $rs->GroupType
+					);
+
+					$this->customer_group_model->add($arr);
+				}
+				else
+				{
+					$arr = array(
+						"name" => $rs->GroupName,
+						"type" => $rs->GroupType
+					);
+
+					$this->customer_group_model->update($rs->GroupCode, $arr);
+				}
+			}
+		}
+
+		$this->_response($sc);
+	}
+
 
 
   public function clear_filter()

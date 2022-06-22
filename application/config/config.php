@@ -23,8 +23,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$doc_folder = 'bec_moc';
-$config['base_url'] = '/bec_moc/';
+$doc_folder = 'bec';
+$config['base_url'] = '/bec/';
 $config['image_path'] = 'images/';
 $config['upload_path'] = 'upload/';
 $config['image_file_path'] = $_SERVER['DOCUMENT_ROOT'] ."/{$doc_folder}/images/";
@@ -407,7 +407,7 @@ $config['sess_regenerate_destroy'] = FALSE;
 */
 $config['cookie_prefix']	= '';
 $config['cookie_domain']	= '';
-$config['cookie_path']		= '/bec_moc';
+$config['cookie_path']		= '/bec';
 $config['cookie_secure']	= FALSE;
 $config['cookie_httponly'] 	= FALSE;
 

@@ -1,13 +1,13 @@
 <?php
 function select_team($id = NULL)
 {
-	$ds = "<option value='-1' ".is_selected('-1', $id).">All Team</option>";
-
 	$ci =& get_instance();
 
-	$ci->load->model('masters/sale_team_model');
+	$ci->load->model('masters/sales_team_model');
 
-	$result = $ci->sale_team_model->get_list();
+	$ds = "";
+
+	$result = $ci->sales_team_model->get_all();
 
 	if(!empty($result))
 	{
@@ -21,19 +21,19 @@ function select_team($id = NULL)
 }
 
 
-function select_user($uname = NULL)
+function select_user($id = NULL)
 {
 	$ds = "";
 
 	$ci =& get_instance();
 
-	$result = $ci->user_model->get_users();
+	$result = $ci->user_model->get_all();
 
 	if(!empty($result))
 	{
 		foreach($result as $rs)
 		{
-			$ds .= "<option value='{$rs->uname}' ".is_selected($uname, $rs->uname).">{$rs->uname} : {$rs->name}</option>";
+			$ds .= "<option value='{$rs->id}' ".is_selected($id, $rs->id).">{$rs->uname} : {$rs->name}</option>";
 		}
 	}
 

@@ -1,6 +1,8 @@
 <?php
 class Profile_model extends CI_Model
 {
+	private $tb = "profile";
+
   public function __construct()
   {
     parent::__construct();
@@ -10,7 +12,7 @@ class Profile_model extends CI_Model
 
   public function add($name)
   {
-    return $this->db->insert('profile', array('name' => $name));
+    return $this->db->insert($this->tb, array('name' => $name));
   }
 
 
@@ -18,34 +20,29 @@ class Profile_model extends CI_Model
 
   public function update($id, $name)
   {
-    return $this->db->where('id', $id)->update('profile', array('name' => $name));
+    return $this->db->where('id', $id)->update($this->tb, array('name' => $name));
   }
 
 
 
   public function delete($id)
   {
-    return $this->db->where('id', $id)->delete('profile');
+    return $this->db->where('id', $id)->delete($this->tb);
   }
 
 
 
 
-  public function is_extsts($name, $id = '')
+  public function is_exists($name, $id = NULL)
   {
-    if($id !== '')
+    if( ! empty($id))
     {
       $this->db->where('id !=', $id);
     }
 
-    $rs = $this->db->where('name', $name)->get('profile');
+    $rs = $this->db->where('name', $name)->count_all_results($this->tb);
 
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
+    return $rs > 0 ? TRUE : FALSE;
   }
 
 
@@ -54,58 +51,71 @@ class Profile_model extends CI_Model
 
   public function count_members($id)
   {
-    $this->db->select('id');
-    $this->db->where('id_profile', $id);
-    $rs = $this->db->get('user');
-    return $rs->num_rows();
+		return $this->db->where('id_profile', $id)->count_all_results('user');
   }
 
 
-
-
-
-  public function get_profile($id)
+  public function get($id)
   {
-    $rs = $this->db->where('id', $id)->get('profile');
-    return $rs->row();
+    $rs = $this->db->where('id', $id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
   }
 
 
 
 
-  public function get_profiles($name = '', $perpage = 0, $offset = 0)
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
 		$this->db->where('id >', 0, FALSE);
 
-    if($name != '')
+    if( ! empty($ds['name']))
     {
-      $this->db->like('name', $name);
+      $this->db->like('name', $ds['name']);
     }
 
-    if($perpage > 0)
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
+    $rs = $this->db->limit($perpage, $offset)->get($this->tb);
 
-    $rs = $this->db->get('profile');
-    return $rs->result();
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+    return NULL;
   }
 
 
 
-  public function count_rows($name = '')
+  public function count_rows(array $ds = array())
   {
 
     $this->db->where('id >', 0, FALSE);
 
-    if($name !== '')
+    if( ! empty($ds['name']))
     {
-      $this->db->like('name', $name);
+      $this->db->like('name', $ds['name']);
     }
 
-  	return $this->db->count_all_results('profile');
+  	return $this->db->count_all_results($this->tb);
   }
+
+
+	public function get_all()
+	{
+		$rs = $this->db->where('id >', 0)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
 
 } //--- End class
 

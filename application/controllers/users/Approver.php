@@ -24,12 +24,7 @@ class Approver extends PS_Controller
 			'status' => get_filter('status', 'ap_status', 'all')
 		);
 
-		$perpage = get_filter('set_rows', 'rows', 20);
-
-		if($perpage > 300)
-		{
-			$perpage = get_filter('rows', 'rows', 300);
-		}
+		$perpage = get_rows();
 
 		$rows = $this->approver_model->count_rows($filter);
 
@@ -49,16 +44,185 @@ class Approver extends PS_Controller
 	public function add_new()
 	{
 		$this->title = "Add Approver";
-		$this->load->view('approver/approver_add');
+
+		if($this->pm->can_add)
+		{
+			$this->load->view('approver/approver_add');
+		}
+		else
+		{
+			$this->permission_deny();
+		}
 	}
+
+
+
+	public function add()
+	{
+		$sc = TRUE;
+
+		if($this->pm->can_add)
+		{
+			$user_id = $this->input->post('user_id');
+			$team_id = $this->input->post('team_id');
+			$disc = round($this->input->post('disc'), 2);
+			$status = $this->input->post('status') == 1 ? 1 : 0;
+
+			if( ! empty($user_id) && ! empty($team_id) && ! empty($disc))
+			{
+				if($disc > 0 && $disc <= 100)
+				{
+					if( ! $this->approver_model->is_exists_data($user_id, $team_id, $disc))
+					{
+						$arr = array(
+							'user_id' => $user_id,
+							'team_id' => $team_id,
+							'max_disc' => $disc,
+							'status' => $status
+						);
+
+						if( ! $this->approver_model->add($arr))
+						{
+							$sc = FALSE;
+							set_error('insert', 'approver');
+						}
+					}
+					else
+					{
+						$sc = FALSE;
+						set_error('exists', "This data");
+					}
+				}
+				else
+				{
+					$sc = FALSE;
+					$this->error = "Discount must in range 0.1 - 100";
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				set_error('required', ' : form data');
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('permission');
+		}
+
+		$this->_response($sc);
+	}
+
+
 
 
 	public function edit($id)
 	{
 		$this->title = "Edit Approver";
-		$approver = $this->approver_model->get($id);
 
-		$this->load->view('approver/approver_edit', $approver);
+		if($this->pm->can_edit)
+		{
+			$approver = $this->approver_model->get($id);
+			$this->load->view('approver/approver_edit', $approver);
+		}
+		else
+		{
+			$this->permission_deny();
+		}
+	}
+
+
+
+	public function update()
+	{
+		$sc = TRUE;
+
+		if($this->pm->can_edit)
+		{
+			$id = $this->input->post('id');
+			$user_id = $this->input->post('user_id');
+			$team_id = $this->input->post('team_id');
+			$disc = round($this->input->post('disc'), 2);
+			$status = $this->input->post('status') == 1 ? 1 : 0;
+
+			if( ! empty($id) && ! empty($user_id) && ! empty($team_id) && ! empty($disc))
+			{
+				if($disc > 0 && $disc <= 100)
+				{
+					if( ! $this->approver_model->is_exists_data($user_id, $team_id, $disc, $id))
+					{
+						$arr = array(
+							'user_id' => $user_id,
+							'team_id' => $team_id,
+							'max_disc' => $disc,
+							'status' => $status
+						);
+
+						if( ! $this->approver_model->update($id, $arr))
+						{
+							$sc = FALSE;
+							set_error('update', 'approver');
+						}
+					}
+					else
+					{
+						$sc = FALSE;
+						set_error('exists', "This data");
+					}
+				}
+				else
+				{
+					$sc = FALSE;
+					$this->error = "Discount must in range 0.1 - 100";
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				set_error('required', ' : form data');
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('permission');
+		}
+
+		$this->_response($sc);
+	}
+
+
+
+	public function delete()
+	{
+		$sc = TRUE;
+
+		if($this->pm->can_delete)
+		{
+			$id = $this->input->post('id');
+
+			if( ! empty($id))
+			{
+				if( ! $this->approver_model->delete($id))
+				{
+					$sc = FALSE;
+					set_error('delete');
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				set_error('required', 'id');
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('permission');
+		}
+
+		$this->_response($sc);
 	}
 
 

@@ -1,40 +1,222 @@
 var validUname = true;
 var validDname = true;
+var validPm = true;
+var validCust = true;
 var validPwd = true;
 
 
 
-function newUser(){
-  window.location.href = BASE_URL+'users/users/add_user';
+function addNew() {
+  window.location.href = HOME +'add_new';
 }
 
 
 
-function goBack(){
-  window.location.href = BASE_URL+'users/users';
+function goBack() {
+  window.location.href = HOME;
 }
 
-function getEdit(id){
-  window.location.href = BASE_URL + 'users/users/edit_user/'+id;
+function getEdit(id) {
+  window.location.href = HOME + 'edit/'+id;
 }
 
 
-function getReset(id){
-  window.location.href = BASE_URL + 'users/users/reset_password/'+id;
+function viewDetail(id) {
+	window.location.href = HOME + 'view_detail/'+id;
 }
 
-function save() {
-	swal({
-		title:'Success',
-		type:'success',
-		timer:1000
+
+function getReset(id) {
+  window.location.href = HOME + 'reset_password/'+id;
+}
+
+function saveAdd() {
+	validUserName();
+	validDisplayName();
+	validProfile();
+	validCustomer();
+	validPWD();
+
+	if( !validUname || !validDname || !validCust || !validPm || !validPwd ) {
+		return false;
+	}
+
+	const uname = $('#uname').val();
+	const dname = $('#dname').val();
+	const sale_id = $('#sale_id').val();
+	const team_id = $('#team_id').val();
+	const is_customer = $('#is_customer').val();
+	const customer_code = $('#customer_code').val();
+	const pwd = $('#pwd').val();
+	const profile = $('#profile').val();
+	const active = $('#active').is(':checked') ? 1 : 0;
+	const force_reset = $('#force_reset').is(':checked') ? 1 : 0;
+
+	load_in();
+
+	$.ajax({
+		url:HOME + 'add',
+		type:'POST',
+		cache:false,
+		data:{
+			'uname' : uname,
+			'dname' : dname,
+			'sale_id' : sale_id,
+			'team_id' : team_id,
+			'is_customer' : is_customer,
+			'customer_code' : customer_code,
+			'pwd' : pwd,
+			'profile' : profile,
+			'active' : active,
+			'force_reset' : force_reset
+		},
+		success:function(rs) {
+			load_out();
+
+			rs = $.trim(rs);
+
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+
+				setTimeout(function() {
+					addNew();
+				}, 1500);
+			}
+			else {
+				swal({
+					title:'Error!',
+					text: rs,
+					type:'error'
+				});
+			}
+		},
+		error:function(xhr) {
+			load_out();
+			swal({
+				title:"Error!",
+				text: xhr.responseText,
+				type:'error',
+				html:true
+			});
+		}
 	});
-
-	setTimeout(function() {
-		window.location.reload();
-	}, 1200)
 }
 
+
+
+function update() {
+	validDisplayName();
+	validProfile();
+	validCustomer();
+
+	if( !validDname || !validCust || !validPm ) {
+		return false;
+	}
+
+	const id = $('#user_id').val();
+	const dname = $('#dname').val();
+	const sale_id = $('#sale_id').val();
+	const team_id = $('#team_id').val();
+	const is_customer = $('#is_customer').val();
+	const customer_code = $('#customer_code').val();
+	const profile = $('#profile').val();
+	const active = $('#active').is(':checked') ? 1 : 0;
+
+	load_in();
+
+	$.ajax({
+		url:HOME + 'update',
+		type:'POST',
+		cache:false,
+		data:{
+			'id' : id,
+			'dname' : dname,
+			'sale_id' : sale_id,
+			'team_id' : team_id,
+			'is_customer' : is_customer,
+			'customer_code' : customer_code,
+			'profile' : profile,
+			'active' : active
+		},
+		success:function(rs) {
+			load_out();
+
+			rs = $.trim(rs);
+
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+			}
+			else {
+				swal({
+					title:'Error!',
+					text: rs,
+					type:'error'
+				});
+			}
+		},
+		error:function(xhr) {
+			load_out();
+			swal({
+				title:"Error!",
+				text: xhr.responseText,
+				type:'error',
+				html:true
+			});
+		}
+	});
+}
+
+
+
+function changePassword()
+{
+	validPWD();
+
+	if( ! validPwd) {
+		return false;
+	}
+
+	const id = $('#user_id').val();
+	const pwd = $('#pwd').val();
+	const force = $('#force_reset').is(':checked') ? 1 : 0;
+
+	$.ajax({
+		url:HOME + 'change_pwd',
+		type:'POST',
+		cache:false,
+		data:{
+			'id' : id,
+			'pwd' : pwd,
+			'force_reset' : force
+		},
+		success:function(rs) {
+			rs = $.trim(rs);
+
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+			}
+			else {
+				swal({
+					title:'Error!',
+					text: rs,
+					type:'error'
+				});
+			}
+		}
+	});
+}
 
 function getDelete(id, uname){
   swal({
@@ -46,12 +228,35 @@ function getDelete(id, uname){
 		confirmButtonText: 'ใช่, ฉันต้องการลบ',
 		cancelButtonText: 'ยกเลิก',
 		closeOnConfirm: false
-  },function(){
-		swal({
-			title:'Success',
-			type:'success',
-			timer:1000
-		});
+  },function(){		
+		$.ajax({
+			url:HOME + 'delete',
+			type:'POST',
+			cache:false,
+			data: {
+				'id' : id
+			},
+			success:function(rs) {
+				if(rs === 'success') {
+					swal({
+						title:'Deleted',
+						type:'success',
+						timer:1000
+					});
+
+					setTimeout(function() {
+						goBack();
+					}, 1500);
+				}
+				else {
+					swal({
+						title:'Error!',
+						text:rs,
+						type:'error'
+					})
+				}
+			}
+		})
   })
 }
 
@@ -59,37 +264,23 @@ function getDelete(id, uname){
 
 function validatePassword(input)
 {
-	var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
+	if(USE_STRONG_PWD == 1) {
+		var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
 
-	if(input.match(passw))
-	{
-		return true;
-	}
-	else
-	{
+		if(input.match(passw))
+		{
+			return true;
+		}
+
 		return false;
 	}
-}
 
-
-function changePassword(){
-  var id = $('#user_id').val();
-  var pwd = $('#pwd').val();
-  var cmp = $('#pwd').val();
-  if(pwd.length == 0 || cmp.length == 0) {
-    validPWD();
-  }
-
-  if(! validPwd){
-    return false;
-  }
-
-  $('#resetForm').submit();
+	return true;
 }
 
 
 
-function validPWD(){
+function validPWD() {
   var pwd = $('#pwd').val();
   var cmp = $('#cm-pwd').val();
   if(pwd.length > 0) {
@@ -129,24 +320,34 @@ function validPWD(){
 
 
 
-function validUserName(){
+function validUserName() {
   var uname = $('#uname').val();
   var id = $('#user_id').val();
-  if(uname.length > 0){
-    let url = BASE_URL + 'users/users/valid_uname/'+uname+'/'+id;
-    $.get(url, function(rs){
-        rs = $.trim(rs);
+  if(uname.length > 0) {
+		$.ajax({
+			url:HOME + 'valid_uname',
+			type:'GET',
+			cache:false,
+			data:{
+				'id' : id,
+				'uname' : uname
+			},
+			success:function(rs) {
+				rs = $.trim(rs);
         if(rs === 'exists'){
           $('#uname-error').text('User name already exists!');
           $('#uname').addClass('has-error');
           validUname = false;
-        }else{
+        }
+				else {
           $('#uname-error').text('');
           $('#uname').removeClass('has-error');
           validUname = true;
         }
-    });
-  }else{
+			}
+		})
+  }
+	else {
     $('#uname-error').text('User name is required!');
     $('#uname').addClass('has-error');
     validUname = false;
@@ -155,24 +356,34 @@ function validUserName(){
 
 
 
-function validDisplayName(){
+function validDisplayName() {
   var dname = $('#dname').val();
   var id = $('#user_id').val();
   if(dname.length > 0){
-    let url = BASE_URL + 'users/users/valid_dname/'+dname+'/'+id;
-    $.get(url, function(rs){
-      rs = $.trim(rs);
-      if(rs === 'exists'){
-        $('#dname-error').text('Display name already exists!');
-        $('#dname').addClass('has-error');
-        validDname = false;
-      }else{
-        $('#dname-error').text('');
-        $('#dname').removeClass('has-error');
-        validDname = true;
-      }
-    })
-  }else{
+    $.ajax({
+			url:HOME + 'valid_dname',
+			type:'GET',
+			cache:false,
+			data:{
+				'id' : id,
+				'dname' : dname
+			},
+			success:function(rs) {
+				var rs = $.trim(rs);
+				if(rs === 'exists'){
+	        $('#dname-error').text('Display name already exists!');
+	        $('#dname').addClass('has-error');
+	        validDname = false;
+	      }
+				else {
+	        $('#dname-error').text('');
+	        $('#dname').removeClass('has-error');
+	        validDname = true;
+	      }
+			}
+		});
+  }
+	else {
     $('#dname-error').text('Display name is required!');
     $('#dname').addClass('has-error');
     validDname = false;
@@ -181,92 +392,101 @@ function validDisplayName(){
 
 
 
+function validCustomer() {
+	const el = $('#customer');
+	const label = $('#customer-error');
+	const is_customer = $('#is_customer').val();
+	const customer_code = $('#customer_code').val();
+
+	if(is_customer == 1 && customer_code.length == 0) {
+		set_error(el, label, "Customer is required!");
+		validCust = false;
+	}
+	else {
+		clear_error(el, label);
+		validCust = true;
+	}
+}
+
+
+function validProfile() {
+	const el = $('#profile');
+	const label = $('#profile-error');
+
+	if(el.val() == "") {
+		set_error(el, label, "Please select profile");
+		validPm = false;
+	}
+	else {
+		clear_error(el, label);
+		validPm = true;
+	}
+}
+
+
 
 $('#dname').focusout(function(){
   validDisplayName();
-})
-
+});
 
 
 $('#uname').focusout(function(){
   validUserName();
-})
+});
 
-
+$('#profile').focusout(function() {
+	validProfile();
+});
 
 $('#pwd').focusout(function(){
   validPWD();
-})
+});
 
 
 $('#cm-pwd').keyup(function(e){
   validPWD();
-})
+});
 
 $('#cm-pwd').focusout(function(){
   validPWD();
-})
+});
 
-
-function clearFilter(){
-  var url = BASE_URL+'users/users/clear_filter';
-  var page = BASE_URL+'users/users';
-  $.get(url, function(rs){
-    window.location.href = page;
-  });
-}
-
-
-
-
-//--- active user
-function setActive(id){
-  url = BASE_URL+'users/users/active_user/'+id;
-  $.get(url, function(rs){
-    rs = $.trim(rs);
-    if(rs === 'success'){
-      $('#btn-active-'+id).addClass('hide');
-      $('#btn-disActive-'+id).removeClass('hide');
-
-      $('#label-disActive-'+id).addClass('hide');
-      $('#label-active-'+id).removeClass('hide');
-    }else{
-      //err = $.parseJSON(rs);
-      swal({
-        title:'Error!',
-        text: rs,
-        type:'error'
-      });
-    }
-  });
-}
-
-
-
-
-
-//--- disactive user
-function disActive(id){
-  url = BASE_URL+'users/users/disactive_user/'+id;
-  $.get(url, function(rs){
-    rs = $.trim(rs);
-    if(rs === 'success'){
-      $('#btn-disActive-'+id).addClass('hide');
-      $('#btn-active-'+id).removeClass('hide');
-
-      $('#label-active-'+id).addClass('hide');
-      $('#label-disActive-'+id).removeClass('hide');
-    }else{
-      swal({
-        title:'Error!',
-        text:rs,
-        type:'error'
-      });
-    }
-  })
-}
 
 
 function getSearch(){
   $('#searchForm').submit();
 }
+
+
+function toggleCustomer() {
+	let is_customer = $('#is_customer').val();
+
+	if(is_customer == 1) {
+		$('#customer').removeAttr('disabled');
+		$('#customer').focus();
+	}
+	else {
+		$('#customer').val('');
+		$('#customer_code').val('');
+		$('#customer').attr('disabled', 'disabled');
+	}
+}
+
+
+$('#customer').autocomplete({
+	source: BASE_URL + "auto_complete/get_customer_code_and_name",
+	autoFocus:true,
+	close:function() {
+		let rs = $(this).val();
+		let ar = rs.split(' | ');
+
+		if(ar.length === 2) {
+			$(this).val(ar[1]);
+			$('#customer_code').val(ar[0]);
+		}
+		else {
+			$(this).val('');
+			$('#customer_code').val('');
+		}
+	}
+})

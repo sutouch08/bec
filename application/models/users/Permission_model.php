@@ -1,6 +1,8 @@
 <?php
 class Permission_model extends CI_Model
 {
+	private $tb = "permission";
+
   public function __construct()
   {
     parent::__construct();
@@ -11,15 +13,20 @@ class Permission_model extends CI_Model
   {
     if(!empty($ds))
     {
-      $this->db->insert('permission', $ds);
+      return $this->db->insert($this->tb, $ds);
     }
+
+		return FALSE;
   }
 
-  
+
   public function get_permission($menu, $id_profile)
   {
-    $this->db->where('menu', $menu)->where('id_profile', $id_profile);
-    $rs = $this->db->get('permission');
+    $rs = $this->db
+		->where('menu', $menu)
+		->where('id_profile', $id_profile)
+		->get('permission');
+
     if($rs->num_rows() > 0)
     {
       return $rs->row();
@@ -41,8 +48,7 @@ class Permission_model extends CI_Model
 
   public function drop_profile_permission($id)
   {
-    $this->db->where('id_profile', $id);
-    return $this->db->delete('permission');
+    return $this->db->where('id_profile', $id)->delete('permission');
   }
 
 }

@@ -52,31 +52,32 @@ class Approver_model extends CI_Model
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
 		$this->db
-		->select('approver.*, sale_team.name AS team_name')
-		->from('approver')
-		->join('sale_team', 'approver.team = sale_team.id', 'left');
+		->select('a.*, u.uname, u.name, t.name AS team_name')
+		->from('approver AS a')
+		->join('user AS u', 'a.user_id = u.id', 'left')
+		->join('sale_team AS t', 'a.team_id = t.id', 'left');
 
 		if(!empty($ds['uname']))
 		{
-			$this->db->like('approve.uname', $ds['uname']);
+			$this->db->like('u.uname', $ds['uname']);
 		}
 
 		if(!empty($ds['name']))
 		{
-			$this->db->like('approver.name', $ds['name']);
+			$this->db->like('u.name', $ds['name']);
 		}
 
 		if(isset($ds['team']) && $ds['team'] !== 'all')
 		{
-			$this->db->where('approver.team', $ds['team']);
+			$this->db->where('a.team_id', $ds['team']);
 		}
 
 		if(isset($ds['status']) && $ds['status'] !== 'all')
 		{
-			$this->db->where('approver.status', $ds['status']);
+			$this->db->where('a.status', $ds['status']);
 		}
 
-		$rs = $this->db->order_by('approver.uname', 'ASC')->limit($perpage, $offset)->get();
+		$rs = $this->db->order_by('u.uname', 'ASC')->limit($perpage, $offset)->get();
 
 		if($rs->num_rows() > 0)
 		{
@@ -89,29 +90,56 @@ class Approver_model extends CI_Model
 
 	public function count_rows(array $ds = array())
 	{
+		$this->db
+		->from('approver AS a')
+		->join('user AS u', 'a.user_id = u.id', 'left')
+		->join('sale_team AS t', 'a.team_id = t.id', 'left');
+
 		if(!empty($ds['uname']))
 		{
-			$this->db->like('uname', $ds['uname']);
+			$this->db->like('u.uname', $ds['uname']);
 		}
 
 		if(!empty($ds['name']))
 		{
-			$this->db->like('name', $ds['name']);
+			$this->db->like('u.name', $ds['name']);
 		}
 
 		if(isset($ds['team']) && $ds['team'] !== 'all')
 		{
-			$this->db->where('team', $ds['team']);
+			$this->db->where('a.team_id', $ds['team']);
 		}
 
 		if(isset($ds['status']) && $ds['status'] !== 'all')
 		{
-			$this->db->where('status', $ds['status']);
+			$this->db->where('a.status', $ds['status']);
 		}
 
-		return $this->db->count_all_results($this->tb);
+		return $this->db->count_all_results();
 	}
 
+
+
+	public function is_exists_data($user_id, $team_id, $disc, $id = NULL)
+	{
+		if( ! empty($id))
+		{
+			$this->db->where('id !=', $id);
+		}
+
+		$rs = $this->db
+		->where('user_id', $user_id)
+		->where('team_id', $team_id)
+		->where('max_disc', $disc)
+		->count_all_results($this->tb);
+
+		if($rs > 0)
+		{
+			return TRUE;
+		}
+
+		return FALSE;
+	}
 
 } //--- end class
 

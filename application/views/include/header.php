@@ -28,20 +28,16 @@
 			}
 	</style>
 	</head>
-	<body class="no-skin" onload="checkError()">
+	<body class="no-skin">
 		<div id="loader" style="position:absolute; padding: 15px 25px 15px 25px; background-color:#fff; opacity:0.0; box-shadow: 0px 0px 25px #CCC; top:-20px; display:none; z-index:10;">
         <center><i class="fa fa-spinner fa-5x fa-spin blue"></i></center><center>กำลังทำงาน....</center>
 		</div>
-		<?php if($this->session->flashdata('error')) : ?>
-							<input type="hidden" id="error" value="<?php echo $this->session->flashdata('error'); ?>" />
-		<?php endif; ?>
-		<?php if($this->session->flashdata('success')) : ?>
-							<input type="hidden" id="success" value="<?php echo $this->session->flashdata('success'); ?>" />
-		<?php endif; ?>
+
 		<!-- #section:basics/navbar.layout -->
 		<div id="navbar" class="navbar navbar-default">
 			<script type="text/javascript">
 				var BASE_URL = '<?php echo base_url(); ?>';
+				var HOME = '<?php echo $this->home . '/'; ?>';
 			</script>
 			<div class="navbar-container" id="navbar-container">
 				<?php if(! isset($_GET['nomenu'])) : ?>
@@ -69,8 +65,8 @@
 							<a data-toggle="dropdown" href="#" class="dropdown-toggle">
 
 								<span class="user-info">
-									<small>Welcome</small>
-									<?php echo get_cookie('uname'); ?>
+									<small><?php echo get_cookie('uname'); ?></small>
+									<?php echo get_cookie('displayName'); ?>
 								</span>
 
 								<i class="ace-icon fa fa-caret-down"></i>
@@ -79,7 +75,7 @@
 							<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-caret dropdown-close">
 
 								<li>
-									<a href="JavaScript:void(0)" onclick="changeUserPwd('<?php echo get_cookie('uid'); ?>')">
+									<a href="JavaScript:void(0)" onclick="changeUserPwd()">
 										<i class="ace-icon fa fa-keys"></i>
 										เปลี่ยนรหัสผ่าน
 									</a>
@@ -128,5 +124,3 @@
 
     			</div>
 					<div class="page-content">
-
-								<!-- PAGE CONTENT BEGINS -->

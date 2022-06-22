@@ -32,7 +32,7 @@ function limitText($str, $length)
 
 function is_selected($val, $select)
 {
-  return $val === $select ? 'selected' : '';
+  return $val == $select ? 'selected' : '';
 }
 
 
@@ -95,6 +95,14 @@ function clear_filter($cookies)
 
 
 
+function get_sort($field, $order_by = NULL, $sort_by = 'DESC')
+{
+	$sc = empty($order_by) ? '' : ($order_by === $field ? ($sort_by === 'DESC' ? 'sorting_desc' : 'sorting_asc') : '');
+	return $sc;
+}
+
+
+
 
 function set_rows($value = 20)
 {
@@ -117,7 +125,7 @@ function set_rows($value = 20)
 function get_rows()
 {
   $CI =& get_instance();
-  return $CI->input->cookie('rows') === NULL ? 20 : $CI->input->cookie('rows');
+  return $CI->input->cookie('rows') === NULL ? 20 : ($CI->input->cookie('rows') > 300 ? 300 : $CI->input->cookie('rows'));
 }
 
 
@@ -158,9 +166,13 @@ function get_vat_amount($amount, $vat = NULL)
 		$vat = getConfig('SALE_VAT_RATE');
 	}
 
-	$re_vat = ($amount * $vat) / (100+$vat);
+	if($vat != 0)
+	{
+		$re_vat = ($amount * $vat) / (100+$vat);
+		return round($re_vat,2);
+	}
 
-	return round($re_vat,6);
+	return round($amount, 2);
 }
 
 
@@ -175,11 +187,13 @@ function remove_vat($amount, $vat = NULL)
 	if( $vat != 0 )
 	{
 		$re_vat	= ($vat + 100) / 100;
-		return round($amount/$re_vat, 6);
+		return round($amount/$re_vat, 2);
 	}
 
-	return round($amount, 6);
+	return round($amount, 2);
 }
+
+
 
 //---- remove discount percent return price after discount
 function get_price_after_discount($price, $disc = 0)
@@ -229,25 +243,28 @@ function add_vat($amount, $vat = NULL)
 	if( $vat != 0 )
 	{
 		$re_vat = $vat * 0.01;
-		return round(($amount * $re_vat) + $amount, 6);
+		return round(($amount * $re_vat) + $amount, 2);
 	}
 
-	return round($amount, 6);
+	return round($amount, 2);
 }
 
 
 
-function set_error($message)
+function set_error($key, $name = "data")
 {
-  $CI =& get_instance();
-  $CI->session->set_flashdata('error', $message);
-}
+	$error = array(
+		'insert' => "Insert {$name} failed.",
+		'update' => "Update {$name} failed.",
+		'delete' => "Delete {$name} failed.",
+		'permission' => "You don't have permission to perform this operation.",
+		'required' => "Missing required parameter.",
+		'exists' => "'{$name}' already exists."
+	);
 
+	$ci =& get_instance();
 
-function set_message($message)
-{
-  $CI =& get_instance();
-  $CI->session->set_flashdata('success', $message);
+	$ci->error = (!empty($error[$key]) ? $error[$key] : "Unknow error.");
 }
 
 
@@ -255,6 +272,20 @@ function set_message($message)
 function get_null($value)
 {
 	return $value === '' ? NULL : $value;
+}
+
+
+//--- return empty value if null value
+function get_empty_text($value)
+{
+	return ($value === NULL OR $value === 0 OR $value === '0')? '' : $value;
+}
+
+
+//--- return  0 if blank or NULL
+function get_zero($value)
+{
+	return ($value === '' OR $value === NULL) ? 0 : $value;
 }
 
 //--- return TRUE if value ==  1 else return FALSE;
@@ -269,11 +300,6 @@ function is_true($value)
 }
 
 
-function get_zero($value)
-{
-	return $value === NULL ? 0 : $value;
-}
-
 
 function pagination_config( $base_url, $total_rows = 0, $perpage = 20, $segment = 3)
 {
@@ -286,7 +312,7 @@ function pagination_config( $base_url, $total_rows = 0, $perpage = 20, $segment 
     $input_rows .= '</p>';
 
 		$config['full_tag_open'] 		= '<nav><ul class="pagination">';
-		$config['full_tag_close'] 		= '</ul>'.$input_rows.'</nav><hr class="padding-5">';
+		$config['full_tag_close'] 		= '</ul>'.$input_rows.'</nav><hr class="">';
 		$config['first_link'] 				= 'First';
 		$config['first_tag_open'] 		= '<li>';
 		$config['first_tag_close'] 		= '</li>';
@@ -317,4 +343,114 @@ function convert($txt)
 	return $txt;
 }
 
+define('BAHT_TEXT_NUMBERS', array('ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'));
+define('BAHT_TEXT_UNITS', array('', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'));
+define('BAHT_TEXT_ONE_IN_TENTH', 'เอ็ด');
+define('BAHT_TEXT_TWENTY', 'ยี่');
+define('BAHT_TEXT_INTEGER', 'ถ้วน');
+define('BAHT_TEXT_BAHT', 'บาท');
+define('BAHT_TEXT_SATANG', 'สตางค์');
+define('BAHT_TEXT_POINT', 'จุด');
+
+function baht_text($number, $include_unit = true, $display_zero = true)
+{
+
+
+	/**
+	 * Convert baht number to Thai text
+	 * @param double|int $number
+	 * @param bool $include_unit
+	 * @param bool $display_zero
+	 * @return string|null
+	 */
+
+
+    if (!is_numeric($number)) {
+        return null;
+    }
+
+    $log = floor(log($number, 10));
+    if ($log > 5) {
+        $millions = floor($log / 6);
+        $million_value = pow(1000000, $millions);
+        $normalised_million = floor($number / $million_value);
+        $rest = $number - ($normalised_million * $million_value);
+        $millions_text = '';
+        for ($i = 0; $i < $millions; $i++) {
+            $millions_text .= BAHT_TEXT_UNITS[6];
+        }
+        return baht_text($normalised_million, false) . $millions_text . baht_text($rest, true, false);
+    }
+
+    $number_str = (string)floor($number);
+    $text = '';
+    $unit = 0;
+
+    if ($display_zero && $number_str == '0') {
+        $text = BAHT_TEXT_NUMBERS[0];
+    } else for ($i = strlen($number_str) - 1; $i > -1; $i--) {
+        $current_number = (int)$number_str[$i];
+
+        $unit_text = '';
+        if ($unit == 0 && $i > 0) {
+            $previous_number = isset($number_str[$i - 1]) ? (int)$number_str[$i - 1] : 0;
+            if ($current_number == 1 && $previous_number > 0) {
+                $unit_text .= BAHT_TEXT_ONE_IN_TENTH;
+            } else if ($current_number > 0) {
+                $unit_text .= BAHT_TEXT_NUMBERS[$current_number];
+            }
+        } else if ($unit == 1 && $current_number == 2) {
+            $unit_text .= BAHT_TEXT_TWENTY;
+        } else if ($current_number > 0 && ($unit != 1 || $current_number != 1)) {
+            $unit_text .= BAHT_TEXT_NUMBERS[$current_number];
+        }
+
+        if ($current_number > 0) {
+            $unit_text .= BAHT_TEXT_UNITS[$unit];
+        }
+
+        $text = $unit_text . $text;
+        $unit++;
+    }
+
+    if ($include_unit) {
+        $text .= BAHT_TEXT_BAHT;
+
+        $satang = explode('.', number_format($number, 2, '.', ''))[1];
+        $text .= $satang == 0
+            ? BAHT_TEXT_INTEGER
+            : baht_text($satang, false) . BAHT_TEXT_SATANG;
+    } else {
+        $exploded = explode('.', $number);
+        if (isset($exploded[1])) {
+            $text .= BAHT_TEXT_POINT;
+            $decimal = (string)$exploded[1];
+            for ($i = 0; $i < strlen($decimal); $i++) {
+                $text .= BAHT_TEXT_NUMBERS[$decimal[$i]];
+            }
+        }
+    }
+
+    return $text;
+}
+
+
+
+function no_value($val)
+{
+	if($val === "" OR $val === NULL)
+	{
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+
+function test($val)
+{
+	$sc = isset($val) ? $val : "no";
+
+	echo $sc;
+}
  ?>

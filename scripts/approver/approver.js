@@ -1,5 +1,3 @@
-var HOME = BASE_URL + 'users/approver/';
-
 function goBack() {
 	window.location.href = HOME;
 }
@@ -15,13 +13,145 @@ function getEdit(id) {
 }
 
 
-function save() {
-	swal({
-		title:'Success',
-		type:'success',
-		timer:1000
+function saveAdd() {
+	const user_id = $('#user').val();
+	const team_id = $('#team_id').val();
+	const disc = parseDefault(parseFloat($('#disc').val()), 0.00);
+	const status = $('#status').is(':checked') ? 1 : 0;
+
+	if(user_id == "") {
+		set_error($('#user'), $('#user-error'), "Required!");
+		return false;
+	}
+	else {
+		clear_error($('#user'), $('#user-error'));
+	}
+
+	if(team_id == "") {
+		set_error($('#team_id'), $('#team-error'), "Required!");
+		return false;
+	}
+	else {
+		clear_error($('#team_id'), $('#team-error'));
+	}
+
+	if(disc <= 0 || disc > 100) {
+		set_error($('#disc'), $('#disc-error'), "Discount must in range 0.1 - 100");
+		return false;
+	}
+	else {
+		clear_error($('#disc'), $('#disc-error'));
+	}
+
+	load_in();
+
+	$.ajax({
+		url:HOME + 'add',
+		type:'POST',
+		cache:false,
+		data:{
+			'user_id' : user_id,
+			'team_id' : team_id,
+			'disc' : disc,
+			'status' : status
+		},
+		success:function(rs) {
+			load_out();
+
+			rs = $.trim(rs);
+
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+
+				setTimeout(function() {
+					addNew()
+				}, 1500);
+			}
+			else {
+				swal({
+					title:'Error!',
+					text: rs,
+					type:'error'
+				});
+			}
+		}
 	});
 }
+
+
+
+function update() {
+	const id = $('#id').val();
+	const user_id = $('#user').val();
+	const team_id = $('#team_id').val();
+	const disc = parseDefault(parseFloat($('#disc').val()), 0.00);
+	const status = $('#status').is(':checked') ? 1 : 0;
+
+	if(user_id == "") {
+		set_error($('#user'), $('#user-error'), "Required!");
+		return false;
+	}
+	else {
+		clear_error($('#user'), $('#user-error'));
+	}
+
+	if(team_id == "") {
+		set_error($('#team_id'), $('#team-error'), "Required!");
+		return false;
+	}
+	else {
+		clear_error($('#team_id'), $('#team-error'));
+	}
+
+	if(disc <= 0 || disc > 100) {
+		set_error($('#disc'), $('#disc-error'), "Discount must in range 0.1 - 100");
+		return false;
+	}
+	else {
+		clear_error($('#disc'), $('#disc-error'));
+	}
+
+	load_in();
+
+	$.ajax({
+		url:HOME + 'update',
+		type:'POST',
+		cache:false,
+		data:{
+			'id' : id,
+			'user_id' : user_id,
+			'team_id' : team_id,
+			'disc' : disc,
+			'status' : status
+		},
+		success:function(rs) {
+			load_out();
+
+			rs = $.trim(rs);
+
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+			}
+			else {
+				swal({
+					title:'Error!',
+					text: rs,
+					type:'error'
+				});
+			}
+		}
+	});
+}
+
+
 
 function getDelete(id, code) {
 	swal({
@@ -34,10 +164,33 @@ function getDelete(id, code) {
 		cancelButtonText:'ยกเลิก',
 		closeOnConfirm:false
 	}, function() {
-			swal({
-				title:'Deleted',
-				type:'success',
-				timer:1000
+			$.ajax({
+				url:HOME + 'delete',
+				type:'POST',
+				cache:false,
+				data:{
+					'id' : id
+				},
+				success:function(rs) {
+					if(rs === 'success') {
+						swal({
+							title:'Deleted',
+							type:'success',
+							timer:1000
+						});
+
+						setTimeout(function() {
+							goBack();
+						}, 1500);
+					}
+					else {
+						swal({
+							title:'Error!',
+							text: rs,
+							type:'error'
+						});
+					}
+				}
 			});
 	});
 }
@@ -56,8 +209,9 @@ function clearFilter() {
 
 
 function update_name() {
-	var data = $('#uname option:selected').text();
-	if(data == 'Select') {
+	const user_id = $('#user').val();
+	const data = $('#user option:selected').text();
+	if(user_id == "") {
 		$('#name').val('');
 	}
 	else {

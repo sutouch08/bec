@@ -1,201 +1,172 @@
 <?php
 class Product_category_model extends CI_Model
 {
+	private $tb = "product_category";
+
   public function __construct()
   {
     parent::__construct();
   }
 
 
-  public function add(array $ds = array())
-  {
-    if(!empty($ds))
-    {
-      return  $this->db->insert('product_category', $ds);
-    }
+	public function get($id)
+	{
+		$rs = $this->db->where('id', $id)->get($this->tb);
 
-    return FALSE;
-  }
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
 
-
-
-  public function update($code, array $ds = array())
-  {
-    if(!empty($ds))
-    {
-      $this->db->where('code', $code);
-      return $this->db->update('product_category', $ds);
-    }
-
-    return FALSE;
-  }
-
-
-  public function delete($code)
-  {
-    return $this->db->where('code', $code)->delete('product_category');
-  }
-
-
-  public function count_rows($code = '', $name = '')
-  {
-    $this->db->select('code');
-
-    if($code != '')
-    {
-      $this->db->like('code', $code);
-    }
-
-    if($name != '')
-    {
-      $this->db->like('name', $name);
-    }
-
-    $rs = $this->db->get('product_category');
-
-    return $rs->num_rows();
-  }
+		return NULL;
+	}
 
 
 
+	public function get_by_level($level)
+	{
+		$level = $level > 5 ? 5 : ($level < 1 ? 1 : $level);
 
-  public function get($code)
-  {
-    $rs = $this->db->where('code', $code)->get('product_category');
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row();
-    }
+		$rs = $this->db->where('level', $level)->get($this->tb);
 
-    return FALSE;
-  }
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
 
-
-
-  public function get_name($code)
-  {
-    if($code === NULL OR $code === '')
-    {
-      return $code;
-    }
-
-    $rs = $this->db->select('name')->where('code', $code)->get('product_category');
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row()->name;
-    }
-
-    return NULL;
-  }
+		return NULL;
+	}
 
 
+	public function get_by_parent($parent_id = 0)
+	{
+		$qr = "SELECT * FROM {$this->tb} WHERE parent_id = {$parent_id}";
+		$rs = $this->db->query($qr);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
 
 
-  public function get_data($code = '', $name = '', $perpage = '', $offset = '')
-  {
-    if($code != '')
-    {
-      $this->db->like('code', $code);
-    }
+	public function has_child($parent_id)
+	{
+		$rs = $this->db->where('parent_id', $parent_id)->count_all_results($this->tb);
 
-    if($name != '')
-    {
-      $this->db->like('name', $name);
-    }
+		if($rs)
+		{
+			return TRUE;
+		}
 
-    if($perpage != '')
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
-
-    $rs = $this->db->get('product_category');
-
-    return $rs->result();
-  }
+		return FALSE;
+	}
 
 
 
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
+	{
+		$this->db
+		->select('c.*, p.name AS parent')
+		->from('product_category AS c')
+		->join('product_category AS p', 'c.parent_id = p.id', 'left');
 
-  public function is_exists($code, $old_code = '')
-  {
-    if($old_code != '')
-    {
-      $this->db->where('code !=', $old_code);
-    }
+		if( ! no_value($ds['name']))
+		{
+			$this->db->like('c.name', $ds['name']);
+		}
 
-    $rs = $this->db->where('code', $code)->get('product_category');
+		if( isset($ds['level']) && $ds['level'] !== 'all')
+		{
+			$this->db->where('c.level', $ds['level']);
+		}
 
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
+		if( isset($ds['parent']) && $ds['parent'] !== 'all')
+		{
+			$this->db->where_in('c.parent_id', parent_in($ds['parent']));
+		}
 
-    return FALSE;
-  }
+		$rs = $this->db
+		->order_by('c.parent_id', 'ASC')
+		->limit($perpage, $offset)
+		->get();
 
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
 
-
-  public function is_exists_name($name, $old_name = '')
-  {
-    if($old_name != '')
-    {
-      $this->db->where('name !=', $old_name);
-    }
-
-    $rs = $this->db->where('name', $name)->get('product_category');
-
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
-  }
+		return NULL;
+	}
 
 
+	public function count_rows(array $ds = array())
+	{
+		if( ! no_value($ds['name']))
+		{
+			$this->db->like('name', $ds['name']);
+		}
 
-  public function count_members($code)
-  {
-    $this->db->select('active')->where('category_code', $code);
-    $rs = $this->db->get('products');
-    return $rs->num_rows();
-  }
+		if( isset($ds['level']) && $ds['level'] !== 'all')
+		{
+			$this->db->where('level', $ds['level']);
+		}
 
+		if( isset($ds['parent']) && $ds['parent'] !== 'all')
+		{
+			$this->db->where_in('parent_id', parent_in($ds['parent']));
+		}
 
-  public function is_sap_exists($code)
-  {
-    $rs = $this->mc->select('Code')->where('Code', $code)->get('CATE');
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
-  }
-
-
-  public function add_sap_cate(array $ds = array())
-  {
-    if(!empty($ds))
-    {
-      return $this->mc->insert('CATE', $ds);
-    }
-
-    return FALSE;
-  }
+		return $this->db->count_all_results($this->tb);
+	}
 
 
 
-  public function update_sap_cate($code, array $ds = array())
-  {
-    if(!empty($ds))
-    {
-      return $this->mc->where('Code', $code)->update('CATE', $ds);
-    }
 
-    return FALSE;
-  }
+	public function is_exists_name($name, $id = NULL)
+	{
+		if($id)
+		{
+			$this->db->where('id !=', $id);
+		}
+
+		$rs = $this->db->where('name', $name)->count_all_results($this->tb);
+
+		if($rs > 0)
+		{
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+
+
+	public function add(array $ds = array())
+	{
+		if( ! empty($ds))
+		{
+			return $this->db->insert($this->tb, $ds);
+		}
+
+		return FALSE;
+	}
+
+
+	public function update($id, $ds = array())
+	{
+		if( ! empty($ds))
+		{
+			return $this->db->where('id', $id)->update($this->tb, $ds);
+		}
+
+		return FALSE;
+	}
+
+
+
 
 }
 ?>

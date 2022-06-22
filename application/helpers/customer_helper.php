@@ -1,16 +1,18 @@
 <?php
-function select_GroupCode($code = '')
+
+function select_customer_group($id = NULL)
 {
-  $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customers_model');
-  $options = $CI->customers_model->getGroupCode(); //--- OCRG
+	$sc = '';
+
+  $ci =& get_instance();
+  $ci->load->model('masters/customer_group_model');
+  $options = $ci->customer_group_model->get_all();
 
   if(!empty($options))
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
     }
   }
 
@@ -19,18 +21,18 @@ function select_GroupCode($code = '')
 
 
 
-function select_GroupNum($code = '')
+function select_payment_term($GroupNum = NULL)
 {
   $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customers_model');
-  $options = $CI->customers_model->getGroupNum(); //--- OCRG
+  $ci =& get_instance();
+  $ci->load->model('masters/payment_term_model');
+  $options = $ci->payment_term_model->get_all();
 
   if(!empty($options))
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->GroupNum.'" '.is_selected($GroupNum, $rs->GroupNum).'>'.$rs->PymntGroup.'</option>';
     }
   }
 
@@ -39,18 +41,18 @@ function select_GroupNum($code = '')
 
 
 
-function select_DebPayAcct($code = '')
+function select_sale($id = NULL)
 {
   $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customers_model');
-  $options = $CI->customers_model->getDebPayAcct(); //--- OCRG
+  $ci =& get_instance();
+  $ci->load->model('masters/sales_person_model');
+  $options = $ci->sales_person_model->get_all();
 
   if(!empty($options))
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->code.' => '.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
     }
   }
 
@@ -58,57 +60,18 @@ function select_DebPayAcct($code = '')
 }
 
 
-
-function select_sale($code='')
+function select_customer_region($id = NULL)
 {
   $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customers_model');
-  $options = $CI->customers_model->getSlp();
+  $ci =& get_instance();
+  $ci->load->model('masters/customer_region_model');
+  $options = $ci->customer_region_model->get_all();
 
   if(!empty($options))
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
-    }
-  }
-
-  return $sc;
-}
-
-function select_customer_group($code = '')
-{
-  $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customer_group_model');
-  $options = $CI->customer_group_model->get_data();
-
-  if(!empty($options))
-  {
-    foreach($options as $rs)
-    {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
-    }
-  }
-
-  return $sc;
-
-}
-
-
-function select_customer_kind($code = '')
-{
-  $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customer_kind_model');
-  $options = $CI->customer_kind_model->get_data();
-
-  if(!empty($options))
-  {
-    foreach($options as $rs)
-    {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -116,18 +79,18 @@ function select_customer_kind($code = '')
 
 
 
-function select_customer_type($code = '')
+function select_customer_type($id = NULL)
 {
   $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customer_type_model');
-  $options = $CI->customer_type_model->get_data();
+  $ci =& get_instance();
+  $ci->load->model('masters/customer_type_model');
+  $options = $ci->customer_type_model->get_all();
 
   if(!empty($options))
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -135,18 +98,18 @@ function select_customer_type($code = '')
 
 
 
-function select_customer_class($code = '')
+function select_customer_grade($id = NULL)
 {
   $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customer_class_model');
-  $options = $CI->customer_class_model->get_data();
+  $ci =& get_instance();
+  $ci->load->model('masters/customer_grade_model');
+  $options = $ci->customer_grade_model->get_all();
 
   if(!empty($options))
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -154,18 +117,18 @@ function select_customer_class($code = '')
 
 
 
-function select_customer_area($code = '')
+function select_customer_area($id = NULL)
 {
   $sc = '';
-  $CI =& get_instance();
-  $CI->load->model('masters/customer_area_model');
-  $options = $CI->customer_area_model->get_data();
+  $ci =& get_instance();
+  $ci->load->model('masters/customer_area_model');
+  $options = $ci->customer_area_model->get_all();
 
   if(!empty($options))
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -177,9 +140,9 @@ function select_customer_area($code = '')
 function customer_in($txt)
 {
   $sc = array('0');
-  $CI =& get_instance();
-  $CI->load->model('masters/customers_model');
-  $rs = $CI->customers_model->search($txt);
+  $ci =& get_instance();
+  $ci->load->model('masters/customers_model');
+  $rs = $ci->customers_model->search($txt);
 
   if(!empty($rs))
   {

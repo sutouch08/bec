@@ -81,7 +81,7 @@
 
 
 	<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 padding-5">
-		<label>หมวดหมู่</label>
+		<label>ชนิด</label>
 		<select class="form-control input-sm">
 			<option value="all">ทั้งหมด</option>
 			<option value="light">อุปกรณ์ส่องสว่าง</option>

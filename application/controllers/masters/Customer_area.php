@@ -7,6 +7,7 @@ class Customer_area extends PS_Controller
 	public $menu_group_code = 'DB';
   public $menu_sub_group_code = 'CUSTOMER';
 	public $title = 'Customer Area';
+	public $segment = 4;
 
   public function __construct()
   {
@@ -18,57 +19,122 @@ class Customer_area extends PS_Controller
 
   public function index()
   {
-		$code = get_filter('code', 'area_code', '');
-		$name = get_filter('name', 'area_name', '');
+    $filter = array(
+      "name" => get_filter('name', 'area_name', '')
+    );
 
 		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_filter('set_rows', 'rows', 20);
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
-		if($perpage > 300)
-		{
-			$perpage = get_filter('rows', 'rows', 300);
-		}
+		$perpage = get_rows();
 
-		$segment = 4; //-- url segment
-		$rows = $this->customer_area_model->count_rows($code, $name);
+
+		$rows = $this->customer_area_model->count_rows($filter);
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-		$rs = $this->customer_area_model->get_data($code, $name, $perpage, $this->uri->segment($segment));
-    $ds = array(
-      'code' => $code,
-      'name' => $name,
-			'data' => $rs
-    );
+		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
+		$filter['data'] = $this->customer_area_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
 
 		$this->pagination->initialize($init);
-    $this->load->view('masters/customer_area/customer_area_view', $ds);
+    $this->load->view('masters/customer_area/customer_area_list', $filter);
   }
 
 
-  public function add_new()
+  public function edit($id)
   {
-    $this->title = 'Add Customer Area';
-    $this->load->view('masters/customer_area/customer_area_add_view');
+    $data = $this->customer_area_model->get($id);
+    $this->load->view('masters/customer_area/customer_area_edit', $data);
   }
 
 
 
+	public function update()
+	{
+		$sc = TRUE;
 
-  public function edit($code)
-  {
-    $this->title = 'Edit Customer Area';
-    $rs = $this->customer_area_model->get($code);
-    $data = array(
-      'code' => $rs->code,
-      'name' => $rs->name
-    );
+		$id = $this->input->post('id');
+		$name = trim($this->input->post('name'));
 
-    $this->load->view('masters/customer_area/customer_area_edit_view', $data);
-  }
+		if($this->customer_area_model->is_exists($name, $id))
+		{
+			$sc = FALSE;
+			set_error('exists', $name);
+		}
+		else
+		{
+			$arr = array(
+				'name' => $name
+			);
+
+			if( ! $this->customer_area_model->update($id, $arr))
+			{
+				$sc = FALSE;
+				set_error('update');
+			}
+		}
+
+		//--- send update to SAP
+		$this->update_sap($id, $name);
+
+		$this->_response($sc);
+	}
+
+
+
+	public function sync_data()
+	{
+		$sc = TRUE;
+
+		$response = json_encode(array(
+			array("id" => 1, "name" => "เขต1"),
+			array("id" => 2, "name" => "เขต2"),
+			array("id" => 3, "name" => "เขต3"),
+			array("id" => 4, "name" => "เขต4"),
+			array("id" => 5, "name" => "เขต5"),
+			array("id" => 6, "name" => "เขต6"),
+			array("id" => 7, "name" => "เขต7")
+		));
+
+		$res = json_decode($response);
+
+
+		if(! empty($res))
+		{
+			foreach($res as $rs)
+			{
+				$cr = $this->customer_area_model->get($rs->id);
+
+				if(empty($cr))
+				{
+					$arr = array(
+						"id" => $rs->id,
+						"name" => $rs->name
+					);
+
+					$this->customer_area_model->add($arr);
+				}
+				else
+				{
+					$arr = array(
+						"name" => $rs->name
+					);
+
+					$this->customer_area_model->update($rs->id, $arr);
+				}
+			}
+		}
+
+		$this->_response($sc);
+	}
+
+
+
+	private function update_sap($id, $name)
+	{
+		return TRUE;
+	}
+
 
   public function clear_filter()
 	{
-		return clear_filter(array('area_code', 'area_name'));
+		return clear_filter(array('area_name'));
 	}
 
 }//--- end class

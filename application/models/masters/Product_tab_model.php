@@ -49,7 +49,7 @@ class Product_tab_model extends CI_Model
 
   public function get_list(array $ds = array(), $perpage = NULL, $offset = NULL)
   {
-    $qr  = "SELECT t.id, t.name, t.id_parent, p.name AS parent ";
+    $qr  = "SELECT t.*, p.name AS parent ";
     $qr .= "FROM product_tab AS t ";
     $qr .= "LEFT JOIN product_tab AS p ON t.id_parent = p.id ";
     $qr .= "WHERE t.name IS NOT NULL ";
