@@ -9,15 +9,17 @@
       <div class="modal-body" id="payment-body">
         <div class="row">
           <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT * FROM payment_method"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
+    <?php if( ! empty($payments)) : ?>
       <?php $pm = $this->discount_rule_model->getRulePayment($rule->id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($pm[$rs->code]) ? 'checked' : ''; ?>
+      <?php foreach($payments as $rs) : ?>
+        <?php $se = isset($pm[$rs->id]) ? 'checked' : ''; ?>
               <label class="display-block">
-                <input type="checkbox" class="chk-payment" name="chk-payment-<?php echo $rs->code; ?>" id="chk-payment-<?php echo $rs->code; ?>" value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
-                <?php echo $rs->name; ?>
+                <input type="checkbox"
+								class="ace chk-payment"
+								name="chk-payment-<?php echo $rs->id; ?>"
+								id="chk-payment-<?php echo $rs->id; ?>"
+								value="<?php echo $rs->id; ?>" <?php echo $se; ?> />
+								<span class="lbl"><?php echo $rs->name; ?></span>
               </label>
       <?php endforeach; ?>
     <?php endif;?>

@@ -9,15 +9,17 @@
       <div class="modal-body" id="channels-body">
         <div class="row">
           <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT * FROM channels"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
+    <?php if( ! empty($channels)) : ?>
       <?php $chn = $this->discount_rule_model->getRuleChannels($rule->id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($chn[$rs->code]) ? 'checked' : ''; ?>
+      <?php foreach($channels as $rs) : ?>
+        <?php $se = isset($chn[$rs->id]) ? 'checked' : ''; ?>
               <label class="display-block">
-                <input type="checkbox" class="chk-channels" name="chk-channels-<?php echo $rs->code; ?>" id="chk-channels-<?php echo $rs->code; ?>" value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
-                <?php echo $rs->name; ?>
+                <input type="checkbox"
+								class="ace chk-channels"
+								name="chk-channels-<?php echo $rs->id; ?>"
+								id="chk-channels-<?php echo $rs->id; ?>"
+								value="<?php echo $rs->id; ?>" <?php echo $se; ?> />
+								<span class="lbl"><?php echo $rs->name; ?></span>
               </label>
       <?php endforeach; ?>
     <?php endif;?>

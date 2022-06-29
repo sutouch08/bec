@@ -1545,6 +1545,10 @@ input[type=number]::-webkit-outer-spin-button {
 	min-width: 1000px;
 }
 
+.fix-width-40 {
+	width:40px !important;
+}
+
 .fix-width-60 {
 	width:60px !important;
 }

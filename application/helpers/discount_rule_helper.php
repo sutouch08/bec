@@ -19,18 +19,23 @@ function discount_rule_in($txt)
 }
 
 
-function showItemDiscountLabel($item_price, $item_disc, $unit)
+function discount_label($type, $price, $disc1, $disc2, $disc3, $disc4, $disc5)
 {
 	$disc = 0.00;
 	//---	ถ้าเป็นการกำหนดราคาขาย
-	if($item_price > 0)
+	//--- N = netprice , P = percent
+	if($type == 'N')
 	{
-		$disc = 'Price '.$item_price;
+		$disc = $price;
 	}
 	else
 	{
-		$symbal = $unit == 'percent' ? '%' : '';
-		$disc = $item_disc.' '.$symbal;
+
+		$disc = round($disc1, 2)."%";
+		$disc .= ($disc1 > 0 && $disc2 > 0) ? "+".round($disc2)."%" : "";
+		$disc .= ($disc2 > 0 && $disc3 > 0) ? "+".round($disc3)."%" : "";
+		$disc .= ($disc3 > 0 && $disc4 > 0) ? "+".round($disc4)."%" : "";
+		$disc .= ($disc4 > 0 && $disc5 > 0) ? "+".round($disc5)."%" : "";
 	}
 
 	return $disc;

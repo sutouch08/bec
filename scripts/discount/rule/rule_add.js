@@ -1,11 +1,40 @@
-function addNew(){
-  var ruleName = $('#name').val();
-  if(ruleName.length < 4){
-    swal('Error!', 'ชื่อเงื่อนไขต้องมากกว่า 4 ตัวอักษร', 'error');
-    return false;
-  }
+function changeURL(id, tab)
+{
 
-  $('#addForm').submit();
+	var url = HOME + 'edit/' + id + '/' + tab;
+	var stObj = { stage: 'stage' };
+	window.history.pushState(stObj, 'discount_rule', url);
+}
+
+function saveAdd(){
+  let name = $('#name').val();
+
+	if(name.length == 0) {
+		$('#name').addClass('has-error');
+		$('#name').focus();
+		return false;
+	}
+
+	$.ajax({
+		url:HOME + 'add',
+		type:'POST',
+		cache:false,
+		data:{
+			"name" : name
+		},
+		success:function(id) {
+			if(! isNaN(id) ) {
+				goEdit(id);
+			}
+			else {
+				swal({
+					title:'Error!',
+					type:'error',
+					text:rs
+				});
+			}
+		}
+	});
 }
 
 
@@ -33,16 +62,8 @@ function disActiveRule(){
   $('#btn-dis-rule').addClass('btn-danger');
 }
 
-function updateRule(){
-	swal({
-		title:'Success',
-		type:'success',
-		timer:1000
-	});
-
-	return false;
-	
-  var id = $('#id_rule').val();
+function updateRule() {
+  var id = $('#rule_id').val();
   var isActive = $('#isActive').val();
   var name = $('#txt-rule-name').val();
   if(isNaN(parseInt(id))){
@@ -58,7 +79,7 @@ function updateRule(){
   load_in();
 
   $.ajax({
-    url: BASE_URL + 'discount/discount_rule/update_rule/'+id,
+    url: HOME + 'update_rule/'+id,
     type:'POST',
     cache:'false',
     data:{

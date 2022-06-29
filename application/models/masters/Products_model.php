@@ -75,6 +75,18 @@ class Products_model extends CI_Model
 	}
 
 
+	public function get_code_and_name($id)
+	{
+		$rs = $this->db->select('id, code, name')->where('id', $id)->get($this->tb);
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
+
 	public function add(array $ds = array())
 	{
 		if( ! empty($ds))

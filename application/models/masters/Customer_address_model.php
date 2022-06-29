@@ -42,44 +42,66 @@ class Customer_address_model extends CI_Model
 
   public function count_rows(array $ds = array())
   {
-		if($ds['address'] != "")
+		$this->db
+		->from('customer_address AS ca')
+		->join('customers AS c', 'ca.CardCode = c.CardCode', 'left');
+
+		if(isset($ds['address']) && $ds['address'] != "")
     {
-      $this->db->like('Address', $ds['address']);
+			$this->db->group_start();
+      $this->db->like('ca.Address', $ds['address']);
+			$this->db->or_like('ca.Address3', $ds['address']);
+			$this->db->group_end();
     }
 
-		if($ds['code'] != "")
+		if(isset($ds['customer']) && $ds['customer'] != "")
 		{
-			$this->db->like('CardCode', $ds['code']);
+			$this->db
+			->group_start()
+			->like('c.CardCode', $ds['customer'])
+			->or_like('c.CardName', $ds['customer'])
+			->group_end();
 		}
 
 		if($ds['type'] != "all")
 		{
-			$this->db->where('CardType', $ds['type']);
+			$this->db->where('ca.AdresType', $ds['type']);
 		}
 
-
-    return $this->db->count_all_results($this->tb);
+    return $this->db->count_all_results();
   }
 
 
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
-    if($ds['address'] != "")
+		$this->db
+		->select('ca.*, c.CardName')
+		->from('customer_address AS ca')
+		->join('customers AS c', 'ca.CardCode = c.CardCode', 'left');
+
+		if(isset($ds['address']) && $ds['address'] != "")
     {
-      $this->db->like('Address', $ds['address']);
+			$this->db->group_start();
+      $this->db->like('ca.Address', $ds['address']);
+			$this->db->or_like('ca.Address3', $ds['address']);
+			$this->db->group_end();
     }
 
-		if($ds['code'] != "")
+		if(isset($ds['customer']) && $ds['customer'] != "")
 		{
-			$this->db->like('CardCode', $ds['code']);
+			$this->db
+			->group_start()
+			->like('c.CardCode', $ds['customer'])
+			->or_like('c.CardName', $ds['customer'])
+			->group_end();
 		}
 
 		if($ds['type'] != "all")
 		{
-			$this->db->where('CardType', $ds['type']);
+			$this->db->where('ca.AdresType', $ds['type']);
 		}
 
-    $rs = $this->db->order_by('CardCode', 'ASC')->limit($perpage, $offset)->get($this->tb);
+    $rs = $this->db->order_by('ca.CardCode', 'ASC')->limit($perpage, $offset)->get();
 
     if($rs->num_rows() > 0)
     {
@@ -91,11 +113,11 @@ class Customer_address_model extends CI_Model
 
 
 
-  public function get($CardCode, $CardType, $Address)
+  public function get($CardCode, $AdresType, $Address)
   {
     $rs = $this->db
 		->where('CardCode', $CardCode)
-		->where('CardType', $CardType)
+		->where('AdresType', $AdresType)
 		->where('Address', $Address)
 		->get($this->tb);
 
@@ -136,11 +158,11 @@ class Customer_address_model extends CI_Model
 
 
 
-  public function is_exists($CardCode, $CardType, $Address)
+  public function is_exists($CardCode, $AdresType, $Address)
   {
     $rs = $this->db
 		->where('CardCode', $CardCode)
-		->where('CarType', $CardType)
+		->where('AdresType', $AdresType)
 		->where('Address', $Address)
 		->count_all_results($this->tb);
 

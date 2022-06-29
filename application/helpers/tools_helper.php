@@ -291,7 +291,7 @@ function get_zero($value)
 //--- return TRUE if value ==  1 else return FALSE;
 function is_true($value)
 {
-	if($value === 1 OR $value === '1' OR $value === TRUE)
+	if($value === 1 OR $value === '1' OR $value === 'Y' OR $value === TRUE)
 	{
 		return TRUE;
 	}

@@ -9052,7 +9052,7 @@ input[type=radio].ace + .lbl::before {
   height: 16px;
   line-height: 14px;
   min-width: 16px;
-  margin-right: 1px;
+  margin-right: 8px;
   position: relative;
   top: -1px;
 }

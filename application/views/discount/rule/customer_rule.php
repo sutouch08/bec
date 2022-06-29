@@ -1,37 +1,29 @@
 <?php
 $allCustomer = $rule->all_customer == 0 ? 'N' : 'Y';
-$id = $rule->id;
 //--- ระบุชื่อลูกค้า
-$cusList = $this->discount_rule_model->getRuleCustomerId($id);
-$cusListNo = count($cusList);
+$cusListNo = (! empty($cusList) ? count($cusList) : 0);
 $customer_id = ($allCustomer == 'N' && $cusListNo > 0 ) ? 'Y' : 'N';
 
 //--- กำหนดกลุ่มลูกค้า
-$custGroup = $this->discount_rule_model->getRuleCustomerGroup($id);
-$custGroupNo = count($custGroup);
+$custGroupNo = ( ! empty($custGroup) ? count($custGroup) : 0);
 $customer_group = ($custGroupNo > 0 && $allCustomer == 'N' && $customer_id == 'N') ? 'Y' : 'N';
 
 //--- กำหนดชนิดลูกค้า
-$custType = $this->discount_rule_model->getRuleCustomerType($id);
-$custTypeNo = count($custType);
+$custTypeNo = ( ! empty($custType) ? count($custType) : 0);
 $customer_type = ($custTypeNo > 0 && $allCustomer == 'N' && $customer_id == 'N') ? 'Y' : 'N';
 
 //--- กำหนดประเภทลูกค้า
-$custKind = $this->discount_rule_model->getRuleCustomerKind($id);
-$custKindNo = count($custKind);
-$customer_kind = ($custKindNo > 0 && $allCustomer == 'N' && $customer_id == 'N') ? 'Y' : 'N';
+$custRegionNo = ( ! empty($custRegion) ? count($custRegion) : 0);
+$customer_region = ($custRegionNo > 0 && $allCustomer == 'N' && $customer_id == 'N') ? 'Y' : 'N';
 
 //--- กำหนดเขตลูกค้า
-$custArea = $this->discount_rule_model->getRuleCustomerArea($id);
-$custAreaNo = count($custArea);
+$custAreaNo = ( ! empty($custArea) ? count($custArea) : 0);
 $customer_area = ($custAreaNo > 0 && $allCustomer == 'N' && $customer_id == 'N') ? 'Y' : 'N';
 
 //--- กำหนดเกรดลูกค้า
-$custClass = $this->discount_rule_model->getRuleCustomerClass($id);
-$custClassNo = count($custClass);
-$customer_class = ($custClassNo > 0 && $allCustomer == 'N' && $customer_id == 'N') ? 'Y' : 'N';
+$custGradeNo = count($custGrade);
+$customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N') ? 'Y' : 'N';
  ?>
-<div class="tab-pane fade" id="customer">
 
 	<div class="row">
         <div class="col-sm-8 top-col">
@@ -60,23 +52,54 @@ $customer_class = ($custClassNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 						<button type="button" class="not-all btn btn-sm width-50 btn-primary" id="btn-cust-id-no" onclick="toggleCustomerId('N')" disabled>NO</button>
 					</div>
         </div>
-				<div class="col-sm-4 padding-5">
-					<input type="text" class="option form-control input-sm text-center" id="txt-cust-id-box" placeholder="ค้นหาชื่อลูกค้า" disabled />
+				<div class="col-lg-6 col-md-6 col-sm-6 padding-5">
+					<input type="text" class="option form-control input-sm" id="txt-cust-id-box" placeholder="ค้นหาชื่อลูกค้า" disabled />
 					<input type="hidden" id="id_customer" />
 				</div>
 				<div class="col-sm-1 padding-5">
 					<button type="button" class="option btn btn-xs btn-info btn-block" id="btn-cust-id-add" onclick="addCustId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
 				</div>
-				<div class="col-sm-2 padding-5">
-					<span class="form-control input-sm text-center"><span id="count"><?php echo $cusListNo; ?></span>  รายการ</span>
-				</div>
-				<div class="col-sm-1 padding-5">
-					<button type="button" class="option btn btn-xs btn-primary btn-block" id="btn-show-cust-name" onclick="showCustomerList()">
-						แสดง
-					</button>
-				</div>
-				<div class="divider-hidden"></div>
 
+				<div class="divider-hidden"></div>
+				<div class="col-sm-2 not-show">
+					<span class="form-control left-label">SKU</span>
+				</div>
+				<div class="col-lg-10 col-md-10 col-sm-10 padding-5" style="max-height:300px; overflow-y:scroll; margin-bottom:5px;">
+					<table class="table table-striped border-1">
+						<thead>
+							<tr>
+								<th class="fix-width-40">
+									<label>
+										<input type="checkbox" class="ace" onchange="checkCustomerAll($(this))">
+										<span class="lbl"></span>
+									</label>
+								</th>
+								<th class="fix-width-150">Customer Code</th>
+								<th class="min-width-250">Customer Name</th>
+								<th class="fix-width-60 text-center"><button type="button" class="btn btn-mini btn-danger btn-block" onclick="removeCustomer()">Delete</button></th>
+							</tr>
+						</thead>
+						<tbody id="customerList">
+							<?php if(!empty($cusList)) : ?>
+								<?php foreach($cusList as $rs) : ?>
+									<tr id="customer-row-<?php echo $rs->customer_id; ?>">
+										<td class="middle text-center">
+											<label>
+												<input type="checkbox" class="ace customer-chk" value="<?php echo $rs->customer_id; ?>">
+												<span class="lbl"></span>
+											</label>
+										</td>
+										<td class="middle">
+										<?php echo $rs->customer_code; ?>
+										<input type="hidden" class="customer-id" id="customer-id-<?php echo $rs->customer_id; ?>" value="<?php echo $rs->customer_id; ?>">
+										</td>
+										<td class="middle" colspan="2"><?php echo $rs->customer_name; ?></td>
+									</tr>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</tbody>
+					</table>
+        </div>
 
 
 				<div class="col-sm-2">
@@ -120,13 +143,13 @@ $customer_class = ($custClassNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
-						<button type="button" class="not-all btn btn-sm width-50" id="btn-cust-kind-yes" onclick="toggleCustomerKind('Y')" disabled>YES</button>
-						<button type="button" class="not-all btn btn-sm width-50 btn-primary" id="btn-cust-kind-no" onclick="toggleCustomerKind('N')" disabled>NO</button>
+						<button type="button" class="not-all btn btn-sm width-50" id="btn-cust-region-yes" onclick="toggleCustomerRegion('Y')" disabled>YES</button>
+						<button type="button" class="not-all btn btn-sm width-50 btn-primary" id="btn-cust-region-no" onclick="toggleCustomerRegion('N')" disabled>NO</button>
 					</div>
         </div>
 				<div class="col-sm-2 col-2-harf padding-5">
-					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-kind" onclick="showCustomerKind()" disabled>
-						ภูมิภาค <span class="badge pull-right" id="badge-kind"><?php echo $custKindNo; ?></span>
+					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-region" onclick="showCustomerRegion()" disabled>
+						ภูมิภาค <span class="badge pull-right" id="badge-region"><?php echo $custRegionNo; ?></span>
 					</button>
 				</div>
 				<div class="divider-hidden"></div>
@@ -154,13 +177,13 @@ $customer_class = ($custClassNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
-						<button type="button" class="not-all btn btn-sm width-50" id="btn-cust-class-yes" onclick="toggleCustomerClass('Y')" disabled>YES</button>
-						<button type="button" class="not-all btn btn-sm width-50 btn-primary" id="btn-cust-class-no" onclick="toggleCustomerClass('N')" disabled>NO</button>
+						<button type="button" class="not-all btn btn-sm width-50" id="btn-cust-grade-yes" onclick="toggleCustomerGrade('Y')" disabled>YES</button>
+						<button type="button" class="not-all btn btn-sm width-50 btn-primary" id="btn-cust-grade-no" onclick="toggleCustomerGrade('N')" disabled>NO</button>
 					</div>
         </div>
 				<div class="col-sm-2 col-2-harf padding-5">
-					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-class" onclick="showCustomerClass()" disabled>
-						เกรดลูกค้า <span class="badge pull-right" id="badge-class"><?php echo $custClassNo; ?></span>
+					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-grade" onclick="showCustomerGrade()" disabled>
+						เกรดลูกค้า <span class="badge pull-right" id="badge-grade"><?php echo $custGradeNo; ?></span>
 					</button>
 				</div>
         <div class="divider-hidden"></div>
@@ -168,17 +191,25 @@ $customer_class = ($custClassNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 				<div class="col-sm-3">
 					<button type="button" class="btn btn-xs btn-success btn-block" onclick="saveCustomer()"><i class="fa fa-save"></i> บันทึก</button>
 				</div>
-
-
     </div>
 
 		<input type="hidden" id="all_customer" value="<?php echo $allCustomer; ?>" />
 		<input type="hidden" id="customer_id" value="<?php echo $customer_id; ?>" />
 		<input type="hidden" id="customer_group" value="<?php echo $customer_group; ?>" />
 		<input type="hidden" id="customer_type" value="<?php echo $customer_type; ?>" />
-		<input type="hidden" id="customer_kind" value="<?php echo $customer_kind; ?>" />
+		<input type="hidden" id="customer_region" value="<?php echo $customer_region; ?>" />
 		<input type="hidden" id="customer_area" value="<?php echo $customer_area; ?>" />
-		<input type="hidden" id="customer_class" value="<?php echo $customer_class; ?>" />
+		<input type="hidden" id="customer_grade" value="<?php echo $customer_grade; ?>" />
 
-</div><!--- Tab-pane --->
+		<script type="text/x-handlebarsTemplate" id="customerRowTemplate">
+			<tr id="customer-row-{{id}}">
+				<td class="middle text-center"><label><input type="checkbox" class="ace customer-chk" value="{{id}}"><span class="lbl"></span></label></td>
+				<td class="middle">
+				{{code}}
+				<input type="hidden" class="customer-id" id="customer-id-{{id}}" value="{{id}}">
+				</td>
+				<td class="middle" colspan="2">{{name}}</td>
+			</tr>
+		</script>
+
 <?php $this->load->view('discount/rule/customer_rule_modal'); ?>

@@ -21,7 +21,7 @@ class Customer_address extends PS_Controller
   {
     $filter = array(
       "address" => get_filter('address', 'ad_address', ''),
-			"code" => get_filter('code', 'ad_code', ''),
+			"customer" => get_filter('customer', 'ad_customer', ''),
 			"type" => get_filter('type', 'ad_type', 'all')
     );
 
@@ -85,14 +85,84 @@ class Customer_address extends PS_Controller
 		$sc = TRUE;
 
 		$response = json_encode(array(
-			array("id" => 1, "name" => "เขต1"),
-			array("id" => 2, "name" => "เขต2"),
-			array("id" => 3, "name" => "เขต3"),
-			array("id" => 4, "name" => "เขต4"),
-			array("id" => 5, "name" => "เขต5"),
-			array("id" => 6, "name" => "เขต6"),
-			array("id" => 7, "name" => "เขต7")
+			array(
+				'Address' => '0000',
+				'CardCode' => 'CL-001',
+				'AdresType' => 'B',
+				'Address2' => '0000',
+				'Address3' => 'สำนักงานใหญ่',
+				'StreetNo' => '',
+				'Street' => 'เลขที่ 445/3 ถ.เพชรบุรี',
+				'Block' => 'แขวงทุ่งพญาไท',
+				'City' => 'เขตราชเทวี',
+				'County' => 'กรุงเทพมหานคร',
+				'Country' => 'TH',
+				'State' => NULL,
+				'ZipCode' => '10400'
+			),
+			array(
+				'Address' => '0000',
+				'CardCode' => 'CL-001',
+				'AdresType' => 'S',
+				'Address2' => '0000',
+				'Address3' => 'สำนักงานใหญ่',
+				'StreetNo' => '',
+				'Street' => 'เลขที่ 445/3 ถ.เพชรบุรี',
+				'Block' => 'แขวงทุ่งพญาไท',
+				'City' => 'เขตราชเทวี',
+				'County' => 'กรุงเทพมหานคร',
+				'Country' => 'TH',
+				'State' => NULL,
+				'ZipCode' => '10400'
+			),
+			array(
+				'Address' => '0000',
+				'CardCode' => 'CL-002',
+				'AdresType' => 'B',
+				'Address2' => '0000',
+				'Address3' => 'สำนักงานใหญ่',
+				'StreetNo' => '',
+				'Street' => 'เลขที่ 445/2 ถ.เพชรบุรี',
+				'Block' => 'แขวงทุ่งพญาไท',
+				'City' => 'เขตราชเทวี',
+				'County' => 'กรุงเทพมหานคร',
+				'Country' => 'TH',
+				'State' => NULL,
+				'ZipCode' => '10400'
+			),
+			array(
+				'Address' => '0000',
+				'CardCode' => 'CL-002',
+				'AdresType' => 'S',
+				'Address2' => '0000',
+				'Address3' => 'สำนักงานใหญ่',
+				'StreetNo' => '',
+				'Street' => 'เลขที่ 445/2 ถ.เพชรบุรี',
+				'Block' => 'แขวงทุ่งพญาไท',
+				'City' => 'เขตราชเทวี',
+				'County' => 'กรุงเทพมหานคร',
+				'Country' => 'TH',
+				'State' => NULL,
+				'ZipCode' => '10400'
+			),
+			array(
+				'Address' => '0001',
+				'CardCode' => 'CL-001',
+				'AdresType' => 'S',
+				'Address2' => '0001',
+				'Address3' => 'สีลม',
+				'StreetNo' => '',
+				'Street' => 'เลขที่ 445/3 ถ.เพชรบุรี',
+				'Block' => 'แขวงทุ่งพญาไท',
+				'City' => 'เขตราชเทวี',
+				'County' => 'กรุงเทพมหานคร',
+				'Country' => 'TH',
+				'State' => NULL,
+				'ZipCode' => '10400'
+			)
 		));
+
+
 
 		$res = json_decode($response);
 
@@ -101,13 +171,24 @@ class Customer_address extends PS_Controller
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->customer_address_model->get($rs->id);
+				$cr = $this->customer_address_model->get($rs->CardCode, $rs->AdresType, $rs->Address);
 
 				if(empty($cr))
 				{
 					$arr = array(
-						"id" => $rs->id,
-						"name" => $rs->name
+						'Address' => $rs->Address,
+						'CardCode' => $rs->CardCode,
+						'AdresType' => $rs->AdresType,
+						'Address2' => $rs->Address2,
+						'Address3' => $rs->Address3,
+						'StreetNo' => $rs->StreetNo,
+						'Street' => $rs->Street,
+						'Block' => $rs->Block,
+						'City' => $rs->City,
+						'County' => $rs->County,
+						'Country' => $rs->Country,
+						'State' => $rs->State,
+						'ZipCode' => $rs->ZipCode
 					);
 
 					$this->customer_address_model->add($arr);
@@ -115,10 +196,22 @@ class Customer_address extends PS_Controller
 				else
 				{
 					$arr = array(
-						"name" => $rs->name
+						'Address' => $rs->Address,
+						'CardCode' => $rs->CardCode,
+						'AdresType' => $rs->AdresType,
+						'Address2' => $rs->Address2,
+						'Address3' => $rs->Address3,
+						'StreetNo' => $rs->StreetNo,
+						'Street' => $rs->Street,
+						'Block' => $rs->Block,
+						'City' => $rs->City,
+						'County' => $rs->County,
+						'Country' => $rs->Country,
+						'State' => $rs->State,
+						'ZipCode' => $rs->ZipCode
 					);
 
-					$this->customer_address_model->update($rs->id, $arr);
+					$this->customer_address_model->update($cr->id, $arr);
 				}
 			}
 		}
@@ -136,7 +229,15 @@ class Customer_address extends PS_Controller
 
   public function clear_filter()
 	{
-		return clear_filter(array('area_name'));
+		$filter = array(
+      "ad_address",
+			"ad_customer",
+			"ad_type"
+    );
+
+		clear_filter($filter);
+
+		echo "done";
 	}
 
 }//--- end class

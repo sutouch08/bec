@@ -1,47 +1,49 @@
-
-<div class="tab-pane fade active in" id="discount">
+<?php
+$p_disabled = $rule->type === 'P' ? '' : 'disabled';
+$n_disabled = $rule->type === 'N' ? '' : 'disabled';
+?>
 
 	<div class="row">
         <div class="col-lg-2 col-md-2 col-sm-2">
 					<span class="form-control left-label">
 						<label>
-							<input type="radio" class="ace" name="disc" value="P">
-							<span class="lbl">&nbsp;&nbsp; ราคา Net</span>
+							<input type="radio" class="ace disc-type" name="discType" value="N" onchange="toggleDiscType('N')" <?php echo is_checked('N', $rule->type); ?>>
+							<span class="lbl">&nbsp;&nbsp; Net price</span>
 						</label>
 					</span>
 				</div>
         <div class="col-sm-2 padding-5">
-          <input type="number" class="form-control input-sm text-center" id="txt-price" value="0.00" disabled/>
+          <input type="number" class="form-control input-sm text-center price-input" id="net-price" value="<?php echo $rule->price; ?>" <?php echo $n_disabled; ?>/>
 				</div>
 				<div class="divider"></div>
 
         <div class="col-sm-2">
 					<span class="form-control left-label margin-top-20">
 						<label>
-							<input type="radio" class="ace" name="disc" value="D" checked>
-							<span class="lbl">&nbsp;&nbsp; ส่วนลด (%)</span>
+							<input type="radio" class="ace disc-type" name="discType" value="P" onchange="toggleDiscType('P')" <?php echo is_checked('P', $rule->type); ?> >
+							<span class="lbl">&nbsp;&nbsp; Discount (%)</span>
 						</label>
 					</span>
 				</div>
         <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5">
 					<label class="display-block">Step 1</label>
-					<input type="number" class="form-control input-sm text-center" value="20.00" />
+					<input type="number" class="form-control input-sm text-center disc-input" id="disc1" value="<?php echo $rule->disc1; ?>"  <?php echo $p_disabled; ?>/>
         </div>
 				<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5">
 					<label class="display-block">Step 2</label>
-					<input type="number" class="form-control input-sm text-center" value="10.00" />
+					<input type="number" class="form-control input-sm text-center disc-input" id="disc2" value="<?php echo $rule->disc2; ?>" <?php echo $p_disabled; ?>/>
         </div>
 				<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5">
 					<label class="display-block">Step 3</label>
-					<input type="number" class="form-control input-sm text-center" value="0.00" />
+					<input type="number" class="form-control input-sm text-center disc-input" id="disc3" value="<?php echo $rule->disc3; ?>" <?php echo $p_disabled; ?>/>
         </div>
 				<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5">
 					<label class="display-block">Step 4</label>
-					<input type="number" class="form-control input-sm text-center" value="0.00" />
+					<input type="number" class="form-control input-sm text-center disc-input" id="disc4" value="<?php echo $rule->disc4; ?>" <?php echo $p_disabled; ?>/>
         </div>
 				<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5">
 					<label class="display-block">Step 5</label>
-					<input type="number" class="form-control input-sm text-center" value="0.00" />
+					<input type="number" class="form-control input-sm text-center disc-input" id="disc5" value="<?php echo $rule->disc5; ?>" <?php echo $p_disabled; ?>/>
         </div>
 				<div class="divider"></div>
 
@@ -50,34 +52,53 @@
 				</div>
 				<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5">
 					<label>จำนวน</label>
-					<input type="number" class="form-control input-sm text-center" value="1.00" />
+					<input type="number" class="form-control input-sm text-center" id="free-qty" value="1.00" />
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-3 padding-5">
+        <div class="col-lg-5 col-md-5 col-sm-5 padding-5">
 					<label>สินค้า</label>
-					<input type="text" class="form-control input-sm text-center" placeholder="รหัส/ชื่อสินค้า" />
+					<input type="text" class="form-control input-sm text-center" id="free-item-box" placeholder="รหัส/ชื่อสินค้า" />
+					<input type="hidden" id="temp-item-id" value="">
         </div>
 				<div class="col-lg-1 col-md-1 col-sm-1 padding-5">
 					<label class="display-block not-show">x</label>
-					<button type="button" class="btn btn-xs btn-primary btn-block" onclick="showItemModal()"><i class="fa fa-plus"></i> เพิ่ม</button>
+					<button type="button" class="btn btn-xs btn-primary btn-block" onclick="addItemToList()"><i class="fa fa-plus"></i> Add</button>
         </div>
 				<div class="divider-hidden"></div>
 				<div class="col-sm-2 not-show">
 					<span class="form-control left-label">ของแถม2</span>
 				</div>
 				<div class="col-lg-10 col-md-10 col-sm-10 padding-5 table-responsive" style="max-height:300px;">
-					<table class="table table-striped border-1" style="width:600px;">
-						<tr id="free-row-1">
-							<td style="width:20px;" class="text-center">1</td>
-							<td style="min-width:100px;">SKU-00268</td>
-							<td style="min-width:200px;">BEC หลอด LED MR16 ขั้ว GU5.3 หรี่ไฟ ดิมไฟได้ รุ่น M DIM</td>
-							<td style="width:20px;" class="text-center"><button type="button" class="btn btn-minier btn-danger" onclick="removeFreeRow(1)"><i class="fa fa-trash"></i></button></td>
-						</tr>
-						<tr id="free-row-2">
-							<td style="width:20px;" class="text-center">2</td>
-							<td style="min-width:100px;">SKU-00269</td>
-							<td style="min-width:200px;">BEC หลอด LED MR16 ขนาด 7 วัตต์ DAISY/หลอดไฟ ขั้ว GU5.3 แพ็ค 2 หลอด</td>
-							<td style="width:20px;" class="text-center"><button type="button" class="btn btn-minier btn-danger" onclick="removeFreeRow(2)"><i class="fa fa-trash"></i></button></td>
-						</tr>
+					<table class="table table-striped border-1">
+						<thead>
+							<tr>
+								<th class="fix-width-40"></th>
+								<th class="fix-width-60 text-center">Qty</th>
+								<th class="fix-width-150">SKU Code</th>
+								<th class="min-width-250">Description</th>
+								<th class="fix-width-60 text-center"><button type="button" class="btn btn-mini btn-danger btn-block" onclick="removeFreeItem()">Delete</button></th>
+							</tr>
+						</thead>
+						<tbody id="freeItemList">
+							<?php if(!empty($free_items)) : ?>
+								<?php foreach($free_items as $item) : ?>
+									<tr id="free-row-<?php echo $item->product_id; ?>">
+										<td class="middle text-center">
+											<label>
+												<input type="checkbox" class="ace del-chk" value="<?php echo $item->product_id; ?>">
+												<span class="lbl"></span>
+											</label>
+										</td>
+										<td class="middle text-center" id="free-item-qty-label-<?php echo $item->product_id; ?>"><?php echo $item->qty; ?></td>
+										<td class="middle">
+										<?php echo $item->code; ?>
+										<input type="hidden" class="free-item-id" id="free-item-id-<?php echo $item->product_id; ?>" value="<?php echo $item->product_id; ?>">
+										<input type="hidden" class="free-item-qty" id="free-item-qty-<?php echo $item->product_id; ?>" value="<?php echo $item->qty; ?>">
+										</td>
+										<td class="middle" colspan="2"><?php echo $item->name; ?></td>
+									</tr>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</tbody>
 					</table>
         </div>
 				<div class="divider"></div>
@@ -87,7 +108,7 @@
 					<span class="form-control left-label text-right">จำนวนขั้นต่ำ</span>
 				</div>
         <div class="col-lg-2 col-md-2 col-sm-2">
-					<input type="number" class="form-control input-sm text-center" id="txt-qty" value="5.00" />
+					<input type="number" class="form-control input-sm text-center" id="min-qty" value="<?php echo $rule->minQty; ?>" />
         </div>
 				<div class="divider-hidden"></div>
 
@@ -96,7 +117,7 @@
 					<span class="form-control left-label text-right">มูลค่าขั้นต่ำ</span>
 				</div>
         <div class="col-lg-2 col-md-2 col-sm-2">
-					<input type="number" class="form-control input-sm text-center" id="txt-amount" value="500.00" />
+					<input type="number" class="form-control input-sm text-center" id="min-amount" value="<?php echo $rule->minAmount;?>" />
         </div>
 				<div class="divider-hidden"></div>
 				<div class="divider-hidden"></div>
@@ -106,13 +127,13 @@
 				</div>
         <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5 margin-top-5">
 					<label>
-						<input type="radio" class="ace" name="canuse"  value="YES" checked />
+						<input type="radio" class="ace" name="canGroup"  value="1" <?php echo is_checked('1', $rule->canGroup); ?> />
 						<span class="lbl">&nbsp;&nbsp;ได้</span>
 					</label>
         </div>
 				<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5 margin-top-5">
 					<label>
-						<input type="radio" class="ace" name="canuse"  value="NO" />
+						<input type="radio" class="ace" name="canGroup"  value="0" <?php echo is_checked('0', $rule->canGroup); ?>/>
 						<span class="lbl">&nbsp;&nbsp;ไม่ได้</span>
 					</label>
         </div>
@@ -126,58 +147,16 @@
 				</div>
     </div>
 
-</div><!--- Tab-pane --->
 
-<div class="modal fade" id="freeItemModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="margin-top:30px;">
-    <div class="modal-content" style="min-width:800px;">
-      <div class="modal-header" style="padding-bottom:0px;">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title" style="font-size: 24px; font-weight: bold; padding-bottom: 10px; color:#428bca; border-bottom:solid 2px #428bca">Seach Results</h4>
-      </div>
-      <div class="modal-body" style="padding-top:5px;">
-        <div class="row">
-          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
-						<table class="table table-striped border-1">
-							<tr>
-								<td style="width:50px;" class="text-center"><label><input type="checkbox" class="ace"><span class="lbl"></span></label></td>
-								<td style="width:120px;">SKU-00268</td>
-								<td style="min-width:400px;">BEC หลอด LED MR16 ขั้ว GU5.3 หรี่ไฟ ดิมไฟได้ รุ่น M DIM</td>
-							</tr>
-							<tr>
-								<td class="text-center"><label><input type="checkbox" class="ace"><span class="lbl"></span></label></td>
-								<td >SKU-00269</td>
-								<td >BEC หลอด LED MR16 ขนาด 7 วัตต์ DAISY/หลอดไฟ ขั้ว GU5.3 แพ็ค 2 หลอด</td>
-							</tr>
-							<tr>
-								<td class="text-center"><label><input type="checkbox" class="ace"><span class="lbl"></span></label></td>
-								<td>SKU-00201</td>
-								<td>BEC หลอด LED MR16 ขนาด 5 วัตต์ DAISY/หลอดไฟ ขั้ว GU5.3 แพ็ค 2 หลอด</td>
-							</tr>
-							<tr>
-								<td class="text-center"><label><input type="checkbox" class="ace"><span class="lbl"></span></label></td>
-								<td >SKU-00014</td>
-								<td >BEC หลอด LED MR16 ขนาด 5 วัตต์ STARLED แพ็ค 2 หลอด</td>
-							</tr>
-							<tr>
-								<td class="text-center"><label><input type="checkbox" class="ace"><span class="lbl"></span></label></td>
-								<td >3884905060-2</td>
-								<td >BEC หลอดไฟ LED 2 วัตต์ แสงวอร์มไวท์ รุ่น VINTAGE-S/Pack 2</td>
-							</tr>
-						</table>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-sm btn-primary" onclick="addAll()">เพิ่มรายการ</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-	function showItemModal() {
-		$('#freeItemModal').modal('show');
-	}
-
+<script type="text/x-handlebarsTemplate" id="freeItemTemplate">
+	<tr id="free-row-{{id}}">
+		<td class="middle text-center"><label><input type="checkbox" class="ace del-chk" value="{{id}}"><span class="lbl"></span></label></td>
+		<td class="middle text-center" id="free-item-qty-label-{{id}}">{{qty}}</td>
+		<td class="middle">
+		{{code}}
+		<input type="hidden" class="free-item-id" id="free-item-id-{{id}}" value="{{id}}">
+		<input type="hidden" class="free-item-qty" id="free-item-qty-{{id}}" value="{{qty}}">
+		</td>
+		<td class="middle" colspan="2">{{name}}</td>
+	</tr>
 </script>

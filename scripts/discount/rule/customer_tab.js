@@ -1,27 +1,17 @@
-function saveCustomer(){
-	swal({
-		title:'Success',
-		type:'success',
-		timer:1000
-	});
-
-	return false;
-
-
-  id_rule = $('#id_rule').val();
+function saveCustomer() {
+  rule_id = $('#rule_id').val();
   all_customer = $('#all_customer').val();
   customer_id = $('#customer_id').val();
   customer_group = $('#customer_group').val();
   customer_type = $('#customer_type').val();
-  customer_kind = $('#customer_kind').val();
+  customer_region = $('#customer_region').val();
   customer_area = $('#customer_area').val();
-  customer_class = $('#customer_class').val();
+  customer_grade = $('#customer_grade').val();
 
-  countId = $('.custId').length;
+  countId = $('.customer-id').length;
 
   //--- ถ้าเลือกลูกค้าทั้งหมดจะไม่สนใจเงื่อนไขอื่นๆ
-  if(all_customer == 'N'){
-
+  if(all_customer == 'N') {
     //--- ถ้าเป็นการระบุชื่อลูกค้ารายคนแล้วยังไม่ได้ระบุ
     if(customer_id == 'Y' && countId == 0){
       swal('กรุณาระบุลูกค้าอย่างน้อย 1 ราย');
@@ -31,10 +21,10 @@ function saveCustomer(){
     if(customer_id == 'N'){
       count_group = parseInt($('.chk-group:checked').size());
       count_type  = parseInt($('.chk-type:checked').size());
-      count_kind  = parseInt($('.chk-kind:checked').size());
+      cound_region  = parseInt($('.chk-region:checked').size());
       count_area  = parseInt($('.chk-area:checked').size());
-      count_class = parseInt($('.chk-class:checked').size());
-      sum_count = count_group + count_type + count_kind + count_area + count_class;
+      cound_grade = parseInt($('.chk-grade:checked').size());
+      sum_count = count_group + count_type + cound_region + count_area + cound_grade;
 
 
       //---- กรณีลือกลูกค้าแบบเป็นกลุ่มแล้วไม่ได้เลือก
@@ -50,7 +40,7 @@ function saveCustomer(){
       }
 
       //---- กรณีลือกลูกค้าแบบเป็นประเภทแล้วไม่ได้เลือก
-      if(customer_kind == 'Y' && count_kind == 0 ){
+      if(customer_region == 'Y' && cound_region == 0 ){
         swal('กรุณาเลือกประเภทลูกค้าอย่างน้อย 1 รายการ');
         return false;
       }
@@ -62,7 +52,7 @@ function saveCustomer(){
       }
 
       //---- กรณีลือกลูกค้าแบบเป็นเกรดแล้วไม่ได้เลือก
-      if(customer_class == 'Y' && count_class == 0 ){
+      if(customer_grade == 'Y' && cound_grade == 0 ){
         swal('กรุณาเลือกเกรดลูกค้าอย่างน้อย 1 รายการ');
         return false;
       }
@@ -77,20 +67,22 @@ function saveCustomer(){
   } //--- end if all_customer
 
   ds = [
-    {'name':'id_rule', 'value':id_rule},
+    {'name':'rule_id', 'value':rule_id},
     {'name':'all_customer', 'value':all_customer},
     {'name':'customer_id', 'value':customer_id},
     {'name':'customer_group', 'value':customer_group},
     {'name':'customer_type', 'value':customer_type},
-    {'name':'customer_kind', 'value':customer_kind},
+    {'name':'customer_region', 'value':customer_region},
     {'name':'customer_area', 'value':customer_area},
-    {'name':'customer_class', 'value':customer_class}
+    {'name':'customer_grade', 'value':customer_grade}
   ];
 
   //--- เก็บข้อมูลชื่อลูกค้า
   if(customer_id == 'Y'){
-    $('.custId').each(function(index, el) {
-      ds.push({'name':$(this).attr('name'), 'value':$(this).val()});
+    $('.customer-id').each(function(index, el) {
+			let id = $(this).val();
+			let name = "custId["+id+"]";
+      ds.push({'name':name, 'value':id});
     });
   }
 
@@ -119,11 +111,11 @@ function saveCustomer(){
   }
 
   //--- เก็บข้อมูเลือกประเภทลูกค้า
-  if(customer_id == 'N' && customer_kind == 'Y'){
+  if(customer_id == 'N' && customer_region == 'Y'){
     i = 0;
-    $('.chk-kind').each(function(index, el){
+    $('.chk-region').each(function(index, el){
       if($(this).is(':checked')){
-        name = 'customerKind['+i+']';
+        name = 'customerRegion['+i+']';
         ds.push({'name':name, 'value':$(this).val()});
         i++;
       }
@@ -144,11 +136,11 @@ function saveCustomer(){
 
 
   //--- เก็บข้อมูลเกรดลูกค้า
-  if(customer_id == 'N' && customer_class == 'Y'){
+  if(customer_id == 'N' && customer_grade == 'Y'){
     i = 0;
-    $('.chk-class').each(function(index, el){
+    $('.chk-grade').each(function(index, el){
       if($(this).is(':checked')){
-        name = 'customerClass['+i+']';
+        name = 'customerGrade['+i+']';
         ds.push({'name':name, 'value':$(this).val()});
         i++;
       }
@@ -169,6 +161,11 @@ function saveCustomer(){
           type:'success',
           timer:1000
         });
+
+				setTimeout(function() {
+					window.location.reload();
+				}, 1200);
+				
       }else{
         swal('Error!', rs, 'error');
       }
@@ -178,6 +175,14 @@ function saveCustomer(){
 
 
 
+function checkCustomerAll(el) {
+	if(el.is(':checked')) {
+		$('.customer-chk').prop('checked', true);
+	}
+	else {
+		$('.customer-chk').prop('checked', false);
+	}
+}
 
 
 function showCustomerGroup(){
@@ -185,20 +190,16 @@ function showCustomerGroup(){
 }
 
 
-function showCustomerList(){
-  $('#cust-name-modal').modal('show');
-}
-
-function showCustomerClass(){
-  $('#cust-class-modal').modal('show');
+function showCustomerGrade(){
+  $('#cust-grade-modal').modal('show');
 }
 
 function showCustomerType(){
   $('#cust-type-modal').modal('show');
 }
 
-function showCustomerKind(){
-  $('#cust-kind-modal').modal('show');
+function showCustomerRegion(){
+  $('#cust-region-modal').modal('show');
 }
 
 function showCustomerArea(){
@@ -237,14 +238,14 @@ $('.chk-type').change(function(e){
 });
 
 
-$('.chk-kind').change(function(e){
+$('.chk-region').change(function(e){
   count = 0;
-  $('.chk-kind').each(function(index, el) {
+  $('.chk-region').each(function(index, el) {
     if($(this).is(':checked')){
       count++;
     }
   });
-  $('#badge-kind').text(count);
+  $('#badge-region').text(count);
 });
 
 
@@ -259,27 +260,28 @@ $('.chk-area').change(function(e){
 });
 
 
-$('.chk-class').change(function(e){
+$('.chk-grade').change(function(e){
   count = 0;
-  $('.chk-class').each(function(index, el) {
+  $('.chk-grade').each(function(index, el) {
     if($(this).is(':checked')){
       count++;
     }
   });
-  $('#badge-class').text(count);
+  $('#badge-grade').text(count);
 });
 
 
 $('#txt-cust-id-box').autocomplete({
-  source: BASE_URL + 'auto_complete/get_customer_code_and_name',
+  source: BASE_URL + 'auto_complete/get_customer_list',
   autoFocus:true,
   close:function(){
     arr = $(this).val().split(' | ');
-    if(arr.length == 2){
-      code = arr[0];
-      name = arr[1];
-      $('#id_customer').val(code);
-      $(this).val(code+' : '+name);
+    if(arr.length == 3){
+      id = arr[0];
+      code = arr[1];
+			name = arr[2];
+      $('#id_customer').val(id);
+      $(this).val(code + ' | ' + name);
     }else{
       $(this).val('');
       $('#id_customer').val('');
@@ -291,35 +293,33 @@ $('#txt-cust-id-box').autocomplete({
 
 function addCustId(){
   id = $('#id_customer').val();
-  custName = $('#txt-cust-id-box').val();
-  if(custName.length > 0){
-    count = parseInt($('#count').text());
-    count++;
-    list  = '<li style="min-height:15px; padding:5px;" id="cust-id-'+id+'">';
-    list += '<a href="#" class="paddint-5" onclick="removeCustId(\''+id+'\')"><i class="fa fa-times red"></i></a>';
-    list += '<span style="margin-left:10px;">'+custName+'</span>';
-    list += '</li>';
+  cust = $('#txt-cust-id-box').val();
 
-    input = '<input type="hidden" name="custId['+id+']" id="custId-'+id+'" class="custId" value="'+id+'" />';
-    $('#cust-list').append(list);
-    $('#cust-list').append(input);
-    $('#count').text(count);
+  if(cust.length > 0 && $('#customer-id-'+id).length == 0) {
+		let arr = cust.split(' | ');
+		if(arr.length == 2) {
+			let ds = {"id" : id, "code" : arr[0], "name" : arr[1]};
+			let source = $('#customerRowTemplate').html();
+			let output = $('#customerList');
 
-    $('#txt-cust-id-box').val('');
-    $('#id_customer').val('');
-    $('#txt-cust-id-box').focus();
-  }
+			render_append(source, ds, output);
+		}
+	}
 
+	$('#txt-cust-id-box').val('');
+	$('#id_customer').val('');
+	$('#txt-cust-id-box').focus();
 }
 
 
 
-function removeCustId(id){
-  count = parseInt($('#count').text());
-  $('#cust-id-'+id).remove();
-  $('#custId-'+id).remove();
-  count--;
-  $('#count').text(count);
+function removeCustomer(){
+  $('.customer-chk').each(function() {
+		if($(this).is(':checked')) {
+			let id = $(this).val();
+			$('#customer-row-'+id).remove();
+		}
+	});
 }
 
 
@@ -343,9 +343,9 @@ function toggleAllCustomer(option){
 function disActiveCustomerControl(){
   toggleCustomerGroup();
   toggleCustomerType();
-  toggleCustomerKind();
+  toggleCustomerRegion();
   toggleCustomerArea();
-  toggleCustomerClass();
+  toggleCustomerGrade();
   $('.not-all').attr('disabled', 'disabled');
 }
 
@@ -357,17 +357,17 @@ function activeCustomerControl(){
   if(customer_id == 'Y'){
     toggleCustomerGroup();
     toggleCustomerType();
-    toggleCustomerKind();
+    toggleCustomerRegion();
     toggleCustomerArea();
-    toggleCustomerClass();
+    toggleCustomerGrade();
     return;
   }
 
   toggleCustomerGroup($('#customer_group').val());
   toggleCustomerType($('#customer_type').val());
-  toggleCustomerKind($('#customer_kind').val());
+  toggleCustomerRegion($('#customer_region').val());
   toggleCustomerArea($('#customer_area').val());
-  toggleCustomerClass($('#customer_class').val());
+  toggleCustomerGrade($('#customer_grade').val());
 }
 
 
@@ -472,38 +472,38 @@ function toggleCustomerType(option){
 
 
 
-function toggleCustomerKind(option){
+function toggleCustomerRegion(option){
   if(option == '' || option == undefined){
-    option = $('#customer_kind').val();
+    option = $('#customer_region').val();
   }
 
 
-  $('#customer_kind').val(option);
+  $('#customer_region').val(option);
   sc = $('#customer_id').val();
   all = $('#all_customer').val();
 
   if(option == 'Y' && all == 'N' && sc == 'N'){
-    $('#btn-cust-kind-no').removeClass('btn-primary');
-    $('#btn-cust-kind-yes').addClass('btn-primary');
-    $('#btn-cust-kind-no').removeAttr('disabled');
-    $('#btn-cust-kind-yes').removeAttr('disabled');
-    $('#btn-select-cust-kind').removeAttr('disabled');
+    $('#btn-cust-region-no').removeClass('btn-primary');
+    $('#btn-cust-region-yes').addClass('btn-primary');
+    $('#btn-cust-region-no').removeAttr('disabled');
+    $('#btn-cust-region-yes').removeAttr('disabled');
+    $('#btn-select-cust-region').removeAttr('disabled');
     return;
   }
 
   if(option == 'N' && sc == 'N' && all == 'N'){
-    $('#btn-cust-kind-yes').removeClass('btn-primary');
-    $('#btn-cust-kind-no').addClass('btn-primary');
-    $('#btn-cust-kind-no').removeAttr('disabled');
-    $('#btn-cust-kind-yes').removeAttr('disabled');
-    $('#btn-select-cust-kind').attr('disabled', 'disabled');
+    $('#btn-cust-region-yes').removeClass('btn-primary');
+    $('#btn-cust-region-no').addClass('btn-primary');
+    $('#btn-cust-region-no').removeAttr('disabled');
+    $('#btn-cust-region-yes').removeAttr('disabled');
+    $('#btn-select-cust-region').attr('disabled', 'disabled');
     return;
   }
 
   if(all == 'Y' || sc == 'Y'){
-    $('#btn-cust-kind-yes').attr('disabled', 'disabled');
-    $('#btn-cust-kind-no').attr('disabled', 'disabled');
-    $('#btn-select-cust-kind').attr('disabled', 'disabled');
+    $('#btn-cust-region-yes').attr('disabled', 'disabled');
+    $('#btn-cust-region-no').attr('disabled', 'disabled');
+    $('#btn-select-cust-region').attr('disabled', 'disabled');
   }
 }
 
@@ -544,36 +544,36 @@ function toggleCustomerArea(option){
 
 
 
-function toggleCustomerClass(option){
+function toggleCustomerGrade(option){
   if(option == '' || option == undefined){
-    option = $('#customer_class').val();
+    option = $('#customer_grade').val();
   }
 
-  $('#customer_class').val(option);
+  $('#customer_grade').val(option);
   sc = $('#customer_id').val();
   all = $('#all_customer').val();
   if(option == 'Y' && all == 'N' && sc == 'N'){
-    $('#btn-cust-class-no').removeClass('btn-primary');
-    $('#btn-cust-class-yes').addClass('btn-primary');
-    $('#btn-cust-class-no').removeAttr('disabled');
-    $('#btn-cust-class-yes').removeAttr('disabled');
-    $('#btn-select-cust-class').removeAttr('disabled');
+    $('#btn-cust-grade-no').removeClass('btn-primary');
+    $('#btn-cust-grade-yes').addClass('btn-primary');
+    $('#btn-cust-grade-no').removeAttr('disabled');
+    $('#btn-cust-grade-yes').removeAttr('disabled');
+    $('#btn-select-cust-grade').removeAttr('disabled');
     return;
   }
 
   if(option == 'N' && sc == 'N' && all == 'N'){
-    $('#btn-cust-class-yes').removeClass('btn-primary');
-    $('#btn-cust-class-no').addClass('btn-primary');
-    $('#btn-cust-class-no').removeAttr('disabled');
-    $('#btn-cust-class-yes').removeAttr('disabled');
-    $('#btn-select-cust-class').attr('disabled', 'disabled');
+    $('#btn-cust-grade-yes').removeClass('btn-primary');
+    $('#btn-cust-grade-no').addClass('btn-primary');
+    $('#btn-cust-grade-no').removeAttr('disabled');
+    $('#btn-cust-grade-yes').removeAttr('disabled');
+    $('#btn-select-cust-grade').attr('disabled', 'disabled');
     return;
   }
 
   if(all == 'Y' || sc == 'Y'){
-    $('#btn-cust-class-no').attr('disabled', 'disabled');
-    $('#btn-cust-class-yes').attr('disabled', 'disabled');
-    $('#btn-select-cust-class').attr('disabled', 'disabled');
+    $('#btn-cust-grade-no').attr('disabled', 'disabled');
+    $('#btn-cust-grade-yes').attr('disabled', 'disabled');
+    $('#btn-select-cust-grade').attr('disabled', 'disabled');
   }
 }
 

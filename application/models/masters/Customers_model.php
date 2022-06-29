@@ -148,7 +148,7 @@ class Customers_model extends CI_Model
 		->select('gr.name AS grade_name')
 		->select('rg.name AS region_name')
 		->select('ar.name AS area_name')
-		->select('tm.PymntGroup AS term_name')
+		->select('tm.name AS term_name')
 		->select('slp.name AS sale_name')
 		->from('customers AS c')
 		->join('customer_group AS cg', 'c.GroupCode = cg.code', 'left')
@@ -156,7 +156,7 @@ class Customers_model extends CI_Model
 		->join('customer_grade AS gr', 'c.GradeCode = gr.id', 'left')
 		->join('customer_region AS rg', 'c.RegionCode = rg.id', 'left')
 		->join('customer_area AS ar', 'c.AreaCode = ar.id', 'left')
-		->join('payment_term AS tm', 'c.GroupNum = tm.GroupNum', 'left')
+		->join('payment_term AS tm', 'c.GroupNum = tm.id', 'left')
 		->join('sale_person AS slp', 'c.SlpCode = slp.id', 'left');
 
 		if( ! no_value($ds['code']))

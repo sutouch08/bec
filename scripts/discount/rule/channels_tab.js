@@ -1,13 +1,5 @@
 function saveChannels(){
-	swal({
-		title:'Success',
-		type:'success',
-		timer:1000
-	});
-
-	return false;
-	
-  id_rule = $('#id_rule').val();
+  rule_id = $('#rule_id').val();
   all_channels = $('#all_channels').val();
   countChannels = parseInt($('.chk-channels:checked').size());
 
@@ -17,7 +9,7 @@ function saveChannels(){
   }
 
   ds = [
-    {'name':'id_rule', 'value':id_rule},
+    {'name':'rule_id', 'value':rule_id},
     {'name':'all_channels', 'value':all_channels}
   ];
 
@@ -47,6 +39,11 @@ function saveChannels(){
           type:'success',
           timer:1000
         });
+
+				setTimeout(function(){
+					window.location.reload();
+				}, 1200);
+				
       }else{
         swal('Error!', rs, 'error');
       }

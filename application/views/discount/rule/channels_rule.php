@@ -5,10 +5,9 @@ $id = $rule->id;
 //$channels = $this->discount_rule_model->getRuleChannels($id);
 $channelsNo = 0; //count($channels);
  ?>
-<div class="tab-pane fade" id="channels">
 
 	<div class="row">
-        <div class="col-sm-8 top-col">
+        <div class="col-lg-8 col-md-8 col-sm-8 top-col">
             <h4 class="title">กำหนดเงื่อนไขช่องทางการขาย</h4>
         </div>
 
@@ -40,6 +39,4 @@ $channelsNo = 0; //count($channels);
 
 		<input type="hidden" id="all_channels" value="<?php echo $allChannels; ?>" />
 
-
-</div><!--- Tab-pane --->
 <?php $this->load->view('discount/rule/channels_rule_modal'); ?>

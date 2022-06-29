@@ -22,6 +22,19 @@ class Product_category_model extends CI_Model
 	}
 
 
+	public function get_all()
+	{
+		$rs = $this->db->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
 
 	public function get_by_level($level)
 	{

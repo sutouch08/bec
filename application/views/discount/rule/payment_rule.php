@@ -4,7 +4,6 @@ $allPayment = $rule->all_payment == 0 ? 'N' : 'Y';
 $payment = $this->discount_rule_model->getRulePayment($rule->id);
 $paymentNo = count($payment);
  ?>
-<div class="tab-pane fade" id="payment">
 
 	<div class="row">
         <div class="col-sm-8 top-col">
@@ -36,8 +35,5 @@ $paymentNo = count($payment);
     </div>
 
 		<input type="hidden" id="all_payment" value="<?php echo $allPayment; ?>" />
-
-
-</div><!--- Tab-pane --->
 
 <?php $this->load->view('discount/rule/payment_rule_modal'); ?>
