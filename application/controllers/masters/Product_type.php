@@ -20,7 +20,8 @@ class Product_type extends PS_Controller
   public function index()
   {
     $filter = array(
-      'name'      => get_filter('name', 'pt_name', '')
+			'code' => get_filter('code', 'pt_code', ''),
+      'name' => get_filter('name', 'pt_name', '')
     );
 
 		//--- แสดงผลกี่รายการต่อหน้า
@@ -108,10 +109,13 @@ class Product_type extends PS_Controller
 				$sc = FALSE;
 				set_error('update');
 			}
+			else
+			{
+				//--- send update to SAP
+				$this->update_sap($id);				
+			}
 		}
 
-		//--- send update to SAP
-		$this->update_sap($id, $name);
 
 		$this->_response($sc);
 	}
@@ -122,27 +126,22 @@ class Product_type extends PS_Controller
 	{
 		$sc = TRUE;
 
-		$response = json_encode(array(
-			array('id' => 1, 'name' => 'หลอดไฟ'),
-			array('id' => 2, 'name' => 'เฟอร์นิเจอร์'),
-			array('id' => 3, 'name' => 'โซล่าเซล'),
-			array('id' => 4, 'name' => 'อุปกรณ์ไฟฟ้า')
-		));
+		$this->load->library('api');
 
-		$res = json_decode($response);
-
+		$res = $this->api->getProductTypeUpdateData();
 
 		if(! empty($res))
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->product_type_model->get($rs->id);
+				$cr = $this->product_type_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
 					$arr = array(
-						"id" => $rs->id,
-						"name" => $rs->name
+						"code" => $rs->id,
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
 					$this->product_type_model->add($arr);
@@ -150,10 +149,11 @@ class Product_type extends PS_Controller
 				else
 				{
 					$arr = array(
-						"name" => $rs->name
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
-					$this->product_type_model->update($rs->id, $arr);
+					$this->product_type_model->update($cr->id, $arr);
 				}
 			}
 		}
@@ -163,15 +163,29 @@ class Product_type extends PS_Controller
 
 
 
-	private function update_sap($id, $name)
+	private function update_sap($id)
 	{
-		return TRUE;
+		$ds = $this->product_type_model->get($id);
+
+		if(!empty($ds))
+		{
+			$arr = array(
+				"id" => $ds->code,
+				"name" => $ds->name
+			);
+
+			$this->load->library('update_api');
+
+			return $this->update_api->updateProductType($arr);
+		}
+
+		return FALSE;
 	}
 
 
   public function clear_filter()
 	{
-		return clear_filter(array('pt_name'));
+		return clear_filter(array('pt_code','pt_name'));
 	}
 
 

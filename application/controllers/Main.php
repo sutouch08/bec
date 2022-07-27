@@ -1,10 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Main extends CI_Controller
+class Main extends PS_Controller
 {
 	public $title = 'Welcome';
-	public $menu_code = '';
+	public $menu_code = 'HOME';
 	public $menu_group_code = '';
 	public $home;
 
@@ -19,7 +19,7 @@ class Main extends CI_Controller
 
 
 	public function index()
-	{
+	{		
 		$this->load->view('main_view');
 	}
 

@@ -1,24 +1,22 @@
-var HOME = BASE_URL + 'discount/discount_policy';
-
-function goBack(){
-  window.location.href = BASE_URL + 'discount/discount_policy';
+function goBack() {
+  window.location.href = HOME;
 }
 
 
-function goAdd(){
-  window.location.href = BASE_URL + 'discount/discount_policy/add_new';
-}
-
-
-
-function goEdit(code){
-  window.location.href = BASE_URL + 'discount/discount_policy/edit_policy/' + code;
+function goAdd() {
+  window.location.href = HOME + 'add_new';
 }
 
 
 
-function viewDetail(code){
-  window.location.href = BASE_URL + 'discount/discount_policy/view_policy_detail/'+code;
+function goEdit(id) {
+  window.location.href = HOME + 'edit/' + id;
+}
+
+
+
+function viewDetail(id) {
+  window.location.href = HOME  + 'view_detail/'+id;
 }
 
 

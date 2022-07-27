@@ -18,64 +18,8 @@
 								name="chk-pd-cat-<?php echo $rs->id; ?>"
 								id="chk-pd-cat-<?php echo $rs->id; ?>"
 								value="<?php echo $rs->id; ?>" <?php echo $se; ?> />
-								<span class="lbl">+&nbsp;<?php echo $rs->name; ?></span>
+								<span class="lbl">&nbsp;<?php echo $rs->name; ?></span>
               </label>
-					<?php $level2 = $this->product_category_model->get_by_parent($rs->id); ?>
-						<?php if(! empty($level2)) : ?>
-							<?php foreach($level2 as $l2) : ?>
-								<?php $se = isset($pdCategory[$l2->id]) ? 'checked' : ''; ?>
-								<label class="display-block">
-	                <input type="checkbox"
-									class="ace chk-pd-cat"
-									name="chk-pd-cat-<?php echo $l2->id; ?>"
-									id="chk-pd-cat-<?php echo $l2->id; ?>"
-									value="<?php echo $l2->id; ?>" <?php echo $se; ?> />
-									<span class="lbl">++&nbsp;<?php echo $l2->name; ?></span>
-	              </label>
-								<?php $level3 = $this->product_category_model->get_by_parent($l2->id); ?>
-									<?php if(! empty($level3)) : ?>
-										<?php foreach($level3 as $l3) : ?>
-											<?php $se = isset($pdCategory[$l3->id]) ? 'checked' : ''; ?>
-											<label class="display-block">
-				                <input type="checkbox"
-												class="ace chk-pd-cat"
-												name="chk-pd-cat-<?php echo $l3->id; ?>"
-												id="chk-pd-cat-<?php echo $l3->id; ?>"
-												value="<?php echo $l3->id; ?>" <?php echo $se; ?> />
-												<span class="lbl">+++&nbsp;<?php echo $l3->name; ?></span>
-				              </label>
-											<?php $level4 = $this->product_category_model->get_by_parent($l3->id); ?>
-												<?php if(! empty($level4)) : ?>
-													<?php foreach($level4 as $l4) : ?>
-														<?php $se = isset($pdCategory[$l4->id]) ? 'checked' : ''; ?>
-														<label class="display-block">
-							                <input type="checkbox"
-															class="ace chk-pd-cat"
-															name="chk-pd-cat-<?php echo $l4->id; ?>"
-															id="chk-pd-cat-<?php echo $l4->id; ?>"
-															value="<?php echo $l4->id; ?>" <?php echo $se; ?> />
-															<span class="lbl">++++&nbsp;<?php echo $l4->name; ?></span>
-							              </label>
-														<?php $level5 = $this->product_category_model->get_by_parent($l4->id); ?>
-															<?php if(! empty($level5)) : ?>
-																<?php foreach($level5 as $l5) : ?>
-																	<?php $se = isset($pdCategory[$l5->id]) ? 'checked' : ''; ?>
-																	<label class="display-block">
-										                <input type="checkbox"
-																		class="ace chk-pd-cat"
-																		name="chk-pd-cat-<?php echo $l5->id; ?>"
-																		id="chk-pd-cat-<?php echo $l5->id; ?>"
-																		value="<?php echo $l5->id; ?>" <?php echo $se; ?> />
-																		<span class="lbl">+++++&nbsp;<?php echo $l5->name; ?></span>
-										              </label>
-																<?php endforeach; // level 5 ?>
-															<?php endif; ?>
-													<?php endforeach; // level 4 ?>
-												<?php endif; ?>
-										<?php endforeach; // level 3 ?>
-									<?php endif; ?>
-							<?php endforeach; // level 2 ?>
-						<?php endif; ?>
       <?php endforeach; ?>
     <?php endif;?>
           </div>
@@ -107,7 +51,7 @@
 											class="ace chk-pd-type"
 											name="chk-pd-type-<?php echo $rs->id; ?>"
 											id="chk-pd-type-<?php echo $rs->id; ?>"
-											value="<?php echo $rs->name; ?>" />
+											value="<?php echo $rs->id; ?>" />
 				              <span class="lbl"><?php echo $rs->name; ?></span>
 				             </label>
 				      <?php endforeach; ?>

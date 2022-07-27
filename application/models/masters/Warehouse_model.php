@@ -94,6 +94,19 @@ class Warehouse_model extends CI_Model
 	}
 
 
+	public function get_listed()
+	{
+		$rs = $this->db->where('list', 1)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
 	public function count_rows(array $ds = array())
 	{
 		if(isset($ds['code']) && $ds['code'] != "")
@@ -105,6 +118,11 @@ class Warehouse_model extends CI_Model
 		if(isset($ds['name']) && $ds['name'] != "")
 		{
 			$this->db->like('name', $ds['name']);
+		}
+
+		if(isset($ds['type']) && $ds['type'] != 'all')
+		{
+			$this->db->where('type', $ds['type']);
 		}
 
 		return $this->db->count_all_results($this->tb);
@@ -122,6 +140,11 @@ class Warehouse_model extends CI_Model
 		if(isset($ds['name']) && $ds['name'] != "")
 		{
 			$this->db->like('name', $ds['name']);
+		}
+
+		if(isset($ds['type']) && $ds['type'] != 'all')
+		{
+			$this->db->where('type', $ds['type']);
 		}
 
 		$rs = $this->db->limit($perpage, $offset)->get($this->tb);

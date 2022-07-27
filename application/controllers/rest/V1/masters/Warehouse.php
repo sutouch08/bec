@@ -111,9 +111,13 @@ class Warehouse extends REST_Controller
 
 		  if(empty($cr))
 		  {
+				$type = $ds->WhsCode[-1];
+
 				$arr = array(
-					'id' => $ds->WhsCode,
-					'name' => $ds->WhsName
+					'code' => $ds->WhsCode,
+					'name' => $ds->WhsName,
+					'type' => $type,
+					'last_sync' => now()
 				);
 
 				if(! $this->warehouse_model->add($arr))

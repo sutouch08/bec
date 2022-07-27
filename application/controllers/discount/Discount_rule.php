@@ -139,7 +139,7 @@ class Discount_rule extends PS_Controller
 				"pdType" => $this->discount_rule_model->getRuleProductType($id),
 				"pdCategory" => $this->discount_rule_model->getRuleProductCategory($id),
 				"pdBrand" => $this->discount_rule_model->getRuleProductBrand($id),
-				"product_categorys" => $this->product_category_model->get_by_parent(0),
+				"product_categorys" => $this->product_category_model->get_by_level(5),
 				"product_types" => $this->product_type_model->get_all(),
 				"product_brands" => $this->product_brand_model->get_all(),
 				"free_items" => $this->discount_rule_model->getRuleFreeProduct($id),
@@ -187,6 +187,7 @@ class Discount_rule extends PS_Controller
 			$disc3 = $this->input->post('disc3');
 			$disc4 = $this->input->post('disc4');
 			$disc5 = $this->input->post('disc5');
+			$freeQty = $this->input->post('freeQty');
 			$minQty   = $this->input->post('minQty');
 	    $minAmount = $this->input->post('minAmount');
 	    $canGroup = $this->input->post('canGroup');
@@ -198,12 +199,12 @@ class Discount_rule extends PS_Controller
 				"canGroup" => $canGroup,
 				"type" => $discType,
 				"price" => $discType == 'N' ? $price : 0.00,
+				"freeQty" => $freeQty,
 				"disc1" => $discType == 'P' ? $disc1 : 0.00,
 				"disc2" => $discType == 'P' ? $disc2 : 0.00,
 				"disc3" => $discType == 'P' ? $disc3 : 0.00,
 				"disc4" => $discType == 'P' ? $disc4 : 0.00,
 				"disc5" => $discType == 'P' ? $disc5 : 0.00,
-				"freeitem" => empty($freeItems) ? 0 : 1,
 				"update_user" => $this->_user->uname
 			);
 
@@ -241,7 +242,6 @@ class Discount_rule extends PS_Controller
 							"rule_id" => $rule_id,
 							"product_id" => $id,
 							"product_code" => $pd->code,
-							"qty" => $qty
 						);
 
 						if( ! $this->discount_rule_model->set_discount_rule_free_product($arr))

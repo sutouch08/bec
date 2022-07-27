@@ -68,10 +68,11 @@ class Customer_type extends PS_Controller
 				$sc = FALSE;
 				set_error('update');
 			}
+			else
+			{
+				$this->update_sap($id);
+			}
 		}
-
-		//--- send update to SAP
-		$this->update_sap($id, $name);
 
 		$this->_response($sc);
 	}
@@ -80,32 +81,24 @@ class Customer_type extends PS_Controller
 
 	public function sync_data()
 	{
+		$this->load->library('api');
 		$sc = TRUE;
 
-		$response = json_encode(array(
-			array("id" => 1, "name" => "ห้างใหญ่"),
-			array("id" => 2, "name" => "ร้านค้าส่ง"),
-			array("id" => 3, "name" => "โครงการของรัฐ"),
-			array("id" => 4, "name" => "โครงการเอกชน"),
-			array("id" => 5, "name" => "ผู้รับเหมารายใหญ่"),
-			array("id" => 6, "name" => "ผู้รับเหมารายย่อย"),
-			array("id" => 7, "name" => "ลูกค้าทั่วไป")
-		));
-
-		$res = json_decode($response);
+		$res = $this->api->getCustomerTypeUpdateData();
 
 
 		if(! empty($res))
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->customer_type_model->get($rs->id);
+				$cr = $this->customer_type_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
 					$arr = array(
-						"id" => $rs->id,
-						"name" => $rs->name
+						"code" => $rs->id,
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
 					$this->customer_type_model->add($arr);
@@ -113,10 +106,11 @@ class Customer_type extends PS_Controller
 				else
 				{
 					$arr = array(
-						"name" => $rs->name
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
-					$this->customer_type_model->update($rs->id, $arr);
+					$this->customer_type_model->update($cr->id, $arr);
 				}
 			}
 		}
@@ -126,9 +120,23 @@ class Customer_type extends PS_Controller
 
 
 
-	private function update_sap($id, $name)
+	private function update_sap($id)
 	{
-		return TRUE;
+		$rs = $this->customer_type_model->get($id);
+
+		if(!empty($rs))
+		{
+			$this->load->library('update_api');
+
+			$arr = array(
+				'id' => $rs->code,
+				'name' => $rs->name
+			);
+
+			return $this->update_api->updateCustomerType($arr);
+		}
+
+		return FALSE;
 	}
 
 

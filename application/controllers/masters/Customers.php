@@ -52,27 +52,34 @@ class Customers extends PS_Controller
 
   public function edit($id)
   {
-		$this->load->model('masters/sales_person_model');
-		$this->load->model('masters/customer_group_model');
-		$this->load->model('masters/payment_term_model');
-
-
-		$ds = $this->customers_model->get_by_id($id);
-
-		if(! empty($ds))
+		if($this->pm->can_edit)
 		{
-			$ds->sale_name = $this->sales_person_model->get_name($ds->SlpCode);
-			$ds->term_name = $this->payment_term_model->get_name($ds->GroupNum);
-			$ds->group_name = $this->customer_group_model->get_name($ds->GroupCode);
+			$this->load->model('masters/sales_person_model');
+			$this->load->model('masters/customer_group_model');
+			$this->load->model('masters/payment_term_model');
+
+
+			$ds = $this->customers_model->get_by_id($id);
+
+			if(! empty($ds))
+			{
+				$ds->sale_name = $this->sales_person_model->get_name($ds->SlpCode);
+				$ds->term_name = $this->payment_term_model->get_name($ds->GroupNum);
+				$ds->group_name = $this->customer_group_model->get_name($ds->GroupCode);
+			}
+			else
+			{
+				$ds->sale_name = NULL;
+				$ds->term_name = NULL;
+				$ds->group_name = NULL;
+			}
+
+			$this->load->view('masters/customers/customers_edit', $ds);
 		}
 		else
 		{
-			$ds->sale_name = NULL;
-			$ds->term_name = NULL;
-			$ds->group_name = NULL;
+			$this->permission_page();
 		}
-
-		$this->load->view('masters/customers/customers_edit', $ds);
   }
 
 
@@ -98,9 +105,186 @@ class Customers extends PS_Controller
 			$sc = FALSE;
 			set_error('update');
 		}
+		else
+		{
+			$this->update_sap($id);
+		}
 
 		$this->_response($sc);
 	}
+
+
+
+	public function view_detail($id)
+	{
+		$this->load->model('masters/sales_person_model');
+		$this->load->model('masters/customer_group_model');
+		$this->load->model('masters/payment_term_model');
+
+
+		$ds = $this->customers_model->get_by_id($id);
+
+		if(! empty($ds))
+		{
+			$ds->sale_name = $this->sales_person_model->get_name($ds->SlpCode);
+			$ds->term_name = $this->payment_term_model->get_name($ds->GroupNum);
+			$ds->group_name = $this->customer_group_model->get_name($ds->GroupCode);
+		}
+		else
+		{
+			$ds->sale_name = NULL;
+			$ds->term_name = NULL;
+			$ds->group_name = NULL;
+		}
+
+		$this->load->view('masters/customers/customers_detail', $ds);
+	}
+
+
+	public function update_sap($id)
+	{
+		$rs = $this->customers_model->get_customer_data_by_id($id);
+
+		if( ! empty($rs))
+		{
+			$this->load->library('update_api');
+
+			$arr = array(
+				'CardCode' => $rs->CardCode,
+				'CardName' => $rs->CardName,
+				'LicTradNum' => $rs->LicTradNum,
+				'CardType' => $rs->CardType,
+				'CmpPrivate' => $rs->CmpPrivate,
+				'GroupCode' => $rs->GroupCode,
+				'GroupNum' => $rs->GroupNum,
+				'SlpCode' => $rs->SlpCode,
+				'ListNum' => $rs->ListNum,
+				'RegionCode' => $rs->region_code,
+				'AreaCode' => $rs->area_code,
+				'GradeCode' => $rs->grade_code,
+				'TypeCode' => $rs->type_code,
+				'CreditLine' => $rs->CreditLine,
+				'validFor' => $rs->Status == 1 ? 'Y' : 'N'
+			);
+
+
+			return $this->update_api->updateCustomers($arr);
+		}
+
+		return FALSE;
+	}
+
+
+	public function get_customer_term()
+	{
+		$customer_code = $this->input->get('customer_code');
+
+		$cust = $this->customers_model->get($customer_code);
+
+		if( ! empty($cust))
+		{
+			echo $cust->GroupNum;
+		}
+		else
+		{
+			echo "not found";
+		}
+	}
+
+
+	public function get_last_sync_date()
+	{
+		$date = $this->customers_model->get_last_sync_date();
+
+		echo $date;
+	}
+
+	public function count_update_rows()
+	{
+		$date = $this->input->get('last_sync_date');
+
+		$this->load->library('api');
+
+		echo $this->api->countUpdateCustomer($date);
+	}
+
+	public function sync_data()
+	{
+		$this->load->library('api');
+
+		$sc = TRUE;
+
+		$last_sync = $this->input->get('last_sync');
+		$limit = $this->input->get('limit');
+		$offset = $this->input->get('offset');
+		$i = 0;
+
+		$ds = $this->api->getCustomerUpdateData($last_sync, $limit, $offset);
+
+		if(! empty($ds))
+		{
+			foreach($ds as $rs)
+			{
+				$cs = $this->customers_model->get($rs->CardCode);
+
+				if(empty($cs))
+				{
+					$arr = array(
+						'CardCode' => $rs->CardCode,
+						'CardName' => $rs->CardName,
+						'LicTradNum' => get_null($rs->LicTradNum),
+						'CardType' => $rs->CardType,
+						'CmpPrivate' => $rs->CmpPrivate,
+						'GroupCode' => get_null($rs->GroupCode),
+						'GroupNum' => get_null($rs->GroupNum),
+						'ListNum' => empty($rs->ListNum) ? NULL : $rs->ListNum,
+						'SlpCode' => get_null($rs->SlpCode),
+						'RegionCode' => get_null($rs->RegionCode),
+						'AreaCode' => get_null($rs->AreaCode),
+						'TypeCode' => get_null($rs->TypeCode),
+						'GradeCode' => get_null($rs->GradeCode),
+						'CreditLine' => $rs->CreditLine,
+						'Status' => $rs->validFor == 'Y' ? 1 : 0,
+						'last_sync' => now()
+					);
+
+					$this->customers_model->add($arr);
+				}
+				else
+				{
+					$arr = array(
+						'CardName' => $rs->CardName,
+						'LicTradNum' => get_null($rs->LicTradNum),
+						'CardType' => $rs->CardType,
+						'CmpPrivate' => $rs->CmpPrivate,
+						'GroupCode' => get_null($rs->GroupCode),
+						'GroupNum' => get_null($rs->GroupNum),
+						'ListNum' => empty($rs->ListNum) ? NULL : $rs->ListNum,
+						'SlpCode' => get_null($rs->SlpCode),
+						'RegionCode' => get_null($rs->RegionCode),
+						'AreaCode' => get_null($rs->AreaCode),
+						'TypeCode' => get_null($rs->TypeCode),
+						'GradeCode' => get_null($rs->GradeCode),
+						'CreditLine' => $rs->CreditLine,
+						'Status' => $rs->validFor == 'Y' ? 1 : 0,
+						'last_sync' => now()
+					);
+
+					$this->customers_model->update($rs->CardCode, $arr);
+				}
+
+				$i++;
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "no data found";
+		}
+
+		echo $sc === TRUE ? $i : $this->error;
+	}
+
 
 
   public function clear_filter()

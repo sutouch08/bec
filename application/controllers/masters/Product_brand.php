@@ -20,7 +20,8 @@ class Product_brand extends PS_Controller
   public function index()
   {
 		$filter = array(
-			'name' => get_filter('name', 'brand_name', '')
+			'name' => get_filter('name', 'brand_name', ''),
+			'code' => get_filter('code', 'brand_code', '')
 		);
 
 
@@ -74,7 +75,7 @@ class Product_brand extends PS_Controller
 
 		$this->_response($sc);
 	}
-	
+
 
 	public function edit($id)
   {
@@ -107,10 +108,12 @@ class Product_brand extends PS_Controller
 				$sc = FALSE;
 				set_error('update');
 			}
+			else
+			{
+				//--- send update to SAP
+				$this->update_sap($id);
+			}
 		}
-
-		//--- send update to SAP
-		$this->update_sap($id, $name);
 
 		$this->_response($sc);
 	}
@@ -120,31 +123,22 @@ class Product_brand extends PS_Controller
 	public function sync_data()
 	{
 		$sc = TRUE;
+		$this->load->library('api');
 
-		$response = json_encode(array(
-			array("id" => 1, "name" => "BEC"),
-			array("id" => 2, "name" => "BLite"),
-			array("id" => 3, "name" => "BEC Solar"),
-			array("id" => 4, "name" => "Suntree"),
-			array("id" => 5, "name" => "GOODWE"),
-			array("id" => 6, "name" => "SOFAR Solar"),
-			array("id" => 7, "name" => "LAZBOY")
-		));
-
-		$res = json_decode($response);
-
+		$res = $this->api->getProductBrandUpdateData();
 
 		if(! empty($res))
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->product_brand_model->get($rs->id);
+				$cr = $this->product_brand_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
 					$arr = array(
-						"id" => $rs->id,
-						"name" => $rs->name
+						"code" => $rs->id,
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
 					$this->product_brand_model->add($arr);
@@ -152,10 +146,11 @@ class Product_brand extends PS_Controller
 				else
 				{
 					$arr = array(
-						"name" => $rs->name
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
-					$this->product_brand_model->update($rs->id, $arr);
+					$this->product_brand_model->update($cr->id, $arr);
 				}
 			}
 		}
@@ -165,16 +160,29 @@ class Product_brand extends PS_Controller
 
 
 
-	private function update_sap($id, $name)
+	private function update_sap($id)
 	{
-		return TRUE;
+		$rs = $this->product_brand_model->get($id);
+
+		if( ! empty($rs))
+		{
+			$this->load->library('update_api');
+			$arr = array(
+				'id' => $rs->code,
+				'name' => $rs->name
+			);
+
+			return $this->update_api->updateProductBrand($arr);
+		}
+
+		return FALSE;
 	}
 
 
 
   public function clear_filter()
 	{
-		$filter = array('brand_name');
+		$filter = array('brand_code', 'brand_name');
 
 		return clear_filter($filter);
 	}

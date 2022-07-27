@@ -64,9 +64,11 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 				<div class="col-sm-1 padding-5">
 					<button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-product-id-add" onclick="addProductId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
 				</div>
+				<!--
 				<div class="col-sm-1 col-1-harf padding-5">
 					<button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-product-import" onclick="getUploadFile()" disabled><i class="fa fa-upload"></i> import</button>
 				</div>
+			-->
 				<div class="divider-hidden"></div>
 				<div class="col-sm-2 not-show">
 					<span class="form-control left-label">SKU</span>
@@ -125,9 +127,11 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 				<div class="col-sm-1 padding-5">
 					<button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-model-id-add" onclick="addModelId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
 				</div>
+				<!--
 				<div class="col-sm-1 col-1-harf padding-5">
 					<button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-model-import" onclick="getUploadFile()" disabled><i class="fa fa-upload"></i> import</button>
 				</div>
+			-->
 				<div class="divider-hidden"></div>
 				<div class="col-sm-2 not-show">
 					<span class="form-control left-label">Model</span>

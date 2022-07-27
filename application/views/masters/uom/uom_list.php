@@ -44,9 +44,7 @@
 					<th class="fix-width-60 middle text-center">#</th>
 					<th class="fix-width-150 middle">Code</th>
 					<th class="min-width-250 middle">Name</th>
-					<th class="fix-width-150 middle">Last update</th>
 					<th class="fix-width-150 middle">Last sync</th>
-					<th class="fix-width-60 middle"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -56,14 +54,8 @@
 					<tr>
 						<td class="middle text-center"><?php echo $no; ?></td>
 						<td class="middle"><?php echo $rs->code; ?></td>
-						<td class="middle"><?php echo $rs->name; ?></td>
-						<td class="middle"><?php echo thai_date($rs->date_upd, TRUE); ?></td>
+						<td class="middle"><?php echo $rs->name; ?></td>						
 						<td class="middle"><?php echo (empty($rs->last_sync) ? "" : thai_date($rs->last_sync, TRUE)); ?></td>
-						<td class="middle text-center">
-							<?php if($this->pm->can_edit) : ?>
-								<button type="button" class="btn btn-minier btn-warning" onclick="getEdit('<?php echo $rs->id; ?>')"><i class="fa fa-pencil"></i></button>
-							<?php endif; ?>
-						</td>
 					</tr>
 					<?php $no++; ?>
 				<?php endforeach; ?>

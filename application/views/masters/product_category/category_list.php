@@ -14,14 +14,18 @@
 <hr class="padding-5"/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 <div class="row">
+	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
+    <label>Code</label>
+    <input type="text" class="form-control input-sm search-box" name="code" value="<?php echo $code; ?>" />
+  </div>
   <div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
     <label>Name</label>
-    <input type="text" class="form-control input-sm search-box" name="name" value="" />
+    <input type="text" class="form-control input-sm search-box" name="name" value="<?php echo $name; ?>" />
   </div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
     <label>Parent</label>
-    <select class="form-control input-sm" name="parent" onchange="getSearch()">
+    <select class="form-control input-sm filter" name="parent">
 			<option value="all">ทั้งหมด</option>
 			<?php echo select_parent($parent); ?>
 		</select>
@@ -57,7 +61,8 @@
 		<table class="table table-striped border-1" style="min-width:780px;">
 			<thead>
 				<tr>
-					<th class="fix-width-80 middle text-center">#</th>
+					<th class="fix-width-60 middle text-center">#</th>
+					<th class="fix-width-100 middle">Code</th>
 					<th class="fix-width-250 middle">Name</th>
 					<th class="fix-width-100 middle text-center">Level</th>
 					<th class="min-width-250 middle">Parent</th>
@@ -70,6 +75,7 @@
 				<?php foreach($data as $rs) : ?>
 				<tr>
 					<td class="middle text-center"><?php echo $no; ?></td>
+					<td class="middle"><?php echo $rs->code; ?></td>
 					<td class="middle"><?php echo $rs->name; ?></td>
 					<td class="middle text-center"><?php echo $rs->level; ?></td>
 					<td class="moddle"><?php echo $rs->parent; ?></td>
@@ -88,6 +94,6 @@
 	</div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/masters/product_category.js"></script>
+<script src="<?php echo base_url(); ?>scripts/masters/product_category.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

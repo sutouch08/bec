@@ -141,6 +141,28 @@ class Approver_model extends CI_Model
 		return FALSE;
 	}
 
+
+
+	public function get_approve_right($user_id, $team_id)
+	{
+		$rs = $this->db
+		->where('status', 1)
+		->where('user_id', $user_id)
+		->group_start()
+		->where('team_id', $team_id)
+		->or_where('team_id', -1)
+		->group_end()
+		->order_by('max_disc', 'DESC')
+		->get('approver');
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
 } //--- end class
 
  ?>

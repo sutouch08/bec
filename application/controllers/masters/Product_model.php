@@ -20,13 +20,14 @@ class Product_model extends PS_Controller
   public function index()
   {
     $filter = array(
-      'name'      => get_filter('name', 'model_name', '')
+      'name' => get_filter('name', 'model_name', ''),
+			'code' => get_filter('code', 'model_code', '')
     );
 
 		//--- แสดงผลกี่รายการต่อหน้า
 		$perpage = get_rows();
 
-		$rows     = $this->product_model_model->count_rows($filter);
+		$rows = $this->product_model_model->count_rows($filter);
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
 		$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
 		$filter['data'] = $this->product_model_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
@@ -108,10 +109,12 @@ class Product_model extends PS_Controller
 				$sc = FALSE;
 				set_error('update');
 			}
+			else
+			{
+				//--- send update to SAP
+				$this->update_sap($id);
+			}
 		}
-
-		//--- send update to SAP
-		$this->update_sap($id, $name);
 
 		$this->_response($sc);
 	}
@@ -121,28 +124,24 @@ class Product_model extends PS_Controller
 	public function sync_data()
 	{
 		$sc = TRUE;
+		$this->load->library('api');
+		
+		$date = $this->product_model_model->get_last_sync_date();
 
-		$response = json_encode(array(
-			array('id' => 1, 'name' => 'โคมไฟติดลอย รุ่น SJ6371/6C'),
-			array('id' => 2, 'name' => 'โคมฉาย LED รุ่น ZONIC'),
-			array('id' => 3, 'name' => 'โคมไฟฟลัดไลท์ LED STEEM'),
-			array('id' => 4, 'name' => 'เก้าอี้ปรับเอนนอน La-Z-Boy รุ่น 1PT-505 Rialto')
-		));
-
-		$res = json_decode($response);
-
+		$res = $this->api->getProductModelUpdateData($date);
 
 		if(! empty($res))
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->product_model_model->get($rs->id);
+				$cr = $this->product_model_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
 					$arr = array(
-						"id" => $rs->id,
-						"name" => $rs->name
+						"code" => $rs->id,
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
 					$this->product_model_model->add($arr);
@@ -150,10 +149,11 @@ class Product_model extends PS_Controller
 				else
 				{
 					$arr = array(
-						"name" => $rs->name
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
-					$this->product_model_model->update($rs->id, $arr);
+					$this->product_model_model->update($cr->id, $arr);
 				}
 			}
 		}
@@ -163,15 +163,28 @@ class Product_model extends PS_Controller
 
 
 
-	private function update_sap($id, $name)
+	private function update_sap($id)
 	{
-		return TRUE;
+		$rs = $this->product_model_model->get($id);
+
+		if( ! empty($rs))
+		{
+			$this->load->library('update_api');
+			$arr = array(
+				'id' => $rs->code,
+				'name' => $rs->name
+			);
+
+			return $this->update_api->updateProductModel($arr);
+		}
+
+		return FALSE;
 	}
 
 
   public function clear_filter()
 	{
-		return clear_filter(array('model_name'));
+		return clear_filter(array('model_name', 'model_code'));
 	}
 
 

@@ -81,9 +81,6 @@ class Employee extends REST_Controller
 				$this->response($result, 400);
 			}
 		}
-
-
-
 	}
 
 
@@ -122,7 +119,8 @@ class Employee extends REST_Controller
 					'firstName' => $ds->firstName,
 					'lastName' => $ds->lastName,
 					'middleName' => $ds->middleName,
-					'active' => $ds->Active == 'Y' ? 1 : 0
+					'active' => $ds->Active == 'Y' ? 1 : 0,
+					'last_sync' => now()
 				);
 
 				$this->employee_model->add($arr);
@@ -208,7 +206,8 @@ class Employee extends REST_Controller
 					'firstName' => $ds->firstName,
 					'lastName' => $ds->lastName,
 					'middleName' => $ds->middleName,
-					'active' => $ds->Active == 'Y' ? 1 : 0
+					'active' => $ds->Active == 'Y' ? 1 : 0,
+					'last_sync' => now()
 				);
 
 				if(! $this->employee_model->update($id, $arr))

@@ -7,13 +7,13 @@ $paymentNo = count($payment);
 
 	<div class="row">
         <div class="col-sm-8 top-col">
-            <h4 class="title">กำหนดเงื่อนไขช่องทางการชำระเงิน</h4>
+            <h4 class="title">Conditions according to Payment term</h4>
         </div>
 
         <div class="divider margin-top-5"></div>
 
 				<div class="col-sm-2 col-2-harf">
-					<span class="form-control left-label text-right">ช่องทางการชำระเงิน</span>
+					<span class="form-control left-label text-right">Payments</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
@@ -23,7 +23,7 @@ $paymentNo = count($payment);
         </div>
 				<div class="col-sm-3 padding-5">
 					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-show-payment" onclick="showSelectPayment()" >
-						เลือกช่องทางการชำระเงิน <span class="badge pull-right" id="badge-payment"><?php echo $paymentNo; ?></span>
+						Payments <span class="badge pull-right" id="badge-payment"><?php echo $paymentNo; ?></span>
 					</button>
 				</div>
 

@@ -92,12 +92,13 @@ function select_employee($empID = NULL)
 {
   $ds = '';
   $CI =& get_instance();
-  $qs = $CI->user_model->get_all_employee();
+	$CI->load->model('masters/employee_model');
+  $qs = $CI->employee_model->get_all();
   if(!empty($qs))
   {
     foreach($qs as $rs)
     {
-      $ds .= '<option value="'.$rs->empID.'" '.is_selected($rs->empID, $empID).'>'.$rs->firstName.' '.$rs->lastName.'</option>';
+      $ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $empID).'>'.$rs->firstName.' '.$rs->lastName.'</option>';
     }
   }
 
@@ -121,6 +122,25 @@ function select_saleman($sale_id = '')
   }
 
   return $ds;
+}
+
+
+function select_user($user_id = NULL)
+{
+	$ds = '';
+	$ci =& get_instance();
+	$ci->load->model('users/user_model');
+	$option = $ci->user_model->get_all_active();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $user_id).'>'.$rs->uname.'</option>';
+		}
+	}
+
+	return $ds;
 }
 
 
@@ -182,6 +202,25 @@ function user_in($txt)
   return $sc;
 }
 
+
+function select_quota($code = NULL)
+{
+	$sc = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/quota_model');
+
+	$option = $ci->quota_model->get_all_listed();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.'</option>';
+		}
+	}
+
+	return $sc;
+}
 
 
  ?>

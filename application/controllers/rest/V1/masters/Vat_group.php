@@ -119,7 +119,8 @@ class Vat_group extends REST_Controller
 				  'code' => $ds->Code,
 					'name' => empty($ds->Name) ? NULL : $ds->Name,
 					'rate' => empty($ds->Rate) ? 0.00 : get_zero($ds->Rate),
-					'status' => empty($ds->Inactive) ? 1 : ($ds->Inactive == 'Y' ? 0 : 1)
+					'status' => empty($ds->Inactive) ? 1 : ($ds->Inactive == 'Y' ? 0 : 1),
+					'last_sync' => now()
 			  );
 
 			  if(! $this->vat_group_model->add($arr))

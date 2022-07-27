@@ -83,6 +83,32 @@ class Customer_grade_model extends CI_Model
   }
 
 
+	public function get_by_code($code)
+  {
+    $rs = $this->db->where('code', $code)->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+	public function get_by_id($id)
+  {
+    $rs = $this->db->where('id', $id)->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
 	public function get_all()
 	{
 		$rs = $this->db->get($this->tb);

@@ -1,6 +1,3 @@
-var HOME = BASE_URL + 'masters/customers/';
-
-
 function goBack(){
   window.location.href = HOME;
 }
@@ -8,6 +5,11 @@ function goBack(){
 
 function getEdit(id){
   window.location.href = HOME + 'edit/'+id;
+}
+
+
+function viewDetail(id) {
+	window.location.href = HOME + 'view_detail/'+id;
 }
 
 function update() {
@@ -53,19 +55,4 @@ function update() {
 
 function getSearch(){
   $('#searchForm').submit();
-}
-
-
-
-function syncData(){
-  load_in();
-	setTimeout(function(){
-		load_out();
-
-		swal({
-			title:'Success',
-			type:'success',
-			timer:1000
-		})
-	}, 1500)
 }

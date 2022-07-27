@@ -1,65 +1,81 @@
 <?php $this->load->view('include/header'); ?>
+<script src="<?php echo base_url(); ?>assets/js/jquery.autosize.js"></script>
+<style>
+	.form-group {
+		margin-bottom: 5px;
+	}
+	.input-icon > .ace-icon {
+		z-index: 1;
+	}
+</style>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
-    <h3 class="title"><?php echo $this->title; ?></h3>
+	<div class="col-sm-6 col-xs-6 padding-5">
+    <h3 class="title">
+      <?php echo $this->title; ?>
+    </h3>
     </div>
-    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
+    <div class="col-sm-6 col-xs-6 padding-5">
     	<p class="pull-right top-p">
-        <button type="button" class="btn btn-xs btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
+        <button type="button" class="btn btn-sm btn-default" onclick="leave()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
       </p>
     </div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
-<div class="row">
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-    	<label>เลขที่เอกสาร</label>
-      <input type="text" class="form-control input-sm text-center" value="SO-22030009" disabled />
-    </div>
-    <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
-    	<label>วันที่</label>
-			<input type="text" class="form-control input-sm text-center edit" id="date" value="<?php echo date('d-m-Y'); ?>" readonly />
-    </div>
-		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
-			<label>รหัสลูกค้า</label>
-			<input type="text" class="form-control input-sm text-center edit" id="customer_code" value="" placeholder="Press * get list" />
-		</div>
-    <div class="col-lg-4 col-md-6-harf col-sm-6-harf col-xs-8 padding-5">
-    	<label>ลูกค้า</label>
-			<input type="text" class="form-control input-sm edit" id="customer_name" value="" readonly />
-    </div>
+<form id="addForm" method="post" action="<?php echo $this->home; ?>/add">
+<?php $this->load->view('quotation/quotation_add_header'); ?>
+<?php $this->load->view('quotation/quotation_add_detail'); ?>
+<?php $this->load->view('quotation/quotation_add_footer'); ?>
 
-    <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-    	<label>ช่องทางขาย</label>
-			<select class="form-control input-sm" name="channels" >
-				<option value="">ทั้งหมด</option>
-				<option value="">ตัวแทน</option>
-				<option value="">MT</option>
-				<option value="">Line OA</option>
-				<option value="">Website</option>
-				<option value="">Fanpage</option>
-				<option value="">Lazada</option>
-				<option value="">Shopee</option>
-			</select>
+<input type="hidden" id="sale_id" value="<?php echo $this->_user->sale_id; ?>" />
+<input type="hidden" id="sale_team" value="<?php echo $this->_user->team_id; ?>" />
+<input type="hidden" id="vat_rate" value="<?php echo getConfig('SALE_VAT_RATE'); //--- default sale vat rate ?>" />
+<input type="hidden" id="vat_code" value="<?php echo getConfig('SALE_VAT_CODE'); //--- default sale vat code?>" />
+<input type="hidden" id="priceList" value="1" />
+<input type="hidden" id="is_draft" value="0">
+</form>
+
+<?php $this->load->view('quotation/quotation_ship_to_modal'); ?>
+<?php $this->load->view('quotation/quotation_bill_to_modal'); ?>
+
+
+<script id="ship-to-template" type="text/x-handlebarsTemplate">
+		{{#each this}}
+			<option value="{{code}}">{{code}} : {{name}}</option>
+		{{/each}}
+</script>
+
+<script id="bill-to-template" type="text/x-handlebarsTemplate">
+		{{#each this}}
+			<option value="{{code}}">{{code}} : {{name}}</option>
+		{{/each}}
+</script>
+
+
+<!--  Add New Address Modal  --------->
+<div class="modal fade" id="free-item-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:800px;">
+        <div class="modal-content">
+            <div class="modal-body">
+            <div class="row">
+                <table class="table table-striped broder-1">
+									<tbody id="free-item-list">
+
+									</tbody>
+                </table>
+            </div>
+            </div>
+        </div>
     </div>
-    <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-    	<label>การชำระเงิน</label>
-			<select class="form-control input-sm" name="payment" >
-				<option value="">ทั้งหมด</option>
-				<option value="">เครดิต</option>
-				<option value="">เงินสด</option>
-				<option value="">COD</option>
-				<option value="">เงินโอน</option>
-				<option value="">Credit Card</option>
-			</select>
-    </div>
-		<div class="col-lg-1 col-md-1 col-sm-1 col-xs-4 padding-5">
-			<label class="display-block not-show">add</label>
-			<button type="button" class="btn btn-xs btn-primary btn-block"> Add</i></button>
-		</div>
 </div>
 
-<hr class="padding-5 margin-top-15">
 
-<script src="<?php echo base_url(); ?>scripts/quotation/quotation.js?v=<?php echo date('Ymd'); ?>"></script>
+
+
+<script src="<?php echo base_url(); ?>scripts/quotation/quotation.js?v=<?php echo date('YmdH'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/quotation/quotation_add.js?v=<?php echo date('YmdH'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/address.js"></script>
+
+
+
 
 <?php $this->load->view('include/footer'); ?>

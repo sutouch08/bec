@@ -41,17 +41,10 @@ class Customer_group extends PS_Controller
 
 	public function sync_data()
 	{
+		$this->load->library('api');
 		$sc = TRUE;
 
-		$response = json_encode(array(
-			array("GroupCode" => 100, "GroupName" => "AR-Customer", "GroupType" => 'C'),
-			array("GroupCode" => 101, "GroupName" => "AR-Vender", "GroupType" => 'C'),
-			array("GroupCode" => 102, "GroupName" => "AR-Employee", "GroupType" => 'C'),
-			array("GroupCode" => 103, "GroupName" => "AR-Online", "GroupType" => 'C'),
-			array("GroupCode" => 104, "GroupName" => "AR-Contact", "GroupType" => 'C')
-		));
-
-		$res = json_decode($response);
+		$res = $this->api->getCustomerGroupUpdateData();
 
 
 		if(! empty($res))
@@ -65,7 +58,8 @@ class Customer_group extends PS_Controller
 					$arr = array(
 						"code" => $rs->GroupCode,
 						"name" => $rs->GroupName,
-						"type" => $rs->GroupType
+						"type" => $rs->GroupType,
+						"last_sync" => now()
 					);
 
 					$this->customer_group_model->add($arr);
@@ -74,7 +68,8 @@ class Customer_group extends PS_Controller
 				{
 					$arr = array(
 						"name" => $rs->GroupName,
-						"type" => $rs->GroupType
+						"type" => $rs->GroupType,
+						"last_sync" => now()
 					);
 
 					$this->customer_group_model->update($rs->GroupCode, $arr);

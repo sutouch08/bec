@@ -38,19 +38,10 @@ class Sales_person extends PS_Controller
 	public function sync_data()
 	{
 		$sc = TRUE;
+		$this->load->library('api');
 
-		$response = json_encode(array(
-			array("SlpCode" => -1, "SlpName" =>"-No Sales Employee-", "EmpID" => NULL, "Active" => "Y"),
-			array("SlpCode" => 1, "SlpName" =>"คุณธิษตยา ม่วงโสภา", "EmpID" => 1, "Active" => "Y"),
-			array("SlpCode" => 2, "SlpName" =>"คคุณขวัญจิรา ทะบันหาร", "EmpID" => 2, "Active" => "Y"),
-			array("SlpCode" => 3, "SlpName" =>"นายจักรกฤช อังคณาสวรรค์", "EmpID" => 3, "Active" => "Y"),
-			array("SlpCode" => 4, "SlpName" =>"คอัชรี จักรเพ็ชร", "EmpID" => NULL, "Active" => "N"),
-			array("SlpCode" => 5, "SlpName" =>"คุณลลิตา แซ่ล้อ", "EmpID" => NULL, "Active" => "Y"),
-			array("SlpCode" => 6, "SlpName" =>"วิภารัตน์ คดีพิศาล", "EmpID" => NULL, "Active" => "N"),
-			array("SlpCode" => 7, "SlpName" =>"Shopee", "EmpID" => NULL, "Active" => "Y"),
-		));
+		$res = $this->api->getSalesEmployeeUpdateData();
 
-		$res = json_decode($response);
 
 		if( ! empty($res))
 		{

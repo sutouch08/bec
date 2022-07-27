@@ -1,6 +1,6 @@
-function addNew(){
+function addNew() {
 
-  var name = $('#policy_name').val();
+  var name = $('#name').val();
   var fromDate = $('#fromDate').val();
   var toDate = $('#toDate').val();
 
@@ -14,27 +14,49 @@ function addNew(){
     return false;
   }
 
-	swal({
-		title:'Success',
-		type:'success',
-		timer:1000
+	$.ajax({
+		url:HOME + 'add',
+		type:'POST',
+		cache:false,
+		data:{
+			'name' : name,
+			'start_date' : fromDate,
+			'end_date' : toDate
+		},
+		success:function(rs) {
+			if(! isNaN(rs)) {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+
+				setTimeout(function() {
+					goEdit(rs);
+				}, 1200);
+			}
+			else {
+				swal({
+					title:'Error!',
+					text:rs,
+					type:'error'
+				});
+			}
+		}
 	});
-
-	return false;
-
-  $('#addForm').submit();
 }
 
 
-function toggleButton(){
-  if($('.chk-rule:checked').size() > 0){
+function toggleButton() {
+  if($('.chk-rule:checked').size() > 0) {
     $('#btn-add-rule').removeAttr('disabled');
-  }else{
+  }
+	else {
     $('#btn-add-rule').attr('disabled', 'disabled');
   }
 }
 
-function addRule(){
+function addRule() {
 
   id = $('#id_policy').val();
   count = parseInt($('.chk-rule:checked').size());
@@ -98,7 +120,7 @@ function showRuleList(){
 function getActiveRuleList(){
   load_in();
   $.ajax({
-    url: BASE_URL + 'discount/discount_policy/get_active_rule',
+    url: HOME + 'get_active_rule',
     type:'GET',
     cache:'false',
     success:function(rs){
@@ -124,24 +146,13 @@ function getEdit(){
 
 
 
-function update(){
-	swal({
-		title:'Success',
-		type:'success',
-		timer:1000
-	});
+function update() {
 
-	return false;
   var id_policy = $('#id_policy').val();
   var pName = $('#policy_name').val();
   var fromDate = $('#fromDate').val();
   var toDate = $('#toDate').val();
   var active = $('#isActive').val();
-
-  if(isNaN(parseInt(id_policy))){
-    swal('Error!', 'ไม่พบ ID Policy', 'error');
-    return false;
-  }
 
   if(pName.length < 4 || pName.length > 150){
     swal('ข้อมูลไม่ถูกต้อง','กรุณากำหนดชื่อนโยบายอย่างน้อย 4 ตัวอักษร สูงสุด 150 ตัวอักษร', 'warning');
@@ -155,7 +166,39 @@ function update(){
 
   load_in();
 
-  $('#editForm').submit();
+	$.ajax({
+		url:HOME + 'update',
+		type:'POST',
+		cache:false,
+		data: {
+			"id" : id_policy,
+			"name" : pName,
+			"start_date" : fromDate,
+			"end_date" : toDate,
+			"active" : active
+		},
+		success:function(rs) {
+			load_out();
+			if(rs === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+
+				setTimeout(function(rs) {
+					window.location.reload();
+				}, 1200);
+			}
+			else {
+				swal({
+					title:'Error!',
+					text: rs,
+					type:'error'
+				});
+			}
+		}
+	});
 }
 
 
@@ -193,14 +236,14 @@ function unlinkRule(id, name){
 		cancelButtonText: 'ยกเลิก',
 		closeOnConfirm: false
 		}, function(){
-			
+
       load_in();
 			$.ajax({
 				url: BASE_URL + 'discount/discount_rule/unlink_rule',
 				type:"POST",
         cache:"false",
         data:{
-          "id_rule" : id
+          "rule_id" : id
         },
 				success: function(rs){
           load_out();

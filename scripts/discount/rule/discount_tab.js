@@ -5,12 +5,16 @@ function saveDiscount() {
 	  //--- กำหนดราคาขาย
 	let price = $('#net-price').val();
 
+	let is_free = $('#free-item').is(':checked') ? true : false;
 	//--- กำหนดส่วนลด
 	let disc1 = parseDefault(parseFloat($('#disc1').val()), 0);
 	let disc2 = parseDefault(parseFloat($('#disc2').val()), 0);
 	let disc3 = parseDefault(parseFloat($('#disc3').val()), 0);
 	let disc4 = parseDefault(parseFloat($('#disc4').val()), 0);
 	let disc5 = parseDefault(parseFloat($('#disc5').val()), 0);
+
+	//--- จำนวนของแถม
+	let freeQty = parseDefault(parseFloat($('#free-qty').val()), 0);
 
   //--- กำหนดจำนวนขั้นต่ำ
   minQty = parseDefault(parseFloat($('#min-qty').val()), 0);
@@ -21,8 +25,17 @@ function saveDiscount() {
   //--- สามารถรวมยอดได้หรือไม่
   canGroup = $("input[name='canGroup']:checked").val();
 
+	if(is_free && freeQty <= 0) {
+		swal('ข้อผิดพลาด', 'กรุณาระบุจำนวนของแถม', 'error');
+		$('#free-qty').addClass('has-error');
+    return false;
+	}
+	else {
+		$('#free-qty').removeClass('has-error');
+	}
 
-  if(discType == 'N' && price <= 0) {
+
+  if(discType == 'N' && price <= 0 && freeQty <= 0) {
     swal('ข้อผิดพลาด', 'ราคาขายต้องมากกว่า 0', 'error');
 		$('#net-price').addClass('has-error');
     return false;
@@ -31,7 +44,7 @@ function saveDiscount() {
 		$('#net-price').removeClass('has-error');
 	}
 
-  if(discType == 'P' && (disc1 <= 0 || disc1 > 100 )) {
+  if(discType == 'P' && (disc1 <= 0 || disc1 > 100 ) && freeQty <= 0) {
     swal('ข้อผิดพลาด', 'ส่วนลดไม่ถูกต้อง', 'error');
 		$('#disc1').addClass('has-error');
     return false;
@@ -40,7 +53,8 @@ function saveDiscount() {
 		$('#disc1').removeClass('has-error');
 	}
 
-	if(discType == 'P' && (disc2 < 0 || disc2 > 100 || (disc1 == 100 && disc2 > 0 ))) {
+
+	if(discType == 'P' && ((disc1 <= 0 && disc2 > 0) || disc2 < 0 || disc2 > 100 || (disc1 == 100 && disc2 > 0 ))) {
     swal('ข้อผิดพลาด', 'ส่วนลดไม่ถูกต้อง', 'error');
 		$('#disc2').addClass('has-error');
     return false;
@@ -49,7 +63,7 @@ function saveDiscount() {
 		$('#disc2').removeClass('has-error');
 	}
 
-	if(discType == 'P' && (disc3 < 0 || disc3 > 100 || ((disc2 == 100 || disc2 == 0) && disc3 > 0 ))) {
+	if(discType == 'P' && ((disc2 <= 0 && disc3 > 0) || disc3 < 0 || disc3 > 100 || ((disc2 == 100 || disc2 == 0) && disc3 > 0 ))) {
     swal('ข้อผิดพลาด', 'ส่วนลดไม่ถูกต้อง', 'error');
 		$('#disc3').addClass('has-error');
     return false;
@@ -58,7 +72,7 @@ function saveDiscount() {
 		$('#disc3').removeClass('has-error');
 	}
 
-	if(discType == 'P' && (disc4 < 0 || disc4 > 100 || ((disc3 == 100 || disc3 == 0) && disc4 > 0 ))) {
+	if(discType == 'P' && ((disc3 <= 0 && disc4 > 0) || disc4 < 0 || disc4 > 100 || ((disc3 == 100 || disc3 == 0) && disc4 > 0 ))) {
     swal('ข้อผิดพลาด', 'ส่วนลดไม่ถูกต้อง', 'error');
 		$('#disc4').addClass('has-error');
     return false;
@@ -67,7 +81,7 @@ function saveDiscount() {
 		$('#disc4').removeClass('has-error');
 	}
 
-	if(discType == 'P' && (disc5 < 0 || disc5 > 100 || ((disc4 == 100 || disc4 == 0) && disc5 > 0 ))) {
+	if(discType == 'P' && ((disc4 <= 0 && disc5 > 0 ) || disc5 < 0 || disc5 > 100 || ((disc4 == 100 || disc4 == 0) && disc5 > 0 ))) {
     swal('ข้อผิดพลาด', 'ส่วนลดไม่ถูกต้อง', 'error');
 		$('#disc5').addClass('has-error');
     return false;
@@ -75,6 +89,7 @@ function saveDiscount() {
 	else {
 		$('#disc5').removeClass('has-error');
 	}
+
 
   if(minQty < 0) {
     swal('ข้อผิดพลาด', 'จำนวนขั้นต่ำต้องไม่น้อยกว่า 0', 'error');
@@ -103,6 +118,7 @@ function saveDiscount() {
 		{'name' : 'disc3' , 'value' : disc3},
 		{'name' : 'disc4' , 'value' : disc4},
 		{'name' : 'disc5' , 'value' : disc5},
+		{'name' : 'freeQty', 'value' : freeQty},
 		{'name' : 'minQty' , 'value' : minQty},
 		{'name' : 'minAmount' , 'value' : minAmount},
 		{'name' : 'canGroup' , 'value' : canGroup},
@@ -113,8 +129,7 @@ function saveDiscount() {
 		$('.free-item-id').each(function() {
 			let pid = $(this).val();
 			let name = "freeItems["+pid+"]";
-			let qty = $('#free-item-qty-'+pid).val();
-			ds.push({"name" : name, "value" : qty});
+			ds.push({"name" : name, "value" : pid});
 		});
 	}
 
@@ -138,7 +153,7 @@ function saveDiscount() {
 				setTimeout(function() {
 					window.location.reload();
 				}, 1200);
-				
+
       }else{
         swal('Error', rs, 'error');
       }
@@ -174,33 +189,20 @@ $('#free-item-box').autocomplete({
 function addItemToList() {
 	let txt = $('#free-item-box').val();
 	let id = $('#temp-item-id').val();
-	let qty = parseDefault(parseFloat($('#free-qty').val()), 1.00);
 
 	if(txt.length > 0 && id != "" && id != 0) {
 
-		if($('#free-item-qty-'+id).length) {
-			let cQty = parseDefault(parseFloat($('#free-item-qty-'+id).val()), 0);
-			qty += cQty;
-
-			$('#free-item-qty-label-'+id).text(qty);
-			$('#free-item-qty-'+id).val(qty);
-			$('#temp-item-id').val('');
-			$('#free-qty').val(1.00);
-			$('#free-item-box').val('').focus();
-		}
-		else {
+		if($('#free-item-id-'+id).length == 0) {
 
 			let arr = txt.split(' | ');
 
 			if(arr.length == 2) {
-				let ds = {"id" : id, "code" : arr[0], "name" : arr[1], "qty" : qty};
+				let ds = {"id" : id, "code" : arr[0], "name" : arr[1]};
 				let source = $('#freeItemTemplate').html();
 				let output = $('#freeItemList');
-
 				render_append(source, ds, output);
 
 				$('#temp-item-id').val('');
-				$('#free-qty').val(1.00);
 				$('#free-item-box').val('').focus();
 			}
 		}
@@ -223,6 +225,20 @@ function removeFreeItem() {
 		}
 	})
 }
+
+
+function toggleFreeItem() {
+	if($('#free-item').is(':checked')) {
+		$('.free').removeAttr('disabled');
+		$('#free-item-box').focus();
+	}
+	else {
+		$('#free-qty').val('');
+		$('.free').attr('disabled', 'disabled');
+	}
+}
+
+
 function toggleDiscType(option) {
 	if(option == 'N') {
 		$('.disc-input').attr('disabled', 'disabled');
@@ -235,6 +251,11 @@ function toggleDiscType(option) {
 		$('.price-input').attr('disabled', 'disabled');
 		$('.disc-input').removeAttr('disabled');
 		$('#disc1').focus();
+		return;
+	}
+
+	if(option == 'F') {
+
 		return;
 	}
 }

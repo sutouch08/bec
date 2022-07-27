@@ -28,6 +28,7 @@ class Customer_area extends REST_Controller
 			{
 				$result = array(
 					'id' => $rs->id,
+					'code' => $rs->code,
 					'name' => $rs->name,
 					'date_upd' => $rs->date_upd
 				);
@@ -56,6 +57,7 @@ class Customer_area extends REST_Controller
 				{
 					$arr = array(
 						'id' => $rs->id,
+						'code' => $rs->code,
 						'name' => $rs->name,
 						'date_upd' => $rs->date_upd
 					);
@@ -101,33 +103,26 @@ class Customer_area extends REST_Controller
 
 	  if($sc === TRUE)
 	  {
-		  $cr = $this->customer_area_model->get($ds->id);
+		  $cr = $this->customer_area_model->get_by_code($ds->id);
 
 		  if(empty($cr))
 		  {
-				if( ! $this->customer_area_model->is_exists($ds->name))
-				{
-					$arr = array(
-						'id' => $ds->id,
-						'name' => $ds->name
-					);
+				$arr = array(
+					'code' => $ds->id,
+					'name' => $ds->name,
+					'last_sync' => now()
+				);
 
-					if(! $this->customer_area_model->add($arr))
-					{
-						$sc = FALSE;
-						$this->error = "Insert data failed";
-					}
-				}
-				else
+				if(! $this->customer_area_model->add($arr))
 				{
 					$sc = FALSE;
-					set_error('exists', $ds->name);
+					$this->error = "Insert data failed";
 				}
 		  }
 		  else
 		  {
 				$sc = FALSE;
-				$this->error = "id ({$ds->id}) already exists";
+				$this->error = "({$ds->id}) already exists";
 		  }
 	  }
 
@@ -173,7 +168,7 @@ class Customer_area extends REST_Controller
 
 
 
-	public function update_post($id)
+	public function update_post($code)
   {
     $sc = TRUE;
 		$result = array();
@@ -191,32 +186,25 @@ class Customer_area extends REST_Controller
 
 	  if($sc === TRUE)
 	  {
-		  $cr = $this->customer_area_model->get($id);
+		  $cr = $this->customer_area_model->get_by_code($code);
 
 		  if( ! empty($cr))
 		  {
-				if( ! $this->customer_area_model->is_exists($ds->name, $id))
-				{
-					$arr = array(
-						'name' => $ds->name
-					);
+				$arr = array(
+					'name' => $ds->name,
+					'last_sync' => now()
+				);
 
-					if(! $this->customer_area_model->update($id, $arr))
-					{
-						$sc = FALSE;
-						set_error('update');
-					}
-				}
-				else
+				if(! $this->customer_area_model->update($cr->id, $arr))
 				{
 					$sc = FALSE;
-					set_error('exists', $ds->name);
+					set_error('update');
 				}
 		  }
 		  else
 		  {
 				$sc = FALSE;
-				$this->error = "id ({$id}) not exists";
+				$this->error = "({$code}) not exists";
 		  }
 	  }
 

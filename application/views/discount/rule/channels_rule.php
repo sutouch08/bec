@@ -8,14 +8,14 @@ $channelsNo = 0; //count($channels);
 
 	<div class="row">
         <div class="col-lg-8 col-md-8 col-sm-8 top-col">
-            <h4 class="title">กำหนดเงื่อนไขช่องทางการขาย</h4>
+            <h4 class="title">Conditions according to Sales Channels</h4>
         </div>
 
         <div class="divider margin-top-5"></div>
 
 
 				<div class="col-sm-2 col-2-harf">
-					<span class="form-control left-label text-right">ช่องทางการขาย</span>
+					<span class="form-control left-label text-right">Channels</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
@@ -25,7 +25,7 @@ $channelsNo = 0; //count($channels);
         </div>
 				<div class="col-sm-3 padding-5">
 					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-show-channels" onclick="showSelectChannels()" >
-						เลือกช่องทางขาย <span class="badge pull-right" id="badge-channels"><?php echo $channelsNo; ?></span>
+						Channels <span class="badge pull-right" id="badge-channels"><?php echo $channelsNo; ?></span>
 					</button>
 				</div>
         <div class="divider-hidden"></div>

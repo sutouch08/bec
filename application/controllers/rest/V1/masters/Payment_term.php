@@ -113,7 +113,9 @@ class Payment_term extends REST_Controller
 		  {
 			  $arr = array(
 				  'id' => $ds->GroupNum,
-				  'name' => $ds->PymntGroup
+				  'name' => $ds->PymntGroup,
+					'term' => $ds->ExtraDays,
+					'last_sync' => now()
 			  );
 
 			  if(! $this->payment_term_model->add($arr))
@@ -199,7 +201,9 @@ class Payment_term extends REST_Controller
 		  if( ! empty($cr))
 		  {
 			  $arr = array(
-				  'name' => $ds->PymntGroup
+				  'name' => $ds->PymntGroup,
+					'term' => $ds->ExtraDays,
+					'last_sync' => now()
 			  );
 
 			  if(! $this->payment_term_model->update($id, $arr))

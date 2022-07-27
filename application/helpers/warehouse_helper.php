@@ -1,5 +1,5 @@
 <?php
-function select_warehouse($id = NULL)
+function select_warehouse($code = NULL)
 {
 	$ds = '';
 
@@ -11,7 +11,42 @@ function select_warehouse($id = NULL)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $id).'>'.$rs->code.' : '.$rs->name.'</option>';
+			$ds .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
+		}
+	}
+
+	return $ds;
+}
+
+function select_listed_warehouse($code = NULL)
+{
+	$ds = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/warehouse_model');
+	$option = $ci->warehouse_model->get_listed();
+
+	if(!empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$ds .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.'</option>';
+		}
+	}
+
+	return $ds;
+}
+
+
+//---- ใช้งานกับ SO เพื่อลดการ query
+function select_order_warehouse($option, $code = NULL)
+{
+	$ds = '';
+
+	if( ! empty($option)) //--- qurey result object
+	{
+		foreach($option as $rs)
+		{
+			$ds .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.'</option>';
 		}
 	}
 

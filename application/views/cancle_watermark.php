@@ -27,5 +27,5 @@
 </style>
 
 <div style="width:0px; height:0px; position:absolute; left:30%; line-height:0px; top:400px;color:red; text-align:center; z-index:100000; opacity:0.1; transform:rotate(-30deg)">
-    <span class="cancleWatermark">ยกเลิก</span>
+    <span class="cancleWatermark">Cancelled</span>
 </div>

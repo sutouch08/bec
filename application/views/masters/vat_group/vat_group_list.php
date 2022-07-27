@@ -22,6 +22,15 @@
     <input type="text" class="form-control input-sm search-box" name="name" value="<?php echo $name; ?>" />
   </div>
 
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6">
+    <label>Status</label>
+		<select class="form-control input-sm filter" name="status">
+			<option value="all">ทั้งหมด</option>
+			<option value="1" <?php echo is_selected('1', $status); ?>>Active</option>
+			<option value="0" <?php echo is_selected('0', $status); ?>>Inactive</option>
+		</select>
+  </div>
+
 	<div class="col-xs-6 visible-xs">&nbsp;</div>
 
   <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-3">

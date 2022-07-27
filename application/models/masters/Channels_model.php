@@ -92,7 +92,7 @@ class Channels_model extends CI_Model
 
     if($rs->num_rows() == 1)
     {
-      return $rs->row();
+      return $rs->row()->id;
     }
 
     return FALSE;
@@ -124,6 +124,19 @@ class Channels_model extends CI_Model
 		}
 
 		return NULL;
+	}
+
+
+	public function is_exists_code($code)
+	{
+		$count = $this->db->where('code', $code)->count_all_results($this->tb);
+
+		if($count > 0)
+		{
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 

@@ -80,17 +80,26 @@ class Products extends PS_Controller
 				$id = $this->input->post('id');
 
 				$arr = array(
-					'model_id' => get_null($this->input->post('model')),
-					'brand_id' => get_null($this->input->post('brand')),
-					'category_id' => get_null($this->input->post('category')),
-					'type_id' => get_null($this->input->post('type')),
+					'model_code' => get_null($this->input->post('model')),
+					'brand_code' => get_null($this->input->post('brand')),
+					'category_code' => get_null($this->input->post('category')),
+					'type_code' => get_null($this->input->post('type')),
+					'category_code_1' => get_null($this->input->post('cateCode1')),
+					'category_code_2' => get_null($this->input->post('cateCode2')),
+					'category_code_3' => get_null($this->input->post('cateCode3')),
+					'category_code_4' => get_null($this->input->post('cateCode4')),
+					'category_code_5' => get_null($this->input->post('category')),
 					'is_cover' => $this->input->post('cover') == 1 ? 1 : 0
 				);
 
-				if( ! $this->products_model->update($id, $arr))
+				if( ! $this->products_model->update_by_id($id, $arr))
 				{
 					$sc = FALSE;
 					set_error('update');
+				}
+				else
+				{
+					$this->update_sap($id);
 				}
 			}
 			else
@@ -106,6 +115,40 @@ class Products extends PS_Controller
 		}
 
 		$this->_response($sc);
+	}
+
+
+	public function update_sap($id)
+	{
+		$pd = $this->products_model->get_by_id($id);
+
+		if(!empty($pd))
+		{
+			$this->load->library('update_api');
+			$arr = array(
+				'ItemCode' => $pd->code,
+				'ItemName' => $pd->name,
+				'CodeBars' => $pd->barcode,
+				'SUoMEntry' => $pd->uom_id,
+				'Price' => $pd->price,
+				'Cost' => $pd->cost,
+				'VatGourpSa' => $pd->vat_group,
+				'validFor' => $pd->status == 1 ? 'Y' : 'N',
+				'Product_ModelCode' => $pd->model_code,
+				'Product_CategoryCode' => $pd->category_code,
+				'Product_BrandCode' => $pd->brand_code,
+				'Product_TypeCode' => $pd->type_code,
+				'CategoryCode1' => $pd->category_code_1,
+				'CategoryCode2' => $pd->category_code_2,
+				'CategoryCode3' => $pd->category_code_3,
+				'CategoryCode4' => $pd->category_code_4,
+				'CategoryCode5' => $pd->category_code_5
+			);
+
+			return $this->update_api->updateProduct($arr);
+		}
+
+		return FALSE;
 	}
 
 
@@ -270,12 +313,9 @@ class Products extends PS_Controller
 
 		if(!empty($product_id))
 		{
-			if($rs)
+			if(! delete_product_image($product_id))
 			{
-				delete_product_image($product_id);
-			}
-			else
-			{
+
 				$sc = FALSE;
 				$this->error = "Delete image failed";
 			}
@@ -286,89 +326,84 @@ class Products extends PS_Controller
 			$this->error = "ไม่พบ id image";
 		}
 
-		$this->response($sc);
+		$this->_response($sc);
+	}
+
+
+	public function get_category_parent_list()
+	{
+		$code = $this->input->get('code');
+		$this->load->model('masters/product_category_model');
+
+		$list = $this->product_category_model->get_parent_list($code);
+
+		if(!empty($list))
+		{
+			echo json_encode($list);
+		}
+		else
+		{
+			echo "no parent";
+		}
+	}
+
+
+	public function get_last_sync_date()
+	{
+		$date = $this->products_model->get_last_sync_date();
+
+		echo $date;
+	}
+
+	public function count_update_rows()
+	{
+		$date = $this->input->get('last_sync_date');
+
+		$this->load->library('api');
+
+		echo $this->api->countUpdateProduct($date);
 	}
 
 
   public function sync_data()
 	{
+		$this->load->library('api');
+
 		$sc = TRUE;
-		$response = json_encode(array(
-			array(
-				'ItemCode' => "3673014376",
-				"ItemName" => "โคมไฟติดลอย รุ่น SJ6371/6C",
-				"CodeBars" => "",
-				"SUoMEntry" => 1,
-				"Price" => 4400,
-				"Cost" => 1200,
-				"U_Model" => 1,
-				"U_Category" => "",
-				"U_Type" => "",
-				"U_Brand" => 1,
-				"validFor" => "Y"
-			),
-			array(
-				'ItemCode' => "3881010245",
-				"ItemName" => "BEC โคมฉาย LED 100 วัตต์ แสงวอร์มไวท์ รุ่น ZONIC เดย์ไลท์ 50 วัตต์",
-				"CodeBars" => "",
-				"SUoMEntry" => 1,
-				"Price" => 695,
-				"Cost" => 200,
-				"U_Model" => 2,
-				"U_Category" => "",
-				"U_Type" => "",
-				"U_Brand" => 1,
-				"validFor" => "Y"
-			),
-			array(
-				'ItemCode' => "3881010445",
-				"ItemName" => "BEC โคมไฟฟลัดไลท์ LED STEEM ขนาด 100 วัตต์ 7000K",
-				"CodeBars" => "",
-				"SUoMEntry" => 1,
-				"Price" => 1500,
-				"Cost" => 500,
-				"U_Model" => 3,
-				"U_Category" => "",
-				"U_Type" => "",
-				"U_Brand" => 1,
-				"validFor" => "Y"
-			),
-			array(
-				'ItemCode' => "SKU-00918",
-				"ItemName" => "La-Z-Boy เก้าอี้ปรับเอนนอน รุ่น 1PT-505 Rialto",
-				"CodeBars" => "",
-				"SUoMEntry" => 2,
-				"Price" => 51900,
-				"Cost" => 45000,
-				"U_Model" => 4,
-				"U_Category" => "",
-				"U_Type" => "",
-				"U_Brand" => 7,
-				"validFor" => "Y"
-			)
-		));
 
-		$res = json_decode($response);
+		$last_sync = $this->input->get('last_sync');
+		$limit = $this->input->get('limit');
+		$offset = $this->input->get('offset');
 
+		$i = 0;
+
+		$res = $this->api->getUpdateProduct($last_sync, $limit, $offset);
 
 		if(! empty($res))
 		{
 			foreach($res as $rs)
 			{
-				if(isset($rs->ItemCode) && $rs->ItemCode != "" && isset($rs->ItemName) && $rs->ItemName != "")
+				if(isset($rs->ItemCode) && $rs->ItemCode != "" && isset($rs->ItemName))
 				{
 					$arr = array(
 						"code" => $rs->ItemCode,
 						"name" => $rs->ItemName,
 						"barcode" => empty($rs->CodeBars) ? NULL : $rs->CodeBars,
-						"unit_id" => empty($rs->SUoMEntry) ? NULL : $rs->SUoMEntry,
+						"uom_id" => empty($rs->SUoMEntry) ? NULL : $rs->SUoMEntry,
 						"price" => empty($rs->Price) ? 0.00 : get_zero($rs->Price),
 						"cost" => empty($rs->Cost) ? 0.00 : get_zero($rs->Cost),
-						"model_id" => empty($rs->U_Model) ? NULL : $rs->U_Model,
-						"category_id" => empty($rs->U_Category) ? NULL : $rs->U_Category,
-						"brand_id" => empty($rs->U_Brand) ? NULL : $rs->U_Brand,
-						"type_id" => empty($rs->U_Type) ? NULL : $rs->U_Type,
-						"status" => empty($rs->validFor) ? 1 : ($rs->validFor == 'N' ? 0 : 1)
+						"vat_group" => get_null($rs->VatGourpSa),
+						"model_code" => empty($rs->Product_ModeCode) ? NULL : $rs->Product_ModeCode,
+						"brand_code" => empty($rs->Product_BrandCode) ? NULL : $rs->Product_BrandCode,
+						"type_code" => empty($rs->Product_TypeCode) ? NULL : $rs->Product_TypeCode,
+						"category_code" => empty($rs->Product_CategoryCode) ? NULL : $rs->Product_CategoryCode,
+						"category_code_1" => get_null($rs->CategoryCode1),
+						"category_code_2" => get_null($rs->CategoryCode2),
+						"category_code_3" => get_null($rs->CategoryCode3),
+						"category_code_4" => get_null($rs->CategoryCode4),
+						"category_code_5" => get_null($rs->CategoryCode5),
+						"status" => empty($rs->validFor) ? 1 : ($rs->validFor == 'N' ? 0 : 1),
+						"last_sync" => now()
 					);
 
 					if( ! $this->products_model->is_exists($rs->ItemCode))
@@ -379,17 +414,24 @@ class Products extends PS_Controller
 					{
 						$this->products_model->update($rs->ItemCode, $arr);
 					}
+
+					$i++;
 				}
 			}
 		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "no data found";
+		}
 
-		$this->_response($sc);
+		echo $sc === TRUE ? $i : $this->error;
 	}
 
 
   public function clear_filter()
 	{
-    $filter = array('item_code','item_name','item_barcode','color', 'size','group','sub_group','category','kind','type','brand','year');
+    $filter = array('item_code','item_name','item_model', 'item_type', 'item_category', 'item_brand', 'item_status');
     clear_filter($filter);
 	}
 }

@@ -25,17 +25,19 @@ class Products_model extends CI_Model
 	{
 		$this->db
 		->select('pd.*')
-		->select('pm.name AS model')
-		->select('pc.name AS category')
-		->select('pt.name AS type')
-		->select('pb.name AS brand')
-		->select('u.name AS uom')
+		->select('pm.id AS model_id, pm.code AS model_code, pm.name AS model')
+		->select('pc.id AS category_id, pc.code AS category_code, pc.name AS category')
+		->select('pt.id AS type_id, pt.code AS type_code, pt.name AS type')
+		->select('pb.id AS brand_id, pb.code AS brand_code, pb.name AS brand')
+		->select('u.code AS uom_code, u.name AS uom')
+		->select('vg.rate AS vat_rate')
 		->from('products AS pd')
-		->join('product_model AS pm', 'pd.model_id = pm.id', 'left')
-		->join('product_category AS pc', 'pd.category_id = pc.id', 'left')
-		->join('product_type AS pt', 'pd.type_id = pt.id', 'left')
-		->join('product_brand AS pb', 'pd.brand_id = pb.id', 'left')
-		->join('uom AS u', 'pd.uom_id = u.id', 'left');
+		->join('product_model AS pm', 'pd.model_code = pm.code', 'left')
+		->join('product_category AS pc', 'pd.category_code = pc.code', 'left')
+		->join('product_type AS pt', 'pd.type_code = pt.code', 'left')
+		->join('product_brand AS pb', 'pd.brand_code = pb.code', 'left')
+		->join('uom AS u', 'pd.uom_id = u.id', 'left')
+		->join('vat_group AS vg', 'pd.vat_group = vg.code', 'left');
 
 		$rs = $this->db->where('pd.code', $code)->get();
 
@@ -52,17 +54,19 @@ class Products_model extends CI_Model
 	{
 		$this->db
 		->select('pd.*')
-		->select('pm.name AS model')
-		->select('pc.name AS category')
-		->select('pt.name AS type')
-		->select('pb.name AS brand')
-		->select('u.name AS uom')
+		->select('pm.id AS model_id, pm.code AS model_code, pm.name AS model')
+		->select('pc.id AS category_id, pc.code AS category_code, pc.name AS category')
+		->select('pt.id AS type_id, pt.code AS type_code, pt.name AS type')
+		->select('pb.id AS brand_id, pb.code AS brand_code, pb.name AS brand')
+		->select('u.code AS uom_code, u.name AS uom')
+		->select('vg.rate AS vat_rate')
 		->from('products AS pd')
-		->join('product_model AS pm', 'pd.model_id = pm.id', 'left')
-		->join('product_category AS pc', 'pd.category_id = pc.id', 'left')
-		->join('product_type AS pt', 'pd.type_id = pt.id', 'left')
-		->join('product_brand AS pb', 'pd.brand_id = pb.id', 'left')
-		->join('uom AS u', 'pd.uom_id = u.id', 'left');
+		->join('product_model AS pm', 'pd.model_code = pm.code', 'left')
+		->join('product_category AS pc', 'pd.category_code = pc.code', 'left')
+		->join('product_type AS pt', 'pd.type_code = pt.code', 'left')
+		->join('product_brand AS pb', 'pd.brand_code = pb.code', 'left')
+		->join('uom AS u', 'pd.uom_id = u.id', 'left')
+		->join('vat_group AS vg', 'pd.vat_group = vg.code', 'left');
 
 		$rs = $this->db->where('pd.id', $id)->get();
 
@@ -148,22 +152,22 @@ class Products_model extends CI_Model
 
 		if(isset($ds['model']) && $ds['model'] != "")
 		{
-			$this->db->where_in('model_id', model_in($ds['model']));
+			$this->db->where_in('model_code', model_in($ds['model']));
 		}
 
 		if(isset($ds['category']) && $ds['category'] != 'all')
 		{
-			$this->db->where('category_id', $ds['category']);
+			$this->db->where('category_code', $ds['category']);
 		}
 
 		if(isset($ds['type']) && $ds['type'] != 'all')
 		{
-			$this->db->where('type_id', $ds['type']);
+			$this->db->where('type_code', $ds['type']);
 		}
 
 		if(isset($ds['brand']) && $ds['brand'] != 'all')
 		{
-			$this->db->where('brand_id', $ds['brand']);
+			$this->db->where('brand_code', $ds['brand']);
 		}
 
 		if(isset($ds['status']) && $ds['status'] != 'all')
@@ -184,44 +188,44 @@ class Products_model extends CI_Model
 		->select('pt.name AS type_name')
 		->select('pb.name AS brand_name')
 		->from('products AS pd')
-		->join('product_model AS pm', 'pd.model_id = pm.id', 'left')
-		->join('product_category AS pg', 'pd.category_id = pg.id', 'left')
-		->join('product_type AS pt', 'pd.type_id = pt.id', 'left')
-		->join('product_brand AS pb', 'pd.brand_id = pb.id', 'left');
+		->join('product_model AS pm', 'pd.model_code = pm.code', 'left')
+		->join('product_category AS pg', 'pd.category_code = pg.code', 'left')
+		->join('product_type AS pt', 'pd.type_code = pt.code', 'left')
+		->join('product_brand AS pb', 'pd.brand_code = pb.code', 'left');
 
 		if(isset($ds['code']) && $ds['code'] != "")
 		{
-			$this->db->like('code', $ds['code']);
+			$this->db->like('pd.code', $ds['code']);
 		}
 
 		if(isset($ds['name']) && $ds['name'] != "")
 		{
-			$this->db->like('name', $ds['name']);
+			$this->db->like('pd.name', $ds['name']);
 		}
 
 		if(isset($ds['model']) && $ds['model'] != "")
 		{
-			$this->db->where_in('model_id', model_in($ds['model']));
+			$this->db->where_in('pd.model_code', model_in($ds['model']));
 		}
 
 		if(isset($ds['category']) && $ds['category'] != 'all')
 		{
-			$this->db->where('category_id', $ds['category']);
+			$this->db->where('pd.category_code', $ds['category']);
 		}
 
 		if(isset($ds['type']) && $ds['type'] != 'all')
 		{
-			$this->db->where('type_id', $ds['type']);
+			$this->db->where('pd.type_code', $ds['type']);
 		}
 
 		if(isset($ds['brand']) && $ds['brand'] != 'all')
 		{
-			$this->db->where('brand_id', $ds['brand']);
+			$this->db->where('pd.brand_code', $ds['brand']);
 		}
 
 		if(isset($ds['status']) && $ds['status'] != 'all')
 		{
-			$this->db->where('status', $ds['status']);
+			$this->db->where('pd.status', $ds['status']);
 		}
 
 		$rs = $this->db->limit($perpage, $offset)->get();
@@ -253,6 +257,18 @@ class Products_model extends CI_Model
 	}
 
 
+
+	public function get_last_sync_date()
+	{
+		$rs = $this->db->select_max('last_sync')->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->last_sync === NULL ? date('2021-01-01') : $rs->row()->last_sync;
+		}
+
+		return date('2021-01-01');
+	}
 
 }
 ?>

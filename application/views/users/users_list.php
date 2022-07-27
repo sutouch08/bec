@@ -96,9 +96,10 @@
 			<thead>
 				<tr>
 					<th class="fix-width-60 middle text-center">#</th>
-					<th class="fix-width-150 middle">User name</th>
+					<th class="fix-width-100 middle">User name</th>
 					<th class="min-width-100 middle">Display name</th>
 					<th class="min-width-100 middle">Sales Person</th>
+					<th class="min-width-80 middle text-center">Quota No.</th>
 					<th class="fix-width-150 middle text-center">Team</th>
 					<th class="fix-width-100 middle text-center">User Group</th>
 					<th class="fix-width-100 middle text-center">Profile</th>
@@ -115,6 +116,7 @@
 					<td class="middle"><?php echo $rs->uname; ?></td>
 					<td class="middle"><?php echo $rs->display_name; ?></td>
 					<td class="middle"><?php echo $rs->sale_name; ?></td>
+					<td class="middle text-center"><?php echo $rs->quota_no; ?></td>
 					<td class="middle text-center"><?php echo (is_null($rs->team_id) ? "-No Customer Team-" : $rs->team_name); ?></td>
 					<td class="middle text-center"><?php echo $rs->is_customer == 1 ? 'Customer' : 'BEC'; ?></td>
 					<td class="middle text-center"><?php echo $rs->profile_name; ?></td>

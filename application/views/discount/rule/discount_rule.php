@@ -1,6 +1,8 @@
 <?php
 $p_disabled = $rule->type === 'P' ? '' : 'disabled';
 $n_disabled = $rule->type === 'N' ? '' : 'disabled';
+$f_disabled = $rule->freeQty > 0 ? '' : 'disabled';
+$checked = $rule->freeQty > 0 ? 'checked' : '';
 ?>
 
 	<div class="row">
@@ -48,31 +50,42 @@ $n_disabled = $rule->type === 'N' ? '' : 'disabled';
 				<div class="divider"></div>
 
         <div class="col-sm-2">
-					<span class="form-control left-label margin-top-20">ของแถม</span>
+					<span class="form-control left-label margin-top-20">
+						<label>
+							<input type="checkbox" class="ace disc-type" name="free-item"  id="free-item" <?php echo $checked; ?> onchange="toggleFreeItem()">
+							<span class="lbl">&nbsp;&nbsp; ของแถม</span>
+						</label>
+					</span>
 				</div>
 				<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5">
-					<label>จำนวน</label>
-					<input type="number" class="form-control input-sm text-center" id="free-qty" value="1.00" />
+					<label class="not-show">จำนวน</label>
+					<input type="number" class="form-control input-sm text-center free" id="free-qty" value="<?php echo $rule->freeQty; ?>"  <?php echo $f_disabled; ?>/>
         </div>
-        <div class="col-lg-5 col-md-5 col-sm-5 padding-5">
-					<label>สินค้า</label>
-					<input type="text" class="form-control input-sm text-center" id="free-item-box" placeholder="รหัส/ชื่อสินค้า" />
-					<input type="hidden" id="temp-item-id" value="">
-        </div>
-				<div class="col-lg-1 col-md-1 col-sm-1 padding-5">
-					<label class="display-block not-show">x</label>
-					<button type="button" class="btn btn-xs btn-primary btn-block" onclick="addItemToList()"><i class="fa fa-plus"></i> Add</button>
-        </div>
+				<div class="col-lg-5 col-md-5 col-sm-5 padding-5" style="padding-top:5px;">
+					<span class="form-control left-label margin-top-20">
+					ชิ้น   จากรายการต่อไปนี้
+					</span>
+				</div>
 				<div class="divider-hidden"></div>
 				<div class="col-sm-2 not-show">
 					<span class="form-control left-label">ของแถม2</span>
+				</div>
+        <div class="col-lg-7 col-md-7 col-sm-7 padding-5">
+					<input type="text" class="form-control input-sm free" id="free-item-box" placeholder="รหัส/ชื่อสินค้า" <?php echo $f_disabled; ?> />
+					<input type="hidden" id="temp-item-id" value="">
+        </div>
+				<div class="col-lg-1 col-md-1 col-sm-1 padding-5">
+					<button type="button" class="btn btn-xs btn-primary btn-block free" onclick="addItemToList()" <?php echo $f_disabled; ?>><i class="fa fa-plus"></i> Add</button>
+        </div>
+				<div class="divider-hidden"></div>
+				<div class="col-sm-2 not-show">
+					<span class="form-control left-label">ของแถม3</span>
 				</div>
 				<div class="col-lg-10 col-md-10 col-sm-10 padding-5 table-responsive" style="max-height:300px;">
 					<table class="table table-striped border-1">
 						<thead>
 							<tr>
 								<th class="fix-width-40"></th>
-								<th class="fix-width-60 text-center">Qty</th>
 								<th class="fix-width-150">SKU Code</th>
 								<th class="min-width-250">Description</th>
 								<th class="fix-width-60 text-center"><button type="button" class="btn btn-mini btn-danger btn-block" onclick="removeFreeItem()">Delete</button></th>
@@ -88,11 +101,9 @@ $n_disabled = $rule->type === 'N' ? '' : 'disabled';
 												<span class="lbl"></span>
 											</label>
 										</td>
-										<td class="middle text-center" id="free-item-qty-label-<?php echo $item->product_id; ?>"><?php echo $item->qty; ?></td>
 										<td class="middle">
 										<?php echo $item->code; ?>
 										<input type="hidden" class="free-item-id" id="free-item-id-<?php echo $item->product_id; ?>" value="<?php echo $item->product_id; ?>">
-										<input type="hidden" class="free-item-qty" id="free-item-qty-<?php echo $item->product_id; ?>" value="<?php echo $item->qty; ?>">
 										</td>
 										<td class="middle" colspan="2"><?php echo $item->name; ?></td>
 									</tr>
@@ -121,7 +132,7 @@ $n_disabled = $rule->type === 'N' ? '' : 'disabled';
         </div>
 				<div class="divider-hidden"></div>
 				<div class="divider-hidden"></div>
-
+<div class="hide">
 				<div class="col-lg-2 col-md-2 col-sm-2">
 					<span class="form-control left-label text-right">รวมยอดได้</span>
 				</div>
@@ -138,6 +149,8 @@ $n_disabled = $rule->type === 'N' ? '' : 'disabled';
 					</label>
         </div>
 				<div class="divider-hidden"></div>
+</div>
+
 
 
 				<div class="divider-hidden"></div>
@@ -151,11 +164,9 @@ $n_disabled = $rule->type === 'N' ? '' : 'disabled';
 <script type="text/x-handlebarsTemplate" id="freeItemTemplate">
 	<tr id="free-row-{{id}}">
 		<td class="middle text-center"><label><input type="checkbox" class="ace del-chk" value="{{id}}"><span class="lbl"></span></label></td>
-		<td class="middle text-center" id="free-item-qty-label-{{id}}">{{qty}}</td>
 		<td class="middle">
 		{{code}}
 		<input type="hidden" class="free-item-id" id="free-item-id-{{id}}" value="{{id}}">
-		<input type="hidden" class="free-item-qty" id="free-item-qty-{{id}}" value="{{qty}}">
 		</td>
 		<td class="middle" colspan="2">{{name}}</td>
 	</tr>

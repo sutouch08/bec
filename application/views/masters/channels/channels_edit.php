@@ -11,8 +11,16 @@
 </div><!-- End Row -->
 <hr class="margin-bottom-30"/>
 <form class="form-horizontal" id="addForm" method="post">
+	<div class="form-group">
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Channels Code</label>
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+			<input type="text" class="form-control" maxlength="50" value="<?php echo $code; ?>" disabled />
+    </div>
+    <div class="col-xs-12 col-sm-reset inline red margin-top-5" id="code-error"></div>
+  </div>
+
   <div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Channels name</label>
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Channels Name</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 			<input type="text" id="name" class="form-control" maxlength="50" value="<?php echo $name; ?>" autofocus />
     </div>

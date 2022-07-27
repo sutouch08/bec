@@ -7,6 +7,7 @@ class PS_Controller extends CI_Controller
   public $home;
 	public $_user;
 	public $_SuperAdmin = FALSE;
+	public $_customer = FALSE;
 	public $ms;
 	public $mc;
 
@@ -22,6 +23,15 @@ class PS_Controller extends CI_Controller
 
 		$this->_user = $this->user_model->get_user_by_uid($uid);
 
+		$this->close_system   = getConfig('CLOSE_SYSTEM'); //--- ปิดระบบทั้งหมดหรือไม่
+		$this->_SuperAdmin = $this->_user->id_profile == -987654321 ? TRUE : FALSE;
+		$this->_customer = empty($this->_user->customer_code) ? FALSE : TRUE;
+
+    if($this->close_system == 1 && $this->_SuperAdmin === FALSE)
+    {
+      redirect(base_url().'maintenance');
+    }
+
 		if( ! $this->_SuperAdmin && $this->is_expire_password($this->_user->last_pass_change))
 		{
 			redirect(base_url().'change_password/e');
@@ -32,6 +42,11 @@ class PS_Controller extends CI_Controller
 			redirect(base_url().'change_password/f');
 		}
 
+		if($this->_customer === TRUE)
+		{
+			redirect(base_url().'orders/bporders');
+		}
+
     //--- get permission for user
     $this->pm = get_permission($this->menu_code, $uid, $this->_user->id_profile);
 
@@ -40,9 +55,6 @@ class PS_Controller extends CI_Controller
 			$this->deny_page();
 		}
 
-		//--- load database
-		// $this->ms = $this->load->database('ms', TRUE); //--- SAP database
-    // $this->mc = $this->load->database('mc', TRUE); //--- Temp Database
   }
 
 
@@ -76,6 +88,11 @@ class PS_Controller extends CI_Controller
   }
 
   public function permission_deny()
+  {
+    return $this->load->view('permission_deny');
+  }
+
+	public function permission_page()
   {
     return $this->load->view('permission_deny');
   }

@@ -30,6 +30,7 @@ function getReset(id) {
   window.location.href = HOME + 'reset_password/'+id;
 }
 
+
 function saveAdd() {
 	validUserName();
 	validDisplayName();
@@ -44,13 +45,24 @@ function saveAdd() {
 	const uname = $('#uname').val();
 	const dname = $('#dname').val();
 	const sale_id = $('#sale_id').val();
+	const emp_id = $('#emp_id').val();
 	const team_id = $('#team_id').val();
+	const quota_no = $('#quota_no').val();
 	const is_customer = $('#is_customer').val();
 	const customer_code = $('#customer_code').val();
+	const channels = $('#channels').val();
 	const pwd = $('#pwd').val();
 	const profile = $('#profile').val();
 	const active = $('#active').is(':checked') ? 1 : 0;
 	const force_reset = $('#force_reset').is(':checked') ? 1 : 0;
+
+	if(is_customer == 1 && channels == "") {
+		set_error($('#channels'), $('#channels-error'), "Required");
+		return false;
+	}
+	else {
+		clear_error($('#channels'), $('#channels-error'));
+	}
 
 	load_in();
 
@@ -63,8 +75,10 @@ function saveAdd() {
 			'dname' : dname,
 			'sale_id' : sale_id,
 			'team_id' : team_id,
+			'quota_no' : quota_no,
 			'is_customer' : is_customer,
 			'customer_code' : customer_code,
+			'channels' : channels,
 			'pwd' : pwd,
 			'profile' : profile,
 			'active' : active,
@@ -120,11 +134,22 @@ function update() {
 	const id = $('#user_id').val();
 	const dname = $('#dname').val();
 	const sale_id = $('#sale_id').val();
+	const emp_id = $('#emp_id').val();
 	const team_id = $('#team_id').val();
+	const quota_no = $('#quota_no').val();
 	const is_customer = $('#is_customer').val();
 	const customer_code = $('#customer_code').val();
+	const channels = $('#channels').val();
 	const profile = $('#profile').val();
 	const active = $('#active').is(':checked') ? 1 : 0;
+
+	if(is_customer == 1 && channels == "") {
+		set_error($('#channels'), $('#channels-error'), "Required");
+		return false;
+	}
+	else {
+		clear_error($('#channels'), $('#channels-error'));
+	}
 
 	load_in();
 
@@ -136,9 +161,12 @@ function update() {
 			'id' : id,
 			'dname' : dname,
 			'sale_id' : sale_id,
+			'emp_id' : emp_id,
 			'team_id' : team_id,
+			'quota_no' : quota_no,
 			'is_customer' : is_customer,
 			'customer_code' : customer_code,
+			'channels' : channels,
 			'profile' : profile,
 			'active' : active
 		},
@@ -228,7 +256,7 @@ function getDelete(id, uname){
 		confirmButtonText: 'ใช่, ฉันต้องการลบ',
 		cancelButtonText: 'ยกเลิก',
 		closeOnConfirm: false
-  },function(){		
+  },function(){
 		$.ajax({
 			url:HOME + 'delete',
 			type:'POST',
@@ -463,11 +491,13 @@ function toggleCustomer() {
 
 	if(is_customer == 1) {
 		$('#customer').removeAttr('disabled');
+		$('#channels').removeAttr('disabled');
 		$('#customer').focus();
 	}
 	else {
 		$('#customer').val('');
 		$('#customer_code').val('');
+		$('#channels').val('').attr('disabled', 'disabled');
 		$('#customer').attr('disabled', 'disabled');
 	}
 }
@@ -481,12 +511,14 @@ $('#customer').autocomplete({
 		let ar = rs.split(' | ');
 
 		if(ar.length === 2) {
-			$(this).val(ar[1]);
+			$(this).val(ar[0]);
 			$('#customer_code').val(ar[0]);
+			$('#customer_name').val(ar[1]);
 		}
 		else {
 			$(this).val('');
 			$('#customer_code').val('');
+			$('#customer_name').val('');
 		}
 	}
 })

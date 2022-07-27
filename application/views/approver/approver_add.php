@@ -14,7 +14,7 @@
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Username</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<select class="form-control" id="user">
+			<select class="width-100" id="user">
 				<option value="">Please Select</option>
 				<?php echo select_user(); ?>
 			</select>
@@ -70,5 +70,8 @@
   </div>
 </form>
 
+<script>
+	$('#user').select2();
+</script>
 <script src="<?php echo base_url(); ?>scripts/approver/approver.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

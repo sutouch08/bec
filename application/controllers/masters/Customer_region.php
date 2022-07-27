@@ -70,10 +70,11 @@ class Customer_region extends PS_Controller
 				$sc = FALSE;
 				set_error('update');
 			}
+			else
+			{
+				$this->update_sap($id);
+			}
 		}
-
-		//--- send update to SAP
-		$this->update_sap($id, $name);
 
 		$this->_response($sc);
 	}
@@ -84,30 +85,23 @@ class Customer_region extends PS_Controller
 	{
 		$sc = TRUE;
 
-		$response = json_encode(array(
-			array("id" => 1, "name" => "ภาคเหนือ"),
-			array("id" => 2, "name" => "ภาคกลาง"),
-			array("id" => 3, "name" => "ภาคใต้"),
-			array("id" => 4, "name" => "ภาคอีสาน"),
-			array("id" => 5, "name" => "ภาคตะวันออก"),
-			array("id" => 6, "name" => "ภาคภาคตะวันตก"),
-			array("id" => 7, "name" => "กรุงเทพฯ")
-		));
+		$this->load->library('api');
 
-		$res = json_decode($response);
+		$res = $this->api->getCustomerRegionUpdateData();
 
 
 		if(! empty($res))
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->customer_region_model->get($rs->id);
+				$cr = $this->customer_region_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
 					$arr = array(
-						"id" => $rs->id,
-						"name" => $rs->name
+						"code" => $rs->id,
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
 					$this->customer_region_model->add($arr);
@@ -115,10 +109,11 @@ class Customer_region extends PS_Controller
 				else
 				{
 					$arr = array(
-						"name" => $rs->name
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
-					$this->customer_region_model->update($rs->id, $arr);
+					$this->customer_region_model->update($cr->id, $arr);
 				}
 			}
 		}
@@ -127,9 +122,23 @@ class Customer_region extends PS_Controller
 	}
 
 
-	private function update_sap($id, $name)
+	private function update_sap($id)
 	{
-		return TRUE;
+		$rs = $this->customer_region_model->get($id);
+
+		if(!empty($rs))
+		{
+			$this->load->library('update_api');
+
+			$arr = array(
+				'id' => $rs->code,
+				'name' => $rs->name
+			);
+
+			return $this->update_api->updateCustomerRegion($arr);
+		}
+
+		return FALSE;
 	}
 
 

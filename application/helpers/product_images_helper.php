@@ -27,11 +27,21 @@ function delete_product_image($id)
   $ci =& get_instance();
   $path = $ci->config->item('image_file_path').'products/';
   $use_size = array('mini', 'default', 'medium', 'large');
+	$sc = TRUE;
   foreach($use_size as $size)
   {
     $image_path = $path.$size.'/product_'.$size.'_'.$id.'.jpg';
-    unlink($image_path);
+
+		if(file_exists($image_path))
+		{
+			if(! unlink($image_path))
+			{
+				$sc = FALSE;
+			}			
+		}
   }
+
+	return $sc;
 }
 
 

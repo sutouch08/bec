@@ -14,28 +14,11 @@ function viewDetail(id) {
 	window.location.href = HOME + 'view_detail/'+id;
 }
 
-$('#model').autocomplete({
-	source:HOME + 'search_model',
-	autoFocus:true,
-	close:function() {
-		let rs = $('#model').val();
-		let arr = rs.split(' | ');
-
-		if(arr.length == 2) {
-			$('#model').val(arr[0]);
-			$('#model_id').val(arr[1]);
-		}
-		else {
-			$('#model').val('');
-			$('#model_id').val('');
-		}
-	}
-})
 
 function checkEdit(){
 	let id = $('#id').val();
 	let code = $('#code').val();
-	let model = $('#model_id').val();
+	let model = $('#model').val();
 	let brand = $('#brand').val();
 	let category = $('#category').val();
 	let type = $('#type').val();
@@ -52,6 +35,10 @@ function checkEdit(){
 			"model" : model,
 			"brand" : brand,
 			"category" : category,
+			"cateCode1" : $('#cateCode1').val(),
+			"cateCode2" : $('#cateCode2').val(),
+			"cateCode3" : $('#cateCode3').val(),
+			"cateCode4" : $('#cateCode4').val(),
 			"type" : type,
 			"cover" : cover
 		},
@@ -89,37 +76,6 @@ $('#cost').focus(function(){
 	$(this).select();
 })
 
-
-function syncData() {
-	load_in();
-
-	$.ajax({
-		url:HOME + 'sync_data',
-		type:'GET',
-		cache:false,
-		success:function(rs) {
-			load_out();
-			if(rs === 'success') {
-				swal({
-					title:'Success',
-					type:'success',
-					timer:1000
-				});
-
-				setTimeout(function() {
-					goBack();
-				}, 1200);
-			}
-			else {
-				swal({
-					title:'Error!',
-					text: rs,
-					type:'error'
-				})
-			}
-		}
-	})
-}
 
 
 function changeImage() {
@@ -235,9 +191,8 @@ function removeFile()
 }
 
 
-function deleteImage()
+function deleteImage(id)
 {
-	var code = $('#code').val();
   swal({
 		title: "คุณแน่ใจ ?",
 		text: "ต้องการลบรูปภาพ หรือไม่ ?",
@@ -249,12 +204,9 @@ function deleteImage()
 		closeOnConfirm: false
 		}, function(){
       $.ajax({
-    		url: HOME + 'delete_image',
+    		url: HOME + 'delete_image/'+id,
     		type:"POST",
-        cache:"false",
-        data:{
-          "code" : code
-        },
+        cache:"false",        
     		success: function(rs){
     			var rs = $.trim(rs);
     			if( rs == 'success' )
@@ -288,4 +240,43 @@ function deleteImage()
 				}
     	});
 	});
+}
+
+
+function getParentCate() {
+	let code = $('#category').val();
+
+	if(code == "") {
+		$('#cateCode1').val("");
+		$('#cateCode2').val("");
+		$('#cateCode3').val("");
+		$('#cateCode4').val("");
+	}
+	else {
+
+		$.ajax({
+			url:HOME + 'get_category_parent_list',
+			type:'GET',
+			cache:false,
+			data:{
+				'code' : code
+			},
+			success:function(rs) {
+				if(isJson(rs)) {
+					var ds = $.parseJSON(rs);
+					$('#cateCode1').val(ds.l1);
+					$('#cateCode2').val(ds.l2);
+					$('#cateCode3').val(ds.l3);
+					$('#cateCode4').val(ds.l4);
+				}
+				else {
+					$('#cateCode1').val("");
+					$('#cateCode2').val("");
+					$('#cateCode3').val("");
+					$('#cateCode4').val("");
+				}
+			}
+		})
+	}
+
 }

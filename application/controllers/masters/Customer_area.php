@@ -68,10 +68,14 @@ class Customer_area extends PS_Controller
 				$sc = FALSE;
 				set_error('update');
 			}
+			else
+			{
+				//--- send update to SAP
+				$this->update_sap($id);
+
+			}
 		}
 
-		//--- send update to SAP
-		$this->update_sap($id, $name);
 
 		$this->_response($sc);
 	}
@@ -81,31 +85,23 @@ class Customer_area extends PS_Controller
 	public function sync_data()
 	{
 		$sc = TRUE;
+		$this->load->library('api');
 
-		$response = json_encode(array(
-			array("id" => 1, "name" => "เขต1"),
-			array("id" => 2, "name" => "เขต2"),
-			array("id" => 3, "name" => "เขต3"),
-			array("id" => 4, "name" => "เขต4"),
-			array("id" => 5, "name" => "เขต5"),
-			array("id" => 6, "name" => "เขต6"),
-			array("id" => 7, "name" => "เขต7")
-		));
-
-		$res = json_decode($response);
+		$res = $this->api->getCustomerAreaUpdateData();
 
 
 		if(! empty($res))
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->customer_area_model->get($rs->id);
+				$cr = $this->customer_area_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
 					$arr = array(
-						"id" => $rs->id,
-						"name" => $rs->name
+						"code" => $rs->id,
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
 					$this->customer_area_model->add($arr);
@@ -113,10 +109,11 @@ class Customer_area extends PS_Controller
 				else
 				{
 					$arr = array(
-						"name" => $rs->name
+						"name" => $rs->name,
+						"last_sync" => now()
 					);
 
-					$this->customer_area_model->update($rs->id, $arr);
+					$this->customer_area_model->update($cr->id, $arr);
 				}
 			}
 		}
@@ -126,9 +123,23 @@ class Customer_area extends PS_Controller
 
 
 
-	private function update_sap($id, $name)
+	private function update_sap($id)
 	{
-		return TRUE;
+		$rs = $this->customer_area_model->get($id);
+
+		if(!empty($rs))
+		{
+			$this->load->library('update_api');
+
+			$arr = array(
+				'id' => $rs->code,
+				'name' => $rs->name
+			);
+
+			return $this->update_api->updateCustomerArea($arr);
+		}
+
+		return FALSE;
 	}
 
 

@@ -174,5 +174,94 @@ class Customer_address_model extends CI_Model
 		return FALSE;
   }
 
+
+	public function get_address_ship_to_code($CardCode)
+	{
+		$rs = $this->db
+		->select('Address AS code, Address3 AS name')
+		->where('CardCode', $CardCode)
+		->where('AdresType', 'S')
+		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_address_bill_to_code($CardCode)
+	{
+		$rs = $this->db
+		->select('Address AS code, Address3 AS name')
+		->where('CardCode', $CardCode)
+		->where('AdresType', 'B')
+		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_address_ship_to($CardCode, $Address = NULL)
+	{
+		if(! empty($Address))
+		{
+			$this->db->where('Address', $Address);
+		}
+
+		$rs = $this->db
+		->where('AdresType', 'S')
+		->where('CardCode', $CardCode)
+		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_address_bill_to($CardCode, $Address = NULL)
+	{
+		if(!empty($Address))
+		{
+			$this->db->where('Address', $Address);
+		}
+
+		$rs = $this->db
+		->where('AdresType', 'B')
+		->where('CardCode', $CardCode)
+		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_last_sync_date()
+	{
+		$rs = $this->db->select_max('last_sync')->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->last_sync == NULL ? date('2021-01-01') : $rs->row()->last_sync;
+		}
+
+		return '2021-01-01';
+	}
+
 }
 ?>

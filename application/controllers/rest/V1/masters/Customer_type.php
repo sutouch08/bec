@@ -28,6 +28,7 @@ class Customer_type extends REST_Controller
 			{
 				$result = array(
 					'id' => $rs->id,
+					'code' => $rs->code,
 					'name' => $rs->name,
 					'date_upd' => $rs->date_upd
 				);
@@ -56,6 +57,7 @@ class Customer_type extends REST_Controller
 				{
 					$arr = array(
 						'id' => $rs->id,
+						'code' => $rs->code,
 						'name' => $rs->name,
 						'date_upd' => $rs->date_upd
 					);
@@ -101,27 +103,20 @@ class Customer_type extends REST_Controller
 
 	  if($sc === TRUE)
 	  {
-		  $cr = $this->customer_type_model->get($ds->id);
+		  $cr = $this->customer_type_model->get_by_code($ds->id);
 
 		  if(empty($cr))
 		  {
-				if( ! $this->customer_type_model->is_exists($ds->name))
-				{
-					$arr = array(
-						'id' => $ds->id,
-						'name' => $ds->name
-					);
+				$arr = array(
+					'code' => $ds->id,
+					'name' => $ds->name,
+					'last_sync' => now()
+				);
 
-					if(! $this->customer_type_model->add($arr))
-					{
-						$sc = FALSE;
-						$this->error = "Insert data failed";
-					}
-				}
-				else
+				if(! $this->customer_type_model->add($arr))
 				{
 					$sc = FALSE;
-					set_error('exists', $ds->name);
+					$this->error = "Insert data failed";
 				}
 		  }
 		  else
@@ -173,7 +168,7 @@ class Customer_type extends REST_Controller
 
 
 
-	public function update_post($id)
+	public function update_post($code)
   {
     $sc = TRUE;
 		$result = array();
@@ -191,26 +186,18 @@ class Customer_type extends REST_Controller
 
 	  if($sc === TRUE)
 	  {
-		  $cr = $this->customer_type_model->get($id);
+		  $cr = $this->customer_type_model->get_by_code($code);
 
 		  if( ! empty($cr))
 		  {
-				if( ! $this->customer_type_model->is_exists($ds->name, $id))
-				{
-					$arr = array(
-						'name' => $ds->name
-					);
+				$arr = array(
+					'name' => $ds->name
+				);
 
-					if(! $this->customer_type_model->update($id, $arr))
-					{
-						$sc = FALSE;
-						$this->error = "Update data failed";
-					}
-				}
-				else
+				if(! $this->customer_type_model->update($cr->id, $arr))
 				{
 					$sc = FALSE;
-					set_error('exists', $ds->name);
+					$this->error = "Update data failed";
 				}
 		  }
 		  else

@@ -245,29 +245,39 @@ function parseDiscount(discount_label, price)
 		"discUnit2" : '',
 		"discLabel3" : 0,
 		"discUnit3" : '',
-		"discountAmount" : 0
+		"discLabel4" : 0,
+		"discUnit4" : '',
+		"discLabel5" : 0,
+		"discUnit5" : '',
+		"discountAmount" : 0,
+		"sellPrice" : 0
 	};
+
+	bprice = 0;
 
 	if(discount_label != '' && discount_label != 0)
 	{
 		var arr = discount_label.split('+');
+		discLabel['sellPrice'] = price;
 		arr.forEach(function(item, index){
 			var i = index + 1;
-			if(i < 4){
+			if(i <= 5) {
+				if(price == 0) {
+					bprice--;
+				}
+
 				var disc = item.split('%');
 				var value = parseDefault(parseFloat(disc[0]), 0);
 				discLabel["discLabel"+i] = value;
-				if(disc.length == 2){
-					var amount = (value * 0.01) * price;
-					discLabel["discUnit"+i] = '%';
-					discLabel["discountAmount"] += amount;
-					price -= amount;
-				}else{
-					discLabel["discountAmount"] += value;
-					price -= value;
-				}
+				var amount = (value * 0.01) * price;
+				discLabel["discUnit"+i] = '%';
+				discLabel["discountAmount"] += amount;
+				price -= amount;
+				discLabel['sellPrice'] = price;
 			}
 		});
+
+		discLabel.sellPrice += bprice;
 	}
 
 	return discLabel;
@@ -325,4 +335,10 @@ function validCode(input, regex){
 function changeUserPwd()
 {
 	window.location.href = BASE_URL + 'user_pwd';
+}
+
+
+function uniqueId()
+{
+	return Math.floor(Math.random() * Date.now());
 }

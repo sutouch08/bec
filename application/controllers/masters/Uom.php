@@ -100,16 +100,8 @@ class Uom extends PS_Controller
 	public function sync_data()
 	{
 		$sc = TRUE;
-
-		$response = json_encode(array(
-			array('UomEntry' => 1, 'UomCode' => 'PCS', 'UomName' => 'PCS'),
-			array('UomEntry' => 2, 'UomCode' => 'รายการ', 'UomName' => 'รายการ'),
-			array('UomEntry' => 3, 'UomCode' => 'ใบ', 'UomName' => 'ใบ'),
-			array('UomEntry' => 4, 'UomCode' => 'กล่อง', 'UomName' => 'กล่อง'),
-			array('UomEntry' => 5, 'UomCode' => 'ม้วน', 'UomName' => 'ม้วน')
-		));
-
-		$res = json_decode($response);
+		$this->load->library('api');
+		$res = $this->api->getUomUpdateData();
 
 
 		if(! empty($res))

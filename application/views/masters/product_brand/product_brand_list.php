@@ -20,20 +20,24 @@
 <hr class="padding-5" />
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
     <div class="row">
-        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
-            <label>Name</label>
-            <input type="text" class="form-control input-sm" name="name" value="<?php echo $name; ?>" />
-        </div>
+			<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+					<label>Code</label>
+					<input type="text" class="form-control input-sm search-box" name="code" value="<?php echo $code; ?>" />
+			</div>
+      <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+          <label>Name</label>
+          <input type="text" class="form-control input-sm search-box" name="name" value="<?php echo $name; ?>" />
+      </div>
 
-        <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
-            <label class="display-block not-show">buton</label>
-            <button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
-        </div>
-        <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
-            <label class="display-block not-show">buton</label>
-            <button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i
-                    class="fa fa-retweet"></i> Reset</button>
-        </div>
+      <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
+        <label class="display-block not-show">buton</label>
+        <button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
+      </div>
+      <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
+        <label class="display-block not-show">buton</label>
+        <button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i
+          class="fa fa-retweet"></i> Reset</button>
+      </div>
     </div>
     <hr class="margin-top-15">
 </form>
@@ -45,6 +49,7 @@
             <thead>
                 <tr>
                     <th class="fix-width-60 middle text-center">#</th>
+										<th class="fix-width-100 middle">Code</th>
                     <th class="min-width-250 middle">Name</th>
 										<th class="fix-width-150 middle">Last update</th>
 										<th class="fix-width-150 middle">Last sync</th>
@@ -57,6 +62,7 @@
                 <?php foreach($data as $rs) : ?>
                 <tr>
                     <td class="middle text-center"><?php echo $no; ?></td>
+										<td class="middle"><?php echo $rs->code; ?></td>
                     <td class="middle"><?php echo $rs->name; ?></td>
 										<td class="middle"><?php echo thai_date($rs->date_upd, TRUE); ?></td>
 										<td class="middle"><?php echo (empty($rs->last_sync) ? "" : thai_date($rs->last_sync, TRUE)); ?></td>

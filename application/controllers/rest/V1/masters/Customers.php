@@ -53,15 +53,18 @@ class Customers extends REST_Controller
 					'LicTradNum' => empty($ds->LicTradNum) ? NULL : get_null($ds->LicTradNum),
 					'CardType' => empty($ds->CardType) ? 'C' : $ds->CardType,
 					'GroupCode' => empty($ds->GroupCode) ? NULL : get_null($ds->GroupCode),
-					'CmpPrivate' => empty($ds->CmpPrivate) ? 'C' : ($ds->CmpPrivate == 'C' ? 'C' : ($ds->CmpPrivate == 'I' ? 'I' : 'G')),
+					'GroupNum' => empty($ds->GroupNum) ? NULL : get_null($ds->GroupNum),
+					'ListNum' => empty($ds->ListNum) ? NULL : $ds->ListNum,
 					'SlpCode' => empty($ds->SlpCode) ? NULL : get_null($ds->SlpCode),
 					'RegionCode' => empty($ds->RegionCode) ? NULL : get_null($ds->RegionCode),
 					'AreaCode' => empty($ds->AreaCode) ? NULL : get_null($ds->AreaCode),
 					'TypeCode' => empty($ds->TypeCode) ? NULL : get_null($ds->TypeCode),
 					'GradeCode' => empty($ds->GradeCode) ? NULL : get_null($ds->GradeCode),
 					'CreditLine' => empty($ds->CreditLine) ? 0.00 : $ds->CreditLine,
-					'Status' => empty($ds->validFor) ? 1 : ($ds->validFor == 'N' ? 0 : 1)
+					'Status' => empty($ds->validFor) ? 1 : ($ds->validFor == 'N' ? 0 : 1),
+					'last_sync' => now()
 			  );
+
 
 			  if(! $this->customers_model->add($arr))
 			  {
@@ -146,19 +149,21 @@ class Customers extends REST_Controller
 
 		  if( ! empty($cr))
 		  {
-				$arr = array(
+				$arr = array(				  
 					'CardName' => empty($ds->CardName) ? NULL: get_null($ds->CardName),
 					'LicTradNum' => empty($ds->LicTradNum) ? NULL : get_null($ds->LicTradNum),
 					'CardType' => empty($ds->CardType) ? 'C' : $ds->CardType,
 					'GroupCode' => empty($ds->GroupCode) ? NULL : get_null($ds->GroupCode),
-					'CmpPrivate' => empty($ds->CmpPrivate) ? 'C' : ($ds->CmpPrivate == 'C' ? 'C' : ($ds->CmpPrivate == 'I' ? 'I' : 'G')),
+					'GroupNum' => empty($ds->GroupNum) ? NULL : get_null($ds->GroupNum),
+					'ListNum' => empty($ds->ListNum) ? NULL : $ds->ListNum,
 					'SlpCode' => empty($ds->SlpCode) ? NULL : get_null($ds->SlpCode),
 					'RegionCode' => empty($ds->RegionCode) ? NULL : get_null($ds->RegionCode),
 					'AreaCode' => empty($ds->AreaCode) ? NULL : get_null($ds->AreaCode),
 					'TypeCode' => empty($ds->TypeCode) ? NULL : get_null($ds->TypeCode),
 					'GradeCode' => empty($ds->GradeCode) ? NULL : get_null($ds->GradeCode),
 					'CreditLine' => empty($ds->CreditLine) ? 0.00 : $ds->CreditLine,
-					'Status' => empty($ds->validFor) ? 1 : ($ds->validFor == 'N' ? 0 : 1)
+					'Status' => empty($ds->validFor) ? 1 : ($ds->validFor == 'N' ? 0 : 1),
+					'last_sync' => now()
 			  );
 
 			  if(! $this->customers_model->update($CardCode, $arr))

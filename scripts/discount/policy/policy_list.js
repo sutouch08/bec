@@ -1,19 +1,3 @@
-function getSearch(){
-  $('#searchForm').submit();
-}
-
-
-function clearFilter(){
-  $.ajax({
-    url: HOME + '/clear_filter',
-    type:'GET',
-    cache:'false',
-    success: function(){
-      goBack();
-    }
-  });
-}
-
 
 function setActiveFilter(option){
   $('#isActive').val(option);

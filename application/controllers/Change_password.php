@@ -4,6 +4,7 @@ class Change_password extends CI_Controller
 {
   public $title = 'Change password';
 	public $error;
+	public $_customer = FALSE;
 
 	public function __construct()
 	{

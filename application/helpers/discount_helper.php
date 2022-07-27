@@ -7,6 +7,8 @@ function parse_discount_text($discText, $price)
 		'discount1' => 0,
 		'discount2' => 0,
 		'discount3' => 0,
+		'discount4' => 0,
+		'discount5' => 0,
 		'discount_amount' => 0
 	);
 
@@ -15,17 +17,22 @@ function parse_discount_text($discText, $price)
 		$step = explode('+', $discText);
 
 		$i = 1;
+
 		foreach($step as $discLabel)
 		{
-			if($i < 4)
+			if($i <= 5)
 			{
 				$key = 'discount'.$i;
 				$arr = explode('%', $discLabel);
-				$arr[0] = floatval($arr[0]);
-				$discount = count($arr) == 1 ? $arr[0] : ($arr[0] * 0.01) * $price; //--- ส่วนลดต่อชิ้น
-				$disc[$key] = count($arr) == 1 ? $arr[0] : $arr[0].'%'; //--- discount label
-				$disc['discount_amount'] += $discount;
-				$price -= $discount;
+				$value = floatval($arr[0]);
+
+				if($value > 0)
+				{
+					$discount = ($value * 0.01) * $price; //--- ส่วนลดต่อชิ้น
+					$disc[$key] = $value.'%'; //--- discount label
+					$disc['discount_amount'] += $discount;
+					$price -= $discount;
+				}
 			}
 
 			$i++;
@@ -37,24 +44,40 @@ function parse_discount_text($discText, $price)
 
 
 //--- แสดงป้ายส่วนลด
-function discountLabel($disc = 0, $disc2 = 0, $disc3 = 0)
+function discountLabel($disc1 = 0, $disc2 = 0, $disc3 = 0, $disc4 = 0, $disc5 = 0)
 {
-	$label = '';
-	$label = $disc == 0 ? 0 : getDiscLabel($disc);
-	$label .= $disc2 == 0 ? '' : '+'.getDiscLabel($disc2);
-	$label .= $disc3 == 0 ? '' : '+'.getDiscLabel($disc3);
+	$label  = '';
+	$label  = $disc1 == 0 ? 0 : round($disc1, 2);
+	$label .= $disc2 == 0 ? '' : '+'.round($disc2, 2);
+	$label .= $disc3 == 0 ? '' : '+'.round($disc3, 2);
+	$label .= $disc4 == 0 ? '' : '+'.round($disc4, 2);
+	$label .= $disc5 == 0 ? '' : '+'.round($disc5, 2);
+
 	return $label;
 }
 
 
-function getDiscLabel($disc)
+function getDiscountAmount($amount, $disc1 = 0, $disc2 = 0, $disc3 = 0, $disc4 = 0, $disc5 = 0)
 {
-	$arr = explode('%', $disc);
-	if( count($arr) > 1)
+	$disc = array(
+		'disc1' => $disc1,
+		'disc2' => $disc2,
+		'disc3' => $disc3,
+		'disc4' => $disc4,
+		'disc5' => $disc5
+	);
+
+	$discAmount = 0;
+
+	foreach($disc as $val)
 	{
-		return trim($arr[0]).'%';
+		if($val > 0)
+		{
+			$discAmount += ($val * 0.01 * $amount);
+		}
 	}
-	return $arr[0];
+
+	return $discAmount;
 }
 
 

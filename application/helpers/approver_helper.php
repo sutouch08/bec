@@ -21,22 +21,4 @@ function select_team($id = NULL)
 }
 
 
-function select_user($id = NULL)
-{
-	$ds = "";
-
-	$ci =& get_instance();
-
-	$result = $ci->user_model->get_all();
-
-	if(!empty($result))
-	{
-		foreach($result as $rs)
-		{
-			$ds .= "<option value='{$rs->id}' ".is_selected($id, $rs->id).">{$rs->uname} : {$rs->name}</option>";
-		}
-	}
-
-	return $ds;
-}
  ?>

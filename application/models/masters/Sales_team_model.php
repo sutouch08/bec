@@ -67,6 +67,11 @@ class Sales_team_model extends CI_Model
 	{
 		$this->db->where('id >', 0, FALSE);
 
+		if(isset($ds['code']) && $ds['code'] != '')
+		{
+			$this->db->like('code', $ds['code']);
+		}
+
 		if(!empty($ds['name']))
 		{
 			$this->db->like('name', $ds['name']);
@@ -79,6 +84,12 @@ class Sales_team_model extends CI_Model
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
 		$this->db->where('id >', 0, FALSE);
+
+		if(isset($ds['code']) && $ds['code'] != '')
+		{
+			$this->db->like('code', $ds['code']);
+		}
+
 
 		if(!empty($ds['name']))
 		{
@@ -99,6 +110,24 @@ class Sales_team_model extends CI_Model
 	public function count_member($id)
 	{
 		return $this->db->where('team_id', $id)->count_all_results('user');
+	}
+
+
+	public function is_exists_code($code, $id = NULL)
+	{
+		if( ! empty($id))
+		{
+			$this->db->where('id !=', $id);
+		}
+
+		$rs = $this->db->where('code', $code)->count_all_results($this->tb);
+
+		if($rs > 0)
+		{
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 

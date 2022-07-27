@@ -18,7 +18,7 @@
   </div>
 
   <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
-    <label>Brnach code</label>
+    <label>Branch code</label>
     <input type="text" class="form-control input-sm search-box" name="address" value="<?php echo $address; ?>" />
   </div>
 
@@ -55,11 +55,10 @@
 				<tr>
 					<th class="fix-width-60 middle text-center">#</th>
 					<th class="fix-width-100 middle">Code</th>
-					<th class="fix-width-250 middle">Name</th>
-					<th class="fix-width-40 middle">Type</th>
+					<th class="fix-width-300 middle">Name</th>
+					<th class="fix-width-60 middle">Type</th>
 					<th class="fix-width-150 middle">Branch</th>
 					<th class="min-width-250 middle">Address</th>
-					<th class="fix-width-100 middle"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -73,12 +72,6 @@
 					<td class="middle"><?php echo ($rs->AdresType == 'B' ? 'Bill To' : 'Ship To'); ?></td>
 					<td class="middle"><?php echo $rs->Address.' : '.$rs->Address3; ?></td>
 					<td class="middle"><?php echo $rs->Street.' '.$rs->Block.' '.$rs->City.' '.$rs->County.' '.$rs->Country.' '.$rs->ZipCode; ?></td>
-					<td class="text-right">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->id; ?>')"><i class="fa fa-eye"></i></button>
-						<?php if($this->pm->can_edit) : ?>
-						<button type="button" class="btn btn-mini btn-warning" onclick="getEdit('<?php echo $rs->id; ?>')"><i class="fa fa-pencil"></i></button>
-						<?php endif; ?>
-					</td>
 				</tr>
 				<?php $no++; ?>
 			<?php endforeach; ?>
@@ -89,5 +82,6 @@
 </div>
 
 <script src="<?php echo base_url(); ?>scripts/masters/customer_address.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/masters/sync_address.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

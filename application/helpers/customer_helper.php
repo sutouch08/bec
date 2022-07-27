@@ -1,6 +1,6 @@
 <?php
 
-function select_customer_group($id = NULL)
+function select_customer_group($code = NULL)
 {
 	$sc = '';
 
@@ -12,7 +12,7 @@ function select_customer_group($id = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
     }
   }
 
@@ -21,7 +21,7 @@ function select_customer_group($id = NULL)
 
 
 
-function select_payment_term($GroupNum = NULL)
+function select_payment_term($id = NULL)
 {
   $sc = '';
   $ci =& get_instance();
@@ -32,7 +32,7 @@ function select_payment_term($GroupNum = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->GroupNum.'" '.is_selected($GroupNum, $rs->GroupNum).'>'.$rs->PymntGroup.'</option>';
+      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
     }
   }
 
@@ -60,7 +60,7 @@ function select_sale($id = NULL)
 }
 
 
-function select_customer_region($id = NULL)
+function select_customer_region($code = NULL)
 {
   $sc = '';
   $ci =& get_instance();
@@ -71,7 +71,7 @@ function select_customer_region($id = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -79,7 +79,7 @@ function select_customer_region($id = NULL)
 
 
 
-function select_customer_type($id = NULL)
+function select_customer_type($code = NULL)
 {
   $sc = '';
   $ci =& get_instance();
@@ -90,7 +90,7 @@ function select_customer_type($id = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -98,7 +98,7 @@ function select_customer_type($id = NULL)
 
 
 
-function select_customer_grade($id = NULL)
+function select_customer_grade($code = NULL)
 {
   $sc = '';
   $ci =& get_instance();
@@ -109,7 +109,7 @@ function select_customer_grade($id = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -117,7 +117,7 @@ function select_customer_grade($id = NULL)
 
 
 
-function select_customer_area($id = NULL)
+function select_customer_area($code = NULL)
 {
   $sc = '';
   $ci =& get_instance();
@@ -128,12 +128,49 @@ function select_customer_area($id = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
     }
   }
   return $sc;
 }
 
+
+function select_ship_to_code($CardCode, $code = NULL)
+{
+	$sc = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/customer_address_model');
+	$options = $ci->customer_address_model->get_address_ship_to_code($CardCode);
+
+	if(!empty($options))
+	{
+		foreach($options as $rs)
+		{
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
+		}
+	}
+
+	return $sc;
+}
+
+
+function select_bill_to_code($CardCode, $code = NULL)
+{
+	$sc = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/customer_address_model');
+	$options = $ci->customer_address_model->get_address_bill_to_code($CardCode);
+
+	if(!empty($options))
+	{
+		foreach($options as $rs)
+		{
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
+		}
+	}
+
+	return $sc;
+}
 
 
 

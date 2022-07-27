@@ -126,6 +126,6 @@ class Customer_group_model extends CI_Model
     }
 
     return NULL;
-  }
+  }	
 }
 ?>

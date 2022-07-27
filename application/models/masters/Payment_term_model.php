@@ -51,14 +51,14 @@ class Payment_term_model extends CI_Model
   }
 
 
-  public function get_list(array $ds = array())
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
     if($ds['name'] != "")
     {
       $this->db->like('name', $ds['name']);
     }
 
-    $rs = $this->db->order_by('id', 'ASC')->get($this->tb);
+    $rs = $this->db->order_by('id', 'ASC')->limit($perpage, $offset)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -128,6 +128,18 @@ class Payment_term_model extends CI_Model
   }
 
 
+	public function get_default()
+	{
+		$rs = $this->db->where('is_default', 1)->limit(1)->get($this->tb);
+
+		if($rs->num_rows() == 1)
+		{
+			return $rs->row()->id;
+		}
+
+		return NULL;
+	}
+
 	public function clear_default()
 	{
 		return $this->db->set('is_default', 0)->where('is_default', 1)->update($this->tb);
@@ -148,6 +160,19 @@ class Payment_term_model extends CI_Model
 	public function un_set_default($id)
 	{
 		return $this->db->set('is_default', 0)->where('id', $id)->update($this->tb);
+	}
+
+
+	public function get_term($id)
+	{
+		$rs = $this->select('term')->where('id', $id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->term;
+		}
+
+		return 0;
 	}
 
 }

@@ -6,7 +6,7 @@ body {
   background-color: #e4e6e9;
   min-height: 100%;
   padding-bottom: 0;
-  /*font-family: 'Open Sans';*/
+  font-family: 'Sarabun', 'Open Sans';
   font-size: 13px;
   color: #393939;
   line-height: 1.5;
@@ -8812,7 +8812,7 @@ textarea.form-control {
 }
 select {
   padding: 3px 4px;
-  height: 30px;
+  height: 31px;
 }
 select.form-control {
   padding: 4px 6px;
@@ -14903,7 +14903,7 @@ div.ColVis_collectionBackground {
 }
 .select2-container .select2-choice {
   border-radius: 0;
-  height: 32px;
+  height: 31px;
   line-height: 28px;
 }
 .select2-container.select2-drop-above .select2-choice {

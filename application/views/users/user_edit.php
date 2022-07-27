@@ -16,7 +16,7 @@
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Username</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<input type="text" name="uname" id="uname" class="form-control" maxlength="50" value="<?php echo $user->uname; ?>" disabled/>
+			<input type="text" name="uname" id="uname" class="form-control width-100" maxlength="50" value="<?php echo $user->uname; ?>" disabled/>
     </div>
 		<div class="col-xs-12 col-sm-reset inline red" id="uname-error"></div>
   </div>
@@ -24,28 +24,48 @@
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Display name</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<input type="text" name="dname" id="dname" class="form-control" maxlength="100" value="<?php echo $user->name; ?>" />
+			<input type="text" name="dname" id="dname" class="form-control width-100" maxlength="100" value="<?php echo $user->name; ?>" />
     </div>
 		<div class="col-xs-12 col-sm-reset inline red" id="dname-error"></div>
   </div>
 
 	<div class="form-group">
-  	<label class="col-lg-3 col-md-3 col-sm-3 col-xs-6 control-label">Sales Person</label>
+  	<label class="col-lg-3 col-md-3 col-sm-3 col-xs-6 control-label">Employee</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<select class="form-control" id="sale_id">
+			<select class="width-100" id="emp_id">
+				<option value="">-No Employee-</option>
+				<?php echo select_employee($user->emp_id); ?>
+      </select>
+    </div>
+  </div>
+
+	<div class="form-group">
+  	<label class="col-lg-3 col-md-3 col-sm-3 col-xs-6 control-label">Sales Employee</label>
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+			<select class="width-100" id="sale_id">
 			<?php echo select_saleman($user->sale_id); ?>
       </select>
     </div>
   </div>
 
 	<div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Customer Team</label>
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Sale Team</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 			<select class="form-control" id="team_id">
 				<option value="">-No Customer Team-</option>
       <?php echo select_sales_team($user->team_id); ?>
       </select>
     </div>
+  </div>
+
+	<div class="form-group">
+		<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label ">Quota No.</label>
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+			<select class="form-control" id="quota_no">
+				<option value="">-No Quota-</option>
+				<?php echo select_quota($user->quota_no); ?>
+			</select>
+		</div>
   </div>
 
 
@@ -59,17 +79,32 @@
     </div>
 	</div>
 	<div class="form-group">
-		<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label ">Customer</label>
-		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+		<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label ">Customer Code</label>
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-12">
 			<input type="text" class="form-control"
 			id="customer" placeholder="Code Or Name"
-			value="<?php echo $user->customer_name; ?>"
+			value="<?php echo $user->customer_code; ?>"
 			<?php echo ($user->is_customer == 0 ? "disabled" : ""); ?>>
 			<input type="hidden" id="customer_code" value="<?php echo $user->customer_code; ?>">
+		</div>
+		<div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+			<input type="text" class="form-control"
+			id="customer_name" placeholder="Code Or Name"
+			value="<?php echo $user->customer_name; ?>"	disabled />
 		</div>
 		<div class="col-xs-12 col-sm-reset inline red" id="customer-error"></div>
   </div>
 
+	<div class="form-group">
+		<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label ">Channels</label>
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+			<select class="form-control filter" name="channels" id="channels" <?php echo ($user->is_customer == 0) ? "disabled" : ""; ?>>
+				<option value="">Please Select</option>
+				<?php echo select_channels($user->channels); ?>
+			</select>
+		</div>
+		<div class="col-xs-12 col-sm-reset inline red" id="channels-error"></div>
+  </div>
 
   <div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Permission Profile</label>
@@ -108,5 +143,10 @@
 	<input type="hidden" id="user_id" value="<?php echo $user->id; ?>">
 </form>
 
+
+<script>
+	$('#emp_id').select2();
+	$('#sale_id').select2();
+</script>
 <script src="<?php echo base_url(); ?>scripts/users/users.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

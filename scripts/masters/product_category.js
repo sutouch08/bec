@@ -23,10 +23,19 @@ function viewDetail(id) {
 
 
 function save() {
+	let code = $('#code').val();
 	let name = $('#name').val();
 	let parent = $('input[name=tabs]:checked').val();
 
 	parent = parent === undefined ? 0 : parent;
+
+	if(code.length === 0) {
+		set_error($('#code'), $('#code-error'), "Required");
+		return false;
+	}
+	else {
+		clear_error($('#name'), $('#name-error'));
+	}
 
 	if(name.length === 0) {
 		set_error($('#name'), $('#name-error'), "Required");
@@ -43,6 +52,7 @@ function save() {
 		type:'POST',
 		cache:false,
 		data:{
+			'code' : code,
 			'name' : name,
 			'parent_id' : parent
 		},

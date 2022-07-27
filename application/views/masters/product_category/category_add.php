@@ -12,10 +12,17 @@
 <hr class="padding-5"/>
 
 <form class="form-horizontal" id="addForm" method="post">
-  <div class="form-group margin-top-30">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">ชื่อ</label>
+	<div class="form-group margin-top-30">
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Code</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<input type="text" name="name" id="name" class="width-100" value="" autofocus required />
+			<input type="text" name="code" id="code" class="width-100" value="" autofocus required />
+    </div>
+    <div class="help-block col-xs-12 col-sm-reset inline red" id="code-error"></div>
+  </div>
+  <div class="form-group margin-top-30">
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Name</label>
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+			<input type="text" name="name" id="name" class="width-100" value="" required />
     </div>
     <div class="help-block col-xs-12 col-sm-reset inline red" id="name-error"></div>
   </div>

@@ -124,6 +124,32 @@ class User_model extends CI_Model
 	}
 
 
+	public function get_all_active()
+	{
+		$rs = $this->db->where('id >', 0, FALSE)->where('active', 1)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_all_batch_no()
+	{
+		$rs = $this->db->distinct()->select('batch_no')->where('batch_no IS NOT NULL', NULL, FALSE)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
 
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
@@ -371,6 +397,7 @@ class User_model extends CI_Model
 	{
 		return TRUE;
 	}
+
 } //---- End class
 
  ?>

@@ -70,7 +70,7 @@ class Customer_area_model extends CI_Model
 
 
 
-  public function get($id)
+  public function get_by_id($id)
   {
     $rs = $this->db->where('id', $id)->get($this->tb);
 
@@ -81,6 +81,32 @@ class Customer_area_model extends CI_Model
 
     return NULL;
   }
+
+
+	public function get($id)
+	{
+		$rs = $this->db->where('id', $id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+	}
+
+
+	public function get_by_code($code)
+	{
+		$rs = $this->db->where('code', $code)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+	}
 
 
 	public function get_all()
@@ -98,14 +124,14 @@ class Customer_area_model extends CI_Model
 
 
 
-  public function is_exists($name, $id = NULL)
+  public function is_exists($name, $code = NULL)
   {
-    if( ! empty($id))
+    if( ! empty($code))
     {
-      $this->db->where('id !=', $id);
+      $this->db->where('code !=', $code);
     }
 
-    $rs = $this->db->where('id', $id)->get($this->tb);
+    $rs = $this->db->where('code', $code)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {

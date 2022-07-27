@@ -66,10 +66,20 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	<link rel='icon' href='".base_url()."assets/img/favicon.ico' type='image/x-icon' />";
 	$header .= "	<title>". $pageTitle ."</title>";
 	$header .= "	<link href='".base_url()."assets/css/bootstrap.css' rel='stylesheet' />";
+	$header .= "	<link rel='stylesheet' href='".base_url()."assets/css/font-awesome.css' />";
 	$header .= "	<link href='".base_url()."assets/css/template.css' rel='stylesheet' />";
+	$header .= '<link rel="preconnect" href="https://fonts.googleapis.com">';
+	$header .= '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
+	$header .= '<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">';
 	$header .= "	<script src='".base_url()."assets/js/jquery.min.js'></script>";
 	$header .= "	<script src='".base_url()."assets/js/bootstrap.min.js'></script> ";
-	$header .= "	<style> .page_layout{ border: solid 1px #AAA; border-radius:5px; 	} @media print{ 	.page_layout{ border: none; } } 	</style>";
+	$header .= "	<style> ";
+	$header .= " 		body { font-family:'Sarabun', sans-serif;} ";
+	$header .= "		.page_layout{ border: solid 1px #AAA; border-radius:5px; 	} ";
+	$header .= "		@media print{ 	.page_layout{ border: none; } } ";
+	$header .= " 		.table > tbody > tr > td { border-top:0px; border-left:solid 1px #555555;} ";
+	$header .= "		.table > tbody > tr > td:last-child { border-right:solid 1px #555555;} ";
+	$header .= "	</style>";
 	$header .= "	</head>";
 	$header .= "	<body>";
 	$header .= "	<div class='modal fade' id='xloader' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true' data-backdrop='static'>";
@@ -83,7 +93,8 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	<div style='width:100%;  text-align:center; margin-top:15px; font-size:12px;'><span><strong>Loading....</strong></span></div>";
 	$header .= "	</div></div></div></div></div> "; // modal fade;
 	$header .= "	<div class='hidden-print' style='margin-top:10px; padding-bottom:10px; padding-right:5mm; width:200mm; margin-left:auto; margin-right:auto; text-align:right'>";
-	$header .= "	<button class='btn btn-primary' onclick='print()'><i class='fa fa-print'></i>&nbspพิมพ์</button>";
+	$header .= "	<button class='btn btn-info' onclick='get_pdf()'><i class='fa fa-file-pdf-o'></i> &nbsp; PDF</button>";
+	$header .= "	<button class='btn btn-primary' onclick='print()'><i class='fa fa-print'></i> &nbsp; พิมพ์</button>";
 	$header .= "	</div><div style='width:100%'>";
 
 	return $header;
@@ -266,7 +277,7 @@ public function page_start()
 	{
 		$page_break = "";
 	}
-	return "<div class='page_layout' style='width:".$this->page_width."mm; padding-top:5mm; height:".$this->page_height."mm; margin:auto; ".$page_break."'>"; //// page start
+	return "<div class='page_layout' style='width:".$this->page_width."mm; padding-top:0mm; height:".$this->page_height."mm; margin:auto; ".$page_break."'>"; //// page start
 }
 
 
@@ -307,8 +318,8 @@ public function top_page()
 public function content_start()
 {
 	$height = ($this->row + $this->sub_total_row+1) * $this->row_height+2;
-	$border = $this->content_border == 0 ? '' : "border:solid 2px #ccc;";
-	return  "<div style='width:".$this->content_width."mm; height:".$height."mm; margin:auto; margin-bottom:2mm; ".$border." border-radius: 10px;'>";
+	$border = $this->content_border == 0 ? '' : "border:solid 0px #555555;";
+	return  "<div style='width:".$this->content_width."mm; height:".$height."mm; margin:auto; margin-bottom:2mm; margin-top:2mm; ".$border." border-radius: 0px;'>";
 }
 
 

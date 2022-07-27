@@ -6,7 +6,7 @@
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
   	<p class="pull-right top-p">
 		<?php if($this->pm->can_add) : ?>
-      <button type="button" class="btn btn-xs btn-info top-btn" onclick="syncData()"><i class="fa fa-refresh"></i> Sync</button>
+			<button type="button" class="btn btn-xs btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> Add new</button>      
 		<?php endif; ?>
     </p>
   </div>
@@ -14,9 +14,13 @@
 <hr class=""/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 <div class="row">
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+		<label>Code</label>
+    <input type="text" class="form-control input-sm search-box" name="code"  value="<?php echo $code; ?>" />
+  </div>
   <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
 		<label>Name</label>
-    <input type="text" class="form-control input-sm" name="name"  value="<?php echo $name; ?>" />
+    <input type="text" class="form-control input-sm search-box" name="name"  value="<?php echo $name; ?>" />
   </div>
 
   <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-3">
@@ -38,6 +42,7 @@
 			<thead>
 				<tr>
 					<th class="fix-width-60 middle text-center">#</th>
+					<th class="fix-width-150 middle">Channes name</th>
 					<th class="min-width-150 middle">Channes name</th>
 					<th class="fix-width-80 middle text-center">Position</th>
 					<th class="fix-width-80 middle text-center">Status</th>
@@ -52,6 +57,7 @@
 				<?php foreach($data as $rs) : ?>
 					<tr>
 						<td class="middle text-center"><?php echo $no; ?></td>
+						<td class="middle"><?php echo $rs->code; ?></td>
 						<td class="middle"><?php echo $rs->name; ?></td>
 						<td class="middle text-center"><?php echo $rs->position; ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->active); ?></td>

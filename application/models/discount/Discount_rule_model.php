@@ -228,6 +228,25 @@ class Discount_rule_model extends CI_Model
 		return NULL;
   }
 
+	
+	public function getProductItemRule($id)
+  {
+		$rs = $this->db
+		->select('dr.*, pd.code, pd.name')
+		->from('discount_rule_product AS dr')
+		->join('products AS pd', 'dr.product_id = pd.id', 'left')
+		->where('rule_id', $id)
+		->get();
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+  }
+
+
 
   public function getProductModelRule($id)
   {
@@ -983,7 +1002,7 @@ class Discount_rule_model extends CI_Model
 
 		return FALSE;
 	}
-	
+
 
 	public function set_discount_rule_product(array $ds = array())
 	{

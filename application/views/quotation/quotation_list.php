@@ -1,6 +1,4 @@
 <?php $this->load->view('include/header'); ?>
-<?php $can_upload = getConfig('ALLOW_UPLOAD_ORDER'); ?>
-<?php $instant_export = getConfig('WMS_INSTANT_EXPORT'); ?>
 <div class="row">
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
     <h3 class="title">
@@ -9,88 +7,123 @@
     </div>
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
     	<p class="pull-right top-p">
+<?php if($this->pm->can_add) : ?>
 			<button type="button" class="btn btn-xs btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
+<?php endif; ?>
       </p>
     </div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 <div class="row">
-  <div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
-    <label>เลขที่เอกสาร</label>
-    <input type="text" class="form-control input-sm search" name="code"  value="" />
-  </div>
-  <div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
-    <label>ลูกค้า</label>
-    <input type="text" class="form-control input-sm search" name="customer" value="" />
-  </div>
-
-	<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
-    <label>ช่องทางขาย</label>
-		<select class="form-control input-sm" name="channels">
-			<option value="">ทั้งหมด</option>
-			<option value="">ตัวแทน</option>
-			<option value="">MT</option>
-			<option value="">Line OA</option>
-			<option value="">Website</option>
-			<option value="">Fanpage</option>
-			<option value="">Lazada</option>
-			<option value="">Shopee</option>
-		</select>
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>Web No.</label>
+    <input type="text" class="width-100 search-box" name="code"  value="<?php echo $code; ?>" />
   </div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
-    <label>การชำระเงิน</label>
-		<select class="form-control input-sm" name="payment">
-			<option value="">ทั้งหมด</option>
-			<option value="">เครดิต</option>
-			<option value="">เงินสด</option>
-			<option value="">COD</option>
-			<option value="">เงินโอน</option>
-			<option value="">Credit Card</option>
-		</select>
-  </div>
-
-	<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
-    <label>วันที่</label>
-    <div class="input-daterange input-group">
-      <input type="text" class="form-control input-sm width-50 text-center from-date" name="fromDate" id="fromDate" value="" />
-      <input type="text" class="form-control input-sm width-50 text-center" name="toDate" id="toDate" value="" />
-    </div>
-  </div>
+		<label>Customer</label>
+		<input type="text" class="width-100 search-box" name="customer" value="<?php echo $customer; ?>" />
+	</div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
-		<label>การอนุมัติ</label>
-		<select class="form-control input-sm" name="sap_status">
+		<label>User</label>
+    <select class="width-100 filter" name="user_id" id="user_id">
 			<option value="all">ทั้งหมด</option>
-			<option value="">รออนุมัติ</option>
-			<option value="">อนุมัติแล้ว</option>
-			<option value="">ไม่ต้องอนุมัติ</option>
-			<option value="">ไม่อนุมัติ</option>
+			<?php echo select_user($user_id); ?>
+		</select>
+	</div>
+
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>Channels</label>
+		<select class="width-100 filter" name="channels">
+			<option value="all">ทั้งหมด</option>
+			<?php echo select_channels($channels); ?>
+		</select>
+  </div>
+
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>Payment</label>
+		<select class="width-100 filter" name="payment">
+			<option value="all">ทั้งหมด</option>
+			<?php echo select_payment_term($payment); ?>
+		</select>
+  </div>
+
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>Sale Employee</label>
+		<select class="width-100 filter" name="sale_id" id="sale_id">
+			<option value="all">ทั้งหมด</option>
+			<?php echo select_sale($sale_id); ?>
+		</select>
+  </div>
+
+
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>Approval</label>
+		<select class="width-100 filter" name="approval">
+			<option value="all">ทั้งหมด</option>
+			<option value="P" <?php echo is_selected('P', $approval); ?>>Pending</option>
+			<option value="A" <?php echo is_selected('A', $approval); ?>>Approved</option>
+			<option value="R" <?php echo is_selected('R', $approval); ?>>Rejected</option>
+			<option value="S" <?php echo is_selected('S', $approval); ?>>Approvaless</option>
 		</select>
 	</div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>สถานะ</label>
-		<select class="form-control input-sm" name="sap_status">
+		<select class="width-100 filter" name="status">
 			<option value="all">ทั้งหมด</option>
-			<option value="">Draft</option>
-			<option value="">Pending</option>
-			<option value="">Success</option>
-			<option value="">Failed</option>
-			<option value="">Canceled</option>
+			<option value="-1" <?php echo is_selected('-1', $status); ?>>Draft</option>
+			<option value="0" <?php echo is_selected('0', $status); ?>>Pending</option>
+			<option value="1" <?php echo is_selected('1', $status); ?>>Success</option>
+			<option value="2" <?php echo is_selected('2', $status); ?>>Canceled</option>
+			<option value="3" <?php echo is_selected('3', $status); ?>>Failed</option>
 		</select>
 	</div>
 
-	<div class="col-lg-1 col-md-1 col-sm-1-harf col-xs-4 padding-5">
-		<label class="display-block not-show">buton</label>
-		<button type="submit" class="btn btn-xs btn-primary btn-block" ><i class="fa fa-search"></i> Search</button>
+	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
+		<label>Posting date</label>
+		<div class="input-daterange input-group width-100">
+			<input type="text" class="width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
+			<input type="text" class="width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
+		</div>
 	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1-harf col-xs-4 padding-5">
-		<label class="display-block not-show">buton</label>
-		<button type="button" class="btn btn-xs btn-warning btn-block" ><i class="fa fa-retweet"></i> Reset</button>
+
+	<div class="divider-hidden visible-xs"></div>
+		<div class="divider-hidden visible-xs"></div>
+
+	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
+		<label class="display-block not-show hidden-xs">onlyMe</label>
+		<button type="submit"
+		class="btn btn-xs btn-block <?php echo ($onlyMe == 1 ? "btn-info" : ''); ?>"
+		onclick="toggleOnlyMe()"> &nbsp; Only Me</button>
+	</div>
+
+	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
+		<label class="display-block not-show hidden-xs">buton</label>
+		<button type="submit" class="btn btn-xs btn-primary btn-block" onclick="getSearch()" >Search</button>
+	</div>
+	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
+		<label class="display-block not-show hidden-xs">buton</label>
+		<button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()">Reset</button>
 	</div>
 </div>
+
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 margin-top-15 text-center">
+	<label class="margin-left-15">
+		<input type="checkbox" class="ace" onchange="toggleChannels($(this))" <?php echo is_checked($chk_channels, '1'); ?> />
+		<span class="lbl">Channels</span>
+		<input type="hidden" name="chk_channels" id="chk-channels" value="<?php echo $chk_channels; ?>"/>
+	</label>
+	<label class="margin-left-15">
+		<input type="checkbox" class="ace" onchange="togglePayment($(this))" <?php echo is_checked($chk_payment, '1'); ?>/>
+		<span class="lbl">Payment</span>
+		<input type="hidden" name="chk_payment" id="chk-payment" value="<?php echo $chk_payment; ?>"/>
+	</label>
+</div>
+
+<input type="hidden" id="onlyMe" name="onlyMe" value="<?php echo $onlyMe; ?>" />
 </form>
 <hr class="padding-5 margin-top-10"/>
 <?php echo $this->pagination->create_links(); ?>
@@ -99,253 +132,139 @@
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="double-scroll">
 		<table class="table table-striped table-hover dataTable border-1" style="min-width:960px; border-collapse:inherit;">
 			<thead>
-				<tr style="font-size:12px;">
-					<th class="middle text-center" style="width:50px;">#</th>
-					<th style="width:85px;" class="middle">วันที่</th>
-					<th style="width:100px;" class="middle">เลขที่เอกสาร</th>
-					<th style="min-width:200px;" class="middle">ลูกค้า</th>
-					<th style="width:100px;" class="middle text-right">ยอดเงิน</th>
-					<th style="width:100px;" class="middle">ช่องทางขาย</th>
-					<th style="width:100px;" class="middle">การชำระเงิน</th>
-					<th style="width:80px;" class="middle">การอนุมัติ</th>
-					<th style="width:80px;" class="middle">สถานะ</th>
-					<th class="middle" style="width:120px;"></th>
+				<tr style="font-size:10px;">
+					<th class="fix-width-60 middle text-center" style="width:50px;">#</th>
+					<th class="fix-width-80 middle">Posting date</th>
+					<th class="fix-width-120 middle">Web No.</th>
+					<th class="fix-width-100 middle">Customer code</th>
+					<th class="min-width-200 middle">Customer name</th>
+					<th class="fix-width-100 middle text-right">Amount</th>
+					<th class="fix-width-100 middle channels <?php echo ($chk_channels == 1 ? '' : 'hide'); ?>">Channels</th>
+					<th class="fix-width-80 middle payment <?php echo ($chk_payment == 1 ? '' : 'hide'); ?>">Payment</th>
+					<th class="fix-width-80 middle text-center">Approval</th>
+					<th class="fix-width-80 middle text-center">Status</th>
+					<th class="fix-width-100 middle text-center">User</th>
+					<th class="fix-width-120 middle"></th>
 				</tr>
 			</thead>
 			<tbody style="font-size:12px;">
+		<?php if( ! empty($data)) : ?>
+			<?php $no = $this->uri->segment($this->segment) + 1; ?>
+			<?php foreach($data as $rs) : ?>
 				<tr>
-					<td class="middle text-center">1</td>
-					<td class="middle">11.03.2022</td>
-					<td class="middle">SO-22030010</td>
-					<td class="middle">ร้านโปรแกรม</td>
-					<td class="middle text-right">12,300.00</td>
-					<td class="middle">ขายตัวแทน</td>
-					<td class="middle">เงินสด</td>
-					<td class="middle text-center"></td>
-					<td class="middle">
-						<button type="button" class="btn btn-mini btn-purple btn-block">Draft</button>
+					<td class="middle text-center no"><?php echo $no; ?></td>
+					<td class="middle"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
+					<td class="middle"><?php echo $rs->code; ?></td>
+					<td class="middle"><?php echo $rs->CardCode; ?></td>
+					<td class="moddle"><?php echo $rs->CardName; ?></td>
+					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
+					<td class="middle channels <?php echo ($chk_channels == 1 ? '' : 'hide'); ?>"><?php echo $rs->channels_name; ?></td>
+					<td class="middle payment <?php echo ($chk_payment == 1 ? '' : 'hide'); ?>"><?php echo $rs->payment_name; ?></td>
+					<td class="middle text-center">
+						<?php if($rs->Status == 0 OR $rs->Status == 1) : ?>
+							<?php if($rs->must_approve == 0) : ?>
+								<span class="green">System</span>
+							<?php else : ?>
+								<?php if($rs->Approved == 'P') : ?>
+									<span class="orange">Pending</span>
+								<?php elseif($rs->Approved == 'A') : ?>
+									<span class="green">Approved</span>
+								<?php elseif($rs->Approved == 'R') : ?>
+								<span class="red">Rejected</span>
+								<?php endif; ?>
+							<?php endif; ?>
+						<?php endif; ?>
 					</td>
+					<td class="middle text-center">
+						<?php if($rs->Status == -1) : ?>
+							<span class="purple">Draft</span>
+						<?php elseif($rs->Status == 1) : ?>
+							<span class="green">Success</span>
+						<?php elseif($rs->Status == 2) : ?>
+							<span class="red">Canceled</span>
+						<?php elseif($rs->Status == 3) : ?>
+							<a href="javascript:void(0)" class="red" onclick="showMessage('<?php echo $rs->code; ?>')">Failed</a>
+						<?php endif; ?>
+					</td>
+					<td class="middle text-center"><?php echo $rs->uname; ?></td>
 					<td class="middle text-right">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('draft')"><i class="fa fa-eye"></i></button>
-						<button type="button" class="btn btn-mini btn-warning" onclick="editDetail()"><i class="fa fa-pencil"></i></button>
-						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder()"><i class="fa fa-trash"></i></button>
+						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
+					<?php if($this->pm->can_edit && ($rs->Status == 0 OR $rs->Status == -1 OR $rs->Status == 3)) : ?>
+						<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
+					<?php endif; ?>
+					<?php if($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
+						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
+					<?php endif; ?>
 					</td>
 				</tr>
-				<tr>
-					<td class="middle text-center">1</td>
-					<td class="middle">11.03.2022</td>
-					<td class="middle">SO-22030010</td>
-					<td class="middle">ร้านโปรแกรม</td>
-					<td class="middle text-right">12,300.00</td>
-					<td class="middle">ขายตัวแทน</td>
-					<td class="middle">เงินสด</td>
-					<td class="middle text-center"><span class="label label-danger btn-block">ไม่อนุมัติ</span></td>
-					<td class="middle"></td>
-					<td class="middle text-right">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('rejected')"><i class="fa fa-eye"></i></button>
-						<button type="button" class="btn btn-mini btn-warning" onclick="editDetail()"><i class="fa fa-pencil"></i></button>
-						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder()"><i class="fa fa-trash"></i></button>
-					</td>
-				</tr>
-
-				<tr>
-					<td class="middle text-center">2</td>
-					<td class="middle">10.03.2022</td>
-					<td class="middle">SO-22030009</td>
-					<td class="middle">Home Pro</td>
-					<td class="middle text-right">233,300.00</td>
-					<td class="middle">MT</td>
-					<td class="middle">เครดิต</td>
-					<td class="middle text-center"><span class="label label-success btn-block">อนุมัติแล้ว</span></td>
-					<td class="middle">
-						<button type="button" class="btn btn-mini btn-success btn-block" onclick="showSuccesModal()">Success</button>
-					</td>
-					<td class="middle text-right">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('approved')"><i class="fa fa-eye"></i></button>
-					</td>
-				</tr>
-
-				<tr>
-					<td class="middle text-center">3</td>
-					<td class="middle">10.03.2022</td>
-					<td class="middle">SO-22030008</td>
-					<td class="middle">Central Pattana</td>
-					<td class="middle text-right">92,000.00</td>
-					<td class="middle">MT</td>
-					<td class="middle">เครดิต</td>
-					<td class="middle text-center"><span class="label label-warning btn-block">รออนุมัติ</span></td>
-					<td class="middle">
-						<button type="button" class="btn btn-mini btn-warning btn-block" onclick="showPendingModal()">Pending</button>
-					</td>
-					<td class="middle text-right">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('pending')"><i class="fa fa-eye"></i></button>
-					</td>
-				</tr>
-
-				<tr>
-					<td class="middle text-center">4</td>
-					<td class="middle">09.03.2022</td>
-					<td class="middle">SO-22030006</td>
-					<td class="middle">Lazada (คุณ สุทัศ สังข์สวัสดิ์)</td>
-					<td class="middle text-right">1,910.00</td>
-					<td class="middle">Lazada</td>
-					<td class="middle">COD</td>
-					<td class="middle text-center"><span class="label label-primary btn-block">ไม่ต้องอนุมัติ</span></</td>
-					<td class="middle">
-						<button type="button" class="btn btn-mini btn-danger btn-block" onclick="showFailedModal()">Failed</button>
-					</td>
-					<td class="middle text-right">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('pass')"><i class="fa fa-eye"></i></button>
-					</td>
-				</tr>
-
-				<tr>
-					<td class="middle text-center">4</td>
-					<td class="middle">09.03.2022</td>
-					<td class="middle">SO-22030006</td>
-					<td class="middle">Lazada (คุณ สุทัศ สังข์สวัสดิ์)</td>
-					<td class="middle text-right">1,910.00</td>
-					<td class="middle">Lazada</td>
-					<td class="middle">COD</td>
-					<td class="middle text-center"></</td>
-					<td class="middle">
-						<button type="button" class="btn btn-mini btn-danger btn-block">Canceled</button>
-					</td>
-					<td class="middle text-right">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('canceled')"><i class="fa fa-eye"></i></button>
-					</td>
-				</tr>
+				<?php $no++; ?>
+			<?php endforeach; ?>
+		<?php endif; ?>
 			</tbody>
 		</table>
 	</div>
 </div>
 
-
-
-
-<div class="modal fade" id="successTempModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="failedModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="max-width:800px;">
         <div class="modal-content">
             <div class="modal-header" style="padding-bottom:0px;">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" style="font-size: 24px; font-weight: bold; padding-bottom: 10px; color:#428bca; border-bottom:solid 2px #428bca">Sales Order Temp Status</h4>
+                <h4 class="modal-title" style="font-size: 24px; font-weight: bold; padding-bottom: 10px; color:#428bca; border-bottom:solid 2px #428bca">Interface Status</h4>
             </div>
             <div class="modal-body" style="padding-top:5px;">
             <div class="row">
-              <div class="col-sm-12 col-xs-12">
-								<table class="table table-bordered" style="margin-bottom:0px;">
-							    <tbody style="font-size:16px;">
-							      <tr><td class="width-30">Web Order</td><td class="width-70">SO-22030009</td></tr>
-							      <tr><td class="width-30">BP Code</td><td class="width-70">CL-001</td></tr>
-							      <tr><td>BP Name</td><td>Home Pro</td></tr>
-							      <tr><td>Date/Time To Temp</td><td>10.03.2022 15:31:21</td></tr>
-							      <tr><td>Date/Time To SAP</td><td>10.03.2022 15:35:01</td></tr>
-							      <tr><td>Status</td><td>Success</td></tr>
-							      <tr><td>Message</td><td></td></tr>
-										<tr>
-											<td colspan="2">
-												<button type="button" class="btn btn-sm btn-default" onclick="closeModal('successTempModal')">Close</button>
-											</td>
-										</tr>
-							    </tbody>
-							  </table>
+              <div class="col-sm-12 col-xs-12" id="failed-table">
+
               </div>
             </div>
+
         </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="pendingTempModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width:800px;">
-        <div class="modal-content">
-            <div class="modal-header" style="padding-bottom:0px;">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" style="font-size: 24px; font-weight: bold; padding-bottom: 10px; color:#428bca; border-bottom:solid 2px #428bca">Sales Order Temp Status</h4>
-            </div>
-            <div class="modal-body" style="padding-top:5px;">
-            <div class="row">
-              <div class="col-sm-12 col-xs-12">
-								<table class="table table-bordered" style="margin-bottom:0px;">
-							    <tbody style="font-size:16px;">
-							      <tr><td class="width-30">Web Order</td><td class="width-70">SO-22030009</td></tr>
-							      <tr><td class="width-30">BP Code</td><td class="width-70">CL-001</td></tr>
-							      <tr><td>BP Name</td><td>Home Pro</td></tr>
-							      <tr><td>Date/Time To Temp</td><td>10.03.2022 15:31:21</td></tr>
-							      <tr><td>Date/Time To SAP</td><td>-</td></tr>
-							      <tr><td>Status</td><td>Pending</td></tr>
-							      <tr><td>Message</td><td></td></tr>
-										<tr>
-											<td colspan="2">
-												<button type="button" class="btn btn-sm btn-default" onclick="closeModal('pendingTempModal')">Close</button>
-												<button type="button" class="btn btn-sm btn-danger" onClick="removeTemp()" ><i class="fa fa-trash"></i> Delete Temp</button>
-											</td>
-										</tr>
-							    </tbody>
-							  </table>
-              </div>
-            </div>
-        </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="failedTempModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width:800px;">
-        <div class="modal-content">
-            <div class="modal-header" style="padding-bottom:0px;">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" style="font-size: 24px; font-weight: bold; padding-bottom: 10px; color:#428bca; border-bottom:solid 2px #428bca">Sales Order Temp Status</h4>
-            </div>
-            <div class="modal-body" style="padding-top:5px;">
-            <div class="row">
-              <div class="col-sm-12 col-xs-12">
-								<table class="table table-bordered" style="margin-bottom:0px;">
-							    <tbody style="font-size:16px;">
-							      <tr><td class="width-30">Web Order</td><td class="width-70">SO-22030009</td></tr>
-							      <tr><td class="width-30">BP Code</td><td class="width-70">CL-001</td></tr>
-							      <tr><td>BP Name</td><td>Home Pro</td></tr>
-							      <tr><td>Date/Time To Temp</td><td>10.03.2022 15:31:21</td></tr>
-							      <tr><td>Date/Time Update</td><td>10.03.2022 15:31:21</td></tr>
-							      <tr><td>Status</td><td>Failed</td></tr>
-							      <tr><td>Message</td><td>Base Doc Missmatch</td></tr>
-										<tr>
-											<td colspan="2">
-												<button type="button" class="btn btn-sm btn-default" onclick="closeModal('failedTempModal')">Close</button>
-												<button type="button" class="btn btn-sm btn-danger" onClick="removeTemp()" ><i class="fa fa-trash"></i> Delete Temp</button>
-											</td>
-										</tr>
-							    </tbody>
-							  </table>
-              </div>
-            </div>
-        </div>
-    </div>
-  </div>
-</div>
-
-<script>
-	function showSuccesModal() {
-		$('#successTempModal').modal('show');
-	}
-
-
-	function showPendingModal() {
-		$('#pendingTempModal').modal('show');
-	}
-
-	function showFailedModal() {
-		$('#failedTempModal').modal('show');
-	}
-
-
-	function closeModal(name) {
-		$('#'+name).modal('hide');
-	}
-
-
+<script id="failed-template" type="text/x-handlebarsTemplate">
+  <input type="hidden" id="U_WEBORDER" value="{{U_WEBORDER}}"/>
+  <table class="table table-bordered" style="margin-bottom:0px;">
+    <tbody style="font-size:16px;">
+      <tr><td class="width-30">Web Order</td><td class="width-70">{{U_WEBORDER}}</td></tr>
+      <tr><td class="width-30">Customer Code</td><td class="width-70">{{CardCode}}</td></tr>
+      <tr><td>Customer Name</td><td>{{CardName}}</td></tr>
+      <tr><td>Date/Time To SAP</td><td>{{date_upd}}</td></tr>
+      <tr><td>Status</td><td class="red">Failed</td></tr>
+      <tr><td>Error message</td><td>{{Message}}</td></tr>
+    </tbody>
+  </table>
 </script>
 
+<script>
+function toggleChannels(el) {
+	if(el.is(':checked')) {
+		$('.channels').removeClass('hide');
+		$('#chk-channels').val(1);
+	}
+	else {
+		$('.channels').addClass('hide');
+		$('#chk-channels').val(0);
+	}
+}
+
+function togglePayment(el) {
+	if(el.is(':checked')) {
+		$('.payment').removeClass('hide');
+		$('#chk-payment').val(1);
+	}
+	else {
+		$('.payment').addClass('hide');
+		$('#chk-payment').val(0);
+	}
+}
+
+
+	$('#user_id').select2();
+	$('#sale_id').select2();
+</script>
 <script src="<?php echo base_url(); ?>scripts/quotation/quotation.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

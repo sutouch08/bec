@@ -48,7 +48,7 @@ class Employee_model extends CI_Model
 
 	public function get_all()
 	{
-		$rs = $this->db->get($this->tb);
+		$rs = $this->db->order_by('firstName', 'ASC')->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -118,6 +118,19 @@ class Employee_model extends CI_Model
 		}
 
 		return FALSE;
+	}
+
+
+	public function get_name($id)
+	{
+		$rs = $this->db->where('id', $id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->firstName.' '.$rs->row()->lastName;
+		}
+
+		return NULL;
 	}
 
 } //--- end class

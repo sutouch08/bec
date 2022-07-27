@@ -1,20 +1,32 @@
 <?php
-function paymentLabel($order_code, $isExists, $isPaid)
+function select_order_quota($option, $code = NULL)
 {
-	$sc = "";
-	if( $isExists === TRUE )
+	$ds = '';
+
+	if( ! empty($option)) //--- qurey result object
 	{
-    if( $isPaid == 1 )
+		foreach($option as $rs)
 		{
-			$sc .= '<button type="button" class="btn btn-sm btn-success" onClick="viewPaymentDetail()">';
-			$sc .= 'จ่ายเงินแล้ว | ดูรายละเอียด';
-			$sc .= '</button>';
+			$ds .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.'</option>';
 		}
-		else
+	}
+
+	return $ds;
+}
+
+
+function select_listed_quota($code = NULL)
+{
+	$sc = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/quota_model');
+	$option = $ci->quota_model->get_all_listed();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
 		{
-			$sc .= '<button type="button" class="btn btn-sm btn-primary" onClick="viewPaymentDetail()">';
-			$sc .= 'แจ้งชำระแล้ว | ดูรายละเอียด';
-			$sc .= '</button>';
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->code.'</option>';
 		}
 	}
 
@@ -22,114 +34,18 @@ function paymentLabel($order_code, $isExists, $isPaid)
 }
 
 
-
-function paymentExists($order_code)
-{
-  $CI =& get_instance();
-  $CI->load->model('orders/order_payment_model');
-  return $CI->order_payment_model->is_exists($order_code);
-}
-
-
-function payment_image_url($order_code)
-{
-  $CI =& get_instance();
-	$link	= base_url().'images/payments/'.$order_code.'.jpg';
-  $file = $CI->config->item('image_file_path').'payments/'.$order_code.'.jpg';
-	if( ! file_exists($file) )
-	{
-		$link = FALSE;
-	}
-
-	return $link;
-}
-
-
-function getSpace($amount, $length)
+function select_cost_center($dimCode, $code = NULL)
 {
 	$sc = '';
-	$i	= strlen($amount);
-	$m	= $length - $i;
-	while($m > 0 )
+	$ci =& get_instance();
+	$ci->load->model('masters/cost_center_model');
+	$option = $ci->cost_center_model->get_by_dim_code($dimCode);
+
+	if(!empty($option))
 	{
-		$sc .= '&nbsp;';
-		$m--;
-	}
-	return $sc.$amount;
-}
-
-
-
-
-function get_summary($order, $details, $banks)
-{
-	$payAmount = 0;
-	$orderAmount = 0;
-	$discount = 0;
-	$totalAmount = 0;
-
-	$orderTxt = '<div>สรุปการสั่งซื้อ</div>';
-	$orderTxt .= '<div>Order No : '.$order->code.'</div>';
-	$orderTxt .= '<div style="width:100%; border-bottom:solid 1px #CCC;">&nbsp;</div>';
-
-	foreach($details as $rs)
-	{
-		$orderTxt .= '<div class="width-100">';
-		$orderTxt .=   $rs->product_code.' <span class="pull-right">('.number($rs->qty).') x '.number($rs->price, 2);
-		$orderTxt .= '</div>';
-		$orderAmount += $rs->qty * $rs->price;
-		$discount += $rs->discount_amount;
-		$totalAmount += $rs->total_amount;
-	}
-
-	$orderTxt .= "<br/>";
-	$orderTxt .= 'ค่าสินค้ารวม'.getSpace(number( $orderAmount, 2), 24).'<br/><br/>';
-
-	if( ($discount + $order->bDiscAmount) > 0 )
-	{
-		$orderTxt .= 'ส่วนลดรวม'.getSpace('- '.number( ($discount + $order->bDiscAmount), 2), 27).'<br/>';
-		$orderTxt .= '<br/>';
-	}
-
-
-
-	$payAmount = $orderAmount - ($discount + $order->bDiscAmount);
-	$orderTxt .= 'ยอดชำระ' . getSpace(number( $payAmount, 2), 29).'<br/>';
-
-
-	$orderTxt .= '====================<br/><br/>';
-
-	if(!empty($banks))
-	{
-		$orderTxt .= 'สามารถชำระได้ที่ <br/>';
-		$orderTxt .= '<br/>';
-		foreach($banks as $rs)
+		foreach($option as $rs)
 		{
-			$orderTxt .= '- '.$rs->bank_name.'<br/>';
-			$orderTxt .= '&nbsp;&nbsp;&nbsp;&nbsp;สาขา '.$rs->branch.'<br/>';
-			$orderTxt .= '&nbsp;&nbsp;&nbsp;&nbsp;ชื่อบัญชี '.$rs->acc_name.'<br/>';
-			$orderTxt .= '&nbsp;&nbsp;&nbsp;&nbsp;เลขที่บัญชี '.$rs->acc_no.'<br/>';
-			$orderTxt .= '--------------------<br/>';
-		}
-	}
-
-	$orderTxt .= "<br/>";
-	$orderTxt .= '** หากต้องการใบกำกับภาษี รบกวนแจ้งขอใบกำกับภาษีภายใน 5 วันทำการ';
-
-	return $orderTxt;
-}
-
-
-function select_order_role($role = '')
-{
-	$sc = '';
-	$CI =& get_instance();
-	$rs = $CI->db->query("SELECT * FROM order_role");
-	if($rs->num_rows() > 0)
-	{
-		foreach($rs->result() as $rd)
-		{
-			$sc .= '<option value="'.$rd->code.'" '.is_selected($role, $rd->code).'>'.$rd->name.'</option>';
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->name.'</option>';
 		}
 	}
 
@@ -137,21 +53,22 @@ function select_order_role($role = '')
 }
 
 
-function role_name($role)
+function action_name($action)
 {
-	$ds = array(
-		'C' => 'ฝากขาย',
-		'L'	=> 'ยิม',
-		'M'	=> 'ตัดยอดฝากขาย',
-		'N' => 'ฝากขายโอนคลัง',
-		'P'	=> 'สปอนเซอร์',
-		'R'	=> 'เบิก',
-		'S'	=> 'ขาย',
-		'T'	=> 'แปรสภาพ',
-		'U'	=> 'อภินันท์',
+	$arr = array(
+		'add' => "Create",
+		'edit' => "Edit",
+		'approve' => "Approved",
+		'reject' => "Reject",
+		'cancel' => "Canceled"
 	);
 
-	return isset($ds[$role]) ? $ds[$role] : NULL;
+	if(isset($arr[$action]))
+	{
+		return $arr[$action];
+	}
+
+	return NULL;
 }
 
 

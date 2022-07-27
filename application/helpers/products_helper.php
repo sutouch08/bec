@@ -1,27 +1,6 @@
 <?php
 
-function select_product_group($id = NULL)
-{
-	$ds = "";
-	$ci =& get_instance();
-
-	$ci->load->model('masters/product_group_model');
-
-	$option = $ci->product_group_model->get_all();
-
-	if( ! empty($option))
-	{
-		foreach($option as $rs)
-		{
-			$ds .= "<option value='{$rs->id}' ".is_selected($rs->id, $id).">{$rs->name}</option>";
-		}
-	}
-
-	return $ds;
-}
-
-
-function select_product_brand($id = NULL)
+function select_product_brand($code = NULL)
 {
 	$ds = "";
 	$ci =& get_instance();
@@ -33,7 +12,7 @@ function select_product_brand($id = NULL)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= "<option value='{$rs->id}' ".is_selected($rs->id, $id).">{$rs->name}</option>";
+			$ds .= "<option data-id='{$rs->id}' value='{$rs->code}' ".is_selected($rs->code, $code).">{$rs->name}</option>";
 		}
 	}
 
@@ -42,7 +21,7 @@ function select_product_brand($id = NULL)
 
 
 
-function select_product_type($id = NULL)
+function select_product_type($code = NULL)
 {
 	$ds = "";
 	$ci =& get_instance();
@@ -54,7 +33,7 @@ function select_product_type($id = NULL)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= "<option value='{$rs->id}' ".is_selected($rs->id, $id).">{$rs->name}</option>";
+			$ds .= "<option data-id='{$rs->id}' value='{$rs->code}' ".is_selected($rs->code, $code).">{$rs->name}</option>";
 		}
 	}
 
@@ -114,39 +93,39 @@ function select_product_category($id = NULL)
 	{
 		foreach($root as $rs)
 		{
-			$ds .= '<option value="'.$rs->id.'" '.is_selected($id, $rs->id).'>+ '.$rs->name.'</option>';
+			$ds .= '<option data-id="'.$rs->id.'" value="'.$rs->code.'" '.is_selected($id, $rs->code).'>+ '.$rs->name.'</option>';
 
-			$level_2 = $ci->product_category_model->get_by_parent($rs->id);
+			$level_2 = $ci->product_category_model->get_by_parent($rs->code);
 
 			if(! empty($level_2))
 			{
 				foreach($level_2 as $l2)
 				{
-					$ds .= '<option value="'.$l2->id.'" '.is_selected($id, $l2->id).'>++ '.$l2->name.'</option>';
+					$ds .= '<option data-id="'.$l2->id.'" value="'.$l2->code.'" '.is_selected($id, $l2->code).'>++ '.$l2->name.'</option>';
 
-					$level_3 = $ci->product_category_model->get_by_parent($l2->id);
+					$level_3 = $ci->product_category_model->get_by_parent($l2->code);
 
 					if( ! empty($level_3))
 					{
 						foreach($level_3 as $l3)
 						{
-							$ds .= '<option value="'.$l3->id.'" '.is_selected($id, $l3->id).'>+++ '.$l3->name.'</option>';
+							$ds .= '<option data-id="'.$l3->id.'" value="'.$l3->code.'" '.is_selected($id, $l3->code).'>+++ '.$l3->name.'</option>';
 
-							$level_4 = $ci->product_category_model->get_by_parent($l3->id);
+							$level_4 = $ci->product_category_model->get_by_parent($l3->code);
 
 							if( ! empty($level_4))
 							{
 								foreach($level_4 as $l4)
 								{
-									$ds .= '<option value="'.$l4->id.'" '.is_selected($id, $l4->id).'>++++ '.$l4->name.'</option>';
+									$ds .= '<option data-id="'.$l4->id.'" value="'.$l4->code.'" '.is_selected($id, $l4->code).'>++++ '.$l4->name.'</option>';
 
-									$level_5 = $ci->product_category_model->get_by_parent($l4->id);
+									$level_5 = $ci->product_category_model->get_by_parent($l4->code);
 
 									if( ! empty($level_5))
 									{
 										foreach($level_5 as $l5)
 										{
-											$ds .= '<option value="'.$l5->id.'" '.is_selected($id, $l5->id).'>+++++ '.$l5->name.'</option>';
+											$ds .= '<option data-id="'.$l5->id.'" value="'.$l5->code.'" '.is_selected($id, $l5->code).'>+++++ '.$l5->name.'</option>';
 										}
 									}
 								}
@@ -163,7 +142,7 @@ function select_product_category($id = NULL)
 
 
 
-function select_category_level($level, $id)
+function select_category_level($level, $code)
 {
 	$ci =& get_instance();
 	$ci->load->model('masters/product_category_model');
@@ -176,7 +155,7 @@ function select_category_level($level, $id)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= "<option value='{$rs->id}' ".is_selected($id, $rs->id).">{$rs->name}</option>";
+			$ds .= "<option data-id='{$rs->id}' value='{$rs->code}' ".is_selected($code, $rs->code).">{$rs->name}</option>";
 		}
 	}
 
@@ -184,6 +163,23 @@ function select_category_level($level, $id)
 }
 
 
+function select_product_model($code = NULL)
+{
+	$ci =& get_instance();
+	$ci->load->model('masters/product_model_model');
+	$ds = '';
+	$option = $ci->product_model_model->get_all();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$ds .= '<option data-id="'.$rs->id.'" value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+		}
+	}
+
+	return $ds;
+}
 
 function model_in($txt = "")
 {

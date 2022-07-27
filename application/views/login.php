@@ -6,6 +6,7 @@
 		<title>Login Page - <?php echo getConfig('COMPANY_NAME'); ?></title>
 		<meta name="description" content="User login page" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+		<link rel="shortcut icon" href="<?php echo base_url(); ?>assets/img/favicon.png">
 
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.css" />
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/font-awesome.css" />
@@ -18,7 +19,7 @@
 	<body class="login-layout blur-login">
 
 		<script>
-			var BASE_URL = <?php echo base_url(); ?>;
+			var BASE_URL = "<?php echo base_url(); ?>";
 		</script>
 
 		<div class="main-container">

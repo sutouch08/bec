@@ -120,7 +120,8 @@ class Customer_group extends REST_Controller
 			  $arr = array(
 				  'code' => $ds->GroupCode,
 				  'name' => $ds->GroupName,
-					'type' => empty($ds->GroupType) ? 'C' : ($ds->GroupType == 'S' ? 'S' : 'C')
+					'type' => empty($ds->GroupType) ? 'C' : ($ds->GroupType == 'S' ? 'S' : 'C'),
+					'last_sync' => now()
 			  );
 
 			  if(! $this->customer_group_model->add($arr))
@@ -209,7 +210,8 @@ class Customer_group extends REST_Controller
 		  {
 			  $arr = array(
 				  'name' => $ds->GroupName,
-					'type' => empty($ds->GroupType) ? 'C' : ($ds->GroupType == 'S' ? 'S' : 'C')
+					'type' => empty($ds->GroupType) ? 'C' : ($ds->GroupType == 'S' ? 'S' : 'C'),
+					'last_sync' => now()
 			  );
 
 			  if(! $this->customer_group_model->update($code, $arr))

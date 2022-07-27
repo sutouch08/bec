@@ -116,7 +116,8 @@ class Uom extends REST_Controller
 			  $arr = array(
 				  'id' => $ds->UomEntry,
 				  'code' => $ds->UomCode,
-					'name' => $ds->UomName
+					'name' => $ds->UomName,
+					'last_sync' => now()
 			  );
 
 			  if(! $this->uom_model->add($arr))
@@ -211,7 +212,8 @@ class Uom extends REST_Controller
 				{
 					$arr = array(
 						'code' => $ds->UomCode,
-						'name' => $ds->UomName
+						'name' => $ds->UomName,
+						'last_sync' => now()
 					);
 
 					if(! $this->uom_model->update($id, $arr))

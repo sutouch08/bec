@@ -1,8 +1,67 @@
-var HOME = BASE_URL + 'masters/channels/';
-
 function goBack(){
   window.location.href = HOME;
 }
+
+
+function addNew() {
+	window.location.href = HOME + 'add_new';
+}
+
+
+// function saveAdd() {
+// 	let code = $('#code').val();
+// 	let name = $('#name').val();
+// 	let position = $('#position').val();
+// 	let active = $('#active').is(':checked') ? 1 : 0;
+//
+// 	if(code.length == 0) {
+// 		set_error($('#code'), $('#code-error'), "Required");
+// 		return false;
+// 	}
+// 	else {
+// 		clear_error($('#code'), $('#code-error'));
+// 	}
+//
+// 	if(name.length == 0) {
+// 		set_error($('#name'), $('#name-error'), "Required");
+// 		return false;
+// 	}
+// 	else {
+// 		clear_error($('#name'), $('#name-error'));
+// 	}
+//
+// 	$.ajax({
+// 		url:HOME + 'add',
+// 		type:'POST',
+// 		cache:false,
+// 		data:{
+// 			'code' : code,
+// 			'name' : name,
+// 			'position' : position,
+// 			'active' : active
+// 		},
+// 		success:function(rs) {
+// 			if(rs === 'success') {
+// 				swal({
+// 					title:'Success',
+// 					type:'success',
+// 					timer:1000
+// 				});
+//
+// 				setTimeout(function() {
+// 					addNew();
+// 				}, 1200);
+// 			}
+// 			else {
+// 				swal({
+// 					title:'Error!',
+// 					text: rs,
+// 					type:'error'
+// 				})
+// 			}
+// 		}
+// 	})
+// }
 
 
 function syncData(){
@@ -44,10 +103,19 @@ function getEdit(id){
 
 
 function saveAdd() {
+	const code = $.trim($('#code').val());
 	const name = $.trim($('#name').val());
 	const pos = $('#position').val();
 	const active = $('#active').is(':checked') ? 1 : 0;
 	const is_default = $('#is_default').is(':checked') ? 1 : 0;
+
+	if(code.length == 0) {
+		set_error($('#code'), $('#code-error'), "Required!");
+		return false;
+	}
+	else {
+		clear_error($('#code'), $('#code-error'));
+	}
 
 	if(name.length == 0) {
 		set_error($('#name'), $('#name-error'), "Required!");
@@ -58,49 +126,66 @@ function saveAdd() {
 	}
 
 	$.ajax({
-		url:HOME + 'is_exists',
+		url:HOME + 'is_exists_code',
 		type:'POST',
 		cache:false,
 		data:{
-			'name' : name
+			'code' : code
 		},
 		success:function(rs) {
 			if(rs === 'exists') {
-				set_error($('#name'), $('#name-error'), name + " already exists.");
+				set_error($('#code'), $('#code-error'), code + " already exists.");
 				return false;
 			}
 			else {
 				$.ajax({
-					url:HOME + 'add',
+					url:HOME + 'is_exists_name',
 					type:'POST',
 					cache:false,
 					data:{
-						'name' : name,
-						'position' : pos,
-						'active' : active,
-						'is_default' : is_default
+						'name' : name
 					},
 					success:function(rs) {
-						if(rs === 'success') {
-							swal({
-								title:'Success',
-								type:'success',
-								timer:1000
-							});
-
-							setTimeout(function() {
-								addNew();
-							}, 1500);
+						if(rs == 'exists') {
+							set_error($('#name'), $('#name-error'), name + " already exists.");
+							return false;
 						}
 						else {
-							swal({
-								title:"Error!",
-								text: rs,
-								type:"error"
+							$.ajax({
+								url:HOME + 'add',
+								type:'POST',
+								cache:false,
+								data:{
+									'code' : code,
+									'name' : name,
+									'position' : pos,
+									'active' : active,
+									'is_default' : is_default
+								},
+								success:function(rs) {
+									if(rs === 'success') {
+										swal({
+											title:'Success',
+											type:'success',
+											timer:1000
+										});
+
+										setTimeout(function() {
+											addNew();
+										}, 1500);
+									}
+									else {
+										swal({
+											title:"Error!",
+											text: rs,
+											type:"error"
+										});
+									}
+								}
 							});
 						}
 					}
-				});
+				})
 			}
 		}
 	});
@@ -124,7 +209,7 @@ function update() {
 	}
 
 	$.ajax({
-		url:HOME + 'is_exists',
+		url:HOME + 'is_exists_name',
 		type:'POST',
 		cache:false,
 		data:{

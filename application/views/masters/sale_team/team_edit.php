@@ -11,6 +11,13 @@
 </div><!-- End Row -->
 <hr class="margin-bottom-30"/>
 <form class="form-horizontal" id="addForm" method="post">
+	<div class="form-group">
+    <label class="col-sm-3 control-label no-padding-right">ชื่อ</label>
+    <div class="col-xs-12 col-sm-3">
+			<input type="text" name="code" id="code" class="width-100" maxlength="20" value="<?php echo $code; ?>" disabled />
+    </div>
+    <div class="help-block col-xs-12 col-sm-reset inline red" id="code-error"></div>
+  </div>
 
   <div class="form-group">
     <label class="col-sm-3 control-label no-padding-right">ชื่อ</label>

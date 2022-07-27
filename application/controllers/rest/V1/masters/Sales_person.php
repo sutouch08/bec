@@ -118,7 +118,8 @@ class Sales_person extends REST_Controller
 					'id' => $ds->SlpCode,
 					'name' => $ds->SlpName,
 					'emp_id' => empty($ds->EmpID) ? NULL : $ds->EmpID,
-					'active' => empty($ds->Active) ? 1 : ($ds->Active === 'Y' ? 1 : 0)
+					'active' => empty($ds->Active) ? 1 : ($ds->Active === 'Y' ? 1 : 0),
+					'last_sync' => now()
 				);
 
 				if(! $this->sales_person_model->add($arr))
@@ -207,7 +208,8 @@ class Sales_person extends REST_Controller
 				$arr = array(
 					'name' => $ds->SlpName,
 					'emp_id' => empty($ds->EmpID) ? NULL : $ds->EmpID,
-					'active' => empty($ds->Active) ? 1 :($ds->Active == 'Y' ? 1 : 0)
+					'active' => empty($ds->Active) ? 1 :($ds->Active == 'Y' ? 1 : 0),
+					'last_sync' => now()
 				);
 
 				if(! $this->sales_person_model->update($id, $arr))

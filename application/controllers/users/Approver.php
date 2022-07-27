@@ -3,7 +3,7 @@ class Approver extends PS_Controller
 {
 	public $menu_code = "SCAPPV";
 	public $menu_group_code = "SC";
-	public $title = "Approver";
+	public $title = "Approval";
 
 	public function __construct()
 	{

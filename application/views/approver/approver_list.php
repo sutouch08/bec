@@ -21,7 +21,7 @@
 		<input type="text" class="form-control input-sm search-box" name="name" value="<?php echo $name; ?>" />
 	</div>
 	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6">
-		<label>Customer Team</label>
+		<label>Sales Team</label>
 		<select class="form-control input-sm" name="team" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
 			<?php echo select_team($team); ?>
@@ -58,10 +58,10 @@
 				<tr>
 					<th class="fix-width-60 text-center">#</th>
 					<th class="fix-width-150">Username</th>
-					<th class="min-width-250">ชื่อ</th>
-					<th class="fix-width-150">Customer Team</th>
+					<th class="min-width-250">Name</th>
+					<th class="fix-width-150">Sales Team</th>
 					<th class="fix-width-100 text-center">Max Disc.</th>
-					<th class="fix-width-100 text-center">สถานะ</th>
+					<th class="fix-width-100 text-center">Status</th>
 					<th class="fix-width-100"></th>
 				</tr>
 			</thead>

@@ -13,9 +13,18 @@
 
 <form class="form-horizontal" id="addForm" method="post">
   <div class="form-group margin-top-30">
-    <label class="col-lg-3 col-md-3 col-sm-3 hidden-xs control-label no-padding-right">ชื่อ</label>
+    <label class="col-lg-3 col-md-3 col-sm-3 hidden-xs control-label no-padding-right">Code</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-9">
-				<label class="visible-xs">ชื่อ</label>
+				<label class="visible-xs">Code</label>
+			<input type="text" class="width-100" value="<?php echo $code; ?>" disabled />
+    </div>
+    <div class="help-block col-xs-12 col-sm-reset inline red" id="code-error"></div>
+  </div>
+
+	<div class="form-group">
+    <label class="col-lg-3 col-md-3 col-sm-3 hidden-xs control-label no-padding-right">Name</label>
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-9">
+				<label class="visible-xs">Name</label>
 			<input type="text" name="name" id="name" class="width-100" value="<?php echo $name; ?>" autofocus />
     </div>
 		<div class="col-xs-3 visible-xs">

@@ -11,6 +11,7 @@ class Users extends PS_Controller{
   {
     parent::__construct();
     $this->home = base_url().'users/users';
+		$this->load->helper('channels');
   }
 
 
@@ -73,9 +74,12 @@ class Users extends PS_Controller{
 				$uname = trim($this->input->post('uname'));
 				$dname = trim($this->input->post('dname'));
 				$sale_id = $this->input->post('sale_id');
+				$emp_id = get_null($this->input->post('emp_id'));
 				$team_id = get_null($this->input->post('team_id'));
+				$quota_no = get_null(trim($this->input->post('quota_no')));
 				$is_customer = is_true($this->input->post('is_customer'));
 				$customer_code = get_null($this->input->post('customer_code'));
+				$channels = get_null($this->input->post('channels'));
 				$pwd = $this->input->post('pwd');
 				$id_profile = get_null($this->input->post('profile'));
 				$active = $this->input->post('active') == 1 ? 1 : 0;
@@ -95,9 +99,12 @@ class Users extends PS_Controller{
 								'id_profile' => $id_profile,
 								'active' => $active,
 								'sale_id' => $sale_id,
+								'emp_id' => $emp_id,
 								'team_id' => $team_id,
+								'quota_no' => $quota_no,
 								'is_customer' => $is_customer ? 1 : 0,
 								'customer_code' => $customer_code,
+								'channels' => $channels,
 								'last_pass_change' => date('Y-m-d'),
 								'force_reset' => $force_reset
 							);
@@ -187,9 +194,12 @@ class Users extends PS_Controller{
 				$id = $this->input->post('id');
 				$dname = trim($this->input->post('dname'));
 				$sale_id = $this->input->post('sale_id');
+				$emp_id = get_null($this->input->post('emp_id'));
 				$team_id = get_null($this->input->post('team_id'));
+				$quota_no = get_null(trim($this->input->post('quota_no')));
 				$is_customer = is_true($this->input->post('is_customer'));
 				$customer_code = get_null($this->input->post('customer_code'));
+				$channels = get_null($this->input->post('channels'));
 				$id_profile = get_null($this->input->post('profile'));
 				$active = $this->input->post('active') == 1 ? 1 : 0;
 
@@ -202,9 +212,12 @@ class Users extends PS_Controller{
 							'id_profile' => $id_profile,
 							'active' => $active,
 							'sale_id' => $sale_id,
+							'emp_id' => $emp_id,
 							'team_id' => $team_id,
+							'quota_no' => $quota_no,
 							'is_customer' => $is_customer ? 1 : 0,
-							'customer_code' => $customer_code
+							'customer_code' => $customer_code,
+							'channels' => $channels
 						);
 
 						if( ! $this->user_model->update($id, $arr))

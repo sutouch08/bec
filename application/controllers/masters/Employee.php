@@ -40,18 +40,10 @@ class Employee extends PS_Controller
 	public function sync_data()
 	{
 		$sc = TRUE;
+		$this->load->library('api');
 
-		$response = json_encode(array(
-			array("EmpID" => 1, "firstName" =>"คุณธิษตยา", "lastName" => "ม่วงโสภา", "middleName" => NULL, "Active" => "Y"),
-			array("EmpID" => 2, "firstName" =>"คคุณขวัญจิรา", "lastName" => "ทะบันหาร", "middleName" => NULL, "Active" => "Y"),
-			array("EmpID" => 3, "firstName" =>"นายจักรกฤช", "lastName" => "อังคณาสวรรค์", "middleName" => NULL, "Active" => "Y"),
-			array("EmpID" => 4, "firstName" =>"คอัชรี", "lastName" => "จักรเพ็ชร", "middleName" => NULL, "Active" => "N"),
-			array("EmpID" => 5, "firstName" =>"คุณลลิตา", "lastName" => "แซ่ล้อ", "middleName" => NULL, "Active" => "Y"),
-			array("EmpID" => 6, "firstName" =>"วิภารัตน์", "lastName" => "คดีพิศาล", "middleName" => NULL, "Active" => "N")
-		));
-
-		$res = json_decode($response);
-
+		$res = $this->api->getEmployeeUpdateData();
+		
 		if( ! empty($res))
 		{
 			foreach($res as $rs)

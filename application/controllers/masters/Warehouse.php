@@ -18,7 +18,8 @@ class Warehouse extends PS_Controller
 	{
 		$filter = array(
 			'code' => get_filter('code', 'whs_code', ''),
-			'name' => get_filter('name', 'whs_name', '')
+			'name' => get_filter('name', 'whs_name', ''),
+			'type' => get_filter('type', 'whs_type', 'all')
 		);
 
 		$perpage = get_rows();
@@ -38,15 +39,9 @@ class Warehouse extends PS_Controller
 	public function sync_data()
 	{
 		$sc = TRUE;
+		$this->load->library('api');
 
-		$response = json_encode(array(
-			array("WhsCode" => "AFG-0000", "WhsName" =>"Main warehouse"),
-			array("WhsCode" => "AFG-0001", "WhsName" =>"Branch 1 warehouse"),
-			array("WhsCode" => "AFG-0002", "WhsName" =>"Branch 2 warehouse"),
-			array("WhsCode" => "AFG-0003", "WhsName" =>"Branch 3 warehouse")
-		));
-
-		$res = json_decode($response);
+		$res = $this->api->getWarehouseUpdateData();
 
 		if( ! empty($res))
 		{
@@ -56,9 +51,12 @@ class Warehouse extends PS_Controller
 
 				if(empty($whs))
 				{
+					$type = $rs->WhsCode[-1];
+
 					$arr = array(
 						"code" => $rs->WhsCode,
 						"name" => $rs->WhsName,
+						'type' => $type,
 						"last_sync" => now()
 					);
 
@@ -80,9 +78,22 @@ class Warehouse extends PS_Controller
 	}
 
 
+	public function set_list()
+	{
+		$id = $this->input->post('id');
+		$list = $this->input->post('list');
+
+		$arr = array(
+			'list' => $list
+		);
+
+		return $this->warehouse_model->update_by_id($id, $arr);
+	}
+
+
 	public function clear_filter()
 	{
-		return clear_filter(array("whs_code", "whs_name"));
+		return clear_filter(array("whs_code", "whs_name", "whs_type"));
 	}
 
 

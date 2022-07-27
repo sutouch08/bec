@@ -2,10 +2,11 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 class Logs_model extends CI_Model
 {
-
+		public $logs;
     public function __construct()
     {
         parent::__construct();
+				$this->logs = $this->load->database('logs', TRUE);
     }
 
 
@@ -110,6 +111,13 @@ class Logs_model extends CI_Model
 		public function logs_zone($ds)
 		{
 			return $this->logs->insert('zone_logs', $ds);
+		}
+
+
+
+		public function order_logs($ds)
+		{
+			return $this->logs->insert('order_logs', $ds);
 		}
 
 } //---

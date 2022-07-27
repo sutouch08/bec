@@ -11,7 +11,16 @@ function getEdit(id){
 }
 
 function save() {
+	let code = $('#code').val();
 	let name = $('#name').val();
+
+	if(code.length === 0) {
+		set_error($('#code'), $('#code-error'), 'Required');
+		return false;
+	}
+	else {
+		clear_error($('#code'), $('#code-error'));
+	}
 
 	if(name.length === 0) {
 		set_error($('#name'), $('#name-error'), 'Required');
@@ -26,6 +35,7 @@ function save() {
 		type:'POST',
 		cache:false,
 		data:{
+			'code' : code,
 			'name' : name
 		},
 		success:function(rs) {
@@ -41,8 +51,11 @@ function save() {
 				}, 1200);
 			}
 			else {
-				set_error($('#name'), $('#name-error'), rs);
-				return false;
+				swal({
+					title:'Error!',
+					text:rs,
+					type:'error'
+				})
 			}
 		}
 	})

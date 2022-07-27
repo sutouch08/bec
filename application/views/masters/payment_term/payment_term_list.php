@@ -41,10 +41,8 @@
                 <tr>
                     <th class="fix-width-60 middle text-center">#</th>
                     <th class="min-width-250 middle">Name</th>
-										<th class="fix-width-80 middle text-center">Default</th>
-										<th class="fix-width-150 middle">Last update</th>
+										<th class="fix-width-120 middle text-center">Term (Days)</th>
 										<th class="fix-width-150 middle">Last sync</th>
-                    <th class="fix-width-60"></th>
                 </tr>
             </thead>
             <tbody>
@@ -54,17 +52,8 @@
                 <tr>
                     <td class="middle text-center"><?php echo $no; ?></td>
                     <td class="middle"><?php echo $rs->name; ?></td>
-										<td class="middle text-center"><?php echo ($rs->is_default == 1 ? is_active($rs->is_default) : ""); ?></td>
-										<td class="middle"><?php echo thai_date($rs->date_upd, TRUE); ?></td>
-										<td class="middle"><?php echo (empty($rs->last_sync) ? "" : thai_date($rs->last_sync, TRUE)); ?></td>
-                    <td class="text-right">
-											<?php if($this->pm->can_edit) : ?>
-                        <button type="button" class="btn btn-mini btn-warning"
-                            onclick="getEdit('<?php echo $rs->id; ?>')">
-                            <i class="fa fa-pencil"></i>
-                        </button>
-											<?php endif; ?>
-                    </td>
+										<td class="middle text-center"><?php echo $rs->term; ?> days</td>
+										<td class="middle"><?php echo (empty($rs->last_sync) ? "" : thai_date($rs->last_sync, TRUE)); ?></td>                    
                 </tr>
                 <?php $no++; ?>
                 <?php endforeach; ?>

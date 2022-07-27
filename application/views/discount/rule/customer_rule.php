@@ -27,12 +27,12 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 	<div class="row">
         <div class="col-sm-8 top-col">
-            <h4 class="title">กำหนดเงื่อนไขตามคุณสมบัติลูกค้า</h4>
+            <h4 class="title">Conditions according to customer attributes</h4>
         </div>
 
         <div class="divider margin-top-5"></div>
         <div class="col-sm-2">
-					<span class="form-control left-label text-right">ลูกค้าทั้งหมด</span>
+					<span class="form-control left-label text-right">All customer</span>
 				</div>
         <div class="col-sm-2">
           <div class="btn-group width-100">
@@ -44,7 +44,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
         <div class="col-sm-2">
-					<span class="form-control left-label text-right">ระบุลูกค้า</span>
+					<span class="form-control left-label text-right">Individual customers</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
@@ -103,7 +103,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
 				<div class="col-sm-2">
-					<span class="form-control left-label text-right">กลุ่มลูกค้า</span>
+					<span class="form-control left-label text-right">Customer Group</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
@@ -113,7 +113,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
         </div>
 				<div class="col-sm-2 col-2-harf padding-5">
 					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-group" onclick="showCustomerGroup()" disabled>
-						กลุ่มลูกค้า <span class="badge pull-right" id="badge-group"><?php echo $custGroupNo; ?></span>
+						Customer Group <span class="badge pull-right" id="badge-group"><?php echo $custGroupNo; ?></span>
 					</button>
 				</div>
 				<div class="divider-hidden"></div>
@@ -121,7 +121,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
 				<div class="col-sm-2">
-					<span class="form-control left-label text-right">ประเภทลูกค้า</span>
+					<span class="form-control left-label text-right">Customer Type</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
@@ -131,7 +131,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
         </div>
 				<div class="col-sm-2 col-2-harf padding-5">
 					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-type" onclick="showCustomerType()" disabled>
-						ประเภทลูกค้า <span class="badge pull-right" id="badge-type"><?php echo $custTypeNo; ?></span>
+						Customer Type <span class="badge pull-right" id="badge-type"><?php echo $custTypeNo; ?></span>
 					</button>
 				</div>
 				<div class="divider-hidden"></div>
@@ -139,7 +139,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
 				<div class="col-sm-2">
-					<span class="form-control left-label text-right">ภูมิภาค</span>
+					<span class="form-control left-label text-right">Customer Region</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
@@ -149,14 +149,14 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
         </div>
 				<div class="col-sm-2 col-2-harf padding-5">
 					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-region" onclick="showCustomerRegion()" disabled>
-						ภูมิภาค <span class="badge pull-right" id="badge-region"><?php echo $custRegionNo; ?></span>
+						Customer Region <span class="badge pull-right" id="badge-region"><?php echo $custRegionNo; ?></span>
 					</button>
 				</div>
 				<div class="divider-hidden"></div>
 
 
 				<div class="col-sm-2">
-					<span class="form-control left-label text-right">เขตการขาย</span>
+					<span class="form-control left-label text-right">Customer Area</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
@@ -166,14 +166,14 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
         </div>
 				<div class="col-sm-2 col-2-harf padding-5">
 					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-area" onclick="showCustomerArea()" disabled>
-						เขตการขาย <span class="badge pull-right" id="badge-area"><?php echo $custAreaNo; ?></span>
+						Customer Area <span class="badge pull-right" id="badge-area"><?php echo $custAreaNo; ?></span>
 					</button>
 				</div>
 				<div class="divider-hidden"></div>
 
 
 				<div class="col-sm-2">
-					<span class="form-control left-label text-right">เกรดลูกค้า</span>
+					<span class="form-control left-label text-right">Customer Grade</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">
@@ -183,7 +183,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
         </div>
 				<div class="col-sm-2 col-2-harf padding-5">
 					<button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-grade" onclick="showCustomerGrade()" disabled>
-						เกรดลูกค้า <span class="badge pull-right" id="badge-grade"><?php echo $custGradeNo; ?></span>
+						Customer Grade <span class="badge pull-right" id="badge-grade"><?php echo $custGradeNo; ?></span>
 					</button>
 				</div>
         <div class="divider-hidden"></div>

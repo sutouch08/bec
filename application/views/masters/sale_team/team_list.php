@@ -16,9 +16,13 @@
 <hr class="padding-5"/>
 <form id="searchForm" method="post">
 <div class="row">
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+    <label>Code</label>
+    <input type="text" class="width-100 search-box" name="code" value="<?php echo $code; ?>" />
+  </div>
   <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
-    <label>Team name</label>
-    <input type="text" class="width-100" name="name" id="name" value="<?php echo $name; ?>" />
+    <label>Name</label>
+    <input type="text" class="width-100 search-box" name="name" value="<?php echo $name; ?>" />
   </div>
 
   <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-3">
@@ -36,13 +40,14 @@
 
 <div class="row">
 	<div class="col-sm-12">
-		<table class="table table-striped table-bordered table-hover">
+		<table class="table table-striped border-1">
 			<thead>
 				<tr>
-					<th style="width:60px;" class="middle text-center">#</th>
-					<th style="min-width:300px;" class="middle">Team name</th>
-					<th style="width:100px;" class="middle text-center">Members</th>
-					<th style="width:100px;"></th>
+					<th class="fix-width-60 middle text-center">#</th>
+					<th class="fix-width-100 middle">Code</th>
+					<th class="min-width-200 middle">Name</th>
+					<th class="fix-width-80 middle text-center">Members</th>
+					<th class="fix-width-100"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -51,6 +56,7 @@
 				<?php foreach($data as $rs) : ?>
 					<tr>
 						<td class="middle text-center"><?php echo $no; ?></td>
+						<td class="middle"><?php echo $rs->code; ?></td>
 						<td class="middle"><?php echo $rs->name; ?></td>
 						<td class="middle text-center"><?php echo $rs->member; ?></td>
 						<td class="text-right">

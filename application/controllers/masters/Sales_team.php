@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Sales_team extends PS_Controller{
 	public $menu_code = 'DBSTEAM'; //--- Add/Edit Profile
 	public $menu_group_code = 'SC'; //--- System security
-	public $title = 'Customer Team';
+	public $title = 'Sales Team';
 
   public function __construct()
   {
@@ -14,12 +14,11 @@ class Sales_team extends PS_Controller{
   }
 
 
-
-
   public function index()
   {
 		$filter = array(
-			'name' => get_filter('name', 'st_name', '')
+			'name' => get_filter('name', 'st_name', ''),
+			'code' => get_filter('code', 'st_code', '')
 		);
 
 		//--- แสดงผลกี่รายการต่อหน้า
@@ -77,30 +76,42 @@ class Sales_team extends PS_Controller{
 
 		if($this->pm->can_add)
 		{
+			$code = trim($this->input->post('code'));
 			$name = trim($this->input->post('name'));
 
-			if( ! empty($name))
+			if( ! empty($code) && ! empty($name))
 			{
-				if( ! $this->sales_team_model->is_exists_name($name))
+				if(! $this->sales_team_model->is_exists_code($code))
 				{
-					$arr = array('name' => $name);
+					if( ! $this->sales_team_model->is_exists_name($name))
+					{
+						$arr = array(
+							'code' => $code,
+							'name' => $name
+						);
 
-					if( ! $this->sales_team_model->add($arr))
+						if( ! $this->sales_team_model->add($arr))
+						{
+							$sc = FALSE;
+							set_error('insert');
+						}
+					}
+					else
 					{
 						$sc = FALSE;
-						set_error('insert');
+						set_error('exists', $name);
 					}
 				}
 				else
 				{
 					$sc = FALSE;
-					set_error('exists', $name);
+					set_error('exists', $code);
 				}
 			}
 			else
 			{
 				$sc = FALSE;
-				set_error('required', ' : Name');
+				set_error('required', ' : Code or Name');
 			}
 		}
 		else
@@ -226,7 +237,7 @@ class Sales_team extends PS_Controller{
 
 	public function clear_filter()
 	{
-		return clear_filter(array('st_name'));
+		return clear_filter(array('st_code','st_name'));
 	}
 }
 ?>

@@ -33,3 +33,18 @@ function syncData(){
 		}
 	})
 }
+
+
+function toggleList(el) {
+	const list = el.is(':checked') ? 1 : 0;
+	let id = el.data('id');
+	$.ajax({
+		url:HOME + 'set_list',
+		type:'POST',
+		cache:false,
+		data:{
+			'id' : id,
+			'list' : list
+		}
+	});
+}

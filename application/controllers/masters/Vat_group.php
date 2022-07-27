@@ -101,16 +101,9 @@ class Vat_group extends PS_Controller
 	public function sync_data()
 	{
 		$sc = TRUE;
+		$this->load->library('api');
 
-		$response = json_encode(array(
-			array('Code' => 'S00', 'Name' => 'TH Sale Rate 0%', 'Inactive' => 'N'),
-			array('Code' => 'S07', 'Name' => 'TH Sale Rate 7%', 'Inactive' => 'N'),
-			array('Code' => 'P00', 'Name' => 'TH Purchase Rate 0%', 'Inactive' => 'N'),
-			array('Code' => 'P07', 'Name' => 'TH Purchase Rate 7%', 'Inactive' => 'N')
-		));
-
-		$res = json_decode($response);
-
+		$res = $this->api->getVatGroupUpdateData();
 
 		if(! empty($res))
 		{
@@ -158,7 +151,7 @@ class Vat_group extends PS_Controller
 
   public function clear_filter()
 	{
-		return clear_filter(array('vat_group_code', 'vat_group_name'));
+		return clear_filter(array('vat_group_code', 'vat_group_name', 'vat_group_status'));
 	}
 
 

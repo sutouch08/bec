@@ -19,6 +19,7 @@ class Channels extends PS_Controller
   public function index()
   {
 		$filter = array(
+			'code' => get_filter('code', 'channels_code', ''),
 			'name' => get_filter('name', 'channels_name', '')
 		);
 
@@ -37,6 +38,73 @@ class Channels extends PS_Controller
   }
 
 
+	public function add_new()
+	{
+		if($this->pm->can_add)
+		{
+			$ds['top_position'] = $this->channels_model->get_top_position();
+			$this->load->view('masters/channels/channels_add', $ds);
+		}
+		else
+		{
+			$this->permission_deny();
+		}
+	}
+
+
+	public function add()
+	{
+		$sc = TRUE;
+
+		$code = $this->input->post('code');
+		$name = $this->input->post('name');
+		$active = $this->input->post('active');
+		$position = $this->input->post('position');
+
+		if(! empty($code) && !empty($name))
+		{
+			if(!$this->channels_model->is_exists_code($code))
+			{
+				if(! $this->channels_model->is_exists($name))
+				{
+					$arr = array(
+						'code' => $code,
+						'name' => $name,
+						'active' => $active == 1 ? 1 : 0,
+						'position' => $position
+					);
+
+					if( ! $this->channels_model->add($arr))
+					{
+						$sc = FALSE;
+						set_error('insert');
+					}
+				}
+				else
+				{
+					$sc = FALSE;
+					set_error('exists', $name);
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				set_error('exists', $code);
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('required');
+		}
+
+
+		$this->_response($sc);
+	}
+
+
+
+/*
 	public function sync_data()
 	{
 		$sc = TRUE;
@@ -90,7 +158,7 @@ class Channels extends PS_Controller
 		$this->_response($sc);
 	}
 
-
+*/
 
   public function edit($id)
   {
@@ -189,12 +257,27 @@ class Channels extends PS_Controller
 
 
 
-	public function is_exists()
+	public function is_exists_name()
 	{
 		$id = $this->input->post('id');
 		$name = trim($this->input->post('name'));
 
 		if($this->channels_model->is_exists($name, $id))
+		{
+			echo 'exists';
+		}
+		else
+		{
+			echo 'ok';
+		}
+	}
+
+	public function is_exists_code()
+	{
+		$id = $this->input->post('id');
+		$code = trim($this->input->post('code'));
+
+		if($this->channels_model->is_exists_code($code, $id))
 		{
 			echo 'exists';
 		}
@@ -248,7 +331,7 @@ class Channels extends PS_Controller
 
   public function clear_filter()
 	{
-		return clear_filter(array('channels_name'));
+		return clear_filter(array('channels_code','channels_name'));
 	}
 
 }//--- end class

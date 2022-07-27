@@ -21,6 +21,7 @@ class Product_category extends PS_Controller
   public function index()
   {
 		$filter = array(
+			'code' => get_filter('code', 'caCode', ''),
 			'name' => get_filter('name', 'caName', ''),
 			'level' => get_filter('level', 'caLevel', 'all'),
 			'parent' => get_filter('parent', 'caParent', 'all')
@@ -76,33 +77,43 @@ class Product_category extends PS_Controller
 	public function add()
 	{
 		$sc = TRUE;
+		$code = trim($this->input->post('code'));
 		$name = trim($this->input->post('name'));
 		$parent_id = $this->input->post('parent_id');
 
 		if($this->pm->can_add)
 		{
-			if( ! $this->product_category_model->is_exists_name($name))
+			if( ! $this->product_category_model->is_exists_code($code))
 			{
-				$parent = $this->product_category_model->get($parent_id);
+				if( ! $this->product_category_model->is_exists_name($name))
+				{
+					$parent = $this->product_category_model->get($parent_id);
 
-				$level = (empty($parent) ? 1 : $parent->level + 1);
+					$level = (empty($parent) ? 1 : $parent->level + 1);
 
-				$arr = array(
-					'name' => $name,
-					'level' => $level,
-					'parent_id' => $parent_id
-				);
+					$arr = array(
+						'code' => $code,
+						'name' => $name,
+						'level' => $level,
+						'parent_id' => $parent_id
+					);
 
-				if( ! $this->product_category_model->add($arr))
+					if( ! $this->product_category_model->add($arr))
+					{
+						$sc = FALSE;
+						set_error('insert');
+					}
+				}
+				else
 				{
 					$sc = FALSE;
-					set_error('insert');
+					set_error('exists', $name);
 				}
 			}
 			else
 			{
 				$sc = FALSE;
-				set_error('exists', $name);
+				set_error('exists', $code);
 			}
 		}
 		else
@@ -113,10 +124,6 @@ class Product_category extends PS_Controller
 
 		$this->_response($sc);
 	}
-
-
-
-
 
 
 
@@ -200,7 +207,7 @@ class Product_category extends PS_Controller
 
   public function clear_filter()
 	{
-		$filter = array('caName', 'caLevel', 'caParent');
+		$filter = array('caName', 'caLevel', 'caParent', 'caCode');
     clear_filter($filter);
 	}
 

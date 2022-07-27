@@ -41,6 +41,12 @@ class Product_brand_model extends CI_Model
 
   public function count_rows(array $ds = array())
   {
+		if(isset($ds['code']) && $ds['code'] != "")
+		{
+			$this->db->like('code', $ds['code']);
+		}
+
+
     if(isset($ds['name']) && $ds['name'] != "")
 		{
 			$this->db->like('name', $ds['name']);
@@ -53,6 +59,11 @@ class Product_brand_model extends CI_Model
 
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
+		if(isset($ds['code']) && $ds['code'] != "")
+		{
+			$this->db->like('code', $ds['code']);
+		}
+		
 		if(isset($ds['name']) && $ds['name'] != "")
 		{
 			$this->db->like('name', $ds['name']);
@@ -80,8 +91,21 @@ class Product_brand_model extends CI_Model
       return $rs->row();
     }
 
-    return FALSE;
+    return NULL;
   }
+
+
+	public function get_by_code($code)
+	{
+		$rs = $this->db->where('code', $code)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
 
 
 

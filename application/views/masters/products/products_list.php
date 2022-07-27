@@ -31,7 +31,7 @@
     <label>Category</label>
 		<select class="form-control input-sm" name="category" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
-			<?php echo select_category_level(3, $category); ?>
+			<?php echo select_category_level(5, $category); ?>
 		</select>
   </div>
 
@@ -74,15 +74,15 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped border-1" style="min-width:1100px;">
+		<table class="table table-striped border-1 min-width-1000">
 			<thead>
 				<tr>
 					<th class="fix-width-60 middle text-center">#</th>
 					<th class="fix-width-60 middle text-center">Img</th>
 					<th class="fix-width-100 middle">Code</th>
 					<th class="min-width-200 middle">Name</th>
-					<th class="fix-width-100 middle text-right">Price</th>
 					<th class="fix-width-150 middle">Model</th>
+					<th class="fix-width-150 middle">Type</th>
 					<th class="fix-width-150 middle">Category</th>
 					<th class="fix-width-100 middle">Brand</th>
 					<th class="fix-width-60 middle text-center">Status</th>
@@ -95,11 +95,11 @@
 			<?php foreach($data as $rs) : ?>
 					<tr class="font-size-12" id="row-<?php echo $rs->id; ?>">
 						<td class="middle text-center no"><?php echo $no; ?></td>
-						<td class="middle text-center padding-0"><img src="<?php echo get_product_image($rs->id, "mini"); ?>" width="40" /></td>
+						<td class="middle text-center"><img src="<?php echo get_product_image($rs->id, "mini"); ?>" width="40" /></td>
 						<td class="middle"><?php echo $rs->code; ?></td>
 						<td class="middle"><?php echo $rs->name; ?></td>
-						<td class="middle text-right"><?php echo number($rs->price, 2); ?></td>
 						<td class="middle"><?php echo $rs->model_name; ?></td>
+						<td class="middle"><?php echo $rs->type_name; ?></td>
 						<td class="middle"><?php echo $rs->category_name; ?></td>
 						<td class="middle"><?php echo $rs->brand_name; ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->status); ?></td>
@@ -114,7 +114,7 @@
 			<?php endforeach; ?>
 		<?php else : ?>
 			<tr>
-				<td colspan="9" class="middle text-center">--- No data ---</td>
+				<td colspan="10" class="middle text-center">--- No data ---</td>
 			</tr>
 		<?php endif; ?>
 			</tbody>
@@ -123,5 +123,6 @@
 </div>
 
 <script src="<?php echo base_url(); ?>scripts/masters/products.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/masters/sync_product.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

@@ -74,22 +74,10 @@ class Payment_term extends PS_Controller
 
 	public function sync_data()
 	{
+		$this->load->library('api');
 		$sc = TRUE;
 
-		$data =
-		$response = json_encode(array(
-			array("GroupNum" => -1, "PymntGroup" => "-Cash Basic-"),
-			array("GroupNum" => 2, "PymntGroup" => "N007"),
-			array("GroupNum" => 3, "PymntGroup" => "N015"),
-			array("GroupNum" => 4, "PymntGroup" => "N030"),
-			array("GroupNum" => 5, "PymntGroup" => "N045"),
-			array("GroupNum" => 5, "PymntGroup" => "N060"),
-			array("GroupNum" => 7, "PymntGroup" => "N075"),
-			array("GroupNum" => 8, "PymntGroup" => "N090"),
-			array("GroupNum" => 9, "PymntGroup" => "สด")
-		));
-
-		$res = json_decode($response);
+		$res = $this->api->getPaymentGroupUpdateData();
 
 
 		if(! empty($res))
@@ -103,6 +91,7 @@ class Payment_term extends PS_Controller
 					$arr = array(
 						"id" => $rs->GroupNum,
 						"name" => $rs->PymntGroup,
+						"term" => $rs->ExtraDays,
 						"last_sync" => now()
 					);
 
@@ -112,6 +101,7 @@ class Payment_term extends PS_Controller
 				{
 					$arr = array(
 						"name" => $rs->PymntGroup,
+						"term" => $rs->ExtraDays,
 						"last_sync" => now()
 					);
 

@@ -9,6 +9,7 @@ class User_pwd extends CI_Controller
 	public $pm;
   public $error;
 	public $_user;
+	public $_customer = FALSE;
 
 	public function __construct()
 	{

@@ -68,17 +68,19 @@
 		<div class="form-group">
 			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Model</label>
 			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-				<input type="text" name="model" id="model" class="form-control" value="<?php echo $model; ?>" />
-				<input type="hidden" name="model_id" id="model_id" value="<?php echo $model_id; ?>" />
+				<select class="width-100" name="model" id="model">
+					<option value="">โปรดเลือก</option>
+					<?php echo select_product_model($model_code); ?>
+				</select>
 			</div>
 		</div>
 
 		<div class="form-group">
 			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Brand</label>
 			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-				<select name="brand" id="brand" class="form-control">
+				<select name="brand" id="brand" class="width-100">
 					<option value="">โปรดเลือก</option>
-				<?php echo select_product_brand($brand_id); ?>
+				<?php echo select_product_brand($brand_code); ?>
 				</select>
 			</div>
 		</div>
@@ -86,19 +88,23 @@
 		<div class="form-group">
 			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Category</label>
 			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-				<select name="category" id="category" class="form-control">
+				<select name="category" id="category" class="width-100" onchange="getParentCate()">
 					<option value="">โปรดเลือก</option>
-				<?php echo select_product_category($category_id); ?>
+				<?php echo select_category_level(5, $category_code); ?>
 				</select>
+				<input type="hidden" id="cateCode1" value="<?php echo $category_code_1; ?>" />
+				<input type="hidden" id="cateCode2" value="<?php echo $category_code_2; ?>" />
+				<input type="hidden" id="cateCode3" value="<?php echo $category_code_3; ?>" />
+				<input type="hidden" id="cateCode4" value="<?php echo $category_code_4; ?>" />
 			</div>
 		</div>
 
 		<div class="form-group">
 			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Type</label>
 			<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-				<select name="type" id="type" class="form-control">
+				<select name="type" id="type" class="width-100">
 					<option value="">โปรดเลือก</option>
-				<?php echo select_product_type($type_id); ?>
+				<?php echo select_product_type($type_code); ?>
 				</select>
 			</div>
 		</div>
@@ -144,6 +150,7 @@
 		<div class="col-sm-12 col-xs-12 center">
 			<?php if($this->pm->can_edit) : ?>
 			<button type="button" class="btn btn-sm btn-primary" onclick="changeImage()">Upload image</button>
+			<button type="button" class="btn btn-sm btn-danger" onclick="deleteImage(<?php echo $id; ?>)">Delete image</button>
 			<?php endif; ?>
 		</div>
 	</div> <!-- end right column-->
@@ -197,5 +204,11 @@
 	</div>
 </div>
 
+<script>
+	$('#model').select2();
+	$('#brand').select2();
+	$('#type').select2();
+	$('#category').select2();
+</script>
 <script src="<?php echo base_url(); ?>scripts/masters/products.js?v=<?php echo date('YmdH'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

@@ -65,6 +65,27 @@ class Product_category_model extends CI_Model
 	}
 
 
+	public function get_parent_list($code)
+	{
+		$qr = "SELECT lv5.code AS l5, lv4.code AS l4, lv3.code AS l3, lv2.code AS l2, lv1.code AS l1 ";
+		$qr .= "FROM product_category AS lv5 ";
+		$qr .= "LEFT JOIN product_category AS lv4 ON lv5.parent_id = lv4.id ";
+		$qr .= "LEFT JOIN product_category AS lv3 ON lv4.parent_id = lv3.id ";
+		$qr .= "LEFT JOIN product_category AS lv2 ON lv3.parent_id = lv2.id ";
+		$qr .= "LEFT JOIN product_category AS lv1 ON lv2.parent_id = lv1.id ";
+		$qr .= "WHERE lv5.code = {$code}";
+
+		$rs = $this->db->query($qr);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
+
 	public function has_child($parent_id)
 	{
 		$rs = $this->db->where('parent_id', $parent_id)->count_all_results($this->tb);
@@ -85,6 +106,11 @@ class Product_category_model extends CI_Model
 		->select('c.*, p.name AS parent')
 		->from('product_category AS c')
 		->join('product_category AS p', 'c.parent_id = p.id', 'left');
+
+		if(! no_value($ds['code']))
+		{
+			$this->db->like('c.code', $ds['code']);
+		}
 
 		if( ! no_value($ds['name']))
 		{
@@ -117,6 +143,11 @@ class Product_category_model extends CI_Model
 
 	public function count_rows(array $ds = array())
 	{
+		if(! no_value($ds['code']))
+		{
+			$this->db->like('c.code', $ds['code']);
+		}
+
 		if( ! no_value($ds['name']))
 		{
 			$this->db->like('name', $ds['name']);
@@ -146,6 +177,20 @@ class Product_category_model extends CI_Model
 		}
 
 		$rs = $this->db->where('name', $name)->count_all_results($this->tb);
+
+		if($rs > 0)
+		{
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+
+
+	public function is_exists_code($code)
+	{
+		$rs = $this->db->where('code', $code)->count_all_results($this->tb);
 
 		if($rs > 0)
 		{

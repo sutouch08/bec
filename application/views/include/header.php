@@ -40,7 +40,6 @@
 				var HOME = '<?php echo $this->home . '/'; ?>';
 			</script>
 			<div class="navbar-container" id="navbar-container">
-				<?php if(! isset($_GET['nomenu'])) : ?>
 				<!-- #section:basics/sidebar.mobile.toggle -->
 				<button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar">
 					<span class="sr-only">Toggle sidebar</span>
@@ -48,7 +47,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<?php endif; ?>
+
 				<div class="navbar-header pull-left">
 					<a href="<?php echo base_url(); ?>" class="navbar-brand" style="min-width:167px;">
 						<small>
@@ -57,7 +56,6 @@
 					</a>
 				</div>
 
-					<?php $this->load->view('include/top_menu'); ?>
 				<div class="navbar-buttons navbar-header pull-right" role="navigation">
 					<ul class="nav ace-nav">
 
@@ -102,25 +100,32 @@
 				try{ace.settings.check('main-container' , 'fixed')}catch(e){}
 			</script>
 			<!-- #section:basics/sidebar -->
-			<div id="sidebar" class="sidebar responsive <?php echo get_cookie('sidebar_layout'); ?>" data-sidebar="true" data-sidebar-scoll="true" data-sidebar-hover="true">
-				<script type="text/javascript">
-					try{ace.settings.check('sidebar' , 'fixed')}catch(e){}
-				</script>
+			<?php if($this->_customer === TRUE) : ?>
+				<?php if(! empty($this->side_filter)) : ?>
+				<div id="sidebar" class="sidebar responsive <?php echo get_cookie('sidebar_layout'); ?>" data-sidebar="true" data-sidebar-scoll="true" data-sidebar-hover="true">
+					<script type="text/javascript">
+						try{ace.settings.check('sidebar' , 'fixed')}catch(e){}
+					</script>
 						<!--- side menu  ------>
-				<?php $this->load->view("include/side_menu"); ?>
-
-				<!-- #section:basics/sidebar.layout.minimize -->
-				<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse" onclick="toggle_layout()">
-					<i class="ace-icon fa fa-angle-double-left" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
+						<?php $this->load->view('include/side_filter'); ?>
+						</div>
+					<?php endif; ?>
+				<?php else : ?>
+					<div id="sidebar" class="sidebar responsive <?php echo get_cookie('sidebar_layout'); ?>" data-sidebar="true" data-sidebar-scoll="true" data-sidebar-hover="true">
+						<script type="text/javascript">
+							try{ace.settings.check('sidebar' , 'fixed')}catch(e){}
+						</script>
+					<?php $this->load->view("include/side_menu"); ?>
+					<!-- #section:basics/sidebar.layout.minimize -->
+					<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse" onclick="toggle_layout()">
+						<i class="ace-icon fa fa-angle-double-left" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
+					</div>
 				</div>
-
-			</div>
+				<?php endif; ?>
 			<!-- /section:basics/sidebar -->
 			<div class="main-content">
 				<div class="main-content-inner">
 					<div id="sidebar2" class="sidebar h-sidebar navbar-collapse collapse" data-sidebar="true" data-sidebar-scoll="true"
 					data-sidebar-hover="true" aria-expanded="false" style="height:1px;">
-      <!-- second sidebar, horizontal -->
-
     			</div>
 					<div class="page-content">

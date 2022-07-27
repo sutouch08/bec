@@ -207,7 +207,7 @@ class Products extends REST_Controller
 
 
 
-	public function update_post($id)
+	public function update_post($code = NULL)
   {
     $sc = TRUE;
 		$result = array();

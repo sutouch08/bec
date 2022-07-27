@@ -78,117 +78,56 @@ class Customer_address extends PS_Controller
 		$this->_response($sc);
 	}
 
+	public function get_last_sync_date()
+	{
+		$date = $this->customer_address_model->get_last_sync_date();
 
+		echo $date;
+	}
+
+	public function count_update_rows()
+	{
+		$date = $this->input->get('last_sync_date');
+
+		$this->load->library('api');
+
+		echo $this->api->countUpdateAddress($date);
+	}
 
 	public function sync_data()
 	{
+		$this->load->library('api');
+
 		$sc = TRUE;
 
-		$response = json_encode(array(
-			array(
-				'Address' => '0000',
-				'CardCode' => 'CL-001',
-				'AdresType' => 'B',
-				'Address2' => '0000',
-				'Address3' => 'สำนักงานใหญ่',
-				'StreetNo' => '',
-				'Street' => 'เลขที่ 445/3 ถ.เพชรบุรี',
-				'Block' => 'แขวงทุ่งพญาไท',
-				'City' => 'เขตราชเทวี',
-				'County' => 'กรุงเทพมหานคร',
-				'Country' => 'TH',
-				'State' => NULL,
-				'ZipCode' => '10400'
-			),
-			array(
-				'Address' => '0000',
-				'CardCode' => 'CL-001',
-				'AdresType' => 'S',
-				'Address2' => '0000',
-				'Address3' => 'สำนักงานใหญ่',
-				'StreetNo' => '',
-				'Street' => 'เลขที่ 445/3 ถ.เพชรบุรี',
-				'Block' => 'แขวงทุ่งพญาไท',
-				'City' => 'เขตราชเทวี',
-				'County' => 'กรุงเทพมหานคร',
-				'Country' => 'TH',
-				'State' => NULL,
-				'ZipCode' => '10400'
-			),
-			array(
-				'Address' => '0000',
-				'CardCode' => 'CL-002',
-				'AdresType' => 'B',
-				'Address2' => '0000',
-				'Address3' => 'สำนักงานใหญ่',
-				'StreetNo' => '',
-				'Street' => 'เลขที่ 445/2 ถ.เพชรบุรี',
-				'Block' => 'แขวงทุ่งพญาไท',
-				'City' => 'เขตราชเทวี',
-				'County' => 'กรุงเทพมหานคร',
-				'Country' => 'TH',
-				'State' => NULL,
-				'ZipCode' => '10400'
-			),
-			array(
-				'Address' => '0000',
-				'CardCode' => 'CL-002',
-				'AdresType' => 'S',
-				'Address2' => '0000',
-				'Address3' => 'สำนักงานใหญ่',
-				'StreetNo' => '',
-				'Street' => 'เลขที่ 445/2 ถ.เพชรบุรี',
-				'Block' => 'แขวงทุ่งพญาไท',
-				'City' => 'เขตราชเทวี',
-				'County' => 'กรุงเทพมหานคร',
-				'Country' => 'TH',
-				'State' => NULL,
-				'ZipCode' => '10400'
-			),
-			array(
-				'Address' => '0001',
-				'CardCode' => 'CL-001',
-				'AdresType' => 'S',
-				'Address2' => '0001',
-				'Address3' => 'สีลม',
-				'StreetNo' => '',
-				'Street' => 'เลขที่ 445/3 ถ.เพชรบุรี',
-				'Block' => 'แขวงทุ่งพญาไท',
-				'City' => 'เขตราชเทวี',
-				'County' => 'กรุงเทพมหานคร',
-				'Country' => 'TH',
-				'State' => NULL,
-				'ZipCode' => '10400'
-			)
-		));
+		$last_sync = $this->input->get('last_sync');
+		$limit = $this->input->get('limit');
+		$offset = $this->input->get('offset');
+		$i = 0;
 
+		$ds = $this->api->getUpdateAddress($last_sync, $limit, $offset);
 
-
-		$res = json_decode($response);
-
-
-		if(! empty($res))
+		if(! empty($ds))
 		{
-			foreach($res as $rs)
+			foreach($ds as $rs)
 			{
-				$cr = $this->customer_address_model->get($rs->CardCode, $rs->AdresType, $rs->Address);
+				$cr = $this->customer_address_model->get($rs->CardCode, $rs->AddressType, $rs->Address);
 
 				if(empty($cr))
 				{
 					$arr = array(
 						'Address' => $rs->Address,
 						'CardCode' => $rs->CardCode,
-						'AdresType' => $rs->AdresType,
+						'AdresType' => $rs->AddressType,
 						'Address2' => $rs->Address2,
 						'Address3' => $rs->Address3,
-						'StreetNo' => $rs->StreetNo,
 						'Street' => $rs->Street,
 						'Block' => $rs->Block,
 						'City' => $rs->City,
 						'County' => $rs->County,
 						'Country' => $rs->Country,
-						'State' => $rs->State,
-						'ZipCode' => $rs->ZipCode
+						'ZipCode' => $rs->ZipCode,
+						'last_sync' => now()
 					);
 
 					$this->customer_address_model->add($arr);
@@ -198,25 +137,31 @@ class Customer_address extends PS_Controller
 					$arr = array(
 						'Address' => $rs->Address,
 						'CardCode' => $rs->CardCode,
-						'AdresType' => $rs->AdresType,
+						'AdresType' => $rs->AddressType,
 						'Address2' => $rs->Address2,
 						'Address3' => $rs->Address3,
-						'StreetNo' => $rs->StreetNo,
 						'Street' => $rs->Street,
 						'Block' => $rs->Block,
 						'City' => $rs->City,
 						'County' => $rs->County,
 						'Country' => $rs->Country,
-						'State' => $rs->State,
-						'ZipCode' => $rs->ZipCode
+						'ZipCode' => $rs->ZipCode,
+						'last_sync' => now()
 					);
 
 					$this->customer_address_model->update($cr->id, $arr);
 				}
+
+				$i++;
 			}
 		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "no data found";
+		}
 
-		$this->_response($sc);
+		echo $sc === TRUE ? $i : $this->error;
 	}
 
 
@@ -224,6 +169,108 @@ class Customer_address extends PS_Controller
 	private function update_sap($id, $name)
 	{
 		return TRUE;
+	}
+
+
+	public function get_address_ship_to_code()
+	{
+		$CardCode = $this->input->get('CardCode');
+		$sc = array();
+		$ds = $this->customer_address_model->get_address_ship_to_code($CardCode);
+
+		if(!empty($ds))
+		{
+			foreach($ds as $rs)
+			{
+				$sc[] = $rs;
+			}
+
+			echo json_encode($sc);
+		}
+		else
+		{
+			echo "no data";
+		}
+	}
+
+	public function get_address_bill_to_code()
+	{
+		$CardCode = $this->input->get('CardCode');
+		$sc = array();
+		$ds = $this->customer_address_model->get_address_bill_to_code($CardCode);
+
+		if(!empty($ds))
+		{
+			foreach($ds as $rs)
+			{
+				$sc[] = $rs;
+			}
+
+			echo json_encode($sc);
+		}
+		else
+		{
+			echo "no data";
+		}
+	}
+
+
+
+	public function get_address_ship_to()
+	{
+		$CardCode = $this->input->get('CardCode');
+		$Address = $this->input->get('Address');
+		$adr = $this->customer_address_model->get_address_ship_to($CardCode, $Address);
+
+		if( ! empty($adr))
+		{
+			$arr = array(
+				'code' => get_empty_text($adr->Address),
+				'address' => get_empty_text($adr->Street),
+				'street' => get_empty_text($adr->StreetNo),
+				'sub_district' => get_empty_text($adr->Block),
+				'district' => get_empty_text($adr->City),
+				'province' => get_empty_text($adr->County),
+				'country' => get_empty_text($adr->Country),
+				'postcode' => get_empty_text($adr->ZipCode)
+			);
+
+			echo json_encode($arr);
+		}
+		else
+		{
+			echo "not found";
+		}
+	}
+
+
+	public function get_address_bill_to()
+	{
+		$CardCode = $this->input->get('CardCode');
+		$Address = $this->input->get('Address');
+
+		$sc = array();
+		$adr = $this->customer_address_model->get_address_bill_to($CardCode, $Address);
+
+		if( ! empty($adr))
+		{
+			$arr = array(
+				'code' => get_empty_text($adr->Address),
+				'address' => get_empty_text($adr->Street),
+				'street' => get_empty_text($adr->StreetNo),
+				'sub_district' => get_empty_text($adr->Block),
+				'district' => get_empty_text($adr->City),
+				'province' => get_empty_text($adr->County),
+				'country' => get_empty_text($adr->Country),
+				'postcode' => get_empty_text($adr->ZipCode)
+			);
+
+			echo json_encode($arr);
+		}
+		else
+		{
+			echo "not found";
+		}
 	}
 
 
