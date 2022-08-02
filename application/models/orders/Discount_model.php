@@ -10,6 +10,21 @@ class Discount_model extends CI_Model
     parent::__construct();
   }
 
+
+	public function getRuleCode($id)
+	{
+		$rs = $this->db->select('code')->where('id', $id)->get($this->dr);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->code;
+		}
+
+		return NULL;
+	}
+
+
+
   public function get_item_discount($item_code, $customer_code, $price, $qty, $payment_id, $channels_id, $date = '', $order_code = NULL)
 	{
     $this->load->model('masters/products_model');

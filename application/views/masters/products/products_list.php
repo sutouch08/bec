@@ -6,6 +6,12 @@
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-4 padding-5">
     <p class="pull-right top-p">
 			<button type="button" class="btn btn-xs btn-info btn-100 top-btn" onclick="syncData()"><i class="fa fa-refresh"></i> Sync</button>
+			<?php if($this->_SuperAdmin) : ?>
+			<button type="button" class="btn btn-xs btn-info btn-100 top-btn" onclick="forceSyncData()"><i class="fa fa-refresh"></i> Sync All</button>
+			<?php endif; ?>
+			<?php if($this->pm->can_add OR $this->pm->can_edit) : ?>
+			<button type="button" class="btn btn-xs btn-primary btn-100 top-btn" onclick="updateCategory()">Update Category</button>
+			<?php endif; ?>
     </p>
   </div>
 </div><!-- End Row -->
@@ -60,6 +66,15 @@
 		</select>
   </div>
 
+	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>สินค้าแนะนำ</label>
+		<select class="form-control input-sm" name="home" onchange="getSearch()">
+			<option value="all">ทั้งหมด</option>
+			<option value="1" <?php echo is_selected('1', $home); ?>>Yes</option>
+			<option value="0" <?php echo is_selected('0', $home); ?>>No</option>
+		</select>
+  </div>
+
   <div class="col-lg-1 col-md-2 col-sm-2 col-xs-3 padding-5">
     <label class="display-block not-show">buton</label>
     <button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> ค้นหา</button>
@@ -81,11 +96,12 @@
 					<th class="fix-width-60 middle text-center">Img</th>
 					<th class="fix-width-100 middle">Code</th>
 					<th class="min-width-200 middle">Name</th>
-					<th class="fix-width-150 middle">Model</th>
+					<th class="fix-width-100 middle">Model</th>
 					<th class="fix-width-150 middle">Type</th>
 					<th class="fix-width-150 middle">Category</th>
 					<th class="fix-width-100 middle">Brand</th>
 					<th class="fix-width-60 middle text-center">Status</th>
+					<th class="fix-width-60 middle text-center">แนะนำ</th>
 					<th class="fix-width-80"></th>
 				</tr>
 			</thead>
@@ -103,6 +119,12 @@
 						<td class="middle"><?php echo $rs->category_name; ?></td>
 						<td class="middle"><?php echo $rs->brand_name; ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->status); ?></td>
+						<td class="middle text-center">
+							<label>
+								<input type="checkbox" class="ace" onchange="toggleHome($(this))" value="<?php echo $rs->id; ?>" <?php echo is_checked(1, $rs->home); ?> />
+								<span class="lbl"></span>
+							</label>
+						</td>
 						<td class="middle text-right">
 							<button type="button" class="btn btn-minier btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
 							<?php if($this->pm->can_edit) : ?>
@@ -114,7 +136,7 @@
 			<?php endforeach; ?>
 		<?php else : ?>
 			<tr>
-				<td colspan="10" class="middle text-center">--- No data ---</td>
+				<td colspan="11" class="middle text-center">--- No data ---</td>
 			</tr>
 		<?php endif; ?>
 			</tbody>

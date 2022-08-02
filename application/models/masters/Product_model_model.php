@@ -124,7 +124,7 @@ class Product_model_model extends CI_Model
 
   public function get_all()
   {
-  	$rs = $this->db->get($this->tb);
+  	$rs = $this->db->order_by('name', 'ASC')->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{

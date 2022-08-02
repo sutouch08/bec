@@ -65,7 +65,7 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
 	$header .= "	<link rel='icon' href='".base_url()."assets/img/favicon.ico' type='image/x-icon' />";
 	$header .= "	<title>". $pageTitle ."</title>";
-	$header .= "	<link href='".base_url()."assets/css/bootstrap.css' rel='stylesheet' />";
+	$header .= "	<link href='".base_url()."assets/css/bootstrap_pdf.css' rel='stylesheet' />";
 	$header .= "	<link rel='stylesheet' href='".base_url()."assets/css/font-awesome.css' />";
 	$header .= "	<link href='".base_url()."assets/css/template.css' rel='stylesheet' />";
 	$header .= '<link rel="preconnect" href="https://fonts.googleapis.com">';
@@ -74,7 +74,7 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	<script src='".base_url()."assets/js/jquery.min.js'></script>";
 	$header .= "	<script src='".base_url()."assets/js/bootstrap.min.js'></script> ";
 	$header .= "	<style> ";
-	$header .= " 		body { font-family:'Sarabun', sans-serif;} ";
+	//$header .= " 		body { font-family:'sarabun', font-size:12px; line-height:2;} ";
 	$header .= "		.page_layout{ border: solid 1px #AAA; border-radius:5px; 	} ";
 	$header .= "		@media print{ 	.page_layout{ border: none; } } ";
 	$header .= " 		.table > tbody > tr > td { border-top:0px; border-left:solid 1px #555555;} ";
@@ -82,20 +82,7 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	</style>";
 	$header .= "	</head>";
 	$header .= "	<body>";
-	$header .= "	<div class='modal fade' id='xloader' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true' data-backdrop='static'>";
-	$header .= "	<div class='modal-dialog' style='width:150px; background-color:transparent;' >";
-	$header .= "	<div class='modal-content'>";
-	$header .= "	<div class='modal-body'>";
-	$header .= "	<div style='width:100%; height:150px; padding-top:25px;'>";
-	$header .= "	<div style='width:100%;  text-align:center; margin-bottom:10px;'><i class='fa fa-spinner fa-4x fa-pulse' style='color:#069; display:block;'></i>	</div>";
-	$header .= "	<div style='width:100%; height:10px; background-color:#CCC;'></div>";
-	$header .= "	<div id='preloader' style='margin-top:-10px; height:10px; width:1%; background-color:#09F;'></div>";
-	$header .= "	<div style='width:100%;  text-align:center; margin-top:15px; font-size:12px;'><span><strong>Loading....</strong></span></div>";
-	$header .= "	</div></div></div></div></div> "; // modal fade;
-	$header .= "	<div class='hidden-print' style='margin-top:10px; padding-bottom:10px; padding-right:5mm; width:200mm; margin-left:auto; margin-right:auto; text-align:right'>";
-	$header .= "	<button class='btn btn-info' onclick='get_pdf()'><i class='fa fa-file-pdf-o'></i> &nbsp; PDF</button>";
-	$header .= "	<button class='btn btn-primary' onclick='print()'><i class='fa fa-print'></i> &nbsp; พิมพ์</button>";
-	$header .= "	</div><div style='width:100%'>";
+	$header .= "<div style='width:100%'>";
 
 	return $header;
 }

@@ -60,6 +60,8 @@ class Customers extends REST_Controller
 					'AreaCode' => empty($ds->AreaCode) ? NULL : get_null($ds->AreaCode),
 					'TypeCode' => empty($ds->TypeCode) ? NULL : get_null($ds->TypeCode),
 					'GradeCode' => empty($ds->GradeCode) ? NULL : get_null($ds->GradeCode),
+					'SaleTeam' => empty($ds->Sales_Team) ? NULL : get_null($ds->Sales_Team),
+					'SaleTeamName' => empty($ds->Sales_Team_Name) ? NULL : get_null($ds->Sales_Team_Name),
 					'CreditLine' => empty($ds->CreditLine) ? 0.00 : $ds->CreditLine,
 					'Status' => empty($ds->validFor) ? 1 : ($ds->validFor == 'N' ? 0 : 1),
 					'last_sync' => now()
@@ -149,7 +151,7 @@ class Customers extends REST_Controller
 
 		  if( ! empty($cr))
 		  {
-				$arr = array(				  
+				$arr = array(
 					'CardName' => empty($ds->CardName) ? NULL: get_null($ds->CardName),
 					'LicTradNum' => empty($ds->LicTradNum) ? NULL : get_null($ds->LicTradNum),
 					'CardType' => empty($ds->CardType) ? 'C' : $ds->CardType,
@@ -161,6 +163,8 @@ class Customers extends REST_Controller
 					'AreaCode' => empty($ds->AreaCode) ? NULL : get_null($ds->AreaCode),
 					'TypeCode' => empty($ds->TypeCode) ? NULL : get_null($ds->TypeCode),
 					'GradeCode' => empty($ds->GradeCode) ? NULL : get_null($ds->GradeCode),
+					'SaleTeam' => empty($ds->Sales_Team) ? NULL : get_null($ds->Sales_Team),
+					'SaleTeamName' => empty($ds->Sales_Team_Name) ? NULL : get_null($ds->Sales_Team_Name),
 					'CreditLine' => empty($ds->CreditLine) ? 0.00 : $ds->CreditLine,
 					'Status' => empty($ds->validFor) ? 1 : ($ds->validFor == 'N' ? 0 : 1),
 					'last_sync' => now()

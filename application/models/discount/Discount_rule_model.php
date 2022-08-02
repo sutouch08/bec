@@ -228,7 +228,7 @@ class Discount_rule_model extends CI_Model
 		return NULL;
   }
 
-	
+
 	public function getProductItemRule($id)
   {
 		$rs = $this->db
@@ -517,7 +517,7 @@ class Discount_rule_model extends CI_Model
   public function getRuleProductModel($id)
   {
 		$rs = $this->db
-		->select('dr.*, pm.name')
+		->select('dr.*, pm.code , pm.name')
 		->from('discount_rule_product_model AS dr')
 		->join('product_model AS pm', 'dr.model_id = pm.id', 'left')
 		->where('dr.rule_id', $id)
@@ -1174,30 +1174,32 @@ class Discount_rule_model extends CI_Model
     $this->db->trans_start();
 
     //--- 1.
-    $this->db->where('rule_id', $id)->delete('discount_rule_product_model');
+		$this->db->where('rule_id', $id)->delete('discount_rule_product');
 
-    //--- 2.
-    $this->db->where('rule_id', $id)->delete('discount_rule_product_group');
+		$this->db->where('rule_id', $id)->delete('discount_rule_product_model');
 
-    //--- 3
-    $this->db->where('rule_id', $id)->delete('discount_rule_product_sub_group');
+		$this->db->where('rule_id', $id)->delete('discount_rule_product_brand');
 
-    //--- 4
-    $this->db->where('rule_id', $id)->delete('discount_rule_product_category');
+		$this->db->where('rule_id', $id)->delete('discount_rule_product_category');
 
-    //--- 5
-    $this->db->where('rule_id', $id)->delete('discount_rule_product_type');
+		$this->db->where('rule_id', $id)->delete('discount_rule_product_type');
 
-    //--- 6
-    $this->db->where('rule_id', $id)->delete('discount_rule_product_region');
+    $this->db->where('rule_id', $id)->delete('discount_rule_customer');
 
-    //--- 7
-    $this->db->where('rule_id', $id)->delete('discount_rule_product_brand');
+    $this->db->where('rule_id', $id)->delete('discount_rule_customer_group');
 
-    //--- 8
-    $this->db->where('rule_id', $id)->delete('discount_rule_product_year');
+    $this->db->where('rule_id', $id)->delete('discount_rule_customer_region');
 
-    //--- 9
+		$this->db->where('rule_id', $id)->delete('discount_rule_customer_area');
+
+		$this->db->where('rule_id', $id)->delete('discount_rule_customer_grade');
+
+		$this->db->where('rule_id', $id)->delete('discount_rule_customer_type');
+
+		$this->db->where('rule_id', $id)->delete('discount_rule_channels');
+
+		$this->db->where('rule_id', $id)->delete('discount_rule_payment');
+
     $this->db->where('id', $id)->delete('discount_rule');
 
     //--- end transection

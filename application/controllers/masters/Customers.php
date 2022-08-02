@@ -26,7 +26,7 @@ class Customers extends PS_Controller
 			'group' => get_filter('group', 'cs_group', 'all'),
 			'type' => get_filter('type', 'cs_type', 'all'),
 			'grade' => get_filter('grade', 'cs_grade', 'all'),
-			'region' => get_filter('region', 'cs_region', 'all'),
+			'saleTeam' => get_filter('saleTeam', 'cs_saleTeam', 'all'),
 			'area' => get_filter('area', 'cs_area', 'all'),
 			'term' => get_filter('term', 'cs_term', 'all'),
 			'slp' => get_filter('slp', 'cs_slp', 'all'),
@@ -208,6 +208,8 @@ class Customers extends PS_Controller
 		echo $this->api->countUpdateCustomer($date);
 	}
 
+
+
 	public function sync_data()
 	{
 		$this->load->library('api');
@@ -243,6 +245,8 @@ class Customers extends PS_Controller
 						'AreaCode' => get_null($rs->AreaCode),
 						'TypeCode' => get_null($rs->TypeCode),
 						'GradeCode' => get_null($rs->GradeCode),
+						'SaleTeam' => get_null($rs->Sales_Team),
+						'SaleTeamName' => get_null($rs->Sales_Team_Name),
 						'CreditLine' => $rs->CreditLine,
 						'Status' => $rs->validFor == 'Y' ? 1 : 0,
 						'last_sync' => now()
@@ -265,6 +269,8 @@ class Customers extends PS_Controller
 						'AreaCode' => get_null($rs->AreaCode),
 						'TypeCode' => get_null($rs->TypeCode),
 						'GradeCode' => get_null($rs->GradeCode),
+						'SaleTeam' => get_null($rs->Sales_Team),
+						'SaleTeamName' => get_null($rs->Sales_Team_Name),
 						'CreditLine' => $rs->CreditLine,
 						'Status' => $rs->validFor == 'Y' ? 1 : 0,
 						'last_sync' => now()
@@ -289,7 +295,7 @@ class Customers extends PS_Controller
 
   public function clear_filter()
 	{
-		$filter = array('cs_code', 'cs_name', 'cs_group', 'cs_type', 'cs_grade', 'cs_region', 'cs_area', 'cs_term', 'cs_slp', 'cs_status');
+		$filter = array('cs_code', 'cs_name', 'cs_group', 'cs_type', 'cs_grade', 'cs_saleTeam', 'cs_area', 'cs_term', 'cs_slp', 'cs_status');
     clear_filter($filter);
 	}
 

@@ -11,7 +11,7 @@ class Products_model extends CI_Model
 
 	public function get_all()
 	{
-		$rs = $this->db->get($this->tb);
+		$rs = $this->db->order_by('code', 'ASC')->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -175,6 +175,11 @@ class Products_model extends CI_Model
 			$this->db->where('status', $ds['status']);
 		}
 
+		if(isset($ds['home']) && $ds['home'] != 'all')
+		{
+			$this->db->where('home', $ds['home']);
+		}
+
 		return $this->db->count_all_results($this->tb);
 	}
 
@@ -228,6 +233,11 @@ class Products_model extends CI_Model
 			$this->db->where('pd.status', $ds['status']);
 		}
 
+		if(isset($ds['home']) && $ds['home'] != 'all')
+		{
+			$this->db->where('home', $ds['home']);
+		}
+
 		$rs = $this->db->limit($perpage, $offset)->get();
 
 		if($rs->num_rows() > 0)
@@ -270,5 +280,67 @@ class Products_model extends CI_Model
 		return date('2021-01-01');
 	}
 
-}
+
+
+	/*********** for filter on customer order page *****************/
+	public function get_home_product($limit = 20, $offset = 0)
+	{
+		$rs = $this->db->where('home', 1)->limit($limit, $offset)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function count_filter_rows(array $ds = array())
+	{
+		if( ! empty($ds['brandCode']))
+		{
+			$this->db->where('brand_code', $ds['brandCode']);
+		}
+
+		if( ! empty($ds['cateCode']))
+		{
+			$this->db
+			->group_start()
+			->where('category_code_4', $ds['cateCode'])
+			->or_where('category_code', $ds['cateCode'])
+			->group_end();
+		}
+
+		return $this->db->count_all_results($this->tb);
+	}
+
+
+	public function get_filter(array $ds = array(), $perpage = 20, $offset = 0)
+	{
+		if( ! empty($ds['brandCode']))
+		{
+			$this->db->where('brand_code', $ds['brandCode']);
+		}
+
+		if( ! empty($ds['cateCode']))
+		{
+			$this->db
+			->group_start()
+			->where('category_code_4', $ds['cateCode'])
+			->or_where('category_code', $ds['cateCode'])
+			->group_end();
+		}
+
+		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+} //--- end classs
 ?>

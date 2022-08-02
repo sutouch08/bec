@@ -59,7 +59,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group hide">
         <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Rouding</label>
         <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
           <input type="number" id="roundDif" class="form-control input-sm text-right" value="0.00" />
@@ -78,7 +78,7 @@
         <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Total</label>
         <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
 					<input type="hidden" id="docTotal" value="0.00"/>
-          <input type="text" id="docTotalLabel" class="form-control input-sm text-right" value="0.00" readonly/>
+          <input type="text" id="docTotalLabel" class="form-control input-sm text-right" value="0.00" disabled/>
         </div>
       </div>
     </div>

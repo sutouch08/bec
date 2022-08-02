@@ -28,6 +28,7 @@
           <th class="fix-width-80 middle text-center">Available</th>
           <th class="fix-width-100 middle text-center">Quantity</th>
           <th class="fix-width-100 middle text-center">Uom</th>
+					<th class="fix-width-100 middle text-center">Std Price</th>
           <th class="fix-width-100 middle text-center">Price</th>
           <th class="fix-width-150 middle text-center">Discount(%)</th>
           <th class="fix-width-80 middle text-center">Tax Code</th>
@@ -51,6 +52,7 @@
 						$disabled = $rs->is_free == 1 ? 'disabled' : '';
 					?>
 					<?php $prow = $rs->is_free ? (isset($parent[$rs->parent_uid]) ? $parent[$rs->parent_uid] : '') : ''; ?>
+					<input type="hidden" id="stdPrice-<?php echo $no; ?>" value="<?php echo $rs->StdPrice; ?>" />
 					<input type="hidden" id="price-<?php echo $no; ?>" value="<?php echo $rs->Price; ?>" />
 					<input type="hidden" id="sellPrice-<?php echo $no; ?>" value="<?php echo $rs->SellPrice; ?>" />
 					<input type="hidden" id="sysSellPrice-<?php echo $no; ?>" value="<?php echo $rs->sysSellPrice; ?>" />
@@ -128,6 +130,11 @@
           <td class="middle">
             <input type="text" class="form-control input-sm text-center" id="uom-<?php echo $no; ?>" value="<?php echo $rs->uom_name; ?>" disabled/>
           </td>
+
+					<td class="middle">
+            <input type="text" class="form-control input-sm text-right number" id="stdPrice-label-<?php echo $no; ?>" value="<?php echo number($rs->StdPrice, 2); ?>" readonly disabled/>
+          </td>
+
           <td class="middle">
             <input type="text" class="form-control input-sm text-right number" id="price-label-<?php echo $no; ?>" value="<?php echo number($rs->Price, 2); ?>" readonly disabled/>
           </td>
@@ -136,6 +143,7 @@
             <input type="text" class="form-control input-sm text-right " id="disc-label-<?php echo $no; ?>"
 						value="<?php echo $rs->discLabel; ?>" onchange="recalDiscount(<?php echo $no; ?>)"  <?php echo $disabled; ?>/>
           </td>
+
           <td class="middle">
             <input type="text" class="form-control input-sm text-center" id="vat-code-<?php echo $no; ?>" value="<?php echo $rs->VatGroup; ?>" disabled/>
           </td>
@@ -168,6 +176,7 @@
 <hr class="padding-5"/>
 <script id="row-template" type="text/x-handlebarsTemplate">
 <tr id="row-{{no}}">
+	<input type="hidden" id="stdPrice-{{no}}" value="0" />
 	<input type="hidden" id="price-{{no}}" value="0" />
 	<input type="hidden" id="sellPrice-{{no}}" value="0" />
 	<input type="hidden" id="sysSellPrice-{{no}}" value="0" />
@@ -239,12 +248,17 @@
 	<td class="middle">
 		<input type="text" class="form-control input-sm text-center" id="uom-{{no}}" disabled/>
 	</td>
+
 	<td class="middle">
-		<input type="text" class="form-control input-sm text-right number" id="price-label-{{no}}" readonly disabled/>
+		<input type="text" class="form-control input-sm text-right" id="stdPrice-label-{{no}}" disabled/>
 	</td>
 
 	<td class="middle">
-		<input type="text" class="form-control input-sm text-right " id="disc-label-{{no}}" onkeyup="recalDiscount({{no}})"/>
+		<input type="text" class="form-control input-sm text-right number" id="price-label-{{no}}" disabled/>
+	</td>
+
+	<td class="middle">
+		<input type="text" class="form-control input-sm text-right " id="disc-label-{{no}}" onchange="recalDiscount({{no}})"/>
 	</td>
 	<td class="middle">
 		<input type="text" class="form-control input-sm text-center" id="vat-code-{{no}}" value="" disabled/>
@@ -255,7 +269,7 @@
 	</td>
 
 	<td class="middle">
-		<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-{{no}}" readonly disabled />
+		<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-{{no}}" disabled />
 	</td>
 
 	<td class="middle text-center">
@@ -268,6 +282,7 @@
 <script id="free-row-template" type="text/x-handlebarsTemplate">
 <tr id="row-{{no}}">
 	<input type="hidden" id="price-{{no}}" value="{{price}}" />
+	<input type="hidden" id="stdPrice-{{no}}" value="{{price}}" />
 	<input type="hidden" id="sellPrice-{{no}}" value="{{sellPrice}}" />
 	<input type="hidden" id="sysSellPrice-{{no}}" value="{{sellPrice}}" />
 	<input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
@@ -338,8 +353,13 @@
 	<td class="middle">
 		<input type="text" class="form-control input-sm text-center" id="uom-{{no}}" value="{{uom_name}}" disabled/>
 	</td>
+
 	<td class="middle">
-		<input type="text" class="form-control input-sm text-right number" id="price-label-{{no}}" value="{{priceLabel}}" readonly disabled/>
+		<input type="text" class="form-control input-sm text-right" id="stdPrice-label-{{no}}" value="{{priceLabel}}"  disabled/>
+	</td>
+
+	<td class="middle">
+		<input type="text" class="form-control input-sm text-right number" id="price-label-{{no}}" value="{{priceLabel}}"  disabled/>
 	</td>
 
 	<td class="middle">
@@ -354,7 +374,7 @@
 	</td>
 
 	<td class="middle">
-		<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-{{no}}" value="0.00" readonly disabled />
+		<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-{{no}}" value="0.00"  disabled />
 	</td>
 
 	<td class="middle text-center">Free</td>

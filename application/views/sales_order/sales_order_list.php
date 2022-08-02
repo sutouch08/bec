@@ -88,7 +88,7 @@
 	</div>
 
 	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
-		<label>Posting date</label>
+		<label>Document date</label>
 		<div class="input-daterange input-group width-100">
 			<input type="text" class="width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
 			<input type="text" class="width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
@@ -115,6 +115,11 @@
 	</div>
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 margin-top-15 text-center">
 		<label>
+			<input type="checkbox" class="ace" onchange="toggleShipDate($(this))" <?php echo is_checked($chk_ship, '1'); ?> />
+			<span class="lbl">Shipment Date</span>
+			<input type="hidden" name="chk_ship" id="chk-ship" value="<?php echo $chk_ship; ?>"/>
+		</label>
+		<label class="margin-left-15">
 			<input type="checkbox" class="ace" onchange="toggleSqNo($(this))" <?php echo is_checked($chk_sqNo, '1'); ?> />
 			<span class="lbl">SQ No.</span>
 			<input type="hidden" name="chk_sqNo" id="chk-sqNo" value="<?php echo $chk_sqNo; ?>"/>
@@ -143,7 +148,8 @@
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="fix-width-40 middle text-center">#</th>
-					<th class="fix-width-80 middle">Posting date</th>
+					<th class="fix-width-80 middle text-center">Document date</th>
+					<th class="fix-width-80 middle text-center shipDate <?php echo ($chk_ship == 1 ? '' : 'hide'); ?>">Shipment date</th>
 					<th class="fix-width-120 middle">Web No.</th>
 					<th class="fix-width-120 middle sqNo <?php echo ($chk_sqNo == 1 ? '' : 'hide'); ?>">SQ No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
@@ -163,7 +169,8 @@
 			<?php foreach($data as $rs) : ?>
 				<tr>
 					<td class="middle text-center no"><?php echo $no; ?></td>
-					<td class="middle"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
+					<td class="middle text-center"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
+					<td class="middle text-center shipDate <?php echo ($chk_ship == 1 ? '' : 'hide'); ?>"><?php echo thai_date($rs->DocDueDate, FALSE, '.'); ?></td>
 					<td class="middle"><?php echo $rs->code; ?></td>
 					<td class="middle sqNo <?php echo ($chk_sqNo == 1 ? '' : 'hide'); ?>"><?php echo $rs->SqNo; ?></td>
 					<td class="middle"><?php echo $rs->CardCode; ?></td>
@@ -197,6 +204,8 @@
 							<span class="red">Canceled</span>
 						<?php elseif($rs->Status == 3) : ?>
 							<a href="javascript:void(0)" class="red" onclick="showMessage('<?php echo $rs->code; ?>')">Failed</a>
+						<?php else : ?>
+							<span class="orange">Pending</span>
 						<?php endif; ?>
 					</td>
 					<td class="middle text-center"><?php echo $rs->uname; ?></td>
@@ -252,6 +261,17 @@
 </script>
 <script src="<?php echo base_url(); ?>scripts/sales_order/sales_order.js?v=<?php echo date('Ymd'); ?>"></script>
 <script>
+
+function toggleShipDate(el) {
+	if(el.is(':checked')) {
+		$('.shipDate').removeClass('hide');
+		$('#chk-ship').val(1);
+	}
+	else {
+		$('.shipDate').addClass('hide');
+		$('#chk-ship').val(0);
+	}
+}
 
 	function toggleSqNo(el) {
 		if(el.is(':checked')) {

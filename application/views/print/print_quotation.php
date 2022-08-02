@@ -449,6 +449,12 @@ $defaultFontConfig = (new Mpdf\Config\FontVariables())->getDefaults();
 $fontData = $defaultFontConfig['fontdata'];
 
 $mpdf = new \Mpdf\Mpdf([
+	'mode' => 'utf-8',
+	'format' => 'A4',
+	'margin-left' => 0,
+	'margin-right' => 0,
+	'margin-top' => 0,
+	'margin-bottom' => 0,
     'fontDir' => array_merge($fontDirs, [
         __DIR__. '/fonts',
     ]),
@@ -456,7 +462,7 @@ $mpdf = new \Mpdf\Mpdf([
         'sarabun' => [
             'R' => 'Sarabun-Regular.ttf',
             'I' => 'Sarabun-Italic.ttf',
-						'B' => 'Sarabun-Bold.ttf'
+						'B' => 'Sarabun-Bold.ttf'						
         ]
     ],
     'default_font' => 'sarabun'

@@ -15,12 +15,14 @@
           <th class="min-width-250 middle">Description.</th>
           <th class="fix-width-100 middle text-right">Quantity</th>
           <th class="fix-width-100 middle text-center">Uom</th>
+					<th class="fix-width-100 middle text-right">Std Price</th>
           <th class="fix-width-100 middle text-right">Price</th>
           <th class="fix-width-150 middle text-center">Discount(%)</th>
           <th class="fix-width-80 middle text-center">Tax Code</th>
 					<th class="fix-width-100 middle text-right">Price after discount</th>
           <th class="fix-width-150 middle text-right">Amount before tax</th>
-					<th class="fix-width-60 middle text-center"></th>
+					<th class="fix-width-60 middle text-center">Free</th>
+					<th class="fix-width-100 middle text-center">Discount Rule</th>
         </tr>
       </thead>
       <tbody id="details-template">
@@ -34,12 +36,14 @@
           <td class="middle"><?php echo $rs->ItemName; ?></td>
           <td class="middle text-right"><?php echo number($rs->Qty, 2); ?></td>
           <td class="middle text-center"><?php echo $rs->uom_name; ?></td>
+					<td class="middle text-right"><?php echo number($rs->StdPrice, 2); ?></td>
           <td class="middle text-right"><?php echo number($rs->Price, 2); ?></td>
           <td class="middle text-center"><?php echo $rs->discLabel; ?></td>
           <td class="middle text-center"><?php echo $rs->VatGroup; ?></td>
           <td class="middle text-right"><?php echo number($rs->SellPrice, 2); ?></td>
           <td class="middle text-right"><?php echo number($rs->LineTotal, 2); ?></td>
 					<td class="middle text-center"><?php echo ($rs->is_free == 1 ? 'Free' : ''); ?></td>
+					<td class="middle text-center"><?php echo $rs->ruleCode; ?></td>
         </tr>
           <?php $no++; ?>
         <?php endforeach; ?>

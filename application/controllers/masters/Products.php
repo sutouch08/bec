@@ -32,7 +32,8 @@ class Products extends PS_Controller
       'category' => get_filter('category', 'item_category', 'all'),
       'type' => get_filter('type', 'item_type', 'all'),
       'brand' => get_filter('brand', 'item_brand', 'all'),
-			'status' => get_filter('status', 'item_status', 'all')
+			'status' => get_filter('status', 'item_status', 'all'),
+			'home' => get_filter('home', 'item_home', 'all')
     );
 
 		$perpage = get_rows();
@@ -429,9 +430,53 @@ class Products extends PS_Controller
 	}
 
 
+
+	public function update_parent_category()
+	{
+		$this->load->model('masters/product_category_model');
+
+		$qs = $this->db->distinct()->select('category_code')->where('category_code IS NOT NULL', NULL, FALSE)->get('products');
+
+		if($qs->num_rows() > 0)
+		{
+			foreach($qs->result() as $rs)
+			{
+				$list = $this->product_category_model->get_parent_list($rs->category_code);
+
+				if( ! empty($list))
+				{
+					$arr = array(
+						"category_code_1" => $list->l1,
+						"category_code_2" => $list->l2,
+						"category_code_3" => $list->l3,
+						"category_code_4" => $list->l4,
+						"category_code_5" => $list->l5
+					);
+
+					$this->db->where('category_code', $rs->category_code)->update('products', $arr);
+				}
+			}
+		}
+	}
+
+
+	public function set_home_item()
+	{
+		$id = $this->input->get('id');
+		$home = $this->input->get('home');
+
+		$arr = array(
+			'home' => $home == 1 ? 1 : 0
+		);
+
+		$this->products_model->update_by_id($id, $arr);
+	}
+
+
+
   public function clear_filter()
 	{
-    $filter = array('item_code','item_name','item_model', 'item_type', 'item_category', 'item_brand', 'item_status');
+    $filter = array('item_code','item_name','item_model', 'item_type', 'item_category', 'item_brand', 'item_status', 'item_home');
     clear_filter($filter);
 	}
 }

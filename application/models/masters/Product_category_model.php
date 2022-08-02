@@ -36,9 +36,14 @@ class Product_category_model extends CI_Model
 
 
 
-	public function get_by_level($level)
+	public function get_by_level($level, $active = FALSE)
 	{
 		$level = $level > 5 ? 5 : ($level < 1 ? 1 : $level);
+
+		if($active)
+		{
+			$this->db->where('active', 1);
+		}
 
 		$rs = $this->db->where('level', $level)->get($this->tb);
 
@@ -51,9 +56,15 @@ class Product_category_model extends CI_Model
 	}
 
 
-	public function get_by_parent($parent_id = 0)
+	public function get_by_parent($parent_id = 0, $active = FALSE)
 	{
-		$qr = "SELECT * FROM {$this->tb} WHERE parent_id = {$parent_id}";
+		$qr = "SELECT * FROM {$this->tb} WHERE parent_id = {$parent_id} ";
+
+		if($active)
+		{
+			$qr .= "AND active = 1 ";
+		}
+
 		$rs = $this->db->query($qr);
 
 		if($rs->num_rows() > 0)
@@ -224,7 +235,20 @@ class Product_category_model extends CI_Model
 	}
 
 
+	public function get_name($code = NULL)
+	{
+		if( ! empty($code))
+		{
+			$rs = $this->db->where('code', $code)->get($this->tb);
 
+			if($rs->num_rows() === 1)
+			{
+				return $rs->row()->name;
+			}
+		}
+
+		return NULL;
+	}
 
 }
 ?>

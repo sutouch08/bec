@@ -24,7 +24,8 @@ class Product_category extends PS_Controller
 			'code' => get_filter('code', 'caCode', ''),
 			'name' => get_filter('name', 'caName', ''),
 			'level' => get_filter('level', 'caLevel', 'all'),
-			'parent' => get_filter('parent', 'caParent', 'all')
+			'parent' => get_filter('parent', 'caParent', 'all'),
+			'active' => get_filter('active', 'caActive', 'all')
 		);
 
 		//--- แสดงผลกี่รายการต่อหน้า
@@ -205,9 +206,22 @@ class Product_category extends PS_Controller
 	}
 
 
+	public function set_active($id, $active)
+	{
+		if($this->db->set('active', $active)->where('id', $id)->update("product_category"))
+		{
+			echo 'success';
+		}
+		else
+		{
+			echo 'failed';
+		}
+	}
+
+
   public function clear_filter()
 	{
-		$filter = array('caName', 'caLevel', 'caParent', 'caCode');
+		$filter = array('caName', 'caLevel', 'caParent', 'caCode', 'caActive');
     clear_filter($filter);
 	}
 

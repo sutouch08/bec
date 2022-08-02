@@ -206,7 +206,7 @@ function deleteImage(id)
       $.ajax({
     		url: HOME + 'delete_image/'+id,
     		type:"POST",
-        cache:"false",        
+        cache:"false",
     		success: function(rs){
     			var rs = $.trim(rs);
     			if( rs == 'success' )
@@ -278,5 +278,46 @@ function getParentCate() {
 			}
 		})
 	}
+}
 
+
+
+function updateCategory() {
+	load_in();
+
+	$.ajax({
+		url:HOME + 'update_parent_category',
+		type:'POST',
+		cache:false,
+		success:function(rs) {
+			load_out();
+
+			swal({
+				title:'Completed',
+				type:'success',
+				timer:1000
+			});
+
+			setTimeout(function() {
+				window.location.reload();
+			}, 1200);
+		}
+	});
+}
+
+
+
+function toggleHome(el) {
+	let id = el.val();
+	let home = el.is(':checked') ? 1 : 0;
+
+	$.ajax({
+		url:HOME + 'set_home_item',
+		type:'GET',
+		cache:false,
+		data:{
+			'id' : id,
+			'home' : home
+		}
+	});
 }

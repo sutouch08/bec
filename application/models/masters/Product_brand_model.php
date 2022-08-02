@@ -63,7 +63,7 @@ class Product_brand_model extends CI_Model
 		{
 			$this->db->like('code', $ds['code']);
 		}
-		
+
 		if(isset($ds['name']) && $ds['name'] != "")
 		{
 			$this->db->like('name', $ds['name']);
@@ -120,6 +120,22 @@ class Product_brand_model extends CI_Model
 
     return NULL;
   }
+
+
+	public function get_name_by_code($code = NULL)
+	{
+		if($code != NULL)
+		{
+			$rs = $this->db->where('code', $code)->get($this->tb);
+
+			if($rs->num_rows() === 1)
+			{
+				return $rs->row()->name;
+			}
+		}
+
+		return NULL;
+	}
 
 
 

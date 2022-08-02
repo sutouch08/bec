@@ -114,6 +114,7 @@ class Discount_rule extends PS_Controller
 			$this->load->model('masters/customer_region_model');
 			$this->load->model('masters/customer_area_model');
 			$this->load->model('masters/customer_grade_model');
+			$this->load->model('masters/products_model');
 			$this->load->model('masters/product_model_model');
 			$this->load->model('masters/product_category_model');
 			$this->load->model('masters/product_type_model');
@@ -797,6 +798,7 @@ class Discount_rule extends PS_Controller
     //--- check before delete
     $id = $this->input->post('rule_id');
     $rule = $this->discount_rule_model->get($id);
+
     if(!empty($rule))
     {
       if(!empty($rule->id_policy))
@@ -863,7 +865,7 @@ class Discount_rule extends PS_Controller
 
   public function clear_filter()
   {
-    $filter = array('rule_code', 'rule_name', 'active', 'policy', 'rule_disc');
+    $filter = array('rule_code', 'rule_name', 'rule_active', 'rule_policy');
     clear_filter($filter);
   }
 } //--- end grade

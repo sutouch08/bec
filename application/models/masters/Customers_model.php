@@ -165,9 +165,9 @@ class Customers_model extends CI_Model
 			$this->db->where('GradeCode', $ds['grade']);
 		}
 
-		if($ds['region'] != 'all')
+		if($ds['saleTeam'] != 'all')
 		{
-			$this->db->where('RegionCode', $ds['region']);
+			$this->db->where('SaleTeam', $ds['saleTeam']);
 		}
 
 		if($ds['area'] != 'all')
@@ -202,7 +202,6 @@ class Customers_model extends CI_Model
 		->select('cg.name AS group_name')
 		->select('ty.name AS type_name')
 		->select('gr.name AS grade_name')
-		->select('rg.name AS region_name')
 		->select('ar.name AS area_name')
 		->select('tm.name AS term_name')
 		->select('slp.name AS sale_name')
@@ -210,7 +209,6 @@ class Customers_model extends CI_Model
 		->join('customer_group AS cg', 'c.GroupCode = cg.code', 'left')
 		->join('customer_type AS ty', 'c.TypeCode = ty.id', 'left')
 		->join('customer_grade AS gr', 'c.GradeCode = gr.id', 'left')
-		->join('customer_region AS rg', 'c.RegionCode = rg.id', 'left')
 		->join('customer_area AS ar', 'c.AreaCode = ar.id', 'left')
 		->join('payment_term AS tm', 'c.GroupNum = tm.id', 'left')
 		->join('sale_person AS slp', 'c.SlpCode = slp.id', 'left');
@@ -240,9 +238,9 @@ class Customers_model extends CI_Model
 			$this->db->where('GradeCode', $ds['grade']);
 		}
 
-		if($ds['region'] != 'all')
+		if($ds['saleTeam'] != 'all')
 		{
-			$this->db->where('RegionCode', $ds['region']);
+			$this->db->where('SaleTeam', $ds['saleTeam']);
 		}
 
 		if($ds['area'] != 'all')
@@ -286,6 +284,19 @@ class Customers_model extends CI_Model
 		}
 
 		return '2021-01-01';
+	}
+
+
+	public function get_customer_sales_team_list()
+	{
+		$rs = $this->db->select('SaleTeam AS code, SaleTeamName AS name')->where('SaleTeam IS NOT NULL', NULL, FALSE)->group_by('SaleTeam')->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
 	}
 
 }

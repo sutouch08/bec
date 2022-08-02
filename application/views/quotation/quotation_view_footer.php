@@ -1,4 +1,4 @@
-<div class="row">  
+<div class="row">
 
 	<div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 padding-5">
 		<table class="table">
@@ -33,10 +33,7 @@
 				<td class="width-60 xxx text-right">Discount &nbsp; <?php echo $order->DiscPrcnt; ?>% </td>
 				<td class="width-40 xxx text-right"><?php echo number($order->DiscAmount, 2); ?></td>
 			</tr>
-			<tr>
-				<td class="width-60 xxx text-right">Rouding</td>
-				<td class="width-40 xxx text-right"><?php echo $order->RoundDif; ?></td>
-			</tr>
+			
 			<tr>
 				<td class="width-60 xxx text-right">Tax</td>
 				<td class="width-40 xxx text-right"><?php echo number($order->VatSum, 2); ?></td>

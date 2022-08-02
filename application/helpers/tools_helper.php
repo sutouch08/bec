@@ -311,15 +311,15 @@ function pagination_config( $base_url, $total_rows = 0, $perpage = 20, $segment 
     $input_rows .= '<buton class="btn btn-success btn-xs" type="button" onClick="set_rows()">แสดง</button>';
     $input_rows .= '</p>';
 
-		$config['full_tag_open'] 		= '<nav><ul class="pagination">';
-		$config['full_tag_close'] 		= '</ul>'.$input_rows.'</nav><hr class="">';
+		$config['full_tag_open'] 		= '<nav class="pagination-link"><ul class="pagination">';
+		$config['full_tag_close'] 		= '</ul>'.$input_rows.'</nav>';
 		$config['first_link'] 				= 'First';
 		$config['first_tag_open'] 		= '<li>';
 		$config['first_tag_close'] 		= '</li>';
-		$config['next_link'] 				= 'Next';
+		$config['next_link'] 				= '>';
 		$config['next_tag_open'] 		= '<li>';
 		$config['next_tag_close'] 	= '</li>';
-		$config['prev_link'] 			= 'prev';
+		$config['prev_link'] 			= '<';
 		$config['prev_tag_open'] 	= '<li>';
 		$config['prev_tag_close'] 	= '</li>';
 		$config['last_link'] 				= 'Last';
@@ -330,6 +330,7 @@ function pagination_config( $base_url, $total_rows = 0, $perpage = 20, $segment 
 		$config['num_tag_open'] 		= '<li>';
 		$config['num_tag_close'] 		= '</li>';
 		$config['uri_segment'] 		= $segment;
+		$config['num_links']		= 1;
 		$config['per_page']			= $perpage;
 		$config['total_rows']			= $total_rows != false ? $total_rows : 0 ;
 		$config['base_url']				= $base_url;

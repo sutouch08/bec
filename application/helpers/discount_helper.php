@@ -44,14 +44,14 @@ function parse_discount_text($discText, $price)
 
 
 //--- แสดงป้ายส่วนลด
-function discountLabel($disc1 = 0, $disc2 = 0, $disc3 = 0, $disc4 = 0, $disc5 = 0)
+function discountLabel($disc1 = 0, $disc2 = 0, $disc3 = 0, $disc4 = 0, $disc5 = 0, $sign = NULL)
 {
 	$label  = '';
-	$label  = $disc1 == 0 ? 0 : round($disc1, 2);
-	$label .= $disc2 == 0 ? '' : '+'.round($disc2, 2);
-	$label .= $disc3 == 0 ? '' : '+'.round($disc3, 2);
-	$label .= $disc4 == 0 ? '' : '+'.round($disc4, 2);
-	$label .= $disc5 == 0 ? '' : '+'.round($disc5, 2);
+	$label  = $disc1 == 0 ? 0 : round($disc1, 2).$sign;
+	$label .= $disc2 == 0 ? '' : '+'.round($disc2, 2).$sign;
+	$label .= $disc3 == 0 ? '' : '+'.round($disc3, 2).$sign;
+	$label .= $disc4 == 0 ? '' : '+'.round($disc4, 2).$sign;
+	$label .= $disc5 == 0 ? '' : '+'.round($disc5, 2).$sign;
 
 	return $label;
 }

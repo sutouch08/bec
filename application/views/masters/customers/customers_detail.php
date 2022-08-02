@@ -67,7 +67,15 @@
 				<div class="help-block col-xs-12 col-sm-reset inline red" id="slp-error"></div>
 			</div>
 
+			<div class="form-group">
+				<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Sales Team</label>
+				<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+					<input type="text" class="form-control input-sm" value="<?php echo $SaleTeamName; ?>" disabled />
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline red"></div>
+			</div>
 
+			<!--
 			<div class="form-group">
 		    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Type</label>
 		    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
@@ -113,7 +121,7 @@
 				</div>
 				<div class="help-block col-xs-12 col-sm-reset inline red" id="area-error"></div>
 			</div>
-
+		-->
 
 			<div class="form-group">
 				<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Status</label>

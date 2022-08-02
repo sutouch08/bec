@@ -34,6 +34,27 @@ function syncData(){
 }
 
 
+function forceSyncData(){
+	last_sync = '2020-01-01 00:00:00';
+  load_in();
+
+	$.ajax({
+		url:HOME + 'count_update_rows',
+		type:'GET',
+		cache:false,
+		data:{
+			'last_sync_date' : last_sync
+		},
+		success:function(co) {
+			if(! isNaN(co)) {
+				total = co;
+				updateData();
+			}
+		}
+	})
+}
+
+
 function updateData() {
 	console.log("Sync "+updated+" items out of "+total+" items");
 

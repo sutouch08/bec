@@ -139,6 +139,22 @@ function update() {
 
 
 
+
+function setActive(el) {
+	let id = el.data('id');
+	let active = el.is(':checked') ? 1 : 0;
+
+	$.ajax({
+		url:HOME + 'set_active/'+id+'/'+active,
+		type:'GET',
+		cache:false,
+		success:function(rs) {
+			
+		}
+	})
+}
+
+
 function clearFilter(){
   goBack();
 }

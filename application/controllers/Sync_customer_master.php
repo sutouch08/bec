@@ -398,6 +398,8 @@ class Sync_customer_master extends CI_Controller
 								'AreaCode' => get_null($rs->AreaCode),
 								'TypeCode' => get_null($rs->TypeCode),
 								'GradeCode' => get_null($rs->GradeCode),
+								'SaleTeam' => get_null($rs->SaleTeam),
+								'SaleTeamName' => get_null($rs->Sales_Team_Name),
 								'CreditLine' => $rs->CreditLine,
 								'Status' => $rs->validFor == 'Y' ? 1 : 0,
 								'last_sync' => now()
@@ -424,6 +426,8 @@ class Sync_customer_master extends CI_Controller
 								'AreaCode' => get_null($rs->AreaCode),
 								'TypeCode' => get_null($rs->TypeCode),
 								'GradeCode' => get_null($rs->GradeCode),
+								'SaleTeam' => get_null($rs->SaleTeam),
+								'SaleTeamName' => get_null($rs->Sales_Team_Name),
 								'CreditLine' => $rs->CreditLine,
 								'Status' => $rs->validFor == 'Y' ? 1 : 0,
 								'last_sync' => now()

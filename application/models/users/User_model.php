@@ -395,7 +395,13 @@ class User_model extends CI_Model
 
 	public function has_transection($id)
 	{
-		return TRUE;
+		$so = $this->db->where('user_id', $id)->or_where('upd_user_id', $id)->count_all_results('orders');
+		$sq = $this->db->where('user_id', $id)->or_where('upd_user_id', $id)->count_all_results('quotation');
+		$apv = $this->db->where('user_id', $id)->count_all_results('approver');
+
+		$total = $so + $sq + $apv;
+
+		return $total > 0 ? TRUE : FALSE;
 	}
 
 } //---- End class

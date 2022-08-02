@@ -135,6 +135,24 @@ function select_customer_area($code = NULL)
 }
 
 
+function select_customer_sales_team($code = NULL)
+{
+  $sc = '';
+  $ci =& get_instance();
+  $ci->load->model('masters/customers_model');
+  $options = $ci->customers_model->get_customer_sales_team_list();
+
+  if(!empty($options))
+  {
+    foreach($options as $rs)
+    {
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+    }
+  }
+  return $sc;
+}
+
+
 function select_ship_to_code($CardCode, $code = NULL)
 {
 	$sc = '';

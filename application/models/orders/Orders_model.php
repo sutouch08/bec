@@ -259,7 +259,7 @@ class Orders_model extends CI_Model
 			->where('od.DocDate >=', from_date($ds['from_date']))
 			->where('od.DocDate <=', to_date($ds['to_date']));
 		}
-
+	
 		if(isset($ds['user_id']) && $ds['user_id'] != 'all')
 		{
 			$this->db->where('user_id', $ds['user_id']);
@@ -309,7 +309,6 @@ class Orders_model extends CI_Model
 			$this->db->where('od.Status', $ds['status']);
 		}
 
-		//echo $this->db->order_by('od.DocDate', 'DESC')->order_by('od.code', 'DESC')->limit($perpage, $offset)->get_compiled_select();
 
 		$rs = $this->db->order_by('od.DocDate', 'DESC')->order_by('od.code', 'DESC')->limit($perpage, $offset)->get();
 
@@ -460,6 +459,49 @@ class Orders_model extends CI_Model
 		if($rs->num_rows() > 0)
 		{
 			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+
+	///-----------------   BP order -------------------------///
+
+	public function get_last_sale_product($cardCode, $limit = 20, $offset = 0)
+	{
+		$rs = $this->db
+		->select('ItemCode AS code, ItemName AS name, Price  AS price, product_id AS id')
+		->from('order_details AS od')
+		->join('orders AS o', 'od.order_code = o.code', 'left')
+		->where('role', 'C')
+		->where('CardCode', $cardCode)
+		->where('is_free', 0)
+		->group_by('ItemCode')
+		->limit($limit, $offset)
+		->get();
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_last_sale_order($cardCode)
+	{
+		$rs = $this->db
+		->where('role', 'C')
+		->where('CardCode', $cardCode)
+		->order_by('code', 'DESC')
+		->limit(1, 0)
+		->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
 		}
 
 		return NULL;

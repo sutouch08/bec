@@ -43,6 +43,15 @@
 		</select>
   </div>
 
+	<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
+    <label>Status</label>
+    <select class="form-control input-sm filter" name="active">
+			<option value="all">ทั้งหมด</option>
+			<option value="1" <?php echo is_selected('1', $active); ?>>Active</option>
+			<option value="0" <?php echo is_selected('0', $active); ?>>Inactive</option>
+		</select>
+  </div>
+
   <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
     <label class="display-block not-show">buton</label>
     <button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
@@ -66,6 +75,7 @@
 					<th class="fix-width-250 middle">Name</th>
 					<th class="fix-width-100 middle text-center">Level</th>
 					<th class="min-width-250 middle">Parent</th>
+					<th class="fix-width-100 middle text-center">Status</th>
 					<th class="fix-width-100 middle"></th>
 				</tr>
 			</thead>
@@ -79,6 +89,12 @@
 					<td class="middle"><?php echo $rs->name; ?></td>
 					<td class="middle text-center"><?php echo $rs->level; ?></td>
 					<td class="moddle"><?php echo $rs->parent; ?></td>
+					<td class="moddle text-center">
+						<label>
+							<input type="checkbox" class="ace" onchange="setActive($(this))" data-id="<?php echo $rs->id; ?>" <?php echo is_checked('1', $rs->active); ?>/>
+							<span class="lbl"></span>
+						</label>
+					</td>
 					<td class="text-right">
 						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
 						<?php if($this->pm->can_edit) : ?>

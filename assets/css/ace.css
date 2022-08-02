@@ -1168,7 +1168,7 @@ pre.prettyprint {
 .ace-nav > li {
   line-height: 45px;
   height: 45px;
-  border-left: 1px solid #E1E1E1;
+  /* border-left: 1px solid #E1E1E1; */
   padding: 0;
   position: relative;
   float: left;
@@ -1547,8 +1547,8 @@ pre.prettyprint {
     display: block;
     float: none !important;
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    /* background-color: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1); */
     border-width: 1px 0 0;
     letter-spacing: -3px;
   }
@@ -1559,7 +1559,7 @@ pre.prettyprint {
     letter-spacing: normal;
   }
   .navbar:not(.navbar-collapse) .ace-nav > li:first-child {
-    border-left: 1px solid rgba(255, 255, 255, 0.4);
+    /* border-left: 1px solid rgba(255, 255, 255, 0.4); */
   }
   .navbar:not(.navbar-collapse) .ace-nav > li:last-child {
     border-right: 1px solid rgba(255, 255, 255, 0.4);

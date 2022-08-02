@@ -67,6 +67,7 @@ function validateFreeItem(option) {
 function saveAdd() {
 	let mustApprove = 0;
 	let max_diff = 0;
+	let emptyQuota = 0;
 
 	$('.disc-diff').each(function() {
 		if($(this).val() > 0) {
@@ -226,11 +227,18 @@ function saveAdd() {
 		let itemCode = $(this).val();
 		if(itemCode.length > 0) {
 
+			let quotaNo = $('#quota-'+no).val();
+
+			if(quotaNo == "") {
+				emptyQuota++;
+			}
+
 			//--- ถ้ามีการระบุข้อมูล
 			var row = {
 				"LineNum" : lineNum,
 				"ItemCode" : itemCode,
 				"Description" : $('#itemName-'+no).val(),
+				"StdPrice" : $('#stdPrice-'+no).val(),
 				"Price" : $('#price-'+no).val(),
 				"SellPrice" : $('#sellPrice-'+no).val(),
 				"sysSellPrice" : $('#sysSellPrice-'+no).val(),
@@ -268,6 +276,11 @@ function saveAdd() {
 
 	if(count === 0) {
 		swal("ไม่พบรายการสินค้า");
+		return false;
+	}
+
+	if(emptyQuota > 0) {
+		swal("กรุณาระบุ Quota No ให้ครบ");
 		return false;
 	}
 
@@ -324,6 +337,7 @@ function updateAsDraft() {
 function saveUpdate() {
 	let mustApprove = 0;
 	let max_diff = 0;
+	let emptyQuota = 0;
 
 	$('.disc-diff').each(function() {
 		if($(this).val() > 0) {
@@ -492,12 +506,17 @@ function saveUpdate() {
 		let no = $(this).data('id');
 		let itemCode = $(this).val();
 		if(itemCode.length > 0) {
+			let quotaNo = $('#quota-'+no).val();
 
+			if(quotaNo == "") {
+				emptyQuota++;
+			}
 			//--- ถ้ามีการระบุข้อมูล
 			var row = {
 				"LineNum" : lineNum,
 				"ItemCode" : itemCode,
 				"Description" : $('#itemName-'+no).val(),
+				"StdPrice" : $('#stdPrice-'+no).val(),
 				"Price" : $('#price-'+no).val(),
 				"SellPrice" : $('#sellPrice-'+no).val(),
 				"sysSellPrice" : $('#sysSellPrice-'+no).val(),
@@ -535,6 +554,11 @@ function saveUpdate() {
 
 	if(count === 0) {
 		swal("ไม่พบรายการสินค้า");
+		return false;
+	}
+
+	if(emptyQuota > 0) {
+		swal("กรุณาระบุ Quota No ให้ครบ");
 		return false;
 	}
 
@@ -771,13 +795,13 @@ function get_address_ship_to() {
 				$('#sPostCode').val(ds.postcode);
 
 				let address = ds.address === "" ? "" : ds.address + " ";
-				let street = ds.street === "" ? "" : ds.street + " ";
+				//let street = ds.street === "" ? "" : ds.street + " ";
 				let sub_district = ds.sub_district === "" ? "" : ds.sub_district + " ";
 				let district = ds.district === "" ? "" : ds.district + " ";
 				let province = ds.province === "" ? "" : ds.province + " ";
 				let postcode = ds.postcode === "" ? "" : ds.postcode + " "
 				let country = ds.country === 'TH' ? '' : ds.countryName;
-				let adr = address + street + sub_district + district + province + postcode + country;
+				let adr = address + sub_district + district + province + postcode + country;
 
 				$('#ShipTo').val(adr);
 			}
@@ -843,13 +867,13 @@ function get_address_bill_to() {
 				$('#bPostCode').val(ds.postcode);
 
 				let address = ds.address === "" ? "" : ds.address + " ";
-				let street = ds.street === "" ? "" : ds.street + " ";
+				//let street = ds.street === "" ? "" : ds.street + " ";
 				let sub_district = ds.sub_district === "" ? "" : ds.sub_district + " ";
 				let district = ds.district === "" ? "" : ds.district + " ";
 				let province = ds.province === "" ? "" : ds.province + " ";
 				let postcode = ds.postcode === "" ? "" : ds.postcode + " "
 				let country = ds.country === 'TH' ? '' : ds.countryName;
-				let adr = address + street + sub_district + district + province + postcode + country;
+				let adr = address + sub_district + district + province + postcode + country;
 
 				$('#BillTo').val(adr);
 			}
@@ -872,6 +896,7 @@ function addRow() {
 	reIndex();
 	init();
 	$('#itemCode-'+no).focus();
+	return no;
 }
 
 function removeRow() {
@@ -976,11 +1001,13 @@ function updateDiscountRule(no) {
 				if(isJson(rs)) {
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
+					var stdPrice = parseFloat(ds.StdPrice);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
 					sellPrice = sellPrice.toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
 
 					$('#price-'+no).val(price)
+					$('#stdPrice-'+no).val(stdPrice);
 					$('#sellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);
 					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
@@ -1004,6 +1031,8 @@ function updateDiscountRule(no) {
 
 					$('#itemName-'+no).val(ds.ItemName);
 					$('#uom-'+no).val(ds.UomName);
+					$('#stdPrice-label-'+no).val(addCommas(stdPrice.toFixed(2)));
+					$('#price-label-'+no).val(addCommas(price.toFixed(2)));
 					$('#sysSellPrice-'+no).val(sellPrice);
 					$('#disc-label-'+no).val(ds.discLabel);
 					$('#vat-code-'+no).val(ds.VatGroup);
@@ -1087,11 +1116,13 @@ function getItemData(no) {
 					$('#')
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
+					var stdPrice = parseFloat(ds.StdPrice);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
 					sellPrice = sellPrice.toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
 
-					$('#price-'+no).val(price)
+					$('#price-'+no).val(price);
+					$('#stdPrice-'+no).val(stdPrice);
 					$('#sellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);
 					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
@@ -1119,6 +1150,7 @@ function getItemData(no) {
 					$('#available-'+no).val(ds.available);
 					$('#line-qty-'+no).val(ds.Qty);
 					$('#uom-'+no).val(ds.UomName);
+					$('#stdPrice-label-'+no).val(addCommas(stdPrice.toFixed(2)));
 					$('#price-label-'+no).val(addCommas(price.toFixed(2)));
 					$('#sysSellPrice-'+no).val(sellPrice);
 					$('#disc-label-'+no).val(ds.discLabel);
@@ -1343,7 +1375,7 @@ function addFreeRow(uuid) {
 
 
 function recalDiscount(no) {
-	var regex = /[^0-9+]+/gi;
+	var regex = /[^0-9+.]+/gi;
 	var label = $('#disc-label-'+no).val();
 	label = label.replace(regex, '');
 	let first = label.charAt(0);
@@ -1582,31 +1614,55 @@ function init() {
 	$('.line-qty').change(function() {
 		let no = $(this).data('id');
 		updateDiscountRule(no);
-		no++;
 
-		if($('#itemCode-'+no).length) {
-			$('#itemCode-'+no).focus();
-		}
-		else {
-			addRow();
-			$('#itemCode-'+no).focus();
-		}
-	});
-
-	$('.line-qty').keyup(function(e) {
-		if(e.keyCode == 13) {
-			let no = $(this).data('id');
+		setTimeout(function() {
 			no++;
-
-			if($('#itemCode-'+no).length) {
+			no++;
+			if($('#itemCode-'+no).length && $('#itemCode-'+no).val() == "") {
 				$('#itemCode-'+no).focus();
 			}
 			else {
-				addRow();
-				$('#itemCode-'+no).focus();
+				count = 0;
+				$('.item-code').each(function() {
+					if($(this).val() == '') {
+						no = $(this).data('id');
+						count++;
+						$('#itemCode-'+no).focus();
+						return true;
+					}
+				});
+
+				if(count == 0) {
+					no = addRow();
+					$('#itemCode-'+no).focus();
+				}
 			}
-		}
+		}, 200)
+		// no++;
+		//
+		// if($('#itemCode-'+no).length) {
+		// 	$('#itemCode-'+no).focus();
+		// }
+		// else {
+		// 	addRow();
+		// 	$('#itemCode-'+no).focus();
+		// }
 	});
+
+	// $('.line-qty').keyup(function(e) {
+	// 	if(e.keyCode == 13) {
+	// 		let no = $(this).data('id');
+	// 		no++;
+	//
+	// 		if($('#itemCode-'+no).length) {
+	// 			$('#itemCode-'+no).focus();
+	// 		}
+	// 		else {
+	// 			addRow();
+	// 			$('#itemCode-'+no).focus();
+	// 		}
+	// 	}
+	// });
 
 	$('.line-qty').focus(function() {
 		$(this).select();

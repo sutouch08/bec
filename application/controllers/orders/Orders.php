@@ -49,7 +49,8 @@ class Orders extends PS_Controller
 			'user_id' => get_filter('user_id', 'order_user_id', 'all'),
 			'chk_sqNo' => get_filter('chk_sqNo', 'chk_sqNo', 0),
 			'chk_channels' => get_filter('chk_channels', 'chk_channels', 0),
-			'chk_payment' => get_filter('chk_payment', 'chk_payment', 0)
+			'chk_payment' => get_filter('chk_payment', 'chk_payment', 0),
+			'chk_ship' => get_filter('chk_ship', 'chk_ship', 0),
 		);
 
 		//--- แสดงผลกี่รายการต่อหน้า
@@ -116,7 +117,7 @@ class Orders extends PS_Controller
 						'CardCode' => $customer->CardCode,
 						'CardName' => $customer->CardName,
 						'PriceList' => get_null($customer->ListNum),
-						'SlpCode' => $customer->SlpCode,
+						'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
 						'Channels' => $hd->Channels,
 						'Payment' => $hd->Payment,
 						'DocCur' => getConfig('DEFAULT_CURRENCY'),
@@ -184,6 +185,7 @@ class Orders extends PS_Controller
 										'Qty' => $rs->Quantity,
 										'UomCode' => $pd->uom_code,
 										'UomEntry' => $pd->uom_id,
+										'StdPrice' => $rs->StdPrice,
 										'Price' => $rs->Price,
 										'SellPrice' => $rs->SellPrice,
 										'sysSellPrice' => $rs->sysSellPrice,
@@ -305,7 +307,6 @@ class Orders extends PS_Controller
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/customer_address_model');
 		$this->load->model('masters/quota_model');
-		$dev = TRUE;
 
 		if($this->pm->can_edit OR $this->pm->can_add)
 		{
@@ -324,9 +325,9 @@ class Orders extends PS_Controller
 					{
 						$totalAmount += $rs->LineTotal;
 						$totalVat += $rs->totalVatAmount;
-						$stock = $dev ? NULL :$this->getStock($rs->Price, $rs->WhsCode, $rs->QuotaNo);
+						$stock = $this->getStock($rs->Price, $rs->WhsCode, $rs->QuotaNo);
 						$rs->instock = !empty($stock) ? $stock['OnHand'] : 0;
-						$rs->team = !empty($stock) ? $stock['BatchQty'] : 0;
+						$rs->team = !empty($stock) ? $stock['QuotaQty'] : 0;
 						$rs->commit = !empty($stock) ? ($stock['Committed'] > 0 ? $stock['Committed'] - $rsQty : 0) : 0;
 						$rs->available = !empty($stock) ? $stock['Available'] : 0;
 						$rs->image = get_image_path($rs->product_id, 'mini');
@@ -385,187 +386,196 @@ class Orders extends PS_Controller
 
 					if(! empty($order))
 					{
-						if($order->Status == -1 OR $order->Status == 0 OR $order->Status == 3)
+						if(($order->Status == -1 OR $order->Status == 0 OR $order->Status == 3))
 						{
-							if( ! empty($customer))
+							if($order->Approved != 'A' && $order->Approved != 'S')
 							{
-								$arr = array(
-									'CardCode' => $customer->CardCode,
-									'CardName' => $customer->CardName,
-									'PriceList' => get_null($customer->ListNum),
-									'SlpCode' => $customer->SlpCode,
-									'Channels' => $hd->Channels,
-									'Payment' => $hd->Payment,
-									'DocCur' => getConfig('DEFAULT_CURRENCY'),
-									'DocRate' => 1,
-									'DocDate' => $docDate,
-									'DocTotal' => $hd->docTotal,
-									'DocDueDate' => db_date($hd->DocDueDate, FALSE),
-									'TextDate' => db_date($hd->TextDate, FALSE),
-									'PayToCode' => $hd->PayToCode,
-									'ShipToCode' => $hd->ShipToCode,
-									'Address' => $hd->BillTo,
-									'Address2' => $hd->ShipTo,
-									'DiscPrcnt' => $hd->discPrcnt,
-									'DiscAmount' => $hd->disAmount,
-									'VatSum' => $hd->tax,
-									'RoundDif' => $hd->roundDif,
-									'sale_team' => $hd->sale_team,
-									'user_id' => $hd->user_id,
-									'uname' => $hd->uname,
-									'Comments' => get_null($hd->comments),
-									'must_approve' => $hd->mustApprove,
-									'disc_diff' => $hd->maxDiff,
-									'VatGroup' => $hd->VatGroup,
-									'VatRate' => $hd->VatRate,
-									'Status' => ($hd->isDraft == 1 ? -1 : ($hd->mustApprove == 1 ? 0 : 1)),
-									'Approved' => ($hd->isDraft == 1 ? 'P' : ($hd->mustApprove == 1 ? 'P' : 'S')),
-									'upd_user_id' => $this->_user->id,
-									'OwnerCode' => $hd->OwnerCode,
-									'dimCode1' => $hd->dimCode1,
-									'dimCode2' => $hd->dimCode2,
-									'dimCode3' => $hd->dimCode3,
-									'dimCode4' => $hd->dimCode4,
-									'dimCode5' => $hd->dimCode5
-								);
-
-								$this->db->trans_begin();
-
-								if(! $this->orders_model->update($code, $arr))
+								if( ! empty($customer))
 								{
-									$sc = FALSE;
-									$this->error = "Update Order failed";
-								}
-								else
-								{
-									if($this->orders_model->drop_details($code))
+									$arr = array(
+										'CardCode' => $customer->CardCode,
+										'CardName' => $customer->CardName,
+										'PriceList' => get_null($customer->ListNum),
+										'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
+										'Channels' => $hd->Channels,
+										'Payment' => $hd->Payment,
+										'DocCur' => getConfig('DEFAULT_CURRENCY'),
+										'DocRate' => 1,
+										'DocDate' => $docDate,
+										'DocTotal' => $hd->docTotal,
+										'DocDueDate' => db_date($hd->DocDueDate, FALSE),
+										'TextDate' => db_date($hd->TextDate, FALSE),
+										'PayToCode' => $hd->PayToCode,
+										'ShipToCode' => $hd->ShipToCode,
+										'Address' => $hd->BillTo,
+										'Address2' => $hd->ShipTo,
+										'DiscPrcnt' => $hd->discPrcnt,
+										'DiscAmount' => $hd->disAmount,
+										'VatSum' => $hd->tax,
+										'RoundDif' => $hd->roundDif,
+										'sale_team' => $hd->sale_team,
+										'user_id' => $hd->user_id,
+										'uname' => $hd->uname,
+										'Comments' => get_null($hd->comments),
+										'must_approve' => $hd->mustApprove,
+										'disc_diff' => $hd->maxDiff,
+										'VatGroup' => $hd->VatGroup,
+										'VatRate' => $hd->VatRate,
+										'Status' => ($hd->isDraft == 1 ? -1 : ($hd->mustApprove == 1 ? 0 : 1)),
+										'Approved' => ($hd->isDraft == 1 ? 'P' : ($hd->mustApprove == 1 ? 'P' : 'S')),
+										'upd_user_id' => $this->_user->id,
+										'OwnerCode' => $hd->OwnerCode,
+										'dimCode1' => $hd->dimCode1,
+										'dimCode2' => $hd->dimCode2,
+										'dimCode3' => $hd->dimCode3,
+										'dimCode4' => $hd->dimCode4,
+										'dimCode5' => $hd->dimCode5
+									);
+
+									$this->db->trans_begin();
+
+									if(! $this->orders_model->update($code, $arr))
 									{
-										if( ! empty($details))
-										{
-											foreach($details as $rs)
-											{
-												if($sc === FALSE)
-												{
-													break;
-												}
-
-												$pd = $this->products_model->get($rs->ItemCode);
-
-												if( ! empty($pd))
-												{
-													$disc = parse_discount_text($rs->discLabel, $rs->Price);
-													$sysdisc = parse_discount_text($rs->sysDiscLabel, $rs->Price);
-
-													$arr = array(
-														'order_code' => $code,
-														'LineNum' => $rs->LineNum,
-														'ItemCode' => $rs->ItemCode,
-														'ItemName' => $rs->Description,
-														'Qty' => $rs->Quantity,
-														'UomCode' => $pd->uom_code,
-														'UomEntry' => $pd->uom_id,
-														'Price' => $rs->Price,
-														'SellPrice' => $rs->SellPrice,
-														'sysSellPrice' => $rs->sysSellPrice,
-														'disc1' => $disc['discount1'],
-														'disc2' => $disc['discount2'],
-														'disc3' => $disc['discount3'],
-														'disc4' => $disc['discount4'],
-														'disc5' => $disc['discount5'],
-														'sysDisc1' => $sysdisc['discount1'],
-														'sysDisc2' => $sysdisc['discount2'],
-														'sysDisc3' => $sysdisc['discount3'],
-														'sysDisc4' => $sysdisc['discount4'],
-														'sysDisc5' => $sysdisc['discount5'],
-														'discLabel' => $rs->discLabel,
-														'sysDiscLabel' => $rs->sysDiscLabel,
-														'discDiff' => $rs->discDiff,
-														'DiscPrcnt' => discountAmountToPercent($rs->discAmount, 1, $rs->Price),
-														'discAmount' => $rs->discAmount,
-														'totalDiscAmount' => $rs->totalDiscAmount,
-														'VatGroup' => $pd->vat_group,
-														'VatRate' => $pd->vat_rate,
-														'VatAmount' => $rs->VatAmount,
-														'totalVatAmount' => $rs->totalVatAmount,
-														'LineTotal' => $rs->LineTotal,
-														'policy_id' => $rs->policy_id,
-														'rule_id' => $rs->rule_id,
-														'WhsCode' => $rs->WhsCode,
-														'QuotaNo' => $rs->QuotaNo,
-														'free_item' => $rs->free_item,
-														'uid' => $rs->uid,
-														'parent_uid' => $rs->parent_uid,
-														'is_free' => $rs->is_free,
-														'discType' => $rs->discType,
-														'picked' => $rs->picked,
-														'channels_id' => $hd->Channels,
-														'payment_id' => $hd->Payment,
-														'product_id' => $pd->id,
-														'product_model_id' => $pd->model_id,
-														'product_category_id' => $pd->category_id,
-														'product_type_id' => $pd->type_id,
-														'product_brand_id' => $pd->brand_id,
-														'customer_id' => $customer->id,
-														'customer_group_id' => $customer->GroupCode,
-														'customer_type_id' => $customer->TypeCode,
-														'customer_region_id' => $customer->RegionCode,
-														'customer_area_id' => $customer->AreaCode,
-														'customer_grade_id' => $customer->GradeCode,
-														'user_id' => $this->_user->id,
-														'uname' => $this->_user->uname,
-														'sale_team' => $rs->sale_team
-														);
-
-													if(! $this->orders_model->add_detail($arr))
-													{
-														$sc = FALSE;
-														$this->error = "Insert detail failed";
-													}
-												}
-											}//--- end foreach
-										} //--- end if ! empty($details)
+										$sc = FALSE;
+										$this->error = "Update Order failed";
 									}
 									else
 									{
-										$sc = FALSE;
-										$this->error = "Drop current order details failed";
-									}
-								}
-
-								if($sc === TRUE)
-								{
-									$this->db->trans_commit();
-									$arr = array(
-										'code' => $code,
-										'user_id' => $this->_user->id,
-										'uname' => $this->_user->uname,
-										'action' => 'edit'
-									);
-
-									$this->orders_model->add_logs($arr);
-
-									if($hd->isDraft == 0)
-									{
-										if($hd->mustApprove == 0)
+										if($this->orders_model->drop_details($code))
 										{
-											$rs = $this->do_export($code);
-
-											if(! $rs)
+											if( ! empty($details))
 											{
-												$sc = FALSE;
+												foreach($details as $rs)
+												{
+													if($sc === FALSE)
+													{
+														break;
+													}
+
+													$pd = $this->products_model->get($rs->ItemCode);
+
+													if( ! empty($pd))
+													{
+														$disc = parse_discount_text($rs->discLabel, $rs->Price);
+														$sysdisc = parse_discount_text($rs->sysDiscLabel, $rs->Price);
+
+														$arr = array(
+															'order_code' => $code,
+															'LineNum' => $rs->LineNum,
+															'ItemCode' => $rs->ItemCode,
+															'ItemName' => $rs->Description,
+															'Qty' => $rs->Quantity,
+															'UomCode' => $pd->uom_code,
+															'UomEntry' => $pd->uom_id,
+															'StdPrice' => $rs->StdPrice,
+															'Price' => $rs->Price,
+															'SellPrice' => $rs->SellPrice,
+															'sysSellPrice' => $rs->sysSellPrice,
+															'disc1' => $disc['discount1'],
+															'disc2' => $disc['discount2'],
+															'disc3' => $disc['discount3'],
+															'disc4' => $disc['discount4'],
+															'disc5' => $disc['discount5'],
+															'sysDisc1' => $sysdisc['discount1'],
+															'sysDisc2' => $sysdisc['discount2'],
+															'sysDisc3' => $sysdisc['discount3'],
+															'sysDisc4' => $sysdisc['discount4'],
+															'sysDisc5' => $sysdisc['discount5'],
+															'discLabel' => $rs->discLabel,
+															'sysDiscLabel' => $rs->sysDiscLabel,
+															'discDiff' => $rs->discDiff,
+															'DiscPrcnt' => discountAmountToPercent($rs->discAmount, 1, $rs->Price),
+															'discAmount' => $rs->discAmount,
+															'totalDiscAmount' => $rs->totalDiscAmount,
+															'VatGroup' => $pd->vat_group,
+															'VatRate' => $pd->vat_rate,
+															'VatAmount' => $rs->VatAmount,
+															'totalVatAmount' => $rs->totalVatAmount,
+															'LineTotal' => $rs->LineTotal,
+															'policy_id' => $rs->policy_id,
+															'rule_id' => $rs->rule_id,
+															'WhsCode' => $rs->WhsCode,
+															'QuotaNo' => $rs->QuotaNo,
+															'free_item' => $rs->free_item,
+															'uid' => $rs->uid,
+															'parent_uid' => $rs->parent_uid,
+															'is_free' => $rs->is_free,
+															'discType' => $rs->discType,
+															'picked' => $rs->picked,
+															'channels_id' => $hd->Channels,
+															'payment_id' => $hd->Payment,
+															'product_id' => $pd->id,
+															'product_model_id' => $pd->model_id,
+															'product_category_id' => $pd->category_id,
+															'product_type_id' => $pd->type_id,
+															'product_brand_id' => $pd->brand_id,
+															'customer_id' => $customer->id,
+															'customer_group_id' => $customer->GroupCode,
+															'customer_type_id' => $customer->TypeCode,
+															'customer_region_id' => $customer->RegionCode,
+															'customer_area_id' => $customer->AreaCode,
+															'customer_grade_id' => $customer->GradeCode,
+															'user_id' => $this->_user->id,
+															'uname' => $this->_user->uname,
+															'sale_team' => $rs->sale_team
+															);
+
+														if(! $this->orders_model->add_detail($arr))
+														{
+															$sc = FALSE;
+															$this->error = "Insert detail failed";
+														}
+													}
+												}//--- end foreach
+											} //--- end if ! empty($details)
+										}
+										else
+										{
+											$sc = FALSE;
+											$this->error = "Drop current order details failed";
+										}
+									}
+
+									if($sc === TRUE)
+									{
+										$this->db->trans_commit();
+										$arr = array(
+											'code' => $code,
+											'user_id' => $this->_user->id,
+											'uname' => $this->_user->uname,
+											'action' => 'edit'
+										);
+
+										$this->orders_model->add_logs($arr);
+
+										if($hd->isDraft == 0)
+										{
+											if($hd->mustApprove == 0)
+											{
+												$rs = $this->do_export($code);
+
+												if(! $rs)
+												{
+													$sc = FALSE;
+												}
 											}
 										}
+									}
+									else
+									{
+										$this->db->trans_rollback();
 									}
 								}
 								else
 								{
-									$this->db->trans_rollback();
+									$sc = FALSE;
+									$this->error = "Invalid customer";
 								}
 							}
 							else
 							{
 								$sc = FALSE;
-								$this->error = "Invalid customer";
+								$this->error = "ไม่สามารถบันทึกเอกสารได้เนื่องจากเอกสารถูกอนุมัติไปแล้ว";
 							}
 						}
 						else
@@ -821,6 +831,7 @@ class Orders extends PS_Controller
 						$totalAmount += $rs->LineTotal;
 						$totalVat += $rs->totalVatAmount;
 						$rs->image = get_image_path($rs->product_id, 'mini');
+						$rs->ruleCode = $this->discount_model->getRuleCode($rs->rule_id);
 					}
 				}
 
@@ -1221,6 +1232,8 @@ class Orders extends PS_Controller
 
 	public function do_export($code)
 	{
+		$logJson = getConfig('LOGS_JSON') == 1 ? TRUE : FALSE;
+
 		$sc = TRUE;
 		$order = $this->orders_model->get($code);
 		$details = $this->orders_model->get_details($code);
@@ -1343,6 +1356,19 @@ class Orders extends PS_Controller
 
 					$sc = FALSE;
 					$this->error = $rs->error;
+
+					if($logJson)
+					{
+						$this->load->model('rest/logs_model');
+
+						$logs = array(
+							'code' => $code,
+							'status' => 'error',
+							'json' => json_encode($ds)
+						);
+
+						$this->logs_model->order_logs($logs);
+					}
 				}
 			}
 			else
@@ -1352,7 +1378,7 @@ class Orders extends PS_Controller
 
 				$arr = array(
 					'Status' => 3,
-					'message' => $this->error
+					'message' => $response//$this->error
 				);
 
 				$this->orders_model->update($code, $arr);
@@ -1542,7 +1568,7 @@ class Orders extends PS_Controller
 
 		if(! empty($pd))
 		{
-			$price = $this->getPrice($itemCode, $priceList);
+			$price = $pd->Price; //$this->getPrice($itemCode, $priceList);
 			$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
 			$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $docDate);
 
@@ -1559,11 +1585,12 @@ class Orders extends PS_Controller
 					'Qty' => $qty,
 					'UomCode' => $pd->uom_code,
 					'UomName' => $pd->uom,
-					'Price' => $price,
+					'StdPrice' => $price,
+					'Price' => $disc->type == 'N' ? $disc->sellPrice : $price,
 					'SellPrice' => $disc->sellPrice,
 					'sysSellPrice' => $disc->sellPrice,
 					'sysDiscLabel' => discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
-					'discLabel' => discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
+					'discLabel' => $disc->type == 'N' ? "" : discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
 					'DiscPrcnt' => $disc->totalDiscPrecent,
 					'discAmount' => $disc->discAmount,
 					'totalDiscAmount' => $disc->totalDiscAmount,
@@ -1620,11 +1647,12 @@ class Orders extends PS_Controller
 					'Qty' => $qty,
 					'UomCode' => $pd->uom_code,
 					'UomName' => $pd->uom,
-					'Price' => $price,
+					'StdPrice' => $price,
+					'Price' => $disc->type == 'N' ? $disc->sellPrice : $price,
 					'SellPrice' => $disc->sellPrice,
 					'sysSellPrice' => $disc->sellPrice,
 					'sysDiscLabel' => discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
-					'discLabel' => discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
+					'discLabel' => $disc->type == 'N' ? "" : discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
 					'DiscPrcnt' => $disc->totalDiscPrecent,
 					'discAmount' => $disc->discAmount,
 					'totalDiscAmount' => $disc->totalDiscAmount,
@@ -1684,7 +1712,7 @@ class Orders extends PS_Controller
 				$uuid = uniqid(rand(1,100));
 				$img = get_image_path($rs->product_id, 'mini');
 				$pd = $this->products_model->get($rs->product_code);
-				$price = $this->getPrice($pd->code, $priceList);
+				$price = $pd->Price; //$this->getPrice($pd->code, $priceList);
 
 				$ds .= "<tr>";
 				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
@@ -1739,6 +1767,13 @@ class Orders extends PS_Controller
 		$this->load->library('api');
 		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
 
+    $arr = array(
+      'OnHand' => 0,
+      'Committed' => 0,
+      'QuotaQty' => 0,
+      'Available' => 0
+    );
+
 		if(!empty($stock))
 		{
 			$commit = get_zero($this->orders_model->get_commit_qty($ItemCode));
@@ -1749,9 +1784,8 @@ class Orders extends PS_Controller
 				'QuotaQty' => $stock['QuotaQty'],
 				'Available' => $OnHand - $commit
 			);
-
-			return $arr;
 		}
+    return $arr;
 	}
 
 
@@ -1955,6 +1989,7 @@ class Orders extends PS_Controller
 			'chk_sqNo',
 			'chk_channels',
 			'chk_payment',
+			'chk_ship',
 			'order_user_id'
 		);
 

@@ -993,7 +993,7 @@ function getItemData(no) {
 				if(isJson(rs)) {
 					$('#')
 					var ds = $.parseJSON(rs);
-					var price = parseFloat(ds.Price);
+					var price = parseFloat(ds.Price);					
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
 					sellPrice = sellPrice.toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
@@ -1322,8 +1322,7 @@ function recalAmount(no) {
   var currentInput = removeCommas($('#disc-label-'+no).val());
   var val = currentInput.replace(/[A-Za-z!@#$%^&*()]/g, '');
 	var priceLabel = removeCommas($('#price-label-'+no).val());
-	var price = priceLabel.replace(regex, '');
-		  price = parseFloat(price).toFixed(2);
+	var price = parseFloat(priceLabel).toFixed(2);
 	var qty = $('#line-qty-'+no).val();
 
 	$('#price-'+no).val(price);

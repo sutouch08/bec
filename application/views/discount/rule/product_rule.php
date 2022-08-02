@@ -29,6 +29,9 @@ $product_category = ($pdCategoryNo > 0 && $allProduct == 'N' && $product_model =
 $pdBrand = $this->discount_rule_model->getRuleProductBrand($rule->id);
 $pdBrandNo = count($pdBrand);
 $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+
+$pdOptions = $this->products_model->get_all();
+$modelOptions = $this->product_model_model->get_all();
  ?>
 
 	<div class="row">
@@ -57,9 +60,21 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 						<button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-product-id-no" onclick="toggleProductId('N')" disabled>NO</button>
 					</div>
         </div>
+				<!--
 				<div class="col-lg-5 col-md-5 col-sm-5 padding-5">
 					<input type="text" class="not-pd-all option form-control input-sm" id="txt-product-id-box" placeholder="รหัส/ชื่อสินค้า" disabled />
 					<input type="hidden" id="id_product" />
+				</div>
+			-->
+				<div class="col-lg-5 col-md-5 col-sm-5 padding-5">
+					<select class="width-100 not-pd-all option" id="id_product" disabled>
+						<option value="" data-code = "">Please Select</option>
+						<?php if(! empty($pdOptions)) : ?>
+							<?php foreach($pdOptions as $option) : ?>
+								<option value="<?php echo $option->id; ?>"><?php echo $option->code.' | '.$option->name; ?></option>
+							<?php endforeach; ?>
+						<?php endif; ?>
+					</select>
 				</div>
 				<div class="col-sm-1 padding-5">
 					<button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-product-id-add" onclick="addProductId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
@@ -120,10 +135,23 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 						<button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-model-id-no" onclick="toggleModelId('N')" disabled>NO</button>
 					</div>
         </div>
+
+				<!--
 				<div class="col-lg-5 col-md-5 col-sm-5 padding-5">
 					<input type="text" class="not-pd-all option form-control input-sm" id="txt-model-id-box" placeholder="รหัส/ชื่อรุ่น" disabled />
 					<input type="hidden" id="id_model" />
 				</div>
+			-->
+			<div class="col-lg-5 col-md-5 col-sm-5 padding-5">
+				<select class="width-100 not-pd-all option" id="id_model" disabled>
+					<option value="">Please Select</option>
+					<?php if(! empty($modelOptions)) : ?>
+						<?php foreach($modelOptions as $option) : ?>
+							<option value="<?php echo $option->id; ?>"><?php echo $option->code.' | '.$option->name; ?></option>
+						<?php endforeach; ?>
+					<?php endif; ?>
+				</select>
+			</div>
 				<div class="col-sm-1 padding-5">
 					<button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-model-id-add" onclick="addModelId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
 				</div>
@@ -146,7 +174,8 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 										<span class="lbl"></span>
 									</label>
 								</th>
-								<th class="min-width-250">Model Desctiption</th>
+								<th class="min-width-100">Model Code</th>
+								<th class="min-width-250">Desctiption</th>
 								<th class="fix-width-60 text-center"><button type="button" class="btn btn-mini btn-danger btn-block" onclick="removeModel()">Delete</button></th>
 							</tr>
 						</thead>
@@ -160,6 +189,7 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 												<span class="lbl"></span>
 											</label>
 										</td>
+										<td class="middle"><?php echo $item->code; ?></td>
 										<td class="middle" colspan="2">
 										<?php echo $item->name; ?>
 										<input type="hidden" class="model-id" id="model-id-<?php echo $item->model_id; ?>" value="<?php echo $item->model_id; ?>">
@@ -280,11 +310,17 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 		<script type="text/x-handlebarsTemplate" id="modelRowTemplate">
 			<tr id="model-row-{{id}}">
 				<td class="middle text-center"><label><input type="checkbox" class="ace model-chk" value="{{id}}"><span class="lbl"></span></label></td>
-				<td class="middle" colspan="2">
-				{{name}}
+				<td class="middle" >
+				{{code}}
 				<input type="hidden" class="model-id" id="model-id-{{id}}" value="{{id}}">
 				</td>
+				<td class="middle" colspan="2">{{name}}</td>
 			</tr>
+		</script>
+
+		<script>
+			$('#id_product').select2();
+			$('#id_model').select2();
 		</script>
 
 <?php $this->load->view('discount/rule/product_rule_modal'); ?>

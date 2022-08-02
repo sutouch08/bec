@@ -9,7 +9,6 @@
 		<meta name="description" content="" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 		<link rel="shortcut icon" href="<?php echo base_url(); ?>assets/img/favicon.png">
-
 		<?php $this->load->view('include/header_include'); ?>
 
 		<style>
@@ -20,6 +19,7 @@
 			.ui-autocomplete {
 		    max-height: 250px;
 		    overflow-y: auto;
+		    /* prevent horizontal scrollbar */
 		    overflow-x: hidden;
 			}
 
@@ -29,8 +29,10 @@
 	</style>
 	</head>
 	<body class="no-skin">
-		<div id="loader" style="position:absolute; padding: 15px 25px 15px 25px; background-color:#fff; opacity:0.0; box-shadow: 0px 0px 25px #CCC; top:-20px; display:none; z-index:10;">
-        <center><i class="fa fa-spinner fa-5x fa-spin blue"></i></center><center>กำลังทำงาน....</center>
+		<div id="loader">
+        <div class="loader"></div>
+		</div>
+		<div id="loader-backdrop" style="position: fixed; width:100vw; height:100vh; background-color:white; opacity:0.3; display:none; z-index:9;">
 		</div>
 
 		<!-- #section:basics/navbar.layout -->

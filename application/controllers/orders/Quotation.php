@@ -312,7 +312,6 @@ class Quotation extends PS_Controller
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/customer_address_model');
 		$this->load->model('masters/quota_model');
-		$dev = TRUE;
 
 		if($this->pm->can_edit OR $this->pm->can_add)
 		{
@@ -331,9 +330,9 @@ class Quotation extends PS_Controller
 					{
 						$totalAmount += $rs->LineTotal;
 						$totalVat += $rs->totalVatAmount;
-						$stock = $dev ? NULL :$this->getStock($rs->Price, $rs->WhsCode, $rs->QuotaNo);
+						$stock = $this->getStock($rs->Price, $rs->WhsCode, $rs->QuotaNo);
 						$rs->instock = !empty($stock) ? $stock['OnHand'] : 0;
-						$rs->team = !empty($stock) ? $stock['BatchQty'] : 0;
+						$rs->team = !empty($stock) ? $stock['QuotaQty'] : 0;
 						$rs->commit = !empty($stock) ? ($stock['Committed'] > 0 ? $stock['Committed'] - $rsQty : 0) : 0;
 						$rs->available = !empty($stock) ? $stock['Available'] : 0;
 						$rs->image = get_image_path($rs->product_id, 'mini');
@@ -1464,7 +1463,7 @@ class Quotation extends PS_Controller
 
 		if(! empty($pd))
 		{
-			$price = $this->getPrice($itemCode, $priceList);
+			$price = $pd->Price; //$this->getPrice($itemCode, $priceList);
 			$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
 			//$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $docDate);
 
@@ -1592,7 +1591,7 @@ class Quotation extends PS_Controller
 				$uuid = uniqid(rand(1,100));
 				$img = get_image_path($rs->product_id, 'mini');
 				$pd = $this->products_model->get($rs->product_code);
-				$price = $this->getPrice($pd->code, $priceList);
+				$price = $pd->Price; //$this->getPrice($pd->code, $priceList);
 
 				$ds .= "<tr>";
 				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
@@ -1641,11 +1640,17 @@ class Quotation extends PS_Controller
 	}
 
 
-
 	public function getStock($ItemCode, $WhsCode, $QuotaNo)
 	{
 		$this->load->library('api');
 		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
+
+    $arr = array(
+      'OnHand' => 0,
+      'Committed' => 0,
+      'QuotaQty' => 0,
+      'Available' => 0
+    );
 
 		if(!empty($stock))
 		{
@@ -1657,10 +1662,10 @@ class Quotation extends PS_Controller
 				'QuotaQty' => $stock['QuotaQty'],
 				'Available' => $OnHand - $commit
 			);
-
-			return $arr;
 		}
+    return $arr;
 	}
+
 
 
 	public function get_stock()
