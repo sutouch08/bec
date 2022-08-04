@@ -56,7 +56,7 @@
 
   <div class="col-lg-4 col-md-4 col-sm-5 col-xs-12 padding-5 text-right">
 		<?php if($order->Status == 0) : ?>
-			<?php if($order->must_approve == 1 && $order->Approved == 'P' && $can_approve) : ?>
+			<?php if($order->must_approve == 1 && $order->Approved == 'P' && ($can_approve OR $this->_SuperAdmin)) : ?>
 				<button type="button" class="btn btn-sm btn-success btn-100" onclick="doApprove('<?php echo $order->code; ?>')">Approve</button>
 				<button type="button" class="btn btn-sm btn-danger btn-100" onclick="doReject('<?php echo $order->code; ?>')">Reject</button>
 			<?php else : ?>

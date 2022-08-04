@@ -78,21 +78,10 @@ class Orders extends PS_Controller
     $this->load->view('sales_order/sales_order_add', $ds);
   }
 
-	public function add_newx()
-  {
-		$ds = array(
-			'default_term' => $this->payment_term_model->get_default(),
-			'default_channels' => $this->channels_model->get_default()
-		);
-
-    $this->load->view('orders/order_add', $ds);
-  }
-
 
 	public function add()
 	{
 		$sc = TRUE;
-
 		if($this->pm->can_add)
 		{
 			$json = file_get_contents('php://input');
@@ -183,6 +172,7 @@ class Orders extends PS_Controller
 										'ItemCode' => $rs->ItemCode,
 										'ItemName' => $rs->Description,
 										'Qty' => $rs->Quantity,
+                    'OpenQty' => $rs->Quantity,
 										'UomCode' => $pd->uom_code,
 										'UomEntry' => $pd->uom_id,
 										'StdPrice' => $rs->StdPrice,
@@ -325,10 +315,10 @@ class Orders extends PS_Controller
 					{
 						$totalAmount += $rs->LineTotal;
 						$totalVat += $rs->totalVatAmount;
-						$stock = $this->getStock($rs->Price, $rs->WhsCode, $rs->QuotaNo);
+						$stock = $this->getStock($rs->ItemCode, $rs->WhsCode, $rs->QuotaNo);
 						$rs->instock = !empty($stock) ? $stock['OnHand'] : 0;
 						$rs->team = !empty($stock) ? $stock['QuotaQty'] : 0;
-						$rs->commit = !empty($stock) ? ($stock['Committed'] > 0 ? $stock['Committed'] - $rsQty : 0) : 0;
+						$rs->commit = !empty($stock) ? ($stock['Committed'] > 0 ? $stock['Committed'] - $rs->Qty : 0) : 0;
 						$rs->available = !empty($stock) ? $stock['Available'] : 0;
 						$rs->image = get_image_path($rs->product_id, 'mini');
 					}
@@ -388,7 +378,7 @@ class Orders extends PS_Controller
 					{
 						if(($order->Status == -1 OR $order->Status == 0 OR $order->Status == 3))
 						{
-							if($order->Approved != 'A' && $order->Approved != 'S')
+							if($order->Approved != 'A' )
 							{
 								if( ! empty($customer))
 								{
@@ -465,6 +455,7 @@ class Orders extends PS_Controller
 															'ItemCode' => $rs->ItemCode,
 															'ItemName' => $rs->Description,
 															'Qty' => $rs->Quantity,
+                              'OpenQty' => $rs->Quantity,
 															'UomCode' => $pd->uom_code,
 															'UomEntry' => $pd->uom_id,
 															'StdPrice' => $rs->StdPrice,
@@ -552,11 +543,13 @@ class Orders extends PS_Controller
 										{
 											if($hd->mustApprove == 0)
 											{
-												$rs = $this->do_export($code);
+												$this->load->library('order_api');
+												$rs = $this->order_api->exportOrder($code);
 
 												if(! $rs)
 												{
 													$sc = FALSE;
+													$this->error = $this->order_api->error;
 												}
 											}
 										}
@@ -625,9 +618,13 @@ class Orders extends PS_Controller
 
 			if($rs === TRUE)
 			{
-				if(! $this->do_export($code))
+				$this->load->library('order_api');
+				$export = $this->order_api->exportOrder($code);
+
+				if($export == FALSE)
 				{
 					$sc = FALSE;
+					$this->error = $this->order_api->error;
 				}
 			}
 			else
@@ -661,9 +658,9 @@ class Orders extends PS_Controller
 				//--- ตรวจสอบสิทธิ์ในการอนุาัติ
 				$approver = $this->approver_model->get_approve_right($this->_user->id, $doc->sale_team);
 
-				if(! empty($approver))
+				if(! empty($approver) OR $this->_SuperAdmin)
 				{
-					if($doc->disc_diff <= $approver->max_disc)
+					if($this->_SuperAdmin OR $doc->disc_diff <= $approver->max_disc)
 					{
 						$arr = array(
 							'Approved' => 'A',
@@ -946,6 +943,7 @@ class Orders extends PS_Controller
 								'ItemCode' => $rs->ItemCode,
 								'ItemName' => $rs->ItemName,
 								'Qty' => $rs->Qty,
+								'OpenQty' => $rs->Qty,
 								'UomCode' => $rs->UomCode,
 								'UomEntry' => $rs->UomEntry,
 								'Price' => $rs->Price,
@@ -1131,6 +1129,7 @@ class Orders extends PS_Controller
 								'ItemCode' => $rs->ItemCode,
 								'ItemName' => $rs->ItemName,
 								'Qty' => $rs->Qty,
+								'OpenQty' => $rs->Qty,
 								'UomCode' => $rs->UomCode,
 								'UomEntry' => $rs->UomEntry,
 								'Price' => $rs->Price,
@@ -1232,11 +1231,21 @@ class Orders extends PS_Controller
 
 	public function do_export($code)
 	{
-		$logJson = getConfig('LOGS_JSON') == 1 ? TRUE : FALSE;
+		$this->load->library('order_api');
+		return $this->order_api->exportOrder($code);
+	}
 
-		$sc = TRUE;
+
+
+	public function getJSON()
+	{
+		$code = $this->input->get('code');
 		$order = $this->orders_model->get($code);
 		$details = $this->orders_model->get_details($code);
+
+		$ds = array(
+			'nodata' => 'nodata'
+		);
 
 		if(! empty($order) && ! empty($details))
 		{
@@ -1309,92 +1318,10 @@ class Orders extends PS_Controller
 			}
 
 			$ds['DocLine'] = $orderLine;
-
-
-			$url = getConfig('SAP_API_HOST');
-			if($url[-1] != '/')
-			{
-				$url .'/';
-			}
-
-			$url = $url."SalesOrder";
-
-			$curl = curl_init();
-			curl_setopt($curl, CURLOPT_URL, $url);
-			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
-			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($ds));
-			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-			curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
-
-			$response = curl_exec($curl);
-
-			curl_close($curl);
-
-			$rs = json_decode($response);
-
-			if(! empty($rs) && ! empty($rs->status))
-			{
-				if($rs->status == 'success')
-				{
-					$arr = array(
-						'Status' => 1,
-						'DocEntry' => $rs->DocEntry,
-						'DocNum' => $rs->DocNum
-					);
-
-					$this->orders_model->update($code, $arr);
-				}
-				else
-				{
-					$arr = array(
-						'Status' => 3,
-						'message' => $rs->error
-					);
-
-					$this->orders_model->update($code, $arr);
-
-					$sc = FALSE;
-					$this->error = $rs->error;
-
-					if($logJson)
-					{
-						$this->load->model('rest/logs_model');
-
-						$logs = array(
-							'code' => $code,
-							'status' => 'error',
-							'json' => json_encode($ds)
-						);
-
-						$this->logs_model->order_logs($logs);
-					}
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				$this->error = "Export order failed";
-
-				$arr = array(
-					'Status' => 3,
-					'message' => $response//$this->error
-				);
-
-				$this->orders_model->update($code, $arr);
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			$this->error = "No data found";
 		}
 
-		return $sc;
+			echo json_encode($ds);
 	}
-
-
-
 
 	public function cancle_sap_order()
 	{
@@ -1423,9 +1350,11 @@ class Orders extends PS_Controller
 				else
 				{
 					$arr = array(
-						'Status' => 0,
+						'Status' => -1,
 						'DocEntry' => NULL,
-						'DocNum' => NULL
+						'DocNum' => NULL,
+            'Approved' => 'P',
+            'Approver' => NULL
 					);
 
 					$this->orders_model->update($code, $arr);
@@ -1568,7 +1497,7 @@ class Orders extends PS_Controller
 
 		if(! empty($pd))
 		{
-			$price = $pd->Price; //$this->getPrice($itemCode, $priceList);
+			$price = $pd->price; //$this->getPrice($itemCode, $priceList);
 			$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
 			$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $docDate);
 
@@ -1712,7 +1641,7 @@ class Orders extends PS_Controller
 				$uuid = uniqid(rand(1,100));
 				$img = get_image_path($rs->product_id, 'mini');
 				$pd = $this->products_model->get($rs->product_code);
-				$price = $pd->Price; //$this->getPrice($pd->code, $priceList);
+				$price = $pd->price; //$this->getPrice($pd->code, $priceList);
 
 				$ds .= "<tr>";
 				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
@@ -1765,18 +1694,20 @@ class Orders extends PS_Controller
 	public function getStock($ItemCode, $WhsCode, $QuotaNo)
 	{
 		$this->load->library('api');
+
+		$commit = get_zero($this->orders_model->get_commit_qty($ItemCode));
+
 		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
 
     $arr = array(
       'OnHand' => 0,
-      'Committed' => 0,
+      'Committed' => $commit,
       'QuotaQty' => 0,
       'Available' => 0
     );
 
 		if(!empty($stock))
 		{
-			$commit = get_zero($this->orders_model->get_commit_qty($ItemCode));
 			$OnHand = $stock['OnHand'];
 			$arr = array(
 				'OnHand' => $OnHand,
@@ -1785,6 +1716,7 @@ class Orders extends PS_Controller
 				'Available' => $OnHand - $commit
 			);
 		}
+		
     return $arr;
 	}
 

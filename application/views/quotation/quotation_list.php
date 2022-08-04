@@ -83,7 +83,7 @@
 	</div>
 
 	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
-		<label>Posting date</label>
+		<label>Date</label>
 		<div class="input-daterange input-group width-100">
 			<input type="text" class="width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
 			<input type="text" class="width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
@@ -134,7 +134,7 @@
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="fix-width-60 middle text-center" style="width:50px;">#</th>
-					<th class="fix-width-80 middle">Posting date</th>
+					<th class="fix-width-80 middle">Date</th>
 					<th class="fix-width-120 middle">Web No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
 					<th class="min-width-200 middle">Customer name</th>

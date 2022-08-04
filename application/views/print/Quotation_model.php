@@ -238,15 +238,16 @@ class Quotation_model extends CI_Model
 
 	public function get_commit_qty($itemCode)
 	{
-		$rs = $this->db
-		->select_sum('OpenQty')
-		->where('ItemCode', $itemCode)
-		->where('LineStatus', 'O')
-		->get('order_details');
+		$qr  = "SELECT SUM(Qty) AS Qty FROM order_details ";
+		$qr .= "WHERE ItemCode = '{$itemCode}' ";
+		$qr .= "AND QuotaNo IN(SELECT code FROM quota WHERE listed = 1) ";
+		$qr .= "AND is_complete = 0";
+
+		$rs = $this->db->query($qr);
 
 		if($rs->num_rows() === 1)
 		{
-			return $rs->row()->OpenQty;
+			return $rs->row()->Qty;
 		}
 
 		return 0;

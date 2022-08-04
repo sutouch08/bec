@@ -60,7 +60,7 @@ class Update_api
 			"json" => json_encode($arr)
 		);
 		$this->ci->logs_model->order_logs($ds);
-		
+
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
@@ -113,6 +113,41 @@ class Update_api
     return FALSE;
 	}
 
+	public function createProductCategory($arr)
+	{
+		$url = $this->url .'ProductCategory';
+		$curl = curl_init();
+
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+
+		$response = curl_exec($curl);
+		curl_close($curl);
+		$rs = json_decode($response);
+
+		if(! empty($rs))
+		{
+			if($rs->status == 'success')
+			{
+				return TRUE;
+			}
+			else
+			{
+				$this->error = $rs->error;
+			}
+		}
+    else
+    {
+      $this->error = "Update Interface failed : {$response}";
+    }
+
+    return FALSE;
+	}
+
 
   public function updateProductCategory($arr)
 	{
@@ -130,13 +165,20 @@ class Update_api
 		curl_close($curl);
 		$rs = json_decode($response);
 
-		if(! empty($rs) && $rs->status == 'success') {
-
-			return TRUE;
+		if(! empty($rs))
+		{
+			if($rs->status == 'success')
+			{
+				return TRUE;
+			}
+			else
+			{
+				$this->error = $rs->error;
+			}
 		}
     else
     {
-      $this->error = $rs->error;
+      $this->error = "Update Interface failed : {$response}";
     }
 
     return FALSE;

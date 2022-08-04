@@ -53,7 +53,7 @@
 				<td class="width-15  bg-grey">Web Order</td>
 				<td class="width-55 "><?php echo $order->code; ?></td>
 				<td class="width-15 bg-grey ">Posting Date</td>
-				<td class="width-15"><?php echo thai_date($order->DocDate, FALSE); ?></td>
+				<td class="width-15"><?php echo thai_date($order->TextDate, FALSE); ?></td>
 			</tr>
 
 			<tr>
@@ -66,7 +66,7 @@
 				<td class=" bg-grey">Customer Name</td>
 				<td class=""><?php echo $order->CardName; ?></td>
 				<td class="bg-grey ">Document Date</td>
-				<td class=""><?php echo thai_date($order->TextDate, FALSE); ?></td>
+				<td class=""><?php echo thai_date($order->DocDate, FALSE); ?></td>
 			</tr>
 			<tr>
 				<td class=" bg-grey">Payment</td>

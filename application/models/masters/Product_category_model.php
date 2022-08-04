@@ -156,7 +156,7 @@ class Product_category_model extends CI_Model
 	{
 		if(! no_value($ds['code']))
 		{
-			$this->db->like('c.code', $ds['code']);
+			$this->db->like('code', $ds['code']);
 		}
 
 		if( ! no_value($ds['name']))
@@ -217,7 +217,10 @@ class Product_category_model extends CI_Model
 	{
 		if( ! empty($ds))
 		{
-			return $this->db->insert($this->tb, $ds);
+			if($this->db->insert($this->tb, $ds))
+			{
+				return $this->db->insert_id();
+			}
 		}
 
 		return FALSE;

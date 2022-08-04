@@ -12,6 +12,8 @@
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-4 padding-5">
 		<p class="pull-right top-p">
 			<button type="button" class="btn btn-xs btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> Back</button>
+			<button type="button" class="btn btn-xs btn-primary" onclick="create_sap()"><i class="fa fa-send"></i> Create On SAP</button>
+			<button type="button" class="btn btn-xs btn-success" onclick="update_sap()"><i class="fa fa-send"></i> Update On SAP</button>
 		</p>
 	</div>
 </div><!-- End Row -->

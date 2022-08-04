@@ -35,7 +35,7 @@
 				<button type="button" class="btn btn-xs btn-success top-btn" onclick="sendToSap('<?php echo $order->code; ?>')"><i class="fa fa-send"></i> Send to SAP</button>
 				<?php endif; ?>
 				<?php if($order->Status == 1 && ! empty($order->DocEntry) && !empty($order->DocNum)) : ?>
-					<button type="button" class="btn btn-xs btn-danger top-btn" onclick="cancleSap('<?php echo $order->code; ?>')">Cancel On SAP</button>
+					<!--<button type="button" class="btn btn-xs btn-danger top-btn" onclick="cancleSap('<?php echo $order->code; ?>')">Cancel On SAP</button> -->
 				<?php endif; ?>
       </p>
     </div>

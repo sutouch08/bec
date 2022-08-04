@@ -68,13 +68,12 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	<link href='".base_url()."assets/css/bootstrap_pdf.css' rel='stylesheet' />";
 	$header .= "	<link rel='stylesheet' href='".base_url()."assets/css/font-awesome.css' />";
 	$header .= "	<link href='".base_url()."assets/css/template.css' rel='stylesheet' />";
-	$header .= '<link rel="preconnect" href="https://fonts.googleapis.com">';
-	$header .= '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
-	$header .= '<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">';
+	// $header .= '<link rel="preconnect" href="https://fonts.googleapis.com">';
+	// $header .= '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
+	// $header .= '<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">';
 	$header .= "	<script src='".base_url()."assets/js/jquery.min.js'></script>";
 	$header .= "	<script src='".base_url()."assets/js/bootstrap.min.js'></script> ";
 	$header .= "	<style> ";
-	//$header .= " 		body { font-family:'sarabun', font-size:12px; line-height:2;} ";
 	$header .= "		.page_layout{ border: solid 1px #AAA; border-radius:5px; 	} ";
 	$header .= "		@media print{ 	.page_layout{ border: none; } } ";
 	$header .= " 		.table > tbody > tr > td { border-top:0px; border-left:solid 1px #555555;} ";
@@ -304,9 +303,9 @@ public function top_page()
 
 public function content_start()
 {
-	$height = 155;//($this->row + $this->sub_total_row) * $this->row_height;
+	$height = 150;//($this->row + $this->sub_total_row) * $this->row_height;
 	$border = $this->content_border == 0 ? '' : "border:solid 0px #555555;";
-	return  "<div style='width:".$this->content_width."mm; height:".$height."mm; margin:auto; margin-bottom:2mm; margin-top:2mm; ".$border." border-radius: 0px;'>";
+	return  "<div style='width:".$this->content_width."mm; height:".$height."mm; margin:auto; margin-bottom:0mm; margin-top:2mm; ".$border." border-radius: 0px;'>";
 }
 
 
@@ -372,7 +371,9 @@ public function set_footer(array $data)
 	if(!$this->footer)
 	{
 		return false;
-	}else{
+	}
+	else
+	{
 		$c = count($data);
 		$box_width = 100/$c;
 		$height = $this->footer_row * $this->row_height;

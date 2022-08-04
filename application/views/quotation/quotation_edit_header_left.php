@@ -17,10 +17,16 @@
 		<div class="form-group">
       <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 control-label no-padding-right">Contact Person</label>
       <div class="col-lg-7 col-md-7 col-sm-8 col-xs-12">
-        <input type="text" id="contact" class="form-control input-sm" value="<?php echo $order->ContactPerson; ?>" />
+        <input type="text" id="contact" class="form-control input-sm" maxlength="100" value="<?php echo $order->ContactPerson; ?>" />
       </div>
     </div>
 
+		<div class="form-group">
+      <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 control-label no-padding-right">Phone Number</label>
+      <div class="col-lg-3-harf col-md-4 col-sm-4-harf col-xs-12">
+        <input type="text" id="phone" class="form-control input-sm" maxlength="50" value="<?php echo $order->Phone; ?>" />
+      </div>
+    </div>
 
 		<div class="form-group">
 			<label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 control-label no-padding-right">Payment</label>

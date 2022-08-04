@@ -63,35 +63,39 @@
 				<td class=""><?php echo thai_date($order->TextDate, FALSE); ?></td>
 			</tr>
 			<tr>
-				<td class=" bg-grey">Payment</td>
-				<td class=""><?php echo $order->payment_name; ?></td>
-				<td class="bg-grey ">Status</td>
-				<td class=""><?php echo $statusName; ?></td>
-			</tr>
-			<tr>
-				<td class=" bg-grey">Sales Channels</td>
-				<td class=""><?php echo $order->channels_name; ?></td>
 				<td class="bg-grey ">Contact Person</td>
 				<td class=""><?php echo $order->ContactPerson; ?></td>
+				<td class=" bg-grey">Payment</td>
+				<td class=""><?php echo $order->payment_name; ?></td>
 			</tr>
 			<tr>
-				<td class=" bg-grey">Ship To (<?php echo $order->ShipToCode;?>)</td>
-				<td class=""><?php echo $order->Address2; ?></td>
+
+				<td class="bg-grey ">Phone No.</td>
+				<td class=""><?php echo $order->Phone; ?></td>
+
+				<td class="bg-grey ">Status</td>
+				<td class=""><?php echo $statusName; ?></td>
+
+			</tr>
+			<tr>
+
+				<td class=" bg-grey">Sales Channels</td>
+				<td class=""><?php echo $order->channels_name; ?></td>
 				<td class="bg-grey ">Original SQ No.</td>
 				<td class=""><?php echo $order->OriginalSQ; ?></td>
 			</tr>
 			<tr>
-				<td class="bg-grey ">Bill To (<?php echo $order->PayToCode; ?>)</td>
-				<td class=""><?php echo $order->Address; ?></td>
+				<td class=" bg-grey">Ship To (<?php echo $order->ShipToCode;?>)</td>
+				<td class=""><?php echo $order->Address2; ?></td>
 				<td class="bg-grey ">SAP NO.</td>
 				<td class=""><?php echo $order->DocNum; ?></td>
 			</tr>
 
 			<tr>
-				<td class="bg-grey ">ฝ่าย</td>
-				<td class=""><?php echo $dimCode4; ?></td>
-				<td class="bg-grey ">แผนก</td>
-				<td class=""><?php echo $dimCode5; ?></td>
+				<td class="bg-grey ">Bill To (<?php echo $order->PayToCode; ?>)</td>
+				<td class=""><?php echo $order->Address; ?></td>
+				<td class="bg-grey ">สายงาน</td>
+				<td class=""><?php echo $dimCode; ?></td>
 			</tr>
 		</table>
 	</div>

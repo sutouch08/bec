@@ -89,9 +89,9 @@
   <div class="divider-hidden"></div>
 
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
-    <button type="button" class="btn btn-sm btn-primary btn-100" onclick="validateFreeItem('add')">Save</button>
+    <button type="button" class="btn btn-sm btn-primary btn-100" id="btn-save" onclick="validateFreeItem('add')">Save</button>
     <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
-    <button type="button" class="btn btn-sm btn-info btn-100" onclick="saveAsDraft()">Save AS Draft</button>
+    <button type="button" class="btn btn-sm btn-info btn-100" id="btn-draft" onclick="saveAsDraft()">Save AS Draft</button>
   </div>
 </div>
 

@@ -21,6 +21,7 @@ class Quotation extends PS_Controller
 		$this->load->model('masters/channels_model');
 		$this->load->model('orders/discount_model');
 		$this->load->model('masters/warehouse_model');
+		$this->load->model('masters/cost_center_model');
 		$this->load->helper('channels');
 		$this->load->helper('order');
 		$this->load->helper('customer');
@@ -104,6 +105,7 @@ class Quotation extends PS_Controller
 						'CardCode' => $hd->CardCode,
 						'CardName' => $hd->CardName,
 						'ContactPerson' => $hd->ContactPerson,
+						'Phone' => trim($hd->Phone),
 						'PriceList' => get_null($customer->ListNum),
 						'SlpCode' => $customer->SlpCode,
 						'Channels' => $hd->Channels,
@@ -145,7 +147,7 @@ class Quotation extends PS_Controller
 					if(! $this->quotation_model->add($arr))
 					{
 						$sc = FALSE;
-						$this->error = "Create Order failed";
+						$this->error = "Create Quotation failed";
 					}
 					else
 					{
@@ -328,14 +330,17 @@ class Quotation extends PS_Controller
 				{
 					foreach($details as $rs)
 					{
-						$totalAmount += $rs->LineTotal;
-						$totalVat += $rs->totalVatAmount;
-						$stock = $this->getStock($rs->Price, $rs->WhsCode, $rs->QuotaNo);
-						$rs->instock = !empty($stock) ? $stock['OnHand'] : 0;
-						$rs->team = !empty($stock) ? $stock['QuotaQty'] : 0;
-						$rs->commit = !empty($stock) ? ($stock['Committed'] > 0 ? $stock['Committed'] - $rsQty : 0) : 0;
-						$rs->available = !empty($stock) ? $stock['Available'] : 0;
-						$rs->image = get_image_path($rs->product_id, 'mini');
+						if($rs->type == 0)
+						{
+							$totalAmount += $rs->LineTotal;
+							$totalVat += $rs->totalVatAmount;
+							$stock = $this->getStock($rs->ItemCode, $rs->WhsCode, $rs->QuotaNo);
+							$rs->instock = !empty($stock) ? $stock['OnHand'] : 0;
+							$rs->team = !empty($stock) ? $stock['QuotaQty'] : 0;
+							$rs->commit = !empty($stock) ? ($stock['Committed'] > 0 ? $stock['Committed'] - $rs->Qty : 0) : 0;
+							$rs->available = !empty($stock) ? $stock['Available'] : 0;
+							$rs->image = get_image_path($rs->product_id, 'mini');
+						}
 					}
 				}
 
@@ -399,6 +404,7 @@ class Quotation extends PS_Controller
 									'CardCode' => $hd->CardCode,
 									'CardName' => $hd->CardName,
 									'ContactPerson' => $hd->ContactPerson,
+									'Phone' => trim($hd->Phone),
 									'PriceList' => get_null($customer->ListNum),
 									'SlpCode' => $customer->SlpCode,
 									'Channels' => $hd->Channels,
@@ -822,7 +828,6 @@ class Quotation extends PS_Controller
 		$this->load->model('users/approver_model');
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/employee_model');
-		$this->load->model('masters/cost_center_model');
 
 		if($this->pm->can_edit OR $this->pm->can_add)
 		{
@@ -852,11 +857,7 @@ class Quotation extends PS_Controller
 					'totalVat' => $totalVat,
 					'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
 					'owner' => $this->employee_model->get_name($order->OwnerCode),
-					'dimCode1' => $this->cost_center_model->get_name($order->dimCode1),
-					'dimCode2' => $this->cost_center_model->get_name($order->dimCode2),
-					'dimCode3' => $this->cost_center_model->get_name($order->dimCode3),
-					'dimCode4' => $this->cost_center_model->get_name($order->dimCode4),
-					'dimCode5' => $this->cost_center_model->get_name($order->dimCode5),
+					'dimCode' => $this->parseDimCode($order->dimCode1, $order->dimCode2, $order->dimCode3, $order->dimCode4, $order->dimCode5),
 					'logs' => $this->quotation_model->get_logs($code),
 					'approve_right' => $this->approver_model->get_approve_right($this->_user->id, $order->sale_team)
 				);
@@ -870,6 +871,19 @@ class Quotation extends PS_Controller
 		}
 	}
 
+
+	public function parseDimCode($d1, $d2, $d3, $d4, $d5)
+	{
+		$name = "";
+
+		$name = empty($d1) ? $name : $this->cost_center_model->get_name($d1);
+		$name = empty($d2) ? $name : $this->cost_center_model->get_name($d2);
+		$name = empty($d3) ? $name : $this->cost_center_model->get_name($d3);
+		$name = empty($d4) ? $name : $this->cost_center_model->get_name($d4);
+		$name = empty($d5) ? $name : $this->cost_center_model->get_name($d5);
+
+		return $name;
+	}
 
 
 	public function duplicate_quotation()
@@ -894,6 +908,7 @@ class Quotation extends PS_Controller
 					'CardCode' => $hd->CardCode,
 					'CardName' => $hd->CardName,
 					'ContactPerson' => $hd->ContactPerson,
+					'Phone' => $hd->Phone,
 					'PriceList' => $hd->PriceList,
 					'SlpCode' => $hd->SlpCode,
 					'Channels' => $hd->Channels,
@@ -937,7 +952,7 @@ class Quotation extends PS_Controller
 				if(! $this->quotation_model->add($arr))
 				{
 					$sc = FALSE;
-					$this->error = "Create Order failed";
+					$this->error = "Create Quotation failed";
 				}
 				else
 				{
@@ -1212,7 +1227,7 @@ class Quotation extends PS_Controller
 
 				$arr = array(
 					'Status' => 3,
-					'message' => $this->error
+					'message' => $response //$this->error
 				);
 
 				$this->quotation_model->update($code, $arr);
@@ -1394,6 +1409,7 @@ class Quotation extends PS_Controller
 		$this->load->model('masters/employee_model');
 		$this->load->model('masters/sales_person_model');
 		$this->load->library('pdf_printer');
+		$this->load->library('printer');
 		$doc = $this->quotation_model->get($code);
 		$detail = $this->quotation_model->get_details($code);
 
@@ -1463,7 +1479,7 @@ class Quotation extends PS_Controller
 
 		if(! empty($pd))
 		{
-			$price = $pd->Price; //$this->getPrice($itemCode, $priceList);
+			$price = $pd->price; //$this->getPrice($itemCode, $priceList);
 			$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
 			//$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $docDate);
 
@@ -1591,7 +1607,7 @@ class Quotation extends PS_Controller
 				$uuid = uniqid(rand(1,100));
 				$img = get_image_path($rs->product_id, 'mini');
 				$pd = $this->products_model->get($rs->product_code);
-				$price = $pd->Price; //$this->getPrice($pd->code, $priceList);
+				$price = $pd->price; //$this->getPrice($pd->code, $priceList);
 
 				$ds .= "<tr>";
 				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
@@ -1643,18 +1659,19 @@ class Quotation extends PS_Controller
 	public function getStock($ItemCode, $WhsCode, $QuotaNo)
 	{
 		$this->load->library('api');
-		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
+		$commit = get_zero($this->quotation_model->get_commit_qty($ItemCode));
 
     $arr = array(
       'OnHand' => 0,
-      'Committed' => 0,
+      'Committed' => $commit,
       'QuotaQty' => 0,
       'Available' => 0
     );
 
+		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
+
 		if(!empty($stock))
 		{
-			$commit = get_zero($this->quotation_model->get_commit_qty($ItemCode));
 			$OnHand = $stock['OnHand'];
 			$arr = array(
 				'OnHand' => $OnHand,
@@ -1663,6 +1680,7 @@ class Quotation extends PS_Controller
 				'Available' => $OnHand - $commit
 			);
 		}
+
     return $arr;
 	}
 

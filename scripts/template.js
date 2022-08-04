@@ -257,7 +257,7 @@ function parseDiscount(discount_label, price)
 		"discLabel5" : 0,
 		"discUnit5" : '',
 		"discountAmount" : 0,
-		"sellPrice" : 0
+		"sellPrice" : price
 	};
 
 	bprice = 0;

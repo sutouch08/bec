@@ -56,29 +56,21 @@ class Order_api
 
 	public function exportOrder($code)
 	{
-		$testMode = TRUE;
+		$testMode = FALSE;
 
 		$this->ci->load->model('orders/orders_model');
 
 		if($testMode)
 		{
-			// $arr = array(
-			// 	'Status' => 1,
-			// 	'DocEntry' => 1,
-			// 	'DocNum' => "22000001"
-			// );
-			//
-			// $this->ci->orders_model->update($code, $arr);
-			// return TRUE;
-
 			$arr = array(
-				'Status' => 3,
-				'DocEntry' => NULL,
-				'DocNum' => NULL
+				'Status' => 1,
+				'DocEntry' => 1,
+				'DocNum' => "22000001"
 			);
 
-			$this->error = "Error";
-			return FALSE;
+			$this->ci->orders_model->update($code, $arr);
+
+			return TRUE;
 		}
 
 
@@ -240,122 +232,6 @@ class Order_api
 		{
 			$sc = FALSE;
 			$this->error = "No data found";
-		}
-
-		return $sc;
-	}
-
-
-
-
-	public function syncOrderStatus($OrderCode, $DocEntry, $DocNum)
-	{
-		$sc = TRUE;
-		$this->ci->load->model('orders/orders_model');
-		$this->ci->load->model('sync_logs_model');
-
-		$arr = array(
-			"DocEntry" => $DocEntry,
-			"DocNum" => $DocNum
-		);
-
-		$url = $this->url .'SalesOrder';
-		$curl = curl_init();
-
-		curl_setopt($curl, CURLOPT_URL, $url);
-		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
-		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
-
-		$response = curl_exec($curl);
-
-		curl_close($curl);
-
-		$res = json_decode($response);
-
-		if(! empty($res))
-		{
-			if( ! empty($res->status))
-			{
-				if($res->status == 'success')
-				{
-					if(! empty($res->DocStatus))
-					{
-						if( ! empty($res->Line))
-						{
-							foreach($res->Line as $rs)
-							{
-								$row = $this->ci->orders_model->get_detail_by_item_line($OrderCode, $rs->ItemCode, $rs->LineNum);
-
-								if(!empty($row))
-								{
-									$arr = array(
-										'OpenQty' => $rs->OpenQty,
-										'LineStatus' => $rs->LineStatus
-									);
-
-									$this->ci->orders_model->update_detail($row->id, $arr);
-								}
-							}
-						}
-
-						$arr = array(
-							'so_status' => $res->DocStatus,
-							'last_sync' => now()
-						);
-
-						$this->ci->orders_model->update($OrderCode, $arr);
-
-						$arr = array(
-							'code' => $OrderCode,
-							'status' => $res->DocStatus
-						);
-
-						$this->ci->sync_logs_model->add_status_logs($arr);
-					}
-					else
-					{
-						$sc = FALSE;
-						$this->error = "Empty Document Status";
-						$arr = array(
-							'code' => $OrderCode,
-							'DocStatus' => NULL,
-							'status' => 'E',
-							'Message' => $response
-						);
-
-						$this->ci->sync_logs_model->add_status_logs($arr);
-					}
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				$this->error = "Empty response. Please sell order sync logs";
-				$arr = array(
-					'code' => $OrderCode,
-					'DocStatus' => NULL,
-					'status' => 'E',
-					'Message' => $response
-				);
-
-				$this->ci->sync_logs_model->add_status_logs($arr);
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			$this->error = "Empty response. Please sell order sync logs";
-			$arr = array(
-				'code' => $OrderCode,
-				'DocStatus' => NULL,
-				'status' => 'E',
-				'Message' => $response
-			);
-
-			$this->ci->sync_logs_model->add_status_logs($arr);
 		}
 
 		return $sc;

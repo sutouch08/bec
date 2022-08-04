@@ -99,10 +99,22 @@ class Product_category extends PS_Controller
 						'parent_id' => $parent_id
 					);
 
-					if( ! $this->product_category_model->add($arr))
+					$id = $this->product_category_model->add($arr);
+
+					if( ! $id)
 					{
 						$sc = FALSE;
 						set_error('insert');
+					}
+					else
+					{
+						$this->load->library('update_api');
+
+						if( ! $this->update_api->createProductCategory($id))
+						{
+							$sc = FALSE;
+							$this->error = $this->update_api->error;
+						}
 					}
 				}
 				else
@@ -158,6 +170,14 @@ class Product_category extends PS_Controller
 				else
 				{
 					$this->update_child_level($id);
+
+					$this->load->library('update_api');
+
+					if( ! $this->update_api->updateProductCategory($id))
+					{
+						$sc = FALSE;
+						$this->error = $this->update_api->error;
+					}
 				}
 			}
 			else
@@ -216,6 +236,86 @@ class Product_category extends PS_Controller
 		{
 			echo 'failed';
 		}
+	}
+
+
+
+	private function update_sap($id)
+	{
+		$rs = $this->product_category_model->get($id);
+
+		if( ! empty($rs))
+		{
+			$this->load->library('update_api');
+
+			$arr = array(
+				'id' => $rs->code,
+				'name' => $rs->name
+			);
+
+			return $this->update_api->updateProductCategory($arr);
+		}
+
+		return FALSE;
+	}
+
+
+
+	public function send_to_sap($id)
+	{
+		$sc = TRUE;
+		$rs = $this->product_category_model->get($id);
+
+		if( ! empty($rs))
+		{
+			$this->load->library('update_api');
+			$arr = array(
+				'id' => $rs->code,
+				'name' => $rs->name
+			);
+
+			if( ! $this->update_api->updateProductCategory($arr))
+			{
+				$sc = FALSE;
+				$this->error = $this->update_api->error;
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "Category not found";
+		}
+
+		$this->_response($sc);
+	}
+
+
+	public function create_sap($id)
+	{
+		$sc = TRUE;
+		$rs = $this->product_category_model->get($id);
+
+		if( ! empty($rs))
+		{
+			$this->load->library('update_api');
+			$arr = array(
+				'id' => $rs->code,
+				'name' => $rs->name
+			);
+
+			if( ! $this->update_api->createProductCategory($arr))
+			{
+				$sc = FALSE;
+				$this->error = $this->update_api->error;
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "Category not found";
+		}
+
+		$this->_response($sc);
 	}
 
 

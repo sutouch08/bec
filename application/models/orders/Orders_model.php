@@ -89,6 +89,23 @@ class Orders_model extends CI_Model
 	}
 
 
+	public function get_detail_by_item_line($code, $itemCode, $lineNum)
+	{
+		$rs = $this->db
+		->where('order_code', $code)
+		->where('ItemCode', $itemCode)
+		->where('LineNum', $lineNum)
+		->get($this->td);
+
+		if($rs->num_rows() === 1)
+		{
+			return  $rs->row();
+		}
+
+		return NULL;
+	}
+
+
 	public function get_details($code)
 	{
 		$rs = $this->db
@@ -170,9 +187,10 @@ class Orders_model extends CI_Model
 			$DiscPrcnt = $this->get_order_disc_percent($code);
 
 			$DiscAmount = $ds->row()->TotalAmount * ($DiscPrcnt * 0.01);
+			$docTotal = $ds->LineTotal - $DiscAmount;
 
 			return $this->db
-			->set('DocTotal', $ds->row()->LineTotal)
+			->set('DocTotal', $docTotal)
 			->set('VatSum', $ds->row()->TotalVatAmount)
 			->set('DiscAmount', $DiscAmount)
 			->where('code', $code)
@@ -197,16 +215,15 @@ class Orders_model extends CI_Model
 
 	public function get_commit_qty($itemCode)
 	{
-		$qr  = "SELECT SUM(Qty) AS Qty FROM order_details ";
-		$qr .= "WHERE ItemCode = '{$itemCode}' ";
-		$qr .= "AND QuotaNo IN(SELECT code FROM quota WHERE listed = 1) ";
-		$qr .= "AND is_complete = 0";
-
-		$rs = $this->db->query($qr);
+		$rs = $this->db
+		->select_sum('OpenQty')
+		->where('ItemCode', $itemCode)
+		->where('LineStatus', 'O')
+		->get($this->td);
 
 		if($rs->num_rows() === 1)
 		{
-			return $rs->row()->Qty;
+			return $rs->row()->OpenQty;
 		}
 
 		return 0;
@@ -259,7 +276,7 @@ class Orders_model extends CI_Model
 			->where('od.DocDate >=', from_date($ds['from_date']))
 			->where('od.DocDate <=', to_date($ds['to_date']));
 		}
-	
+
 		if(isset($ds['user_id']) && $ds['user_id'] != 'all')
 		{
 			$this->db->where('user_id', $ds['user_id']);
@@ -464,6 +481,47 @@ class Orders_model extends CI_Model
 		return NULL;
 	}
 
+
+
+	public function complete_details($code)
+	{
+		return $this->db->set('is_complete', 1)->where('order_code', $code)->update($this->td);
+	}
+
+
+	public function un_complete_details($code)
+	{
+		return $this->db->set('is_complete', 0)->where('order_code', $code)->update($this->td);
+	}
+
+
+	//---- get order to sync status
+	public function get_sync_list($limit = 100)
+	{
+		$rs = $this->db
+		->select('code, DocEntry, DocNum')
+		->where('Status', 1)
+		->where('DocEntry IS NOT NULL', NULL, FALSE)
+		->where('DocNum IS NOT NULL', NULL, FALSE)
+		->where('so_status', 'O')
+		->order_by('last_sync', 'ASC')
+		->limit($limit)
+		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function update_all_line_status($code, $status)
+	{
+		//---- O = Open, C = Closed, D = Canceled
+		return $this->db->set('LineStatus', $status)->where('order_code', $code)->update($this->td);
+	}
 
 
 	///-----------------   BP order -------------------------///

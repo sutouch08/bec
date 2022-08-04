@@ -8,10 +8,20 @@
 		</div>
 
 		<div class="form-group">
-			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Posting Date</label>
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Document Date</label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
 				<span class="input-icon input-icon-right">
 				<input type="text" id="DocDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly/>
+				<i class="ace-icon fa fa-calendar-o"></i>
+				</span>
+			</div>
+		</div>
+
+		<div class="form-group hide">
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Posting Date</label>
+			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
+				<span class="input-icon input-icon-right">
+				<input type="text" id="TextDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly/>
 				<i class="ace-icon fa fa-calendar-o"></i>
 				</span>
 			</div>
@@ -27,15 +37,7 @@
 			</div>
 		</div>
 
-		<div class="form-group">
-			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Document Date</label>
-			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
-				<span class="input-icon input-icon-right">
-				<input type="text" id="TextDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly/>
-				<i class="ace-icon fa fa-calendar-o"></i>
-				</span>
-			</div>
-		</div>
+
 
 
 		<div class="form-group">

@@ -21,6 +21,68 @@ function viewDetail(id) {
 	window.location.href = HOME + 'view_detail/'+id;
 }
 
+function update_sap() {
+	var id = $('#id').val();
+	setTimeout(function() {
+		load_in();
+
+		$.ajax({
+			url:HOME + 'send_to_sap/'+id,
+			type:'POST',
+			cache:false,
+			success:function(rs) {
+				load_out();
+				if(rs === 'success') {
+					swal({
+						title:'Success',
+						type:'success',
+						timer:1000
+					});
+				}
+				else {
+					swal({
+						title:'Error!',
+						text:rs,
+						type:'error'
+					});
+				}
+			}
+		});
+	}, 200);
+}
+
+
+
+function create_sap() {
+	var id = $('#id').val();
+	setTimeout(function() {
+		load_in();
+
+		$.ajax({
+			url:HOME + 'create_sap/'+id,
+			type:'POST',
+			cache:false,
+			success:function(rs) {
+				load_out();
+				if(rs === 'success') {
+					swal({
+						title:'Success',
+						type:'success',
+						timer:1000
+					});
+				}
+				else {
+					swal({
+						title:'Error!',
+						text:rs,
+						type:'error'
+					});
+				}
+			}
+		});
+	}, 200);
+}
+
 
 function save() {
 	let code = $('#code').val();
@@ -149,7 +211,7 @@ function setActive(el) {
 		type:'GET',
 		cache:false,
 		success:function(rs) {
-			
+
 		}
 	})
 }

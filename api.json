@@ -341,3 +341,41 @@ Playload
 		}
 	]
 }
+
+
+
+/*************************** get sales order status
+Url : /api/SalesOrderStatus
+Playload
+{
+	"DocEntry" : "101",
+	"DocNum" : "22080392"
+}
+
+success response
+{
+	"Status" : "success",
+	"DocStatus" : "O",   /*** O = Open, C = Closed, D = Cancelled **/
+	"Line" : [
+		{
+			"LineNum" : 0,
+			"LineStatus" : "O", /*** O = Open, C = Closed, D = Cancelled **/
+			"ItemCode" : "FG-BEL0634",
+			"Quantity" : 10,
+			"OpenQty" : 5
+		},
+		{
+			"LineNum" : 1,
+			"LineStatus" "C",
+			"ItemCode" : "FG-BEL0077",
+			"Quantity" : 20,
+			"OpenQty" : 0
+		}
+	]
+}
+
+error response
+{
+	"status" : "fail",
+	"error" : "Price list not exists"
+}

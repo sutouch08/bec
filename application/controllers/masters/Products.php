@@ -398,22 +398,29 @@ class Products extends PS_Controller
 						"brand_code" => empty($rs->Product_BrandCode) ? NULL : $rs->Product_BrandCode,
 						"type_code" => empty($rs->Product_TypeCode) ? NULL : $rs->Product_TypeCode,
 						"category_code" => empty($rs->Product_CategoryCode) ? NULL : $rs->Product_CategoryCode,
-						"category_code_1" => get_null($rs->CategoryCode1),
-						"category_code_2" => get_null($rs->CategoryCode2),
-						"category_code_3" => get_null($rs->CategoryCode3),
-						"category_code_4" => get_null($rs->CategoryCode4),
-						"category_code_5" => get_null($rs->CategoryCode5),
 						"status" => empty($rs->validFor) ? 1 : ($rs->validFor == 'N' ? 0 : 1),
 						"last_sync" => now()
 					);
 
 					if( ! $this->products_model->is_exists($rs->ItemCode))
 					{
-						$this->products_model->add($arr);
+						if($this->products_model->add($arr))
+						{
+							if(!empty($rs->Product_CategoryCode))
+							{
+								$this->update_item_parent_category($rs->ItemCode);
+							}
+						}
 					}
 					else
 					{
-						$this->products_model->update($rs->ItemCode, $arr);
+						if($this->products_model->update($rs->ItemCode, $arr))
+						{
+							if(!empty($rs->Product_CategoryCode))
+							{
+								$this->update_item_parent_category($rs->ItemCode);
+							}
+						}
 					}
 
 					$i++;
@@ -455,6 +462,32 @@ class Products extends PS_Controller
 
 					$this->db->where('category_code', $rs->category_code)->update('products', $arr);
 				}
+			}
+		}
+	}
+
+
+	public function update_item_parent_category($code)
+	{
+		$this->load->model('masters/product_category_model');
+
+		$rs = $this->db->distinct()->select('category_code')->where('code', $code)->get('products');
+
+		if($rs->num_rows() == 1)
+		{
+			$list = $this->product_category_model->get_parent_list($rs->row()->category_code);
+
+			if( ! empty($list))
+			{
+				$arr = array(
+					"category_code_1" => $list->l1,
+					"category_code_2" => $list->l2,
+					"category_code_3" => $list->l3,
+					"category_code_4" => $list->l4,
+					"category_code_5" => $list->l5
+				);
+
+				$this->db->where('code', $code)->update('products', $arr);
 			}
 		}
 	}

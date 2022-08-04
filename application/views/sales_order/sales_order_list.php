@@ -271,6 +271,8 @@ function toggleShipDate(el) {
 		$('.shipDate').addClass('hide');
 		$('#chk-ship').val(0);
 	}
+
+	getSearch();
 }
 
 	function toggleSqNo(el) {
@@ -282,6 +284,8 @@ function toggleShipDate(el) {
 			$('.sqNo').addClass('hide');
 			$('#chk-sqNo').val(0);
 		}
+
+		getSearch();
 	}
 
 	function toggleChannels(el) {
@@ -293,6 +297,8 @@ function toggleShipDate(el) {
 			$('.channels').addClass('hide');
 			$('#chk-channels').val(0);
 		}
+
+		getSearch();
 	}
 
 	function togglePayment(el) {
@@ -304,6 +310,8 @@ function toggleShipDate(el) {
 			$('.payment').addClass('hide');
 			$('#chk-payment').val(0);
 		}
+
+		getSearch();
 	}
 
 	$('#sale_id').select2();
