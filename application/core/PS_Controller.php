@@ -64,13 +64,16 @@ class PS_Controller extends CI_Controller
 
 		$last_change = empty($last_pass_change) ? date('2021-01-01') : $last_pass_change;
 
-		$expire_days = intval(getConfig('USER_PASSWORD_AGE'));
+		$expire_days = intval(getConfig('USER_PASSWORD_AGE')); 
 
-		$expire_date = date('Y-m-d', strtotime("+{$expire_days} days", strtotime($last_change)));
-
-		if($today > $expire_date)
+		if($expire_days != 0)
 		{
-			return true;
+			$expire_date = date('Y-m-d', strtotime("+{$expire_days} days", strtotime($last_change)));
+
+			if($today > $expire_date)
+			{
+				return true;
+			}
 		}
 
 		return FALSE;

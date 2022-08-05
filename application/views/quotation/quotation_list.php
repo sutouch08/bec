@@ -8,7 +8,7 @@
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
     	<p class="pull-right top-p">
 <?php if($this->pm->can_add) : ?>
-			<button type="button" class="btn btn-xs btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
+			<button type="button" class="btn btn-xs btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิ่มใหม่</button>
 <?php endif; ?>
       </p>
     </div>
@@ -59,7 +59,7 @@
   </div>
 
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5 hide">
 		<label>Approval</label>
 		<select class="width-100 filter" name="approval">
 			<option value="all">ทั้งหมด</option>

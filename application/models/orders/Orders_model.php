@@ -318,7 +318,14 @@ class Orders_model extends CI_Model
 
 		if(isset($ds['approval']) && $ds['approval'] != 'all')
 		{
-			$this->db->where('od.Approved', $ds['approval']);
+			if($ds['approval'] == 'P' && $ds['status'] == 'all')
+			{
+				$this->db->where('od.Approved', $ds['approval'])->where('od.Status', 0);
+			}
+			else
+			{
+				$this->db->where('od.Approved', $ds['approval']);
+			}
 		}
 
 		if(isset($ds['status']) && $ds['status'] != 'all')
@@ -404,10 +411,18 @@ class Orders_model extends CI_Model
 		{
 			$this->db->where('Payment', $ds['payment']);
 		}
+		
 
 		if(isset($ds['approval']) && $ds['approval'] != 'all')
 		{
-			$this->db->where('Approved', $ds['approval']);
+			if($ds['approval'] == 'P' && $ds['status'] == 'all')
+			{
+				$this->db->where('Approved', $ds['approval'])->where('Status', 0);
+			}
+			else
+			{
+				$this->db->where('Approved', $ds['approval']);
+			}
 		}
 
 		if(isset($ds['status']) && $ds['status'] != 'all')

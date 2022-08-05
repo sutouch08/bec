@@ -1456,12 +1456,14 @@ class Orders extends PS_Controller
 		{
 			if(empty($order->DocEntry) && empty($order->DocNum))
 			{
+        $this->load->library('order_api');
 				//--- check document
-				$rs = $this->do_export($code);
+				$rs = $this->order_api->exportOrder($code);
 
 				if( ! $rs)
 				{
 					$sc = FALSE;
+          $this->error = $this->order_api->error;
 				}
 			}
 			else
@@ -1716,7 +1718,7 @@ class Orders extends PS_Controller
 				'Available' => $OnHand - $commit
 			);
 		}
-		
+
     return $arr;
 	}
 

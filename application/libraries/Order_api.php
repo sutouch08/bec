@@ -56,30 +56,33 @@ class Order_api
 
 	public function exportOrder($code)
 	{
-		$testMode = TRUE;
-
-		$this->ci->load->model('orders/orders_model');
-
-		if($testMode)
-		{
-			// $arr = array(
-			// 	'Status' => 1,
-			// 	'DocEntry' => 1,
-			// 	'DocNum' => "22000001"
-			// );
-			//
-			// $this->ci->orders_model->update($code, $arr);
-			// return TRUE;
-
-			$arr = array(
-				'Status' => 3,
-				'DocEntry' => NULL,
-				'DocNum' => NULL
-			);
-
-			$this->error = "Error";
-			return FALSE;
-		}
+		// $testMode = getConfig('TEST_MODE') ? TRUE : FALSE;
+		//
+		// echo $testMode ? "Yes" : "No";
+		// exit();
+		//
+		// $this->ci->load->model('orders/orders_model');
+		//
+		// if($testMode)
+		// {
+		// 	// $arr = array(
+		// 	// 	'Status' => 1,
+		// 	// 	'DocEntry' => 1,
+		// 	// 	'DocNum' => "22000001"
+		// 	// );
+		// 	//
+		// 	// $this->ci->orders_model->update($code, $arr);
+		// 	// return TRUE;
+		//
+		// 	$arr = array(
+		// 		'Status' => 3,
+		// 		'DocEntry' => NULL,
+		// 		'DocNum' => NULL
+		// 	);
+		//
+		// 	$this->error = "Error";
+		// 	return FALSE;
+		// }
 
 
 
@@ -105,8 +108,8 @@ class Order_api
 				"TaxDate" => $order->TextDate,
 				"PayToCode" => $order->PayToCode,
 				"ShipToCode" => $order->ShipToCode,
-				"Address" => $order->Address,
-				"Address2" => $order->Address2,
+				"Address" => NULL,//$order->Address,
+				"Address2" => NULL, //$order->Address2,
 				"DiscPrcnt" => round($order->DiscPrcnt, 2),
 				"RoundDif" => round($order->RoundDif, 2),
 				"Comments" => $order->Comments,
