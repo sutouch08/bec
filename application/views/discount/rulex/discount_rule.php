@@ -52,7 +52,7 @@ $checked = $rule->freeQty > 0 ? 'checked' : '';
         <div class="col-sm-2">
 					<span class="form-control left-label margin-top-20">
 						<label>
-							<input type="radio" class="ace disc-type" name="discType" value="F" onchange="toggleDiscType('F')" <?php echo is_checked('F', $rule->type); ?>>
+							<input type="checkbox" class="ace disc-type" name="free-item"  id="free-item" <?php echo $checked; ?> onchange="toggleFreeItem()">
 							<span class="lbl">&nbsp;&nbsp; ของแถม</span>
 						</label>
 					</span>
@@ -94,7 +94,7 @@ $checked = $rule->freeQty > 0 ? 'checked' : '';
 						<tbody id="freeItemList">
 							<?php if(!empty($free_items)) : ?>
 								<?php foreach($free_items as $item) : ?>
-									<tr id="free-row-<?php echo $item->product_id; ?>" class="free-row">
+									<tr id="free-row-<?php echo $item->product_id; ?>">
 										<td class="middle text-center">
 											<label>
 												<input type="checkbox" class="ace del-chk" value="<?php echo $item->product_id; ?>">
@@ -130,40 +130,11 @@ $checked = $rule->freeQty > 0 ? 'checked' : '';
         <div class="col-lg-2 col-md-2 col-sm-2">
 					<input type="number" class="form-control input-sm text-center" id="min-amount" value="<?php echo $rule->minAmount;?>" />
         </div>
-				<div class="col-lg-7 col-md-7 col-sm-7 padding-5 margin-top-5">
-					<span class="red">** กรณีของแถม จะคำนวนราคาหลังส่วนลด</span>
-        </div>
 				<div class="divider-hidden"></div>
-
+				<div class="divider-hidden"></div>
+<div class="hide">
 				<div class="col-lg-2 col-md-2 col-sm-2">
-					<span class="form-control left-label text-right">ลำดับความสำคัญ</span>
-				</div>
-        <div class="col-lg-2 col-md-2 col-sm-2">
-					<select class="form-control input-sm" name="priority" id="priority">
-						<option value="1" <?php echo is_selected('1', $rule->priority); ?>>1</option>
-						<option value="2" <?php echo is_selected('2', $rule->priority); ?>>2</option>
-						<option value="3" <?php echo is_selected('3', $rule->priority); ?>>3</option>
-						<option value="4" <?php echo is_selected('4', $rule->priority); ?>>4</option>
-						<option value="5" <?php echo is_selected('5', $rule->priority); ?>>5</option>
-						<option value="6" <?php echo is_selected('6', $rule->priority); ?>>6</option>
-						<option value="7" <?php echo is_selected('7', $rule->priority); ?>>7</option>
-						<option value="8" <?php echo is_selected('8', $rule->priority); ?>>8</option>
-						<option value="9" <?php echo is_selected('8', $rule->priority); ?>>9</option>
-						<option value="10" <?php echo is_selected('10', $rule->priority); ?>>10</option>
-					</select>
-        </div>
-				<div class="col-lg-7 col-md-7 col-sm-7 padding-5 margin-top-5">
-					<span class="red">** กรณีเงื่อนไขส่วนลดตรงกันมากกว่า 1 ส่วนลดจะถูกกำหนดตามค่าความสำคัญ 1 - 10 โดยค่ามากหมายถึงสำคัญมาก จะถูกเลือกก่อน</span>
-        </div>
-				<div class="divider-hidden"></div>
-				<div class="divider-hidden"></div>
-
-				<div class="divider"></div>
-
-			<div id="visible-free">
-
-				<div class="col-lg-2 col-md-2 col-sm-2">
-					<span class="form-control left-label text-right">ใช้ซ้ำได้หรือไม่</span>
+					<span class="form-control left-label text-right">รวมยอดได้</span>
 				</div>
         <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf padding-5 margin-top-5">
 					<label>
@@ -177,13 +148,8 @@ $checked = $rule->freeQty > 0 ? 'checked' : '';
 						<span class="lbl">&nbsp;&nbsp;ไม่ได้</span>
 					</label>
         </div>
-				<div class="col-lg-7 col-md-7 col-sm-7 padding-5 margin-top-5">
-					<span class="red">** สำหรับของแถม เช่น ซื้อ 2 แถม 1 ถ้าถ้าซื้อ 6 ชิ้น จะได้แถม 3 ชิ้น</span>
-        </div>
 				<div class="divider-hidden"></div>
-				<div class="divider"></div>
-			</div>
-
+</div>
 
 
 
@@ -196,7 +162,7 @@ $checked = $rule->freeQty > 0 ? 'checked' : '';
 
 
 <script type="text/x-handlebarsTemplate" id="freeItemTemplate">
-	<tr id="free-row-{{id}}" class="free-row">
+	<tr id="free-row-{{id}}">
 		<td class="middle text-center"><label><input type="checkbox" class="ace del-chk" value="{{id}}"><span class="lbl"></span></label></td>
 		<td class="middle">
 		{{code}}

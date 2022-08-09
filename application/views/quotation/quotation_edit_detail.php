@@ -54,6 +54,7 @@
 							<input type="hidden" class="line-num" id="line-num-<?php echo $no; ?>" value="<?php echo $no; ?>" />
 							<input type="hidden" id="disc-amount-<?php echo $no; ?>" value="<?php echo $rs->discAmount; ?>"/>
 							<input type="hidden" id="line-disc-amount-<?php echo $no; ?>" value="<?php echo $rs->totalDiscAmount; ?>" />
+							<input type="hidden" id="totalDiscPercent-<?php echo $no; ?>" value="<?php echo $rs->DiscPrcnt; ?>" />
 							<input type="hidden" id="line-total-<?php echo $no; ?>" value="<?php echo $rs->LineTotal; ?>" />
 							<input type="hidden" id="vat-rate-<?php echo $no; ?>" value="<?php echo $rs->VatRate; ?>" />
 							<input type="hidden" id="vat-amount-<?php echo $no; ?>" value="<?php echo $rs->VatAmount; ?>" />
@@ -182,6 +183,7 @@
 	<input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
 	<input type="hidden" id="disc-amount-{{no}}" value="0"/>
 	<input type="hidden" id="line-disc-amount-{{no}}" value="0" />
+	<input type="hidden" id="totalDiscPercent-{{no}}" value="0.00" />
 	<input type="hidden" id="line-total-{{no}}" value="0" />
 	<input type="hidden" id="vat-rate-{{no}}" value="0" />
 	<input type="hidden" id="vat-amount-{{no}}" value="0" />
@@ -282,6 +284,7 @@
 <input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
 <input type="hidden" id="disc-amount-{{no}}" value="0"/>
 <input type="hidden" id="line-disc-amount-{{no}}" value="0" />
+<input type="hidden" id="totalDiscPercent-{{no}}" value="0.00" />
 <input type="hidden" id="line-total-{{no}}" value="0" />
 <input type="hidden" id="vat-rate-{{no}}" value="0" />
 <input type="hidden" id="vat-amount-{{no}}" value="0" />

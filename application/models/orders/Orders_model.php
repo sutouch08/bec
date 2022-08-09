@@ -157,7 +157,7 @@ class Orders_model extends CI_Model
 
 	public function cancle_details($code)
 	{
-		return $this->db->set('is_complete', 2)->where('order_code', $code)->update($this->td);
+		return $this->db->set('LineStatus', 'D')->where('order_code', $code)->update($this->td);
 	}
 
 
@@ -213,12 +213,13 @@ class Orders_model extends CI_Model
 		return 0;
 	}
 
-	public function get_commit_qty($itemCode)
+	public function get_commit_qty($itemCode, $quotaNo)
 	{
 		$rs = $this->db
 		->select_sum('OpenQty')
-		->where('ItemCode', $itemCode)
 		->where('LineStatus', 'O')
+		->where('ItemCode', $itemCode)
+		->where('QuotaNo', $quotaNo)
 		->get($this->td);
 
 		if($rs->num_rows() === 1)
@@ -250,10 +251,11 @@ class Orders_model extends CI_Model
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
 		$this->db
-		->select('od.*, ch.name AS channels_name, pm.name AS payment_name, pm.term')
+		->select('od.*, ch.name AS channels_name, pm.name AS payment_name, pm.term, sa.name AS sale_name')
 		->from('orders AS od')
 		->join('channels AS ch', 'od.Channels = ch.id', 'left')
-		->join('payment_term AS pm', 'od.Payment = pm.id', 'left');
+		->join('payment_term AS pm', 'od.Payment = pm.id', 'left')
+		->join('sale_person AS sa', 'od.SlpCode = sa.id', 'left');
 
 		if( isset($ds['code']) && $ds['code'] != '')
 		{
@@ -411,7 +413,7 @@ class Orders_model extends CI_Model
 		{
 			$this->db->where('Payment', $ds['payment']);
 		}
-		
+
 
 		if(isset($ds['approval']) && $ds['approval'] != 'all')
 		{

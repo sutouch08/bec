@@ -307,17 +307,17 @@ function updateCategory() {
 
 
 
-function toggleHome(el) {
+function toggleCountStock(el) {
 	let id = el.val();
-	let home = el.is(':checked') ? 1 : 0;
+	let countStock = el.is(':checked') ? 1 : 0;
 
 	$.ajax({
-		url:HOME + 'set_home_item',
+		url:HOME + 'set_count_stock',
 		type:'GET',
 		cache:false,
 		data:{
 			'id' : id,
-			'home' : home
+			'count_stock' : countStock
 		}
 	});
 }

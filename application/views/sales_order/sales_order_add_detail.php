@@ -5,13 +5,17 @@
 </style>
 
 <div class="row">
-  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
+  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
     <button type="button" class="btn btn-sm btn-info" onclick="addRow()">Add Row</button>
     <button type="button" class="btn btn-sm btn-warning" onclick="removeRow()">Delete Row</button>
   </div>
-  <div class="divider-hidden">
-
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
+		<p class="pull-right" id="free-box"></p>
   </div>
+	<div class="hide" id="free-temp"></div>
+
+
+  <div class="divider-hidden"> </div>
   <div class="col-sm-12 col-xs-12 padding-5 table-responsive">
     <table class="table table-bordered border-1" style="min-width:1700px;">
       <thead>
@@ -44,6 +48,7 @@
 				<?php $qn = select_listed_quota($this->_user->quota_no); ?>
 				<?php $uuid = uniqid(rand(1,100)); ?>
 				<tr id="row-<?php echo $no; ?>">
+					<input type="hidden" id="product-id-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="price-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="stdPrice-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="sellPrice-<?php echo $no; ?>" value="0" />
@@ -51,6 +56,7 @@
 					<input type="hidden" class="line-num" id="line-num-<?php echo $no; ?>" value="<?php echo $no; ?>" />
 					<input type="hidden" id="disc-amount-<?php echo $no; ?>" value="0"/>
 					<input type="hidden" id="line-disc-amount-<?php echo $no; ?>" value="0" />
+					<input type="hidden" id="totalDiscPercent-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="line-total-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="vat-rate-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="vat-amount-<?php echo $no; ?>" value="0" />
@@ -61,14 +67,12 @@
 					<input type="hidden" id="rule-id-<?php echo $no; ?>" value="" />
 					<input type="hidden" id="policy-id-<?php echo $no; ?>" value="" />
 					<input type="hidden" class="disc-error" id="disc-error-<?php echo $no; ?>" value="0" data-id="<?php echo $no; ?>" />
-					<input type="hidden" class="free-item" id="free-item-<?php echo $no; ?>" value="" data-id="<?php echo $no; ?>"
-					  data-valid="0" data-rule="" data-picked="0"
-						data-uid="<?php echo $uuid; ?>" data-parent="" />
 					<input type="hidden" class="is-free" id="is-free-<?php echo $no; ?>"
 					value="0" data-id="<?php echo $no; ?>"
 					data-parent="" data-parentrow="" />
 					<input type="hidden" id="<?php echo $uuid; ?>" data-id="<?php echo $no; ?>" value="<?php echo $no; ?>"/>
           <input type="hidden" id="disc-type-<?php echo $no; ?>" value="P" />
+					<input type="hidden" id="count-stock-<?php echo $no; ?>" value="1" />
 
           <td class="middle text-center">
             <input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>"/>
@@ -125,7 +129,8 @@
             <input type="text" class="form-control input-sm text-right number" id="stdPrice-label-<?php echo $no; ?>" value="" disabled/>
           </td>
 					<td class="middle">
-            <input type="text" class="form-control input-sm text-right number" id="price-label-<?php echo $no; ?>" value="" disabled/>
+            <input type="text" class="form-control input-sm text-right number" id="price-label-<?php echo $no; ?>"
+						value="" onchange="recalAmount(<?php echo $no; ?>)"disabled/>
           </td>
 
           <td class="middle">
@@ -144,7 +149,6 @@
             <input type="text" class="form-control input-sm text-right number input-amount" id="total-label-<?php echo $no; ?>" value="" readonly disabled />
           </td>
 					<td class="middle text-center">
-						<button type="button" class="btn btn-mini btn-primary hide" id="btn-free-<?php echo $no; ?>" onclick="pickFreeItem(<?php echo $no; ?>)">Free</button>
 					</td>
         </tr>
           <?php $no++; ?>
@@ -157,6 +161,7 @@
 <hr class="padding-5"/>
 <script id="row-template" type="text/x-handlebarsTemplate">
 <tr id="row-{{no}}">
+	<input type="hidden" id="product-id-{{no}}" value="0" />
 	<input type="hidden" id="stdPrice-{{no}}" value="0" />
 	<input type="hidden" id="price-{{no}}" value="0" />
 	<input type="hidden" id="sellPrice-{{no}}" value="0" />
@@ -164,6 +169,7 @@
 	<input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
 	<input type="hidden" id="disc-amount-{{no}}" value="0"/>
 	<input type="hidden" id="line-disc-amount-{{no}}" value="0" />
+	<input type="hidden" id="totalDiscPercent-{{no}}" value="0" />
 	<input type="hidden" id="line-total-{{no}}" value="0" />
 	<input type="hidden" id="vat-rate-{{no}}" value="0" />
 	<input type="hidden" id="vat-amount-{{no}}" value="0" />
@@ -174,11 +180,10 @@
 	<input type="hidden" id="rule-id-{{no}}" value="" />
 	<input type="hidden" id="policy-id-{{no}}" value="" />
 	<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
-	<input type="hidden" class="free-item" id="free-item-{{no}}" value="0" data-id="{{no}}"
-		data-rule="0" data-valid="0" data-picked="0" data-uid="{{uid}}" data-parent=""/>
 	<input type="hidden" class="is-free" id="is-free-{{no}}" value="0" data-id="{{no}}" data-parent="" data-parentrow=""/>
 	<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
   <input type="hidden" id="disc-type-{{no}}" value="{{discType}}" />
+	<input type="hidden" id="count-stock-{{no}}" value="{{count_stock}}" />
 
 
 	<td class="middle text-center">
@@ -235,11 +240,11 @@
 	</td>
 
 	<td class="middle">
-		<input type="text" class="form-control input-sm text-right number" id="price-label-{{no}}" disabled/>
+		<input type="text" class="form-control input-sm text-right number" id="price-label-{{no}}" onchange="recalAmount({{no}})" disabled/>
 	</td>
 
 	<td class="middle">
-		<input type="text" class="form-control input-sm text-right " id="disc-label-{{no}}" change="recalDiscount({{no}})"/>
+		<input type="text" class="form-control input-sm text-right " id="disc-label-{{no}}" onchange="recalDiscount({{no}})"/>
 	</td>
 	<td class="middle">
 		<input type="text" class="form-control input-sm text-center" id="vat-code-{{no}}" value="" disabled/>
@@ -254,14 +259,14 @@
 	</td>
 
 	<td class="middle text-center">
-		<button type="button" class="btn btn-mini btn-primary hide" id="btn-free-{{no}}" onclick="pickFreeItem({{no}})">Free</button>
 	</td>
 </tr>
 </script>
 
 
 <script id="free-row-template" type="text/x-handlebarsTemplate">
-<tr id="row-{{no}}">
+<tr id="row-{{no}}" class="free-row">
+	<input type="hidden" id="product-id-{{no}}" value="{{product_id}}" />
 	<input type="hidden" id="stdPrice-{{no}}" value="{{price}}" />
 	<input type="hidden" id="price-{{no}}" value="{{price}}" />
 	<input type="hidden" id="sellPrice-{{no}}" value="{{sellPrice}}" />
@@ -269,6 +274,7 @@
 	<input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
 	<input type="hidden" id="disc-amount-{{no}}" value="{{discAmount}}"/>
 	<input type="hidden" id="line-disc-amount-{{no}}" value="{{lineDiscAmount}}" />
+	<input type="hidden" id="totalDiscPercent-{{no}}" value="100" />
 	<input type="hidden" id="line-total-{{no}}" value="0" />
 	<input type="hidden" id="vat-rate-{{no}}" value="{{vat_rate}}" />
 	<input type="hidden" id="vat-amount-{{no}}" value="0" />
@@ -279,11 +285,10 @@
 	<input type="hidden" id="rule-id-{{no}}" value="{{rule_id}}" />
 	<input type="hidden" id="policy-id-{{no}}" value="{{policy_id}}" />
 	<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
-	<input type="hidden" class="free-item" id="free-item-{{no}}" value="0" data-id="{{no}}"
-		data-rule="{{rule_id}}" data-valid="0" data-picked="0" data-uid="{{uid}}" data-parent="{{parent_uid}}"/>
 	<input type="hidden" class="is-free" id="is-free-{{no}}" value="1" data-id="{{no}}" data-parent="{{parent_uid}}" data-parentrow="{{parent_row}}"/>
 	<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
-  <input type="hidden" id="disc-type-{{no}}" value="{{discType}}" />
+  <input type="hidden" id="disc-type-{{no}}" value="F" />
+	<input type="hidden" id="count-stock-{{no}}" value="1" />
 
 
 	<td class="middle text-center">
@@ -360,4 +365,12 @@
 
 	<td class="middle text-center">Free</td>
 </tr>
+</script>
+
+<script id="free-input-template" type="text/x-handlebarsTemplate">
+	<input type="hidden" class="free-item" id="free-{{rule_id}}" value="{{freeQty}}" data-id="{{uid}}" data-valid="0" data-rule="" data-picked="0" data-uid="{{uid}}" />
+</script>
+
+<script id="free-btn-template" type="text/x-handlebarsTemplate">
+	<button type="button" class="btn btn-sm btn-primary free-btn" id="btn-free-{{rule_id}}" data-parent="{{uid}}" onclick="pickFreeItem('{{rule_id}}')">Free {{freeQty}}</button>
 </script>

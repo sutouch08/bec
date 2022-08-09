@@ -175,9 +175,9 @@ class Products_model extends CI_Model
 			$this->db->where('status', $ds['status']);
 		}
 
-		if(isset($ds['home']) && $ds['home'] != 'all')
+		if(isset($ds['count_stock']) && $ds['count_stock'] != 'all')
 		{
-			$this->db->where('home', $ds['home']);
+			$this->db->where('count_stock', $ds['count_stock']);
 		}
 
 		return $this->db->count_all_results($this->tb);
@@ -233,9 +233,9 @@ class Products_model extends CI_Model
 			$this->db->where('pd.status', $ds['status']);
 		}
 
-		if(isset($ds['home']) && $ds['home'] != 'all')
+		if(isset($ds['count_stock']) && $ds['count_stock'] != 'all')
 		{
-			$this->db->where('home', $ds['home']);
+			$this->db->where('count_stock', $ds['count_stock']);
 		}
 
 		$rs = $this->db->limit($perpage, $offset)->get();

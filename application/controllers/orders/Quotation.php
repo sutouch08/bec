@@ -193,7 +193,7 @@ class Quotation extends PS_Controller
 											'discLabel' => $rs->discLabel,
 											'sysDiscLabel' => $rs->sysDiscLabel,
 											'discDiff' => $rs->discDiff,
-											'DiscPrcnt' => discountAmountToPercent($rs->discAmount, 1, $rs->Price),
+											'DiscPrcnt' => $rs->DiscPrcnt, //discountAmountToPercent($rs->discAmount, 1, $rs->Price),
 											'discAmount' => $rs->discAmount,
 											'totalDiscAmount' => $rs->totalDiscAmount,
 											'VatGroup' => $pd->vat_group,
@@ -495,7 +495,7 @@ class Quotation extends PS_Controller
 															'discLabel' => $rs->discLabel,
 															'sysDiscLabel' => $rs->sysDiscLabel,
 															'discDiff' => $rs->discDiff,
-															'DiscPrcnt' => discountAmountToPercent($rs->discAmount, 1, $rs->Price),
+															'DiscPrcnt' => $rs->DiscPrcnt, //discountAmountToPercent($rs->discAmount, 1, $rs->Price),
 															'discAmount' => $rs->discAmount,
 															'totalDiscAmount' => $rs->totalDiscAmount,
 															'VatGroup' => $pd->vat_group,
@@ -1090,7 +1090,7 @@ class Quotation extends PS_Controller
 				"GroupNum" => intval($order->Payment),
 				"DocCur" => $order->DocCur,
 				"DocRate" => round($order->DocRate, 2),
-				"DocTotal" => round($order->DocTotal, 2),
+				"DocTotal" => NULL, //round($order->DocTotal, 2),
 				"DocDate" => $order->DocDate,
 				"DocDueDate" => $order->DocDueDate,
 				"TaxDate" => $order->TextDate,
@@ -1121,7 +1121,7 @@ class Quotation extends PS_Controller
 					"Quantity" => round($rs->Qty, 2),
 					"UomEntry" => intval($rs->UomEntry),
 					"Price" => round($rs->Price, 2),
-					"LineTotal" => round($rs->LineTotal, 2),
+					"LineTotal" => NULL, //round($rs->LineTotal, 2),
 					"DiscPrcnt" => round($rs->DiscPrcnt, 2),
 					"PriceBefDi" => round($rs->Price, 2),
 					"Currency" => $order->DocCur,
@@ -1481,7 +1481,6 @@ class Quotation extends PS_Controller
 		{
 			$price = $pd->price; //$this->getPrice($itemCode, $priceList);
 			$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
-			//$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $docDate);
 
 			$ds = array(
 				'ItemCode' => $pd->code,
@@ -1646,6 +1645,7 @@ class Quotation extends PS_Controller
 		return $this->api->getItemPrice($ItemCode, $priceList);
 	}
 
+
 	public function get_item_price()
 	{
 		$ItemCode = $this->input->get('itemCode');
@@ -1659,7 +1659,7 @@ class Quotation extends PS_Controller
 	public function getStock($ItemCode, $WhsCode, $QuotaNo)
 	{
 		$this->load->library('api');
-		$commit = get_zero($this->quotation_model->get_commit_qty($ItemCode));
+		$commit = get_zero($this->quotation_model->get_commit_qty($ItemCode, $QuotaNo));
 
     $arr = array(
       'OnHand' => 0,

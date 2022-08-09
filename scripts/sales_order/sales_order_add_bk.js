@@ -65,249 +65,307 @@ function validateFreeItem(option) {
 
 
 function saveAdd() {
-	let mustApprove = 0;
-	let max_diff = 0;
+	$('#btn-save').attr('disabled', 'disabled');
+	$('#btn-draft').attr('disabled', 'disabled');
 
-	$('.disc-diff').each(function() {
-		if($(this).val() > 0) {
-			mustApprove++;
-			max_diff = $(this).val() > max_diff ? $(this).val() : max_diff;
+	setTimeout(function() {
+
+		$('.item-code').each(function() {
+			let no = $(this).data('id');
+			let itemCode = $(this).val();
+			if(itemCode.length > 0) {
+				recalDiscount(no);
+			}
+		});
+
+		let mustApprove = 0;
+		let max_diff = 0;
+		let emptyQuota = 0;
+
+		$('.disc-diff').each(function() {
+			if($(this).val() > 0) {
+				mustApprove++;
+				max_diff = $(this).val() > max_diff ? $(this).val() : max_diff;
+			}
+		});
+
+		var ds = {
+			//---- Right column
+			'isDraft' : $('#is_draft').val(),
+			'SlpCode' : $('#sale_id').val(),
+			'CardCode' : $.trim($('#CardCode').val()),  //****** required
+			'CardName' : $('#CardName').val(),
+			'Payment' : $('#payment').val(),
+			'Channels' : $('#channels').val(),
+			'dimCode1' : $('#dimCode1').val(),
+			'dimCode2' : $('#dimCode2').val(),
+			'dimCode3' : $('#dimCode3').val(),
+			'dimCode4' : $('#dimCode4').val(),
+			'dimCode5' : $('#dimCode5').val(),
+			'OwnerCode' : $('#owner').val(),
+			'ShipToCode' : $('#shipToCode').val(),
+			'ShipTo' : $('#ShipTo').val(),
+			//--- right Column
+			'DocDate' : $('#DocDate').val(), //****** required
+			'DocDueDate' : $('#ShipDate').val(), //****** required
+			'TextDate' : $('#TextDate').val(), //****** required
+			'PayToCode' : $('#billToCode').val(),
+			'BillTo' : $('#BillTo').val(),
+			//---- footer
+			'comments' : $.trim($('#comments').val()),
+			'discPrcnt' : parseDefault(parseFloat($('#discPrcnt').val()), 0),
+			'disAmount' : parseDefault(parseFloat($('#discAmount').val()), 0),
+			'roundDif' : 0,
+			'tax' : parseDefault(parseFloat($('#tax').val()), 0), //-- VatSum
+			'docTotal' : parseDefault(parseFloat($('#docTotal').val()), 0),
+			'mustApprove' : mustApprove > 0 ? 1 : 0,
+			'maxDiff' : max_diff,
+			'VatGroup' : $('#vat_code').val(),
+			'VatRate' : $('#vat_rate').val(),
+			'sale_team' : $('#sale_team').val(),
+			'user_id' : $('#user_id').val(),
+			'uname' : $('#uname').val()
 		}
-	});
-
-	var ds = {
-		//---- Right column
-		'isDraft' : $('#is_draft').val(),
-		'SlpCode' : $('#sale_id').val(),
-		'CardCode' : $.trim($('#CardCode').val()),  //****** required
-		'CardName' : $('#CardName').val(),
-		'Payment' : $('#payment').val(),
-		'Channels' : $('#channels').val(),
-		'dimCode1' : $('#dimCode1').val(),
-		'dimCode2' : $('#dimCode2').val(),
-		'dimCode3' : $('#dimCode3').val(),
-		'dimCode4' : $('#dimCode4').val(),
-		'dimCode5' : $('#dimCode5').val(),
-		'OwnerCode' : $('#owner').val(),
-		'ShipToCode' : $('#shipToCode').val(),
-		'ShipTo' : $('#ShipTo').val(),
-		//--- right Column
-		'DocDate' : $('#DocDate').val(), //****** required
-		'DocDueDate' : $('#ShipDate').val(), //****** required
-		'TextDate' : $('#TextDate').val(), //****** required
-		'PayToCode' : $('#billToCode').val(),
-		'BillTo' : $('#BillTo').val(),
-		//---- footer
-		'comments' : $.trim($('#comments').val()),
-		'discPrcnt' : parseDefault(parseFloat($('#discPrcnt').val()), 0),
-		'disAmount' : parseDefault(parseFloat($('#discAmount').val()), 0),
-		'roundDif' : parseDefault(parseFloat($('#roundDif').val()), 0),
-		'tax' : parseDefault(parseFloat($('#tax').val()), 0), //-- VatSum
-		'docTotal' : parseDefault(parseFloat($('#docTotal').val()), 0),
-		'mustApprove' : mustApprove > 0 ? 1 : 0,
-		'maxDiff' : max_diff,
-		'VatGroup' : $('#vat_code').val(),
-		'VatRate' : $('#vat_rate').val(),
-		'sale_team' : $('#sale_team').val(),
-		'user_id' : $('#user_id').val(),
-		'uname' : $('#uname').val()
-	}
 
 		//--- check required parameter
-	if(ds.CardCode.length === 0) {
-		swal("กรุณาระบุลูกค้า");
-		$('#CardCode').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#CardCode').removeClass('has-error');
-	}
+		if(ds.CardCode.length === 0) {
+			swal("กรุณาระบุลูกค้า");
+			$('#CardCode').addClass('has-error');
 
-	if(!isDate(ds.DocDate)) {
-		swal("Invalid Posting Date");
-		$('#DocDate').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#DocDate').removeClass('has-error');
-	}
-
-
-	if(!isDate(ds.DocDueDate)) {
-		swal("Invalid Delivery Date");
-		$('#DocDueDate').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#DocDueDate').removeClass('has-error');
-	}
-
-	if(!isDate(ds.TextDate)) {
-		swal("Invalid Document Date");
-		$('#TextDate').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#TextDate').removeClass('has-error');
-	}
-
-	let dimCount = 0;
-
-	if(ds.dimCode1 != '') {
-		dimCount++;
-	}
-
-	if(ds.dimCode2 != '') {
-		dimCount++;
-	}
-
-	if(ds.dimCode3 != '') {
-		dimCount++;
-	}
-
-	if(ds.dimCode4 != '') {
-		dimCount++;
-	}
-
-	if(ds.dimCode5 != '') {
-		dimCount++;
-	}
-
-	if(dimCount == 0) {
-		swal("กรุณาเลือกหน่วยงาน");
-		return false;
-	}
-
-	if(dimCount > 1) {
-		swal("กรุณาเลือกเพียง 1 หน่วยงานเท่านั้น");
-		return false;
-	}
-
-
-	var disc_error = 0;
-	//--- check discount
-	$('.disc-error').each(function() {
-		no = $(this).data('id');
-		if($(this).val() == 1) {
-			$('#disc-error-'+no).addClass('has-error');
-			disc_error++;
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
 		}
 		else {
-			$('#disc-error-'+no).removeClass('has-error');
+			$('#CardCode').removeClass('has-error');
 		}
-	});
 
-	if(disc_error > 0) {
-		swal({
-			title:'Invalid Discount',
-			type:'error'
-		});
+		if(!isDate(ds.DocDate)) {
+			swal("Invalid Posting Date");
+			$('#DocDate').addClass('has-error');
 
-		return false;
-	}
-
-	if(ds.discPrcnt < 0 || ds.discPrcnt > 100) {
-		swal({
-			title:"Invalid bill discount",
-			type:'error'
-		});
-
-		return false;
-	}
-
-
-	//---- get rows details
-	var count = 0;
-	var details = [];
-	var lineNum = 0;
-
-	$('.item-code').each(function() {
-		let no = $(this).data('id');
-		let itemCode = $(this).val();
-		if(itemCode.length > 0) {
-
-			//--- ถ้ามีการระบุข้อมูล
-			var row = {
-				"LineNum" : lineNum,
-				"ItemCode" : itemCode,
-				"Description" : $('#itemName-'+no).val(),
-				"Price" : $('#price-'+no).val(),
-				"SellPrice" : $('#sellPrice-'+no).val(),
-				"sysSellPrice" : $('#sysSellPrice-'+no).val(),
-				"Quantity" : $('#line-qty-'+no).val(),
-				"UomCode" : $('#uom-code-'+no).val(),
-				"discLabel" : $('#disc-label-'+no).val(),
-				"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
-				"discAmount" : $('#disc-amount-'+no).val(),
-				"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
-				"VatGroup" : $('#vat-code-'+no).val(),
-				"VatRate" : $('#vat-rate-'+no).val(),
-				"VatAmount" : $('#vat-amount-'+no).val(),
-				"totalVatAmount" : $('#vat-total-'+no).val(),
-				"LineTotal" : $('#line-total-'+no).val(),
-				"policy_id" : $('#policy-id-'+no).val(),
-				"rule_id" : $('#rule-id-'+no).val(),
-				'discDiff' : $('#disc-diff-'+no).val(),
-				'uid' : $('#free-item-'+no).data('uid'),
-				'free_item' : $('#free-item-'+no).val(),
-				'parent_uid' : $('#free-item-'+no).data('parent'),
-				'picked' : $('#free-item-'+no).data('picked'),
-				'is_free' : $('#is-free-'+no).val(),
-				'discType' : $('#disc-type-'+no).val(),
-				'WhsCode' : $('#whs-'+no).val(),
-				'QuotaNo' : $('#quota-'+no).val(),
-				'sale_team' : $('#sale_team').val()
-			}
-
-			details.push(row);
-			count++;
-			lineNum++;
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
 		}
-	}); //--- end each function
+		else {
+			$('#DocDate').removeClass('has-error');
+		}
 
 
-	if(count === 0) {
-		swal("ไม่พบรายการสินค้า");
-		return false;
-	}
+		if(!isDate(ds.DocDueDate)) {
+			swal("Invalid Delivery Date");
+			$('#DocDueDate').addClass('has-error');
 
-	let data = {};
-	data.header = ds;
-	data.details = details;
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+		else {
+			$('#DocDueDate').removeClass('has-error');
+		}
 
-	//--- หากไม่มีข้อผิดพลาด
+		if(!isDate(ds.TextDate)) {
+			swal("Invalid Document Date");
+			$('#TextDate').addClass('has-error');
 
-	load_in();
-	$.ajax({
-		url:HOME + 'add',
-		type:'POST',
-		cache:false,
-		data:JSON.stringify(data),
-		success:function(rs) {
-			load_out();
-			if(isJson(rs)) {
-				var ds = $.parseJSON(rs);
-				if(ds.status === 'success') {
-					swal({
-						title:'Success',
-						type:'success',
-						timer:1000
-					});
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+		else {
+			$('#TextDate').removeClass('has-error');
+		}
 
-					setTimeout(function(){
-						viewDetail(ds.code);
-					}, 1200);
-				}
+		let dimCount = 0;
+
+		if(ds.dimCode1 != '') {
+			dimCount++;
+		}
+
+		if(ds.dimCode2 != '') {
+			dimCount++;
+		}
+
+		if(ds.dimCode3 != '') {
+			dimCount++;
+		}
+
+		if(ds.dimCode4 != '') {
+			dimCount++;
+		}
+
+		if(ds.dimCode5 != '') {
+			dimCount++;
+		}
+
+		if(dimCount == 0) {
+			swal("กรุณาเลือกหน่วยงาน");
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+
+		if(dimCount > 1) {
+			swal("กรุณาเลือกเพียง 1 หน่วยงานเท่านั้น");
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+
+
+		var disc_error = 0;
+		//--- check discount
+		$('.disc-error').each(function() {
+			no = $(this).data('id');
+			if($(this).val() == 1) {
+				$('#disc-error-'+no).addClass('has-error');
+				disc_error++;
 			}
 			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error'
-				});
+				$('#disc-error-'+no).removeClass('has-error');
 			}
+		});
+
+		if(disc_error > 0) {
+			swal({
+				title:'Invalid Discount',
+				type:'error'
+			});
+
+			return false;
 		}
-	});
+
+		if(ds.discPrcnt < 0 || ds.discPrcnt > 100) {
+			swal({
+				title:"Invalid bill discount",
+				type:'error'
+			});
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+
+			return false;
+		}
+
+
+		//---- get rows details
+		var count = 0;
+		var details = [];
+		var lineNum = 0;
+
+		$('.item-code').each(function() {
+			let no = $(this).data('id');
+			let itemCode = $(this).val();
+			if(itemCode.length > 0) {
+
+				let quotaNo = $('#quota-'+no).val();
+
+				if(quotaNo == "") {
+					emptyQuota++;
+				}
+
+				//--- ถ้ามีการระบุข้อมูล
+				var row = {
+					"LineNum" : lineNum,
+					"ItemCode" : itemCode,
+					"Description" : $('#itemName-'+no).val(),
+					"StdPrice" : $('#stdPrice-'+no).val(),
+					"Price" : $('#price-'+no).val(),
+					"SellPrice" : $('#sellPrice-'+no).val(),
+					"sysSellPrice" : $('#sysSellPrice-'+no).val(),
+					"Quantity" : $('#line-qty-'+no).val(),
+					"UomCode" : $('#uom-code-'+no).val(),
+					"discLabel" : $('#disc-label-'+no).val(),
+					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
+					"discAmount" : $('#disc-amount-'+no).val(),
+					"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
+					"DiscPrcnt" : $('#totalDiscPercent-'+no).val(),
+					"VatGroup" : $('#vat-code-'+no).val(),
+					"VatRate" : $('#vat-rate-'+no).val(),
+					"VatAmount" : $('#vat-amount-'+no).val(),
+					"totalVatAmount" : $('#vat-total-'+no).val(),
+					"LineTotal" : $('#line-total-'+no).val(),
+					"policy_id" : $('#policy-id-'+no).val(),
+					"rule_id" : $('#rule-id-'+no).val(),
+					'discDiff' : $('#disc-diff-'+no).val(),
+					'uid' : $('#free-item-'+no).data('uid'),
+					'free_item' : $('#free-item-'+no).val(),
+					'parent_uid' : $('#free-item-'+no).data('parent'),
+					'picked' : $('#free-item-'+no).data('picked'),
+					'is_free' : $('#is-free-'+no).val(),
+					'discType' : $('#disc-type-'+no).val(),
+					'WhsCode' : $('#whs-'+no).val(),
+					'QuotaNo' : $('#quota-'+no).val(),
+					'sale_team' : $('#sale_team').val()
+				}
+
+				details.push(row);
+				count++;
+				lineNum++;
+			}
+		}); //--- end each function
+
+
+		if(count === 0) {
+			swal("ไม่พบรายการสินค้า");
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+
+		if(emptyQuota > 0) {
+			swal("กรุณาระบุ Quota No ให้ครบ");
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+
+		let data = {};
+		data.header = ds;
+		data.details = details;
+
+		//--- หากไม่มีข้อผิดพลาด
+
+		load_in();
+		$.ajax({
+			url:HOME + 'add',
+			type:'POST',
+			cache:false,
+			data:JSON.stringify(data),
+			success:function(rs) {
+				load_out();
+				if(isJson(rs)) {
+					var ds = $.parseJSON(rs);
+					if(ds.status === 'success') {
+						swal({
+							title:'Success',
+							type:'success',
+							timer:1000
+						});
+
+						setTimeout(function(){
+							viewDetail(ds.code);
+						}, 1200);
+					}
+				}
+				else {
+					swal({
+						title:'Error!',
+						text:rs,
+						type:'error'
+					});
+				}
+
+				$('#btn-save').removeAttr('disabled');
+				$('#btn-draft').removeAttr('disabled');
+			}
+		});
+	}, 500);
 }
 
 
@@ -322,259 +380,320 @@ function updateAsDraft() {
 
 
 function saveUpdate() {
-	let mustApprove = 0;
-	let max_diff = 0;
+	$('#btn-save').attr('disabled', 'disabled');
+	$('#btn-draft').attr('disabled', 'disabled');
 
-	$('.disc-diff').each(function() {
-		if($(this).val() > 0) {
-			mustApprove++;
-			max_diff = $(this).val() > max_diff ? $(this).val() : max_diff;
+	setTimeout(function() {
+		$('.item-code').each(function() {
+			let no = $(this).data('id');
+			let itemCode = $(this).val();
+			if(itemCode.length > 0) {
+				recalDiscount(no);
+				console.log("recal"+no);
+			}
+		});
+
+		let mustApprove = 0;
+		let max_diff = 0;
+		let emptyQuota = 0;
+
+		$('.disc-diff').each(function() {
+			if($(this).val() > 0) {
+				mustApprove++;
+				max_diff = $(this).val() > max_diff ? $(this).val() : max_diff;
+			}
+		});
+
+		var ds = {
+			//---- Right column
+			'isDraft' : $('#is_draft').val(),
+			'code' : $('#code').val(),
+			'SlpCode' : $('#sale_id').val(),
+			'CardCode' : $.trim($('#CardCode').val()),  //****** required
+			'CardName' : $('#CardName').val(),
+			'Payment' : $('#payment').val(),
+			'Channels' : $('#channels').val(),
+			'dimCode1' : $('#dimCode1').val(),
+			'dimCode2' : $('#dimCode2').val(),
+			'dimCode3' : $('#dimCode3').val(),
+			'dimCode4' : $('#dimCode4').val(),
+			'dimCode5' : $('#dimCode5').val(),
+			'OwnerCode' : $('#owner').val(),
+			'ShipToCode' : $('#shipToCode').val(),
+			'ShipTo' : $('#ShipTo').val(),
+			//--- right Column
+			'DocDate' : $('#DocDate').val(), //****** required
+			'DocDueDate' : $('#ShipDate').val(), //****** required
+			'TextDate' : $('#TextDate').val(), //****** required
+			'PayToCode' : $('#billToCode').val(),
+			'BillTo' : $('#BillTo').val(),
+			//---- footer
+			'comments' : $.trim($('#comments').val()),
+			'discPrcnt' : parseDefault(parseFloat($('#discPrcnt').val()), 0),
+			'disAmount' : parseDefault(parseFloat($('#discAmount').val()), 0),
+			'roundDif' : 0,
+			'tax' : parseDefault(parseFloat($('#tax').val()), 0), //-- VatSum
+			'docTotal' : parseDefault(parseFloat($('#docTotal').val()), 0),
+			'mustApprove' : mustApprove > 0 ? 1 : 0,
+			'maxDiff' : max_diff,
+			'VatGroup' : $('#vat_code').val(),
+			'VatRate' : $('#vat_rate').val(),
+			'sale_team' : $('#sale_team').val(),
+			'user_id' : $('#user_id').val(),
+			'uname' : $('#uname').val()
 		}
-	});
-
-	var ds = {
-		//---- Right column
-		'isDraft' : $('#is_draft').val(),
-		'code' : $('#code').val(),
-		'SlpCode' : $('#sale_id').val(),
-		'CardCode' : $.trim($('#CardCode').val()),  //****** required
-		'CardName' : $('#CardName').val(),
-		'Payment' : $('#payment').val(),
-		'Channels' : $('#channels').val(),
-		'dimCode1' : $('#dimCode1').val(),
-		'dimCode2' : $('#dimCode2').val(),
-		'dimCode3' : $('#dimCode3').val(),
-		'dimCode4' : $('#dimCode4').val(),
-		'dimCode5' : $('#dimCode5').val(),
-		'OwnerCode' : $('#owner').val(),
-		'ShipToCode' : $('#shipToCode').val(),
-		'ShipTo' : $('#ShipTo').val(),
-		//--- right Column
-		'DocDate' : $('#DocDate').val(), //****** required
-		'DocDueDate' : $('#ShipDate').val(), //****** required
-		'TextDate' : $('#TextDate').val(), //****** required
-		'PayToCode' : $('#billToCode').val(),
-		'BillTo' : $('#BillTo').val(),
-		//---- footer
-		'comments' : $.trim($('#comments').val()),
-		'discPrcnt' : parseDefault(parseFloat($('#discPrcnt').val()), 0),
-		'disAmount' : parseDefault(parseFloat($('#discAmount').val()), 0),
-		'roundDif' : parseDefault(parseFloat($('#roundDif').val()), 0),
-		'tax' : parseDefault(parseFloat($('#tax').val()), 0), //-- VatSum
-		'docTotal' : parseDefault(parseFloat($('#docTotal').val()), 0),
-		'mustApprove' : mustApprove > 0 ? 1 : 0,
-		'maxDiff' : max_diff,
-		'VatGroup' : $('#vat_code').val(),
-		'VatRate' : $('#vat_rate').val(),
-		'sale_team' : $('#sale_team').val(),
-		'user_id' : $('#user_id').val(),
-		'uname' : $('#uname').val()
-	}
 
 		//--- check required parameter
-	if(ds.CardCode.length === 0) {
-		swal("กรุณาระบุลูกค้า");
-		$('#CardCode').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#CardCode').removeClass('has-error');
-	}
+		if(ds.CardCode.length === 0) {
+			swal("กรุณาระบุลูกค้า");
+			$('#CardCode').addClass('has-error');
 
-	if(!isDate(ds.DocDate)) {
-		swal("Invalid Posting Date");
-		$('#DocDate').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#DocDate').removeClass('has-error');
-	}
-
-
-	if(!isDate(ds.DocDueDate)) {
-		swal("Invalid Delivery Date");
-		$('#DocDueDate').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#DocDueDate').removeClass('has-error');
-	}
-
-	if(!isDate(ds.TextDate)) {
-		swal("Invalid Document Date");
-		$('#TextDate').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#TextDate').removeClass('has-error');
-	}
-
-	if(ds.OwnerCode == '') {
-		swal("Please Select Owner");
-		$('#owner').addClass('has-error');
-		return false;
-	}
-	else {
-		$('#owner').removeClass('has-error');
-	}
-
-	let dimCount = 0;
-
-	if(ds.dimCode1 != '') {
-		dimCount++;
-	}
-
-	if(ds.dimCode2 != '') {
-		dimCount++;
-	}
-
-	if(ds.dimCode3 != '') {
-		dimCount++;
-	}
-
-	if(ds.dimCode4 != '') {
-		dimCount++;
-	}
-
-	if(ds.dimCode5 != '') {
-		dimCount++;
-	}
-
-	if(dimCount == 0) {
-		swal("กรุณาเลือกหน่วยงาน");
-		return false;
-	}
-
-	if(dimCount > 1) {
-		swal("กรุณาเลือกเพียง 1 หน่วยงานเท่านั้น");
-		return false;
-	}
-
-
-	var disc_error = 0;
-	//--- check discount
-	$('.disc-error').each(function() {
-		no = $(this).data('id');
-		if($(this).val() == 1) {
-			$('#disc-error-'+no).addClass('has-error');
-			disc_error++;
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
 		}
 		else {
-			$('#disc-error-'+no).removeClass('has-error');
+			$('#CardCode').removeClass('has-error');
 		}
-	});
 
-	if(disc_error > 0) {
-		swal({
-			title:'Invalid Discount',
-			type:'error'
-		});
+		if(!isDate(ds.DocDate)) {
+			swal("Invalid Posting Date");
+			$('#DocDate').addClass('has-error');
 
-		return false;
-	}
-
-	if(ds.discPrcnt < 0 || ds.discPrcnt > 100) {
-		swal({
-			title:"Invalid bill discount",
-			type:'error'
-		});
-
-		return false;
-	}
-
-
-	//---- get rows details
-	var count = 0;
-	var details = [];
-	var lineNum = 0;
-
-	$('.item-code').each(function() {
-		let no = $(this).data('id');
-		let itemCode = $(this).val();
-		if(itemCode.length > 0) {
-
-			//--- ถ้ามีการระบุข้อมูล
-			var row = {
-				"LineNum" : lineNum,
-				"ItemCode" : itemCode,
-				"Description" : $('#itemName-'+no).val(),
-				"Price" : $('#price-'+no).val(),
-				"SellPrice" : $('#sellPrice-'+no).val(),
-				"sysSellPrice" : $('#sysSellPrice-'+no).val(),
-				"Quantity" : $('#line-qty-'+no).val(),
-				"UomCode" : $('#uom-code-'+no).val(),
-				"discLabel" : $('#disc-label-'+no).val(),
-				"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
-				"discAmount" : $('#disc-amount-'+no).val(),
-				"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
-				"VatGroup" : $('#vat-code-'+no).val(),
-				"VatRate" : $('#vat-rate-'+no).val(),
-				"VatAmount" : $('#vat-amount-'+no).val(),
-				"totalVatAmount" : $('#vat-total-'+no).val(),
-				"LineTotal" : $('#line-total-'+no).val(),
-				"policy_id" : $('#policy-id-'+no).val(),
-				"rule_id" : $('#rule-id-'+no).val(),
-				'discDiff' : $('#disc-diff-'+no).val(),
-				'uid' : $('#free-item-'+no).data('uid'),
-				'free_item' : $('#free-item-'+no).val(),
-				'parent_uid' : $('#free-item-'+no).data('parent'),
-				'picked' : $('#free-item-'+no).data('picked'),
-				'is_free' : $('#is-free-'+no).val(),
-				'discType' : $('#disc-type-'+no).val(),
-				'WhsCode' : $('#whs-'+no).val(),
-				'QuotaNo' : $('#quota-'+no).val(),
-				'sale_team' : $('#sale_team').val()
-			}
-
-			details.push(row);
-			count++;
-			lineNum++;
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
 		}
-	}); //--- end each function
+		else {
+			$('#DocDate').removeClass('has-error');
+		}
 
 
-	if(count === 0) {
-		swal("ไม่พบรายการสินค้า");
-		return false;
-	}
+		if(!isDate(ds.DocDueDate)) {
+			swal("Invalid Delivery Date");
+			$('#DocDueDate').addClass('has-error');
 
-	let data = {};
-	data.header = ds;
-	data.details = details;
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+		else {
+			$('#DocDueDate').removeClass('has-error');
+		}
 
-	//--- หากไม่มีข้อผิดพลาด
+		if(!isDate(ds.TextDate)) {
+			swal("Invalid Document Date");
+			$('#TextDate').addClass('has-error');
 
-	load_in();
-	$.ajax({
-		url:HOME + 'update',
-		type:'POST',
-		cache:false,
-		data:JSON.stringify(data),
-		success:function(rs) {
-			load_out();
-			if(isJson(rs)) {
-				var ds = $.parseJSON(rs);
-				if(ds.status === 'success') {
-					swal({
-						title:'Success',
-						type:'success',
-						timer:1000
-					});
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+		else {
+			$('#TextDate').removeClass('has-error');
+		}
 
-					setTimeout(function(){
-						viewDetail(ds.code);
-					}, 1200);
-				}
+		if(ds.OwnerCode == '') {
+			swal("Please Select Owner");
+			$('#owner').addClass('has-error');
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+		else {
+			$('#owner').removeClass('has-error');
+		}
+
+		let dimCount = 0;
+
+		if(ds.dimCode1 != '') {
+			dimCount++;
+		}
+
+		if(ds.dimCode2 != '') {
+			dimCount++;
+		}
+
+		if(ds.dimCode3 != '') {
+			dimCount++;
+		}
+
+		if(ds.dimCode4 != '') {
+			dimCount++;
+		}
+
+		if(ds.dimCode5 != '') {
+			dimCount++;
+		}
+
+		if(dimCount == 0) {
+			swal("กรุณาเลือกหน่วยงาน");
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+
+		if(dimCount > 1) {
+			swal("กรุณาเลือกเพียง 1 หน่วยงานเท่านั้น");
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+
+
+		var disc_error = 0;
+		//--- check discount
+		$('.disc-error').each(function() {
+			no = $(this).data('id');
+			if($(this).val() == 1) {
+				$('#disc-error-'+no).addClass('has-error');
+				disc_error++;
 			}
 			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error'
-				});
+				$('#disc-error-'+no).removeClass('has-error');
 			}
+		});
+
+		if(disc_error > 0) {
+			swal({
+				title:'Invalid Discount',
+				type:'error'
+			});
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
 		}
-	});
+
+		if(ds.discPrcnt < 0 || ds.discPrcnt > 100) {
+			swal({
+				title:"Invalid bill discount",
+				type:'error'
+			});
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+
+			return false;
+		}
+
+
+		//---- get rows details
+		var count = 0;
+		var details = [];
+		var lineNum = 0;
+
+		$('.item-code').each(function() {
+			let no = $(this).data('id');
+			let itemCode = $(this).val();
+			if(itemCode.length > 0) {
+				let quotaNo = $('#quota-'+no).val();
+
+				if(quotaNo == "") {
+					emptyQuota++;
+				}
+				//--- ถ้ามีการระบุข้อมูล
+				var row = {
+					"LineNum" : lineNum,
+					"ItemCode" : itemCode,
+					"Description" : $('#itemName-'+no).val(),
+					"StdPrice" : $('#stdPrice-'+no).val(),
+					"Price" : $('#price-'+no).val(),
+					"SellPrice" : $('#sellPrice-'+no).val(),
+					"sysSellPrice" : $('#sysSellPrice-'+no).val(),
+					"Quantity" : $('#line-qty-'+no).val(),
+					"UomCode" : $('#uom-code-'+no).val(),
+					"discLabel" : $('#disc-label-'+no).val(),
+					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
+					"discAmount" : $('#disc-amount-'+no).val(),
+					"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
+					"DiscPrcnt" : $('#totalDiscPercent-'+no).val(),
+					"VatGroup" : $('#vat-code-'+no).val(),
+					"VatRate" : $('#vat-rate-'+no).val(),
+					"VatAmount" : $('#vat-amount-'+no).val(),
+					"totalVatAmount" : $('#vat-total-'+no).val(),
+					"LineTotal" : $('#line-total-'+no).val(),
+					"policy_id" : $('#policy-id-'+no).val(),
+					"rule_id" : $('#rule-id-'+no).val(),
+					'discDiff' : $('#disc-diff-'+no).val(),
+					'uid' : $('#free-item-'+no).data('uid'),
+					'free_item' : $('#free-item-'+no).val(),
+					'parent_uid' : $('#free-item-'+no).data('parent'),
+					'picked' : $('#free-item-'+no).data('picked'),
+					'is_free' : $('#is-free-'+no).val(),
+					'discType' : $('#disc-type-'+no).val(),
+					'WhsCode' : $('#whs-'+no).val(),
+					'QuotaNo' : $('#quota-'+no).val(),
+					'sale_team' : $('#sale_team').val()
+				}
+
+				details.push(row);
+				count++;
+				lineNum++;
+			}
+		}); //--- end each function
+
+
+		if(count === 0) {
+			swal("ไม่พบรายการสินค้า");
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+
+		if(emptyQuota > 0) {
+			swal("กรุณาระบุ Quota No ให้ครบ");
+
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+			return false;
+		}
+
+		let data = {};
+		data.header = ds;
+		data.details = details;
+
+		//--- หากไม่มีข้อผิดพลาด
+
+		load_in();
+		$.ajax({
+			url:HOME + 'update',
+			type:'POST',
+			cache:false,
+			data:JSON.stringify(data),
+			success:function(rs) {
+				load_out();
+				if(isJson(rs)) {
+					var ds = $.parseJSON(rs);
+					if(ds.status === 'success') {
+						swal({
+							title:'Success',
+							type:'success',
+							timer:1000
+						});
+
+						setTimeout(function(){
+							viewDetail(ds.code);
+						}, 1200);
+					}
+				}
+				else {
+					swal({
+						title:'Error!',
+						text:rs,
+						type:'error'
+					});
+				}
+
+				$('#btn-save').removeAttr('disabled');
+				$('#btn-draft').removeAttr('disabled');
+			}
+		});
+	}, 500)
 }
 
 
@@ -706,7 +825,7 @@ function get_customer(code) {
 				let ds = $.parseJSON(rs);
 				$('#payment').val(ds.GroupNum);
 				$('#priceList').val(ds.ListNum);
-				$('#sale_id').val(ds.SlpCode);
+				$('#sale_id').val(ds.SlpCode).trigger('change');
 				$('#sale_name').val(ds.sale_name);
 			}
 		}
@@ -860,8 +979,7 @@ function get_address_bill_to() {
 
 function addRow() {
 	var no = $('#row-no').val();
-	no++;
-	$('#row-no').val(no);
+
 
 	var data = {"no" : no, "uid" : uniqueId()};
 	var source = $('#row-template').html();
@@ -872,6 +990,8 @@ function addRow() {
 	reIndex();
 	init();
 	$('#itemCode-'+no).focus();
+	no++;
+	$('#row-no').val(no);
 	return no;
 }
 
@@ -977,11 +1097,13 @@ function updateDiscountRule(no) {
 				if(isJson(rs)) {
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
+					var stdPrice = parseFloat(ds.StdPrice);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
-					sellPrice = sellPrice.toFixed(2);
+					sellPrice = roundNumber(sellPrice).toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
 
 					$('#price-'+no).val(price)
+					$('#stdPrice-'+no).val(stdPrice);
 					$('#sellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);
 					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
@@ -1005,6 +1127,8 @@ function updateDiscountRule(no) {
 
 					$('#itemName-'+no).val(ds.ItemName);
 					$('#uom-'+no).val(ds.UomName);
+					$('#stdPrice-label-'+no).val(addCommas(stdPrice.toFixed(2)));
+					$('#price-label-'+no).val(addCommas(price.toFixed(2)));
 					$('#sysSellPrice-'+no).val(sellPrice);
 					$('#disc-label-'+no).val(ds.discLabel);
 					$('#vat-code-'+no).val(ds.VatGroup);
@@ -1088,11 +1212,13 @@ function getItemData(no) {
 					$('#')
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
+					var stdPrice = parseFloat(ds.StdPrice);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
 					sellPrice = sellPrice.toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
 
-					$('#price-'+no).val(price)
+					$('#price-'+no).val(price);
+					$('#stdPrice-'+no).val(stdPrice);
 					$('#sellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);
 					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
@@ -1120,6 +1246,7 @@ function getItemData(no) {
 					$('#available-'+no).val(ds.available);
 					$('#line-qty-'+no).val(ds.Qty);
 					$('#uom-'+no).val(ds.UomName);
+					$('#stdPrice-label-'+no).val(addCommas(stdPrice.toFixed(2)));
 					$('#price-label-'+no).val(addCommas(price.toFixed(2)));
 					$('#sysSellPrice-'+no).val(sellPrice);
 					$('#disc-label-'+no).val(ds.discLabel);
@@ -1343,82 +1470,121 @@ function addFreeRow(uuid) {
 }
 
 
+
+
+
 function recalDiscount(no) {
-	var regex = /[^0-9+.]+/gi;
-	var label = $('#disc-label-'+no).val();
+	regex = /[^0-9+.]+/gi;
+
+	label = $('#disc-label-'+no).val();
 	label = label.replace(regex, '');
-	let first = label.charAt(0);
-	let last = label.charAt(label.length - 1);
+
+	first = label.charAt(0);
+	last = label.charAt(label.length - 1);
+
 	label = first == '+' ? label.slice(1) : label;
 	label = last == '+' ? label.slice(0, -1) : label;
+
 	$('#disc-label-'+no).val(label);
 
-	let price = parseDefault(parseFloat($('#price-'+no).val()), 0);
-	let sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0);
+	price = parseDefault(parseFloat($('#price-'+no).val()), 0);
+	price = roundNumber(price);
+
+	sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0);
 
 	if(price > 0) {
 
-		let disc = parseDiscount(label, price);
+		disc = parseDiscount(label, price);
 
-		let sellPrice = parseDefault(parseFloat(disc['sellPrice']), 0);
+		discountAmount = disc.discountAmount;
+		sellPrice = disc.sellPrice;
+		discPrcnt = discountAmount > 0 ? (discountAmount/price) * 100 : 0.00;
+		discPrcnt = roundNumber(discPrcnt);
 
-		if(sysSellPrice > sellPrice) {
-			let diff = sysSellPrice - sellPrice;
+		$('#totalDiscPercent-'+no).val(discPrcnt.toFixed(2));
 
-			let percentDiff = (diff/sysSellPrice) * 100;
+		if( sysSellPrice > sellPrice ) {
+
+			diff = sysSellPrice - sellPrice;
+
+			percentDiff = (diff/sysSellPrice) * 100;
+			percentDiff = roundNumber(percentDiff);
 
 			$('#disc-diff-'+no).val(percentDiff);
 		}
 		else {
 			$('#disc-diff-'+no).val(0);
 		}
+			
+		sellPrice = roundNumber(sellPrice);
 
-		$('#sellPrice-'+no).val(sellPrice.toFixed(2));
-		$('#sell-price-'+no).val(addCommas(sellPrice.toFixed(2)));
+
+		$('#sellPrice-'+no).val(sellPrice);
+		$('#sell-price-'+no).val(addCommas(sellPrice));
 
 		recalAmount(no);
 	}
 }
 
 
+
+
+
 function recalAmount(no) {
-  var currentInput = removeCommas($('#disc-label-'+no).val());
-  var val = currentInput.replace(/[A-Za-z!@#$%^&*()]/g, '');
-	var price = $('#price-'+no).val();
-	var qty = $('#line-qty-'+no).val();
+  currentInput = removeCommas($('#disc-label-'+no).val());
+  val = currentInput.replace(/[A-Za-z!@#$%^&*()]/g, '');
+	price = parseDefault(parseFloat($('#price-'+no).val()), 0.00);
+	price = roundNumber(price);
 
-	var disc = parseDiscount(val, price);
+	qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
 
-	if(disc.sellPrice < 0 || disc.sellPrice > price) {
+	disc = parseDiscount(val, price);
+
+	discountAmount = disc.discountAmount;
+	sellPrice = disc.sellPrice;
+	sellPrice = roundNumber(sellPrice);
+	discPrcnt = discountAmount > 0 ? (discountAmount / price) * 100 : 0.00;
+
+	$('#totalDiscPercent-'+no).val(discPrcnt.toFixed(2));
+
+	if(sellPrice < 0 || sellPrice > price) {
 		$('#disc-label-' + no).addClass('has-error');
 		$('#disc-error-'+no).val(1);
 		return false;
 	}
 	else {
+
+		vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
+		sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);
+		vatAmount = (sellPrice * vat_rate);
+		vatAmount = roundNumber(vatAmount);
+
+		vatTotal = (qty * vatAmount);
+		vatTotal = roundNumber(vatTotal);
+
+		lineAmount = (qty * sellPrice);
+		lineAmount = roundNumber(lineAmount);
+
+		lineDiscAmount = qty * discountAmount;
+		lineDiscAmount = roundNumber(lineDiscAmount);
+
 		$('#disc-error-'+no).val(0);
 		$('#disc-label-' + no).removeClass('has-error');
-		$('#disc-amount-'+no).val(disc.discountAmount);
-		$('#line-disc-amount-'+no).val(qty * disc.discountAmount);
-
-		let vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
-
-		let sellPrice = (price - disc.discountAmount);
-		let sysSellPrice = $('#sysSellPrice-'+no).val();
-		let vatAmount = (sellPrice * vat_rate);
-		let vatTotal = (qty * vatAmount);
-		let lineAmount = (qty * sellPrice);
-		let lineLabel = lineAmount.toFixed(2);
-
+		$('#disc-amount-'+no).val(discountAmount.toFixed(2));
+		$('#line-disc-amount-'+no).val(lineDiscAmount);
 		$('#sellPrice-'+no).val(sellPrice);
-		$('#sell-price-'+no).val(addCommas(sellPrice.toFixed(2)));
+		$('#sell-price-'+no).val(addCommas(sellPrice));
 		$('#vat-amount-'+no).val(vatAmount);
 		$('#vat-total-'+no).val(vatTotal);
 		$('#line-total-'+no).val(lineAmount);
-		$('#total-label-'+no).val(addCommas(lineLabel));
+		$('#total-label-'+no).val(addCommas(lineAmount));
 
 		recalTotal();
 	}
 }
+
+
+
 
 
 function getDiscDiff(old_price, new_price) {
@@ -1432,24 +1598,33 @@ function getDiscDiff(old_price, new_price) {
 }
 
 
+
+
+
+
 function recalTotal() {
 	var total = 0.00; //--- total amount after row discount
 	var totalTaxAmount = 0.00;
 	var df_rate = parseDefault(parseFloat($('#vat_rate').val()), 7); //---- 7%
 	var taxRate = df_rate * 0.01;
-	var rounding = parseDefault(parseFloat(removeCommas($('#roundDif').val())), 0);
+	var rounding = 0;
 
 	$('.line-num').each(function(){
-		let no = $(this).val();
-		let qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
-		let price = parseDefault(parseFloat($('#price-'+no).val()), 0);
-		let amount = parseDefault(parseFloat($('#line-total-'+no).val()), 0);
-		let rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0);
+		var no = $(this).val();
+		var qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
 
+		var price = parseDefault(parseFloat($('#price-'+no).val()), 0.00);
+		price = roundNumber(price);
+
+		var amount = parseDefault(parseFloat($('#line-total-'+no).val()), 0.00);
+		amount = roundNumber(amount);
+
+		var rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0.00);
 
 		if(qty > 0 && price > 0)
 		{
 			total += amount;
+
 			if(rate > 0) {
 				totalTaxAmount += amount;
 			}
@@ -1458,59 +1633,43 @@ function recalTotal() {
 
 	//--- update bill discount
 	var disc = parseDefault(parseFloat($('#discPrcnt').val()), 0);
-	var billDiscAmount = total * (disc * 0.01);
+	disc = roundNumber(disc);
+
+	var billDiscAmount = parseFloat(total * (disc * 0.01));
+	billDiscAmount = roundNumber(billDiscAmount);
+
 	$('#discAmount').val(billDiscAmount);
-	$('#discAmountLabel').val(addCommas(billDiscAmount.toFixed(2)));
+	$('#discAmountLabel').val(addCommas(billDiscAmount));
 
 	//---- bill discount amount
-	var amountAfterDisc = total - billDiscAmount; //--- มูลค่าสินค้า หลังหักส่วนลด
-	var amountBeforeDiscWithTax = totalTaxAmount //-- มูลค่าสินค้า เฉพาะที่มีภาษี
+	amountAfterDisc = parseDefault(parseFloat(total - billDiscAmount), 0.00); //--- มูลค่าสินค้า หลังหักส่วนลด
+	amountBeforeDiscWithTax = parseDefault(parseFloat(totalTaxAmount), 0.00); //-- มูลค่าสินค้า เฉพาะที่มีภาษี
 	//--- คำนวนภาษี หากมีส่วนลดท้ายบิล
 	//--- เฉลี่ยส่วนลดออกให้ทุกรายการ โดยเอาส่วนลดท้ายบิล(จำนวนเงิน)/มูลค่าสินค้าก่อนส่วนลด
 	//--- ได้มูลค่าส่วนลดท้ายบิลที่เฉลี่ยนแล้ว ต่อ บาท เช่น หารกันมาแล้ว ได้ 0.16 หมายถึงทุกๆ 1 บาท จะลดราคา 0.16 บาท
-	var everageBillDisc = (total > 0 ? billDiscAmount/total : 0);
-
-	//console.log(everageBillDisc);
+	everageBillDisc = parseFloat((total > 0 ? billDiscAmount/total : 0));
+	everageBillDisc = roundNumber(everageBillDisc);
 
 	//--- นำผลลัพธ์ข้างบนมาคูณ กับ มูลค่าที่ต้องคิดภาษี (ตัวที่ไม่มีภาษีไม่เอามาคำนวณ)
 	//--- จะได้มูลค่าส่วนลดที่ต้องไปลบออกจากมูลค่าสินค้าที่ต้องคิดภาษี
-	var totalDiscTax = amountBeforeDiscWithTax * everageBillDisc;
-	//console.log(amountBeforeDiscWithTax);
-	var amountToPayTax = amountBeforeDiscWithTax - totalDiscTax;
-	//console.log(amountToPayTax);
-	var taxAmount = amountToPayTax * taxRate;
-	var docTotal = amountAfterDisc + taxAmount + rounding;
+	totalDiscTax = roundNumber(amountBeforeDiscWithTax * everageBillDisc);
 
-	$('#totalAmount').val(total.toFixed(2));
+
+	amountToPayTax = roundNumber(amountBeforeDiscWithTax - totalDiscTax);
+
+	taxAmount = roundNumber(amountToPayTax * taxRate);
+
+	docTotal = roundNumber(amountAfterDisc + taxAmount + rounding);
+
+	$('#totalAmount').val(total);
 	$('#totalAmountLabel').val(addCommas(total.toFixed(2)));
-	$('#tax').val(taxAmount.toFixed(2));
+	$('#tax').val(taxAmount);
 	$('#taxLabel').val(addCommas(taxAmount.toFixed(2)));
-	$('#docTotal').val(docTotal.toFixed(2));
+	$('#docTotal').val(docTotal);
 	$('#docTotalLabel').val(addCommas(docTotal.toFixed(2)));
 }
 
 
-$('#discAmountLabel').focusout(function(){
-	var total = parseDefault(parseFloat($('#totalAmount').val()), 0);
-	var disc = parseDefault(parseFloat(removeCommas($(this).val())), 0);
-
-	if(disc < 0 ) {
-		disc = 0;
-		$(this).val(0);
-		$('#discAmount').val(0);
-	}
-	else if(disc > total) {
-		disc = total;
-		$(this).val(addCommas(total));
-		$('#discAmount').val(total);
-	}
-	//--- convert amount to percent
-	var discPrcnt = (total > 0 ? (disc / total) * 100 : 0);
-
-	$('#discPrcnt').val(discPrcnt.toFixed(2));
-
-	recalTotal();
-})
 
 
 
@@ -1533,13 +1692,6 @@ $('#discPrcnt').change(function() {
 		recalTotal();
 	}
 });
-
-
-
-$('#roundDif').keyup(function(){
-	recalTotal();
-})
-
 
 
 
@@ -1637,13 +1789,6 @@ function init() {
 		$(this).select();
 	});
 }
-
-
-$('#discAmount').keyup(function(e) {
-	if(e.keyCode === 13) {
-		$('#roundDif').focus();
-	}
-})
 
 
 
@@ -1766,4 +1911,19 @@ function recal_order_discount(no_arr) {
 			p = p.then(updateDiscountRule(no));
 		}
 	});
+}
+
+
+function dumpJson(code) {
+	$.ajax({
+		url:HOME + 'getJSON',
+		type:'GET',
+		cache:false,
+		data:{
+			'code' : code
+		},
+		success:function(rs) {
+			console.log(rs);
+		}
+	})
 }

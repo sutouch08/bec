@@ -236,12 +236,13 @@ class Quotation_model extends CI_Model
 		return 0;
 	}
 
-	public function get_commit_qty($itemCode)
+	public function get_commit_qty($itemCode, $quotaNo)
 	{
 		$rs = $this->db
 		->select_sum('OpenQty')
-		->where('ItemCode', $itemCode)
 		->where('LineStatus', 'O')
+		->where('ItemCode', $itemCode)
+		->where('QuotaNo', $quotaNo)
 		->get('order_details');
 
 		if($rs->num_rows() === 1)

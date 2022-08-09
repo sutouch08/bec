@@ -61,12 +61,6 @@
         </div>
       </div>
 
-      <div class="form-group hide">
-        <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Rouding</label>
-        <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
-          <input type="number" id="roundDif" class="form-control input-sm text-right" value="<?php echo $order->RoundDif; ?>" />
-        </div>
-      </div>
 
       <div class="form-group">
         <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Tax</label>
@@ -89,11 +83,12 @@
   <div class="divider-hidden"></div>
   <div class="divider-hidden"></div>
   <div class="divider-hidden"></div>
-
-  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
-    <button type="button" class="btn btn-sm btn-primary btn-100" id="btn-save" onclick="validateFreeItem('update')">Save</button>
+  
+	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
+		<button type="button" class="btn btn-sm btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
+    <button type="button" class="btn btn-sm btn-primary btn-100 hide" id="btn-save" onclick="validateFreeItem('add')">Save</button>
     <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
-    <button type="button" class="btn btn-sm btn-info btn-100" id="btn-draft" onclick="updateAsDraft()">Save AS Draft</button>
+    <button type="button" class="btn btn-sm btn-info btn-100 hide" id="btn-draft" onclick="saveAsDraft()">Save AS Draft</button>
   </div>
 </div>
 

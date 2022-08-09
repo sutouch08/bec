@@ -33,7 +33,7 @@ class Products extends PS_Controller
       'type' => get_filter('type', 'item_type', 'all'),
       'brand' => get_filter('brand', 'item_brand', 'all'),
 			'status' => get_filter('status', 'item_status', 'all'),
-			'home' => get_filter('home', 'item_home', 'all')
+			'count_stock' => get_filter('count_stock', 'count_stock', 'all')
     );
 
 		$perpage = get_rows();
@@ -493,13 +493,13 @@ class Products extends PS_Controller
 	}
 
 
-	public function set_home_item()
+	public function set_count_stock()
 	{
 		$id = $this->input->get('id');
-		$home = $this->input->get('home');
+		$count_stock = $this->input->get('count_stock');
 
 		$arr = array(
-			'home' => $home == 1 ? 1 : 0
+			'count_stock' => $count_stock == 1 ? 1 : 0
 		);
 
 		$this->products_model->update_by_id($id, $arr);
@@ -509,7 +509,7 @@ class Products extends PS_Controller
 
   public function clear_filter()
 	{
-    $filter = array('item_code','item_name','item_model', 'item_type', 'item_category', 'item_brand', 'item_status', 'item_home');
+    $filter = array('item_code','item_name','item_model', 'item_type', 'item_category', 'item_brand', 'item_status', 'count_stock');
     clear_filter($filter);
 	}
 }

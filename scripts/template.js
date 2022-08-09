@@ -284,7 +284,7 @@ function parseDiscount(discount_label, price)
 			}
 		});
 
-		discLabel.sellPrice += bprice;
+		//discLabel.sellPrice += bprice;
 	}
 
 	return discLabel;
@@ -348,4 +348,10 @@ function changeUserPwd()
 function uniqueId()
 {
 	return Math.floor(Math.random() * Date.now());
+}
+
+
+function roundNumber(num)
+{
+	return Math.round((num + Number.EPSILON) * 100) / 100;
 }

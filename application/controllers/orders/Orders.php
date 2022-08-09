@@ -30,6 +30,22 @@ class Orders extends PS_Controller
   }
 
 
+	public function test()
+	{
+		$itemCode = 'FG-BEC0027';
+		$customer_code = 'CC00002';
+		$channels = 2;
+		$payment = 27;
+		$date = '2022-08-05';
+		$qty = 1;
+		$amount = 1000;
+
+		$rs = $this->discount_model->get_free_item_rule($itemCode, $customer_code, $payment, $channels, $date, $qty, $amount);
+
+		print_r($rs);
+	}
+
+
   public function index()
   {
 		$filter = array(
@@ -192,7 +208,7 @@ class Orders extends PS_Controller
 										'discLabel' => $rs->discLabel,
 										'sysDiscLabel' => $rs->sysDiscLabel,
 										'discDiff' => $rs->discDiff,
-										'DiscPrcnt' => discountAmountToPercent($rs->discAmount, 1, $rs->Price),
+										'DiscPrcnt' => $rs->DiscPrcnt, //discountAmountToPercent($rs->discAmount, 1, $rs->Price),
 										'discAmount' => $rs->discAmount,
 										'totalDiscAmount' => $rs->totalDiscAmount,
 										'VatGroup' => $pd->vat_group,
@@ -204,12 +220,10 @@ class Orders extends PS_Controller
 										'rule_id' => $rs->rule_id,
 										'WhsCode' => $rs->WhsCode,
 										'QuotaNo' => $rs->QuotaNo,
-										'free_item' => $rs->free_item,
 										'uid' => $rs->uid,
 										'parent_uid' => $rs->parent_uid,
 										'is_free' => $rs->is_free,
 										'discType' => $rs->discType,
-										'picked' => $rs->picked,
 										'channels_id' => $hd->Channels,
 										'payment_id' => $hd->Payment,
 										'product_id' => $pd->id,
@@ -225,7 +239,8 @@ class Orders extends PS_Controller
 										'customer_grade_id' => $customer->GradeCode,
 										'user_id' => $this->_user->id,
 										'uname' => $this->_user->uname,
-										'sale_team' => $rs->sale_team
+										'sale_team' => $rs->sale_team,
+										'count_stock' => $rs->count_stock
 									);
 
 									if(! $this->orders_model->add_detail($arr))
@@ -319,7 +334,8 @@ class Orders extends PS_Controller
 						$rs->instock = !empty($stock) ? $stock['OnHand'] : 0;
 						$rs->team = !empty($stock) ? $stock['QuotaQty'] : 0;
 						$rs->commit = !empty($stock) ? ($stock['Committed'] > 0 ? $stock['Committed'] - $rs->Qty : 0) : 0;
-						$rs->available = !empty($stock) ? $stock['Available'] : 0;
+            $available = $rs->team - $rs->commit;
+						$rs->available = $available > 0 ? $available : 0;
 						$rs->image = get_image_path($rs->product_id, 'mini');
 					}
 				}
@@ -508,7 +524,8 @@ class Orders extends PS_Controller
 															'customer_grade_id' => $customer->GradeCode,
 															'user_id' => $this->_user->id,
 															'uname' => $this->_user->uname,
-															'sale_team' => $rs->sale_team
+															'sale_team' => $rs->sale_team,
+															'count_stock' => $rs->count_stock
 															);
 
 														if(! $this->orders_model->add_detail($arr))
@@ -1500,12 +1517,13 @@ class Orders extends PS_Controller
 		if(! empty($pd))
 		{
 			$price = $pd->price; //$this->getPrice($itemCode, $priceList);
-			$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
+			$stock = $this->getStock($itemCode, $whsCode, $quotaNo, $pd->count_stock);
 			$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $docDate);
 
 			if(!empty($disc))
 			{
 				$ds = array(
+					'product_id' => $pd->id,
 					'ItemCode' => $pd->code,
 					'ItemName' => $pd->name,
 					'whsCode' => $whsCode,
@@ -1534,7 +1552,8 @@ class Orders extends PS_Controller
 					'rule_id' => $disc->rule_id,
 					'policy_id' => $disc->policy_id,
 					'freeQty' => $disc->freeQty,
-					'discType' => $disc->type
+					'discType' => $disc->type,
+					'count_stock' => $pd->count_stock
 				);
 			}
 			else
@@ -1562,9 +1581,8 @@ class Orders extends PS_Controller
 		$payment = $this->input->get('Payment');
 		$channels = $this->input->get('Channels');
 		$qty = $this->input->get('Qty');
-		$price = $this->input->get('Price');
-
 		$pd = $this->products_model->get($itemCode);
+		$price = $pd->price;
 
 		if(! empty($pd))
 		{
@@ -1573,6 +1591,7 @@ class Orders extends PS_Controller
 			if(!empty($disc))
 			{
 				$ds = array(
+					"product_id" => $pd->id,
 					'ItemCode' => $pd->code,
 					'ItemName' => $pd->name,
 					'Qty' => $qty,
@@ -1614,13 +1633,58 @@ class Orders extends PS_Controller
 	}
 
 
+	public function get_free_item_rule()
+	{
+		$sc = TRUE;
+
+		$ds = array();
+
+		$json = json_decode($this->input->post('json'));
+
+		if(!empty($json))
+		{
+			$date = db_date($json->DocDate);
+
+			if(! empty($json->items))
+			{
+				$arr = array();
+
+				foreach($json->items as $rs)
+				{
+					$rd = $this->discount_model->get_free_item_rule($rs->itemCode, $json->CardCode, $json->Payment, $json->Channels, $date, $rs->qty, $rs->amount);
+
+					if(!empty($rd))
+					{
+						if($rd->freeQty > 0)
+						{
+							if(isset($ds[$rd->rule_id]))
+							{
+								$ds[$rd->rule_id]['freeQty'] += $rd->freeQty;
+							}
+							else
+							{
+								$ds[$rd->rule_id]['freeQty'] = $rd->freeQty;
+								$ds[$rd->rule_id]['policy_id'] = $rd->policy_id;
+								$ds[$rd->rule_id]['rule_id'] = $rd->rule_id;
+								$ds[$rd->rule_id]['uid'] = uniqid(rand(1,100));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		echo json_encode($ds);
+	}
+
+
+
 	public function get_free_item()
 	{
 		$rule_id = $this->input->get('rule_id');
 		$uid = $this->input->get('uid');
 		$freeQty = $this->input->get('freeQty');
 		$picked = $this->input->get('picked');
-		$priceList = $this->input->get('priceList');
 		$qty = $freeQty - $picked;
 
 		$list = $this->discount_model->get_free_item_list($rule_id);
@@ -1643,7 +1707,7 @@ class Orders extends PS_Controller
 				$uuid = uniqid(rand(1,100));
 				$img = get_image_path($rs->product_id, 'mini');
 				$pd = $this->products_model->get($rs->product_code);
-				$price = $pd->price; //$this->getPrice($pd->code, $priceList);
+				$price = $pd->price;
 
 				$ds .= "<tr>";
 				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
@@ -1693,30 +1757,47 @@ class Orders extends PS_Controller
 
 
 
-	public function getStock($ItemCode, $WhsCode, $QuotaNo)
+	public function getStock($ItemCode, $WhsCode, $QuotaNo, $count_stock = 1)
 	{
-		$this->load->library('api');
+		$test = getConfig('TEST') == 1 ? TRUE : FALSE;
 
-		$commit = get_zero($this->orders_model->get_commit_qty($ItemCode));
-
-		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
-
-    $arr = array(
-      'OnHand' => 0,
-      'Committed' => $commit,
-      'QuotaQty' => 0,
-      'Available' => 0
-    );
-
-		if(!empty($stock))
+		if($test OR $count_stock == 0)
 		{
-			$OnHand = $stock['OnHand'];
 			$arr = array(
-				'OnHand' => $OnHand,
-				'Committed' => $commit,
-				'QuotaQty' => $stock['QuotaQty'],
-				'Available' => $OnHand - $commit
+				'OnHand' => 0,
+				'Committed' => 0,
+				'QuotaQty' => 0,
+				'Available' => 0
 			);
+		}
+		else
+		{
+			$this->load->library('api');
+
+			$commit = get_zero($this->orders_model->get_commit_qty($ItemCode, $QuotaNo));
+
+			$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
+
+			$arr = array(
+				'OnHand' => 0,
+				'Committed' => $commit,
+				'QuotaQty' => 0,
+				'Available' => 0
+			);
+
+			if(!empty($stock))
+			{
+				$OnHand = $stock['OnHand'];
+				$Quota = $stock['QuotaQty'];
+				$available = $Quota - $commit;
+
+				$arr = array(
+					'OnHand' => $OnHand,
+					'Committed' => $commit,
+					'QuotaQty' => $Quota,
+					'Available' => $available > 0 ? $available : 0
+				);
+			}
 		}
 
     return $arr;

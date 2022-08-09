@@ -26,7 +26,9 @@ class Discount_rule extends PS_Controller
 			'code' => get_filter('code', 'rule_code', ''),
 			'name' => get_filter('name', 'rule_name', ''),
 			'active' => get_filter('active', 'rule_active', 'all'),
-			'policy' => get_filter('policy', 'rule_policy', '')
+			'type' => get_filter('type', 'rule_type', 'all'),
+			'policy' => get_filter('policy', 'rule_policy', ''),
+			'priority' => get_filter('priority', 'rule_priority', 'all')
 		);
 
 		$perpage = get_rows();
@@ -193,6 +195,7 @@ class Discount_rule extends PS_Controller
 	    $minAmount = $this->input->post('minAmount');
 	    $canGroup = $this->input->post('canGroup');
 			$freeItems = $this->input->post('freeItems');
+			$priority = $this->input->post('priority');
 
 			$arr = array(
 				"minQty" => $minQty,
@@ -206,6 +209,7 @@ class Discount_rule extends PS_Controller
 				"disc3" => $discType == 'P' ? $disc3 : 0.00,
 				"disc4" => $discType == 'P' ? $disc4 : 0.00,
 				"disc5" => $discType == 'P' ? $disc5 : 0.00,
+				"priority" => $priority,
 				"update_user" => $this->_user->uname
 			);
 
@@ -865,7 +869,7 @@ class Discount_rule extends PS_Controller
 
   public function clear_filter()
   {
-    $filter = array('rule_code', 'rule_name', 'rule_active', 'rule_policy');
+    $filter = array('rule_code', 'rule_name', 'rule_active','rule_type', 'rule_policy', 'rule_priority');
     clear_filter($filter);
   }
 } //--- end grade

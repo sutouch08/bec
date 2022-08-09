@@ -8,6 +8,13 @@
 		</div>
 
 		<div class="form-group">
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Original SQ</label>
+			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
+				<input type="text" id="code" class="form-control input-sm" value="<?php echo $order->OriginalSQ; ?>" disabled/>
+			</div>
+		</div>
+
+		<div class="form-group">
 			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Document Date</label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
 				<span class="input-icon input-icon-right">

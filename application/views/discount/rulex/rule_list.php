@@ -15,52 +15,26 @@
 
 <form id="searchForm" method="post" >
 <div class="row">
-  <div class="col-lg-1-harf col-md-1-harf col-sm-3 col-xs-6 padding-5">
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Document No.</label>
     <input type="text" class="form-control input-sm text-center search-box" name="code" value="<?php echo $code; ?>" autofocus />
   </div>
-  <div class="col-lg-1-harf col-md-1-harf col-sm-3 col-xs-6 padding-5">
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Description</label>
     <input type="text" class="form-control input-sm text-center search-box" name="name" value="<?php echo $name; ?>" />
   </div>
 
-  <div class="col-lg-1-harf col-md-1-harf col-sm-3 col-xs-6 padding-5">
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Promotion No.</label>
     <input type="text" class="form-control input-sm text-center search-box" name="policy" value="<?php echo $policy; ?>" />
   </div>
 
-	<div class="col-lg-1-harf col-md-1-harf col-sm-3 col-xs-6 padding-5">
-    <label>Type</label>
-    <select class="form-control input-sm filter" name="type" id="type">
-      <option value="all" <?php echo is_selected("all", $type); ?>>ทั้งหมด</option>
-      <option value="P" <?php echo is_selected('P', $type); ?>>Percentage</option>
-      <option value="N" <?php echo is_selected('N', $type); ?>>Net Price</option>
-			<option value="F" <?php echo is_selected('F', $type); ?>>Get Free</option>
-    </select>
-  </div>
-
-  <div class="col-lg-1-harf col-md-1-harf col-sm-3 col-xs-6 padding-5">
-    <label>Status</label>
+  <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+    <label>สถานะ</label>
     <select class="form-control input-sm filter" name="active" id="active">
       <option value="all" <?php echo is_selected("all", $active); ?>>ทั้งหมด</option>
       <option value="1" <?php echo is_selected('1', $active); ?>>Active</option>
       <option value="0" <?php echo is_selected('0', $active); ?>>Inactive</option>
-    </select>
-  </div>
-	<div class="col-lg-1-harf col-md-1-harf col-sm-3 col-xs-6 padding-5">
-    <label>Priority</label>
-    <select class="form-control input-sm filter" name="priority" id="priority">
-      <option value="all" <?php echo is_selected("all", $active); ?>>ทั้งหมด</option>
-			<option value="1" <?php echo is_selected('1', $priority); ?>>1</option>
-			<option value="2" <?php echo is_selected('2', $priority); ?>>2</option>
-			<option value="3" <?php echo is_selected('3', $priority); ?>>3</option>
-			<option value="4" <?php echo is_selected('4', $priority); ?>>4</option>
-			<option value="5" <?php echo is_selected('5', $priority); ?>>5</option>
-			<option value="6" <?php echo is_selected('6', $priority); ?>>6</option>
-			<option value="7" <?php echo is_selected('7', $priority); ?>>7</option>
-			<option value="8" <?php echo is_selected('8', $priority); ?>>8</option>
-			<option value="9" <?php echo is_selected('8', $priority); ?>>9</option>
-			<option value="10" <?php echo is_selected('10', $priority); ?>>10</option>
     </select>
   </div>
 
@@ -93,7 +67,6 @@
            <th class="fix-width-120 text-center">Promotion No.</th>
            <th class="fix-width-150 text-center">Discount</th>
            <th class="fix-width-60 text-center">Status</th>
-					 <th class="fix-width-60 text-center">Priority</th>
            <th class="fix-width-150"></th>
          </tr>
        </thead>
@@ -106,27 +79,13 @@
           <td class="middle text-center"><?php echo $rs->code; ?></td>
           <td class="middle"><?php echo $rs->name; ?></td>
 					<td class="middle text-center">
-						<?php echo ($rs->type == 'N' ? 'Net price': ($rs->type == 'F' ? 'Get Free' : 'Percentage')); ?>
+						<?php echo ($rs->type == 'N' ? 'Net price': 'Percentage'); ?>
 					</td>
           <td class="middle text-center"><?php echo $rs->policy_code; ?></td>
           <td class="middle text-center">
-				<?php
-						if($rs->type == 'F')
-						{
-							echo $rs->freeQty.' PCS';
-						}
-						elseif($rs->type == 'N')
-						{
-							echo number($rs->price, 2).' THB';
-						}
-						else
-						{
-							echo discount_label($rs->type, $rs->price, $rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5);
-						}
-				?>
+						<?php echo discount_label($rs->type, $rs->price, $rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5); ?>
 					</td>
           <td class="middle text-center"><?php echo is_active($rs->active); ?></td>
-					<td class="middle text-center"><?php echo $rs->priority; ?></td>
           <td class="middle text-right">
             <button type="button" class="btn btn-xs btn-info" onclick="viewDetail('<?php echo $rs->id; ?>')"><i class="fa fa-eye"></i></button>
       <?php if($this->pm->can_edit) : ?>
@@ -143,7 +102,7 @@
 
 <?php else : ?>
         <tr>
-          <td colspan="8" class="text-center">
+          <td colspan="7" class="text-center">
             <h4>ไม่พบรายการ</h4>
           </td>
         </tr>

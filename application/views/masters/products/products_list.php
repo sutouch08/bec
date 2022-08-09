@@ -41,7 +41,7 @@
 		</select>
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Type</label>
 		<select class="form-control input-sm" name="type" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
@@ -49,7 +49,7 @@
 		</select>
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Brand</label>
 		<select class="form-control input-sm" name="brand" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
@@ -67,11 +67,11 @@
   </div>
 
 	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
-    <label>สินค้าแนะนำ</label>
-		<select class="form-control input-sm" name="home" onchange="getSearch()">
+    <label>นับสต็อก</label>
+		<select class="form-control input-sm" name="count_stock" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
-			<option value="1" <?php echo is_selected('1', $home); ?>>Yes</option>
-			<option value="0" <?php echo is_selected('0', $home); ?>>No</option>
+			<option value="1" <?php echo is_selected('1', $count_stock); ?>>Yes</option>
+			<option value="0" <?php echo is_selected('0', $count_stock); ?>>No</option>
 		</select>
   </div>
 
@@ -101,7 +101,7 @@
 					<th class="fix-width-150 middle">Category</th>
 					<th class="fix-width-100 middle">Brand</th>
 					<th class="fix-width-60 middle text-center">Status</th>
-					<th class="fix-width-60 middle text-center">แนะนำ</th>
+					<th class="fix-width-60 middle text-center">Stock</th>
 					<th class="fix-width-80"></th>
 				</tr>
 			</thead>
@@ -121,7 +121,7 @@
 						<td class="middle text-center"><?php echo is_active($rs->status); ?></td>
 						<td class="middle text-center">
 							<label>
-								<input type="checkbox" class="ace" onchange="toggleHome($(this))" value="<?php echo $rs->id; ?>" <?php echo is_checked(1, $rs->home); ?> />
+								<input type="checkbox" class="ace" onchange="toggleCountStock($(this))" value="<?php echo $rs->id; ?>" <?php echo is_checked(1, $rs->count_stock); ?> />
 								<span class="lbl"></span>
 							</label>
 						</td>

@@ -49,6 +49,7 @@
 					<input type="hidden" class="line-num" id="line-num-<?php echo $no; ?>" value="<?php echo $no; ?>" />
 					<input type="hidden" id="disc-amount-<?php echo $no; ?>" value="0"/>
 					<input type="hidden" id="line-disc-amount-<?php echo $no; ?>" value="0" />
+					<input type="hidden" id="totalDiscPercent-<?php echo $no; ?>" value="0.00" />
 					<input type="hidden" id="line-total-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="vat-rate-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="vat-amount-<?php echo $no; ?>" value="0" />
@@ -126,7 +127,11 @@
             <input type="text" class="form-control input-sm text-center" id="uom-<?php echo $no; ?>" value="" disabled/>
           </td>
           <td class="middle">
-            <input type="text" class="form-control input-sm text-right number price" data-id="<?php echo $no; ?>" id="price-label-<?php echo $no; ?>" value=""/>
+            <input type="text" class="form-control input-sm text-right number price"
+						data-id="<?php echo $no; ?>"
+						id="price-label-<?php echo $no; ?>"
+						onchange="recalAmount(<?php echo $no; ?>)" 
+						value=""/>
           </td>
 
           <td class="middle">
@@ -161,6 +166,7 @@
 	<input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
 	<input type="hidden" id="disc-amount-{{no}}" value="0"/>
 	<input type="hidden" id="line-disc-amount-{{no}}" value="0" />
+	<input type="hidden" id="totalDiscPercent-{{no}}" value="0.00" />
 	<input type="hidden" id="line-total-{{no}}" value="0" />
 	<input type="hidden" id="vat-rate-{{no}}" value="0" />
 	<input type="hidden" id="vat-amount-{{no}}" value="0" />
@@ -261,6 +267,7 @@
 <input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
 <input type="hidden" id="disc-amount-{{no}}" value="0"/>
 <input type="hidden" id="line-disc-amount-{{no}}" value="0" />
+<input type="hidden" id="totalDiscPercent-{{no}}" value="0.00" />
 <input type="hidden" id="line-total-{{no}}" value="0" />
 <input type="hidden" id="vat-rate-{{no}}" value="0" />
 <input type="hidden" id="vat-amount-{{no}}" value="0" />

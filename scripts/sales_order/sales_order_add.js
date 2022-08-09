@@ -1,8 +1,82 @@
 
 function saveAsDraft() {
 	$('#is_draft').val(1);
-
 	validateFreeItem('add');
+}
+
+
+
+function getFreeItemRule()
+{
+	removeFreeRow();
+
+	ds = {
+		'DocDate' : $('#DocDate').val(),
+		'CardCode' : $.trim($('#CardCode').val()),
+		'Payment' : $('#payment').val(),
+		'Channels' : $('#channels').val()
+	};
+
+
+	var items = {};
+	//--- get sum item qty, amount
+	$('.item-code').each(function() {
+		itemCode = $(this).val();
+		if(itemCode.length) {
+			no = $(this).data('id');
+			is_free = $('#is-free-'+no).val();
+			if(is_free == 0) {
+				product_id = $('#product-id-'+no).val();
+				qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
+				amount = parseDefault(parseFloat($('#line-total-'+no).val()), 0.00);
+
+				if(items.hasOwnProperty(product_id)) {
+					qty += parseInt(items[product_id].qty);
+					amount += parseFloat(items[product_id].amount);
+				}
+
+				items[product_id] = {"itemCode" : itemCode, "qty" : qty, "amount" : amount};
+			}
+		}
+	});
+
+	ds.items = items;
+
+	if(Object.keys(items).length) {
+		load_in();
+		$.ajax({
+			url:HOME + 'get_free_item_rule',
+			type:'POST',
+			cache:false,
+			data:{
+				"json" : JSON.stringify(ds)
+			},
+			success:function(rs) {
+				load_out();
+
+				if(isJson(rs)) {
+					ds = $.parseJSON(rs);
+					$.each(ds, function(index, value) {
+						if($('#free-'+value.rule_id).length) {
+							$('#free-'+value.rule_id).val(value.freeQty);
+						}
+						else {
+							source = $('#free-input-template').html();
+							output = $('#free-temp');
+							render_append(source, value, output);
+
+							source = $('#free-btn-template').html();
+							output = $('#free-box');
+							render_append(source, value, output);
+						}
+					});
+				}
+			}
+		})
+	}
+
+	$('#btn-save').removeClass('hide');
+	$('#btn-draft').removeClass('hide');
 }
 
 
@@ -70,13 +144,13 @@ function saveAdd() {
 
 	setTimeout(function() {
 
-		$('.item-code').each(function() {
-			let no = $(this).data('id');
-			let itemCode = $(this).val();
-			if(itemCode.length > 0) {
-				recalDiscount(no);
-			}
-		});
+		// $('.item-code').each(function() {
+		// 	let no = $(this).data('id');
+		// 	let itemCode = $(this).val();
+		// 	if(itemCode.length > 0) {
+		// 		recalDiscount(no);
+		// 	}
+		// });
 
 		let mustApprove = 0;
 		let max_diff = 0;
@@ -115,7 +189,7 @@ function saveAdd() {
 			'comments' : $.trim($('#comments').val()),
 			'discPrcnt' : parseDefault(parseFloat($('#discPrcnt').val()), 0),
 			'disAmount' : parseDefault(parseFloat($('#discAmount').val()), 0),
-			'roundDif' : parseDefault(parseFloat($('#roundDif').val()), 0),
+			'roundDif' : 0,
 			'tax' : parseDefault(parseFloat($('#tax').val()), 0), //-- VatSum
 			'docTotal' : parseDefault(parseFloat($('#docTotal').val()), 0),
 			'mustApprove' : mustApprove > 0 ? 1 : 0,
@@ -235,6 +309,9 @@ function saveAdd() {
 				type:'error'
 			});
 
+			$('#btn-save').removeAttr('disabled');
+			$('#btn-draft').removeAttr('disabled');
+
 			return false;
 		}
 
@@ -282,6 +359,7 @@ function saveAdd() {
 					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
 					"discAmount" : $('#disc-amount-'+no).val(),
 					"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
+					"DiscPrcnt" : $('#totalDiscPercent-'+no).val(),
 					"VatGroup" : $('#vat-code-'+no).val(),
 					"VatRate" : $('#vat-rate-'+no).val(),
 					"VatAmount" : $('#vat-amount-'+no).val(),
@@ -291,14 +369,14 @@ function saveAdd() {
 					"rule_id" : $('#rule-id-'+no).val(),
 					'discDiff' : $('#disc-diff-'+no).val(),
 					'uid' : $('#free-item-'+no).data('uid'),
-					'free_item' : $('#free-item-'+no).val(),
 					'parent_uid' : $('#free-item-'+no).data('parent'),
 					'picked' : $('#free-item-'+no).data('picked'),
 					'is_free' : $('#is-free-'+no).val(),
 					'discType' : $('#disc-type-'+no).val(),
 					'WhsCode' : $('#whs-'+no).val(),
 					'QuotaNo' : $('#quota-'+no).val(),
-					'sale_team' : $('#sale_team').val()
+					'sale_team' : $('#sale_team').val(),
+					'count_stock' : $('#count-stock-'+no).val()
 				}
 
 				details.push(row);
@@ -383,14 +461,14 @@ function saveUpdate() {
 	$('#btn-draft').attr('disabled', 'disabled');
 
 	setTimeout(function() {
-		$('.item-code').each(function() {
-			let no = $(this).data('id');
-			let itemCode = $(this).val();
-			if(itemCode.length > 0) {
-				recalDiscount(no);
-				console.log("recal"+no);
-			}
-		});
+		// $('.item-code').each(function() {
+		// 	let no = $(this).data('id');
+		// 	let itemCode = $(this).val();
+		// 	if(itemCode.length > 0) {
+		// 		recalDiscount(no);
+		// 		console.log("recal"+no);
+		// 	}
+		// });
 
 		let mustApprove = 0;
 		let max_diff = 0;
@@ -430,7 +508,7 @@ function saveUpdate() {
 			'comments' : $.trim($('#comments').val()),
 			'discPrcnt' : parseDefault(parseFloat($('#discPrcnt').val()), 0),
 			'disAmount' : parseDefault(parseFloat($('#discAmount').val()), 0),
-			'roundDif' : parseDefault(parseFloat($('#roundDif').val()), 0),
+			'roundDif' : 0,
 			'tax' : parseDefault(parseFloat($('#tax').val()), 0), //-- VatSum
 			'docTotal' : parseDefault(parseFloat($('#docTotal').val()), 0),
 			'mustApprove' : mustApprove > 0 ? 1 : 0,
@@ -609,6 +687,7 @@ function saveUpdate() {
 					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
 					"discAmount" : $('#disc-amount-'+no).val(),
 					"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
+					"DiscPrcnt" : $('#totalDiscPercent-'+no).val(),
 					"VatGroup" : $('#vat-code-'+no).val(),
 					"VatRate" : $('#vat-rate-'+no).val(),
 					"VatAmount" : $('#vat-amount-'+no).val(),
@@ -618,14 +697,14 @@ function saveUpdate() {
 					"rule_id" : $('#rule-id-'+no).val(),
 					'discDiff' : $('#disc-diff-'+no).val(),
 					'uid' : $('#free-item-'+no).data('uid'),
-					'free_item' : $('#free-item-'+no).val(),
 					'parent_uid' : $('#free-item-'+no).data('parent'),
 					'picked' : $('#free-item-'+no).data('picked'),
 					'is_free' : $('#is-free-'+no).val(),
 					'discType' : $('#disc-type-'+no).val(),
 					'WhsCode' : $('#whs-'+no).val(),
 					'QuotaNo' : $('#quota-'+no).val(),
-					'sale_team' : $('#sale_team').val()
+					'sale_team' : $('#sale_team').val(),
+					'count_stock' : $('#count-stock-'+no).val()
 				}
 
 				details.push(row);
@@ -977,8 +1056,7 @@ function get_address_bill_to() {
 
 function addRow() {
 	var no = $('#row-no').val();
-	no++;
-	$('#row-no').val(no);
+
 
 	var data = {"no" : no, "uid" : uniqueId()};
 	var source = $('#row-template').html();
@@ -989,6 +1067,8 @@ function addRow() {
 	reIndex();
 	init();
 	$('#itemCode-'+no).focus();
+	no++;
+	$('#row-no').val(no);
 	return no;
 }
 
@@ -997,32 +1077,27 @@ function removeRow() {
 		if($(this).is(':checked')) {
 			var no = $(this).val();
 			var is_free = $('#is-free-'+no).val();
-			var free_item = parseDefault(parseInt($('#free-item-'+ no).val()), 0);
-
-			if(free_item > 0) {
-				let uid = $('#free-item-'+no).data('uid');
-				$('.is-free').each(function() {
-					if($(this).val() == 1) {
-						let parent_uid = $(this).data('parent');
-						if(uid == parent_uid) {
-							child_row = $(this).data('id');
-							$('#row-'+child_row).remove();
-						}
-					}
-				})
-			}
+			var rule_id = $('#rule-id-'+no).val();
 
 			if(is_free) {
 				var pno = $('#is-free-'+no).data('parentrow');
-				el = $('#free-item-'+pno);
+				el = $('#free-'+pno);
 				qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
 				picked = parseDefault(parseInt(el.data('picked')), 0);
 				picked = picked - qty;
 
 				if(picked >= 0) {
+					freeQty = el.val();
+					balance = freeQty - picked;
 					el.data('picked', picked);
+					$('#btn-free-'+pno).text("Free "+balance);
 					$('#btn-free-'+pno).removeClass('hide');
 				}
+			}
+
+			if(is_free == 0)
+			{
+				removeFreeRow();
 			}
 
 			$('#row-'+no).remove();
@@ -1030,6 +1105,13 @@ function removeRow() {
 	})
 
 	recalTotal();
+}
+
+
+function removeFreeRow() {
+	$('.free-row').remove();
+	$('.free-item').remove();
+	$('.free-btn').remove();
 }
 
 
@@ -1096,9 +1178,10 @@ function updateDiscountRule(no) {
 					var price = parseFloat(ds.Price);
 					var stdPrice = parseFloat(ds.StdPrice);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
-					sellPrice = sellPrice.toFixed(2);
+					sellPrice = roundNumber(sellPrice).toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
 
+					$('#product-id-'+no).val(ds.product_id);
 					$('#price-'+no).val(price)
 					$('#stdPrice-'+no).val(stdPrice);
 					$('#sellPrice-'+no).val(sellPrice);
@@ -1214,6 +1297,7 @@ function getItemData(no) {
 					sellPrice = sellPrice.toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
 
+					$('#product-id-'+no).val(ds.product_id);
 					$('#price-'+no).val(price);
 					$('#stdPrice-'+no).val(stdPrice);
 					$('#sellPrice-'+no).val(sellPrice);
@@ -1250,10 +1334,16 @@ function getItemData(no) {
 					$('#vat-code-'+no).val(ds.VatGroup);
 					$('#sell-price-'+no).val(sellPrice);
 					$('#total-label-'+no).val(addCommas(lineTotal.toFixed(2)));
+					$('#count-stock-'+no).val(ds.count_stock);
 
 					$('#img-'+no).html('<img src="'+ds.image+'" width="40px;" height="40px;" />');
 
-					//updateFreeItem(no);
+					if(ds.count_stock == '1') {
+						$('#price-label-'+no).attr('disabled', 'disabled');
+					}
+					else {
+						$('#price-label-'+no).removeAttr('disabled');
+					}
 
 					$('#line-qty-'+no).focus();
 
@@ -1319,12 +1409,11 @@ function updateFreeItem() {
 }
 
 
-function pickFreeItem(no) {
-	rule_id = $('#free-item-'+no).data('rule');
-	freeQty = $('#free-item-'+no).val();
-	uid = $('#free-item-'+no).data('uid');
-	picked = $('#free-item-'+no).data('picked');
-	priceList = $('#priceList').val();
+
+function pickFreeItem(rule_id) {
+	freeQty = $('#free-'+rule_id).val();
+	uid = $('#free-'+rule_id).data('uid');
+	picked = $('#free-'+rule_id).data('picked');
 
 	if(rule_id != "" && rule_id > 0 && freeQty > 0 && picked < freeQty) {
 		load_in();
@@ -1337,8 +1426,7 @@ function pickFreeItem(no) {
 				'rule_id' : rule_id,
 				'freeQty' : freeQty,
 				'picked' : picked,
-				'uid' : uid,
-				'priceList' : priceList
+				'uid' : uid
 			},
 			success:function(rs) {
 				load_out();
@@ -1379,7 +1467,7 @@ function addFreeRow(uuid) {
 
 	$('.free-item').each(function() {
 		if($(this).data('uid') == parent_uid) {
-			parent_row = $(this).data('id');
+			parent_row = rule_id;
 			freeQty = parseDefault(parseInt($(this).val()), 0);
 			//picked = parseDefault(parseInt($(this).data('picked')), 0);
 		}
@@ -1390,12 +1478,16 @@ function addFreeRow(uuid) {
 		if($(this).data('parent') == parent_uid) {
 			let no = $(this).data('id');
 			let pick = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
-			console.log(pick);
 			picked += pick;
 		}
 	});
 
 	picked = picked + qty;
+	balance = freeQty - picked;
+
+	if(balance >= 0) {
+		$('#btn-free-'+rule_id).text("Free "+balance);
+	}
 
 	if(freeQty == picked) {
 		$('#free-item-modal').modal('hide');
@@ -1459,7 +1551,7 @@ function addFreeRow(uuid) {
 		init();
 	}
 
-	$('#free-item-' + parent_row).data('picked', picked);
+	$('#free-' + parent_row).data('picked', picked);
 
 	if(picked == freeQty) {
 		$('#btn-free-' + parent_row).addClass('hide');
@@ -1467,29 +1559,51 @@ function addFreeRow(uuid) {
 }
 
 
+
+
+
 function recalDiscount(no) {
-	var regex = /[^0-9+.]+/gi;
-	var label = $('#disc-label-'+no).val();
+	regex = /[^0-9+.]+/gi;
+
+	label = $('#disc-label-'+no).val();
 	label = label.replace(regex, '');
-	let first = label.charAt(0);
-	let last = label.charAt(label.length - 1);
+
+	first = label.charAt(0);
+	last = label.charAt(label.length - 1);
+
 	label = first == '+' ? label.slice(1) : label;
 	label = last == '+' ? label.slice(0, -1) : label;
+
 	$('#disc-label-'+no).val(label);
 
-	let price = parseDefault(parseFloat($('#price-'+no).val()), 0);
-	let sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0);
+	price = parseDefault(parseFloat($('#price-'+no).val()), 0);
+	price = roundNumber(price);
+
+	sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0);
 
 	if(price > 0) {
 
-		let disc = parseDiscount(label, price);
+		disc = parseDiscount(label, price);
 
-		let sellPrice = parseDefault(parseFloat(disc['sellPrice']), 0);
+		discountAmount = disc.discountAmount;
+		sellPrice = disc.sellPrice;
+		discPrcnt = discountAmount > 0 ? (discountAmount/price) * 100 : 0.00;
+		discPrcnt = roundNumber(discPrcnt);
 
-		if(sysSellPrice > sellPrice) {
-			let diff = sysSellPrice - sellPrice;
+		$('#totalDiscPercent-'+no).val(discPrcnt.toFixed(2));
 
-			let percentDiff = (diff/sysSellPrice) * 100;
+		if( sysSellPrice > sellPrice ) {
+
+			count_stock = $('#count-stock-'+no).val();
+			if(count_stock == '1') {
+				diff = sysSellPrice - sellPrice;
+
+				percentDiff = (diff/sysSellPrice) * 100;
+				percentDiff = roundNumber(percentDiff);
+			}
+			else {
+				percentDiff = 0;
+			}
 
 			$('#disc-diff-'+no).val(percentDiff);
 		}
@@ -1497,52 +1611,82 @@ function recalDiscount(no) {
 			$('#disc-diff-'+no).val(0);
 		}
 
-		$('#sellPrice-'+no).val(sellPrice.toFixed(2));
-		$('#sell-price-'+no).val(addCommas(sellPrice.toFixed(2)));
+		sellPrice = roundNumber(sellPrice);
+
+
+		$('#sellPrice-'+no).val(sellPrice);
+		$('#sell-price-'+no).val(addCommas(sellPrice));
 
 		recalAmount(no);
 	}
 }
 
 
+
+
+
 function recalAmount(no) {
-  var currentInput = removeCommas($('#disc-label-'+no).val());
-  var val = currentInput.replace(/[A-Za-z!@#$%^&*()]/g, '');
-	var price = $('#price-'+no).val();
-	var qty = $('#line-qty-'+no).val();
+  currentInput = removeCommas($('#disc-label-'+no).val());
+  val = currentInput.replace(/[A-Za-z!@#$%^&*()]/g, '');
+	priceLabel = removeCommas($('#price-label-'+no).val());
+	price = roundNumber(parseDefault(parseFloat(priceLabel), 0.00));
 
-	var disc = parseDiscount(val, price);
+	$('#price-'+no).val(price);
+	$('#price-label-'+no).val(addCommas(price));
 
-	if(disc.sellPrice < 0 || disc.sellPrice > price) {
+	qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
+
+	disc = parseDiscount(val, price);
+
+	discountAmount = disc.discountAmount;
+	sellPrice = disc.sellPrice;
+	sellPrice = roundNumber(sellPrice);
+	discPrcnt = discountAmount > 0 ? (discountAmount / price) * 100 : 0.00;
+
+	$('#totalDiscPercent-'+no).val(discPrcnt.toFixed(2));
+
+	if(sellPrice < 0 || sellPrice > price) {
 		$('#disc-label-' + no).addClass('has-error');
 		$('#disc-error-'+no).val(1);
 		return false;
 	}
 	else {
+
+		vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
+		sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);
+		vatAmount = (sellPrice * vat_rate);
+		vatAmount = roundNumber(vatAmount);
+
+		vatTotal = (qty * vatAmount);
+		vatTotal = roundNumber(vatTotal);
+
+		lineAmount = (qty * sellPrice);
+		lineAmount = roundNumber(lineAmount);
+
+		lineDiscAmount = qty * discountAmount;
+		lineDiscAmount = roundNumber(lineDiscAmount);
+
 		$('#disc-error-'+no).val(0);
 		$('#disc-label-' + no).removeClass('has-error');
-		$('#disc-amount-'+no).val(disc.discountAmount);
-		$('#line-disc-amount-'+no).val(qty * disc.discountAmount);
-
-		let vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
-
-		let sellPrice = (price - disc.discountAmount);
-		let sysSellPrice = $('#sysSellPrice-'+no).val();
-		let vatAmount = (sellPrice * vat_rate);
-		let vatTotal = (qty * vatAmount);
-		let lineAmount = (qty * sellPrice);
-		let lineLabel = lineAmount.toFixed(2);
-
+		$('#disc-amount-'+no).val(discountAmount.toFixed(2));
+		$('#line-disc-amount-'+no).val(lineDiscAmount);
 		$('#sellPrice-'+no).val(sellPrice);
-		$('#sell-price-'+no).val(addCommas(sellPrice.toFixed(2)));
+		$('#sell-price-'+no).val(addCommas(sellPrice));
 		$('#vat-amount-'+no).val(vatAmount);
 		$('#vat-total-'+no).val(vatTotal);
 		$('#line-total-'+no).val(lineAmount);
-		$('#total-label-'+no).val(addCommas(lineLabel));
+		$('#total-label-'+no).val(addCommas(lineAmount));
 
 		recalTotal();
+
+		removeFreeRow();
+		$('#btn-save').addClass('hide');
+		$('#btn-draft').addClass('hide');
 	}
 }
+
+
+
 
 
 function getDiscDiff(old_price, new_price) {
@@ -1556,24 +1700,33 @@ function getDiscDiff(old_price, new_price) {
 }
 
 
+
+
+
+
 function recalTotal() {
 	var total = 0.00; //--- total amount after row discount
 	var totalTaxAmount = 0.00;
 	var df_rate = parseDefault(parseFloat($('#vat_rate').val()), 7); //---- 7%
 	var taxRate = df_rate * 0.01;
-	var rounding = parseDefault(parseFloat(removeCommas($('#roundDif').val())), 0);
+	var rounding = 0;
 
 	$('.line-num').each(function(){
-		let no = $(this).val();
-		let qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
-		let price = parseDefault(parseFloat($('#price-'+no).val()), 0);
-		let amount = parseDefault(parseFloat($('#line-total-'+no).val()), 0);
-		let rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0);
+		var no = $(this).val();
+		var qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
 
+		var price = parseDefault(parseFloat($('#price-'+no).val()), 0.00);
+		price = roundNumber(price);
+
+		var amount = parseDefault(parseFloat($('#line-total-'+no).val()), 0.00);
+		amount = roundNumber(amount);
+
+		var rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0.00);
 
 		if(qty > 0 && price > 0)
 		{
 			total += amount;
+
 			if(rate > 0) {
 				totalTaxAmount += amount;
 			}
@@ -1582,59 +1735,43 @@ function recalTotal() {
 
 	//--- update bill discount
 	var disc = parseDefault(parseFloat($('#discPrcnt').val()), 0);
-	var billDiscAmount = total * (disc * 0.01);
+	disc = roundNumber(disc);
+
+	var billDiscAmount = parseFloat(total * (disc * 0.01));
+	billDiscAmount = roundNumber(billDiscAmount);
+
 	$('#discAmount').val(billDiscAmount);
-	$('#discAmountLabel').val(addCommas(billDiscAmount.toFixed(2)));
+	$('#discAmountLabel').val(addCommas(billDiscAmount));
 
 	//---- bill discount amount
-	var amountAfterDisc = total - billDiscAmount; //--- มูลค่าสินค้า หลังหักส่วนลด
-	var amountBeforeDiscWithTax = totalTaxAmount //-- มูลค่าสินค้า เฉพาะที่มีภาษี
+	amountAfterDisc = parseDefault(parseFloat(total - billDiscAmount), 0.00); //--- มูลค่าสินค้า หลังหักส่วนลด
+	amountBeforeDiscWithTax = parseDefault(parseFloat(totalTaxAmount), 0.00); //-- มูลค่าสินค้า เฉพาะที่มีภาษี
 	//--- คำนวนภาษี หากมีส่วนลดท้ายบิล
 	//--- เฉลี่ยส่วนลดออกให้ทุกรายการ โดยเอาส่วนลดท้ายบิล(จำนวนเงิน)/มูลค่าสินค้าก่อนส่วนลด
 	//--- ได้มูลค่าส่วนลดท้ายบิลที่เฉลี่ยนแล้ว ต่อ บาท เช่น หารกันมาแล้ว ได้ 0.16 หมายถึงทุกๆ 1 บาท จะลดราคา 0.16 บาท
-	var everageBillDisc = (total > 0 ? billDiscAmount/total : 0);
-
-	//console.log(everageBillDisc);
+	everageBillDisc = parseFloat((total > 0 ? billDiscAmount/total : 0));
+	everageBillDisc = roundNumber(everageBillDisc);
 
 	//--- นำผลลัพธ์ข้างบนมาคูณ กับ มูลค่าที่ต้องคิดภาษี (ตัวที่ไม่มีภาษีไม่เอามาคำนวณ)
 	//--- จะได้มูลค่าส่วนลดที่ต้องไปลบออกจากมูลค่าสินค้าที่ต้องคิดภาษี
-	var totalDiscTax = amountBeforeDiscWithTax * everageBillDisc;
-	//console.log(amountBeforeDiscWithTax);
-	var amountToPayTax = amountBeforeDiscWithTax - totalDiscTax;
-	//console.log(amountToPayTax);
-	var taxAmount = amountToPayTax * taxRate;
-	var docTotal = amountAfterDisc + taxAmount + rounding;
+	totalDiscTax = roundNumber(amountBeforeDiscWithTax * everageBillDisc);
 
-	$('#totalAmount').val(total.toFixed(2));
+
+	amountToPayTax = roundNumber(amountBeforeDiscWithTax - totalDiscTax);
+
+	taxAmount = roundNumber(amountToPayTax * taxRate);
+
+	docTotal = roundNumber(amountAfterDisc + taxAmount + rounding);
+
+	$('#totalAmount').val(total);
 	$('#totalAmountLabel').val(addCommas(total.toFixed(2)));
-	$('#tax').val(taxAmount.toFixed(2));
+	$('#tax').val(taxAmount);
 	$('#taxLabel').val(addCommas(taxAmount.toFixed(2)));
-	$('#docTotal').val(docTotal.toFixed(2));
+	$('#docTotal').val(docTotal);
 	$('#docTotalLabel').val(addCommas(docTotal.toFixed(2)));
 }
 
 
-$('#discAmountLabel').focusout(function(){
-	var total = parseDefault(parseFloat($('#totalAmount').val()), 0);
-	var disc = parseDefault(parseFloat(removeCommas($(this).val())), 0);
-
-	if(disc < 0 ) {
-		disc = 0;
-		$(this).val(0);
-		$('#discAmount').val(0);
-	}
-	else if(disc > total) {
-		disc = total;
-		$(this).val(addCommas(total));
-		$('#discAmount').val(total);
-	}
-	//--- convert amount to percent
-	var discPrcnt = (total > 0 ? (disc / total) * 100 : 0);
-
-	$('#discPrcnt').val(discPrcnt.toFixed(2));
-
-	recalTotal();
-})
 
 
 
@@ -1657,13 +1794,6 @@ $('#discPrcnt').change(function() {
 		recalTotal();
 	}
 });
-
-
-
-$('#roundDif').keyup(function(){
-	recalTotal();
-})
-
 
 
 
@@ -1761,13 +1891,6 @@ function init() {
 		$(this).select();
 	});
 }
-
-
-$('#discAmount').keyup(function(e) {
-	if(e.keyCode === 13) {
-		$('#roundDif').focus();
-	}
-})
 
 
 

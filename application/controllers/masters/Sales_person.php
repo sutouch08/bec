@@ -55,7 +55,8 @@ class Sales_person extends PS_Controller
 						"id" => $rs->SlpCode,
 						"name" => $rs->SlpName,
 						"emp_id" => $rs->EmpID,
-						"active" => $rs->Active === 'Y' ? 1 : 0
+						"active" => $rs->Active === 'Y' ? 1 : 0,
+						"last_sync" => now()
 					);
 
 					$this->sales_person_model->add($arr);
@@ -65,7 +66,8 @@ class Sales_person extends PS_Controller
 					$arr = array(
 						"name" => $rs->SlpName,
 						"emp_id" => $rs->EmpID,
-						"active" => $rs->Active === 'Y' ? 1 : 0
+						"active" => $rs->Active === 'Y' ? 1 : 0,
+						"last_sync" => now()
 					);
 
 					$this->sales_person_model->update($slp->id, $arr);

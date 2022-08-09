@@ -21,9 +21,19 @@ class Discount_rule_model extends CI_Model
 			$this->db->like('r.name', $ds['name']);
 		}
 
+		if(isset($ds['type']) && $ds['type'] != "all")
+		{
+			$this->db->where('r.type', $ds['type']);
+		}
+
 		if(isset($ds['active']) && $ds['active'] != "all")
 		{
 			$this->db->where('r.active', $ds['active']);
+		}
+
+		if(isset($ds['priority']) && $ds['priority'] != "all")
+		{
+			$this->db->where('r.priority', $ds['priority']);
 		}
 
 		if(isset($ds['policy']) && $ds['policy'] != "")
@@ -52,9 +62,19 @@ class Discount_rule_model extends CI_Model
 			$this->db->like('r.name', $ds['name']);
 		}
 
+		if(isset($ds['type']) && $ds['type'] != "all")
+		{
+			$this->db->where('r.type', $ds['type']);
+		}
+
 		if(isset($ds['active']) && $ds['active'] != "all")
 		{
 			$this->db->where('r.active', $ds['active']);
+		}
+
+		if(isset($ds['priority']) && $ds['priority'] != "all")
+		{
+			$this->db->where('r.priority', $ds['priority']);
 		}
 
 		if(isset($ds['policy']) && $ds['policy'] != "")

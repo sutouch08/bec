@@ -25,7 +25,7 @@ Url : /api/GetStock
 Playload
 {
 	"ItemCode" : "FG-ART0012",
-	"WhsCode" : "L4-G",
+	"WhsCode" : ["L4-G", "L2-G", "L3-G"],
 	"QuotaNo" : "B22G"
 }
 

@@ -5,6 +5,7 @@ function saveDiscount() {
 	  //--- กำหนดราคาขาย
 	let price = $('#net-price').val();
 
+	let is_free = $('#free-item').is(':checked') ? true : false;
 	//--- กำหนดส่วนลด
 	let disc1 = parseDefault(parseFloat($('#disc1').val()), 0);
 	let disc2 = parseDefault(parseFloat($('#disc2').val()), 0);
@@ -13,7 +14,7 @@ function saveDiscount() {
 	let disc5 = parseDefault(parseFloat($('#disc5').val()), 0);
 
 	//--- จำนวนของแถม
-	let freeQty = parseDefault(parseInt($('#free-qty').val()), 0);
+	let freeQty = parseDefault(parseFloat($('#free-qty').val()), 0);
 
   //--- กำหนดจำนวนขั้นต่ำ
   minQty = parseDefault(parseFloat($('#min-qty').val()), 0);
@@ -24,9 +25,7 @@ function saveDiscount() {
   //--- สามารถรวมยอดได้หรือไม่
   canGroup = $("input[name='canGroup']:checked").val();
 
-	priority = $('#priority').val();
-
-	if(discType == 'F' && freeQty <= 0) {
+	if(is_free && freeQty <= 0) {
 		swal('ข้อผิดพลาด', 'กรุณาระบุจำนวนของแถม', 'error');
 		$('#free-qty').addClass('has-error');
     return false;
@@ -35,7 +34,8 @@ function saveDiscount() {
 		$('#free-qty').removeClass('has-error');
 	}
 
-  if(discType == 'N' && price <= 0) {
+
+  if(discType == 'N' && price <= 0 && freeQty <= 0) {
     swal('ข้อผิดพลาด', 'ราคาขายต้องมากกว่า 0', 'error');
 		$('#net-price').addClass('has-error');
     return false;
@@ -122,7 +122,6 @@ function saveDiscount() {
 		{'name' : 'minQty' , 'value' : minQty},
 		{'name' : 'minAmount' , 'value' : minAmount},
 		{'name' : 'canGroup' , 'value' : canGroup},
-		{'name' : 'priority', 'value' : priority}
 	];
 
 
@@ -133,7 +132,6 @@ function saveDiscount() {
 			ds.push({"name" : name, "value" : pid});
 		});
 	}
-
 
   load_in();
 
@@ -251,8 +249,6 @@ function toggleDiscType(option) {
 		$('#disc5').val(0.00);
 		$('.free').attr('disabled', 'disabled');
 		$('#free-qty').val(0);
-		$('.free-row').remove();
-		$('#visible-free').addClass('hide');
 		$('.price-input').removeAttr('disabled');
 		$('#net-price').focus();
 		return;
@@ -263,8 +259,6 @@ function toggleDiscType(option) {
 		$('#net-price').val(0.00);
 		$('.free').attr('disabled', 'disabled');
 		$('#free-qty').val(0);
-		$('.free-row').remove();
-		$('#visible-free').addClass('hide');
 		$('.disc-input').removeAttr('disabled');
 		$('#disc1').focus();
 		return;
@@ -281,7 +275,6 @@ function toggleDiscType(option) {
 		$('#net-price').val(0.00);
 		$('.free').removeAttr('disabled');
 		$('#free-qty').val(1);
-		$('#visible-free').removeClass('hide');
 		$('#free-item-box').focus();
 		return;
 	}

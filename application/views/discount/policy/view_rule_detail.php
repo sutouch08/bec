@@ -35,9 +35,17 @@ $currency = getConfig('CURRENTCY');
       </tr>
       <tr class="">
         <td class="middle text-right"><strong>Disc. Type</strong></td>
-        <td class="middle"><?php echo $rule->type == 'N' ? "Net price" : "Discount"; ?></td>
+        <td class="middle"><?php echo $rule->type == 'N' ? "Net price" : ($rule->type == 'F' ? 'Get Free' :"Discount"); ?></td>
         <td class="middle text-right"><strong>Value</strong></td>
-        <td class="middle"><?php echo discount_label($rule->type, $rule->price, $rule->disc1, $rule->disc2, $rule->disc3, $rule->disc4, $rule->disc5); ?></td>
+        <td class="middle">
+					<?php if($rule->type == 'P') : ?>
+						<?php echo discount_label($rule->type, $rule->price, $rule->disc1, $rule->disc2, $rule->disc3, $rule->disc4, $rule->disc5); ?>
+					<?php elseif($rule->type == 'N') : ?>
+						<?php echo $rule->price; ?> THB.
+					<?php elseif($rule->type == 'F') : ?>
+						<?php echo $rule->freeQty; ?> PCS.
+					<?php endif; ?>
+				</td>
       </tr>
       <tr>
         <td class="middle text-right"><strong>Min Quantity</strong></td>
@@ -45,11 +53,18 @@ $currency = getConfig('CURRENTCY');
         <td class="middle text-right"><strong>Min Amount</strong></td>
         <td class="middle"><?php echo ($rule->minAmount > 0 ? number($rule->minAmount, 2) : 'No'); ?></td>
       </tr>
-      
+
+			<tr class="">
+				<td class="middle text-right"><strong>Recursive</strong></td>
+				<td class="middle"><?php echo $rule->canGroup == 1 ? 'Yes' : 'No'; ?></td>
+				<td class="middle text-right"><strong>Priority</strong></td>
+        <td class="middle"><?php echo $rule->priority; ?></td>
+			</tr>
+
 			<tr class="">
 				<td class="middle text-right"><strong>Free Items</strong></td>
 				<td class="middle" colspan="3">
-					<?php if($rule->freeQty == 1) : ?>
+					<?php if($rule->type == 'F') : ?>
 						<?php $qs = $this->discount_rule_model->getRuleFreeProduct($rule_id); ?>
 						<?php if( ! empty($qs)) : ?>
 							<?php $i = 1; ?>

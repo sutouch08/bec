@@ -390,7 +390,8 @@ class Sync_data extends CI_Controller
 						"id" => $rs->SlpCode,
 						"name" => $rs->SlpName,
 						"emp_id" => $rs->EmpID,
-						"active" => $rs->Active === 'Y' ? 1 : 0
+						"active" => $rs->Active === 'Y' ? 1 : 0,
+						"last_sync" => now()
 					);
 
 					if( ! $this->sales_person_model->add($arr))
@@ -404,7 +405,8 @@ class Sync_data extends CI_Controller
 					$arr = array(
 						"name" => $rs->SlpName,
 						"emp_id" => $rs->EmpID,
-						"active" => $rs->Active === 'Y' ? 1 : 0
+						"active" => $rs->Active === 'Y' ? 1 : 0,
+						"last_sync" => now()
 					);
 
 					if( ! $this->sales_person_model->update($slp->id, $arr))

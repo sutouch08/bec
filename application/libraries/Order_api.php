@@ -56,33 +56,24 @@ class Order_api
 
 	public function exportOrder($code)
 	{
-		// $testMode = getConfig('TEST_MODE') ? TRUE : FALSE;
-		//
-		// echo $testMode ? "Yes" : "No";
-		// exit();
-		//
-		// $this->ci->load->model('orders/orders_model');
-		//
-		// if($testMode)
-		// {
-		// 	// $arr = array(
-		// 	// 	'Status' => 1,
-		// 	// 	'DocEntry' => 1,
-		// 	// 	'DocNum' => "22000001"
-		// 	// );
-		// 	//
-		// 	// $this->ci->orders_model->update($code, $arr);
-		// 	// return TRUE;
-		//
-		// 	$arr = array(
-		// 		'Status' => 3,
-		// 		'DocEntry' => NULL,
-		// 		'DocNum' => NULL
-		// 	);
-		//
-		// 	$this->error = "Error";
-		// 	return FALSE;
-		// }
+		$testMode = getConfig('TEST') ? TRUE : FALSE;
+
+		echo $testMode ? "Yes" : "No";
+		exit();
+
+		$this->ci->load->model('orders/orders_model');
+
+		if($testMode)
+		{
+			$arr = array(
+				'Status' => 1,
+				'DocEntry' => 1,
+				'DocNum' => "22000001"
+			);
+
+			$this->ci->orders_model->update($code, $arr);
+			return TRUE;
+		}
 
 
 
@@ -102,7 +93,7 @@ class Order_api
 				"GroupNum" => intval($order->Payment),
 				"DocCur" => $order->DocCur,
 				"DocRate" => round($order->DocRate, 2),
-				"DocTotal" => round($order->DocTotal, 2),
+				"DocTotal" => NULL, //round($order->DocTotal, 2),
 				"DocDate" => $order->DocDate,
 				"DocDueDate" => $order->DocDueDate,
 				"TaxDate" => $order->TextDate,
@@ -134,7 +125,7 @@ class Order_api
 					"UomEntry" => intval($rs->UomEntry),
 					"Price" => round($rs->Price, 2),
 					"LineTotal" => round($rs->LineTotal, 2),
-					"DiscPrcnt" => round($rs->DiscPrcnt, 2),
+					"DiscPrcnt" => NULL, //round($rs->DiscPrcnt, 2),
 					"PriceBefDi" => round($rs->Price, 2),
 					"Currency" => $order->DocCur,
 					"Rate" => round($order->DocRate, 2),

@@ -91,6 +91,7 @@ class Discount_model extends CI_Model
 				->join('discount_rule_payment AS py', 'r.id = py.rule_id', 'left')
 				->where_in('id_policy', $arr)
 				->where('r.active', 1)
+				->where('r.type !=', 'F')
 				->group_start()->where('r.all_product', 1)->or_where('r.all_product', 0)->group_end()
 				->group_start()->where('p.product_id IS NULL', NULL, FALSE)->or_where('p.product_id', $pd->id)->group_end()
 				->group_start()->where('pm.model_id IS NULL', NULL, FALSE)->or_where('pm.model_id', $pd->model_id)->group_end()
@@ -113,7 +114,7 @@ class Discount_model extends CI_Model
 
 				if($qs->num_rows() > 0)
 				{
-						$priority = 0;
+						$priority = 1;
 
 						$type = 'P';
 
@@ -153,13 +154,6 @@ class Discount_model extends CI_Model
 								$discount5 = 0;
 								$amount = $qty * $price;
 								$isSetMin = ($rs->minQty > 0 OR $rs->minAmount > 0) ? TRUE : FALSE; //--- มีการกำหนดขั้นต่ำหรือไม่
-								//$canGroup = $rs->canGroup == 1 ? TRUE : FALSE; //--- รวมยอดได้หรือไม่
-
-								//----- หากมีการกำหนดยอดขั้นต่ำ และ สามารถรวมยอดได้
-								if($isSetMin) // && $canGroup)
-								{
-
-								}
 
 
 								//---- ถ้ามีการกำหนดราคาขาย
@@ -228,21 +222,21 @@ class Discount_model extends CI_Model
 
 						//---- ได้ส่วนลดที่ดีที่สุดมาแล้ว
 						$sc = array(
-							'sellPrice' => $price - $totalDiscAmount, //--- ราคา หลังส่วนลด
+							'sellPrice' => round($price - $totalDiscAmount, 2), //--- ราคา หลังส่วนลด
 							'type' => $type,
-							'disAmount1' => $discAmount1, //--- ส่วนลดเป็นจำนวนเงิน (ยอดต่อหน่วย)
+							'disAmount1' => round($discAmount1, 2), //--- ส่วนลดเป็นจำนวนเงิน (ยอดต่อหน่วย)
 							'disc1' => $discLabel1, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'disAmount2' => $discAmount2,
+							'disAmount2' => round($discAmount2, 2),
 							'disc2' => $discLabel2, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'disAmount3' => $discAmount3,
+							'disAmount3' => round($discAmount3, 2),
 							'disc3' => $discLabel3, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'disAmount4' => $discAmount4,
+							'disAmount4' => round($discAmount4, 2),
 							'disc4' => $discLabel4, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'disAmount5' => $discAmount5,
+							'disAmount5' => round($discAmount5, 2),
 							'disc5' => $discLabel5, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'discAmount' => $totalDiscAmount, //--- ส่วนลด รวม 5 สเต็ปเป็นจำนวนเงิน/ 1 รายการ
-							'totalDiscAmount' => ($totalDiscAmount * $qty), //--- เอายอดส่วนลดที่ได้ มา คูณ ด้วย จำนวนสั่ง เป้นส่วนลดทั้งหมด
-							'totalDiscPrecent' => discountAmountToPercent($totalDiscAmount, 1, $price),
+							'discAmount' => round($totalDiscAmount, 2), //--- ส่วนลด รวม 5 สเต็ปเป็นจำนวนเงิน/ 1 รายการ
+							'totalDiscAmount' => round($totalDiscAmount * $qty, 2), //--- เอายอดส่วนลดที่ได้ มา คูณ ด้วย จำนวนสั่ง เป้นส่วนลดทั้งหมด
+							'totalDiscPrecent' => round(discountAmountToPercent($totalDiscAmount, 1, $price), 2),
 							'rule_id' => $dis_rule,
 							'policy_id' => $dis_policy,
 							'freeQty' => $freeQty
@@ -254,6 +248,152 @@ class Discount_model extends CI_Model
 
 		return (object) $sc;
 	}
+
+
+
+
+	public function get_free_item_rule($item_code, $customer_code, $payment_id, $channels_id, $date, $qty, $amount)
+	{
+		$this->load->model('masters/products_model');
+    $this->load->model('masters/customers_model');
+    $this->load->model('orders/orders_model');
+
+		$sc = array(
+			'freeQty' => 0,
+			'rule_id' => NULL,
+			'policy_id' => NULL
+		);
+
+		$date = $date == "" ? date('Y-m-d') : $date;
+		$pd   = $this->products_model->get($item_code);
+		$cs   = $this->customers_model->get($customer_code);
+
+		$po = $this->db->select('id')->where('active', 1)->where('start_date <=', $date)->where('end_date >=', $date)->get($this->dp);
+
+
+		if(! empty($po))
+		{
+			$arr = array();
+
+			foreach($po->result() as $rs)
+			{
+				$arr[] = $rs->id;
+			}
+
+			$qs = $this->db
+			->distinct()
+			->select('r.*')
+			->from('discount_rule AS r')
+			->join('discount_rule_product AS p', 'r.id = p.rule_id', 'left')
+			->join('discount_rule_product_model AS pm', 'r.id = pm.rule_id', 'left')
+			->join('discount_rule_product_category AS pc', 'r.id = pc.rule_id', 'left')
+			->join('discount_rule_product_type AS pt', 'r.id = pt.rule_id', 'left')
+			->join('discount_rule_product_brand AS pb', 'r.id = pb.rule_id', 'left')
+			->join('discount_rule_customer AS c', 'r.id = c.rule_id', 'left')
+			->join('discount_rule_customer_group AS cg', 'r.id = cg.rule_id', 'left')
+			->join('discount_rule_customer_type AS ct', 'r.id = ct.rule_id', 'left')
+			->join('discount_rule_customer_region AS cr', 'r.id = cr.rule_id', 'left')
+			->join('discount_rule_customer_area AS ca', 'r.id = ca.rule_id', 'left')
+			->join('discount_rule_customer_grade AS g', 'r.id = g.rule_id', 'left')
+			->join('discount_rule_channels AS ch', 'r.id = ch.rule_id', 'left')
+			->join('discount_rule_payment AS py', 'r.id = py.rule_id', 'left')
+			->where_in('id_policy', $arr)
+			->where('r.active', 1)
+			->where('r.type', 'F')
+			->group_start()->where('r.all_product', 1)->or_where('r.all_product', 0)->group_end()
+			->group_start()->where('p.product_id IS NULL', NULL, FALSE)->or_where('p.product_id', $pd->id)->group_end()
+			->group_start()->where('pm.model_id IS NULL', NULL, FALSE)->or_where('pm.model_id', $pd->model_id)->group_end()
+			->group_start()->where('pc.category_id IS NULL', NULL, FALSE)->or_where('pc.category_id', $pd->category_id)->group_end()
+			->group_start()->where('pt.type_id IS NULL', NULL, FALSE)->or_where('pt.type_id', $pd->type_id)->group_end()
+			->group_start()->where('pb.brand_id IS NULL', NULL, FALSE)->or_where('pb.brand_id', $pd->brand_id)->group_end()
+			->group_start()->where('r.all_customer', 1)->or_where('r.all_customer', 0)->group_end()
+			->group_start()->where('c.customer_id IS NULL', NULL, FALSE)->or_where('c.customer_id', $cs->id)->group_end()
+			->group_start()->where('cg.group_code IS NULL', NULL, FALSE)->or_where('cg.group_code', $cs->GroupCode)->group_end()
+			->group_start()->where('ct.type_id IS NULL', NULL, FALSE)->or_where('ct.type_id', $cs->TypeCode)->group_end()
+			->group_start()->where('cr.region_id IS NULL', NULL, FALSE)->or_where('cr.region_id', $cs->RegionCode)->group_end()
+			->group_start()->where('ca.area_id IS NULL', NULL, FALSE)->or_where('ca.area_id', $cs->AreaCode)->group_end()
+			->group_start()->where('g.grade_id IS NULL', NULL, FALSE)->or_where('g.grade_id', $cs->GradeCode)->group_end()
+			->group_start()->where('ch.channels_id IS NULL', NULL, FALSE)->or_where('ch.channels_id', $channels_id)->group_end()
+			->group_start()->where('py.payment_id IS NULL', NULL, FALSE)->or_where('py.payment_id', $payment_id)->group_end()
+			->group_start()
+			->where('r.minQty', 0)
+			->or_where('r.minQty <=', $qty)
+			->or_where('r.minAmount', 0)
+			->or_where('r.minAmount <=', ($amount))
+			->group_end()
+			->order_by('r.priority', 'DESC')
+			->get();
+
+			if($qs->num_rows() > 0)
+			{
+				$priority = 1;
+				$freeQty = 0;
+				$dis_rule = NULL;
+				$dis_policy = NULL;
+
+				foreach($qs->result() as $rs)
+				{
+					if($rs->priority >= $priority)
+					{
+						$getQty = $rs->freeQty > $freeQty ? $rs->freeQty : $freeQty;
+
+						if($rs->minAmount > 0 && $rs->canGroup == 1)
+						{
+							$sellAmount = $amount;
+							$totalQty = 0;
+							//---ถ้ามูลค่าที่คีย์มา มากกว่า มูลค่าขั้นต่ำ ทำการหาร เพื่อคำนวนยอดที่ได้
+							while($sellAmount >= $rs->minAmount)
+							{
+								$sellAmount -= $rs->minAmount;
+								$totalQty += $rs->freeQty;
+							}
+
+							$getQty = $totalQty > $getQty ? $totalQty : $getQty;
+						}
+
+						if($rs->minQty > 0 && $rs->canGroup == 1)
+						{
+							$sellQty = $qty;
+							$totalQty = 0;
+
+							while($sellQty >= $rs->minQty)
+							{
+								$sellQty -= $rs->minQty;
+								$totalQty += $rs->freeQty;
+							}
+
+							$getQty = $totalQty > $getQty ? $totalQty : $getQty;
+						}
+
+						if($getQty > $freeQty)
+						{
+							$freeQty = $getQty;
+							$priority = $rs->priority;
+							$dis_rule = $rs->id;
+							$dis_policy = $rs->id_policy;
+						}
+					} //--- end priority
+				} //--- end foreach
+
+				$sc = array(
+					'freeQty' => $freeQty,
+					'rule_id' => $dis_rule,
+					'policy_id' => $dis_policy
+				);
+
+			}
+		}
+
+		return (object) $sc;
+	}
+
+
+
+
+
+
+
+
 
 
 

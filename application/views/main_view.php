@@ -1,7 +1,7 @@
 <?php $this->load->view('include/header'); ?>
 	<div class="row">
 	  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-center">
-	    <h1>Hello! <?php echo get_cookie('displayName'); ?></h1>			
+	    <h1>Hello! <?php echo get_cookie('displayName'); ?></h1>
 	    <h5>Good to see you here</h5>
 	  </div>
 	  <div class="divider-hidden"></div>
@@ -11,5 +11,16 @@
 	  </div>
 
 	</div>
+
+	<?php
+
+		$arr = array(
+			"ItemCode" => "FG-BEC0001",
+			"WhsCode" => array("LG4-G", "LG2-G", "LG3-G"),
+			"QuotaNo" => "B22G"
+		);
+
+		echo json_encode($arr);
+	 ?>
 
 <?php $this->load->view('include/footer'); ?>
