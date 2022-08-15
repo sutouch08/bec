@@ -91,59 +91,49 @@
 
 <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog item-modal">
+				<button type="button" class="btn btn-white btn-info item-close" data-dismiss="modal" aria-hidden="true">
+					<i class="fa fa-times"></i>
+				</button>
         <div class="modal-content item-modal">
             <div class="modal-body">
               <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive">
-									<table class="table table-bordered" style="min-width:1000px;">
-										<thead>
-											<tr>
-												<th class="fix-width-60 text-center">เลือก</th>
-												<th class="fix-width-100 text-center">Item Code</th>
-												<th class="fix-width-350 text-center">Description</th>
-												<th class="fix-width-80 text-center">Available</th>
-												<th class="fix-width-100 text-center">Price</th>
-												<th class="fix-width-120 text-center">Discount</th>
-												<th class="fix-width-100 text-center">Qty</th>
-												<th class="fix-width-120 text-center">Amount</th>
-											</tr>
-										</thead>
-										<tbody id="item-table">
-
-										</tbody>
-									</table>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="item" style="padding:0px;">
+									<div class="width-100 display-block" id="img">
+										<img src="<?php echo get_image_path(1, 'large'); ?>" class="width-100"/>
+									</div>
+									<div class="font-size-14 bold" style="padding:3px 15px;" id="item-name"></div>
+									<div class="font-size-14 bold" style="padding:3px 15px;" id="item-code"></div>
+									<div class="item-price bold" style="padding:3px 15px;" id="item-price"></div>
                 </div>
               </div>
             </div>
             <div class="modal-footer width-100 text-center item-footer">
-							<button type="button" class="btn btn-sm btn-warning" onclick="removeNonCheck()">ลบรายการที่ไม่เลือก</button>
-							<button type="button" class="btn btn-sm btn-default btn-100" onclick="closeModal()">ปิด</button>
-							<button type="button" class="btn btn-sm btn-success btn-100" onclick="addTocart()">Add</button>
+							<div class="width-100 text-center">
+								<div class="ace-spinner middle touch-spinner" style="width:200px;">
+									<div class="input-group">
+										<div class="spinbox-buttons input-group-btn">
+											<button type="button" class="btn spinbox-down btn-white btn-info"
+											style="width:50px; height:50px; padding:3px 10px; border-radius:50%; text-align:center;" onclick="spinDown()">
+											<i class="icon-only  ace-icon ace-icon fa fa-minus"></i>
+										</button>
+									</div>
+									<input type="text" class="input-lg spinbox-input form-control text-center no-border" id="item-qty" value="1" style="font-size:24px;">
+									<div class="spinbox-buttons input-group-btn">
+										<button type="button" class="btn spinbox-up btn-lg btn-white btn-info"
+										style="width:50px; height:50px; padding:3px 10px; border-radius:50%; text-align:center;" onclick="spinUp()">
+											<i class="icon-only  ace-icon ace-icon fa fa-plus"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+							</div>
+							<div class="divider-hidden"></div>
+							<div class="divider-hidden"></div>
+							<button type="button" class="btn btn-lg btn-success btn-block" id="btn-add-to-cart" onclick="addTocart()">Add to cart <span id="btn-price">1000.00 บาท</span></button>
             </div>
         </div>
     </div>
 </div>
-
-
-<script id="item-template" type="text/x-handlebarsTemplate">
-	{{#each this}}
-		<tr id="item-row-{{id}}">
-			<td class="middle text-center">
-				<label>
-					<input type="checkbox" class="ace item-chk" id="chk-{{id}}" value="{{id}}" />
-					<span class="lbl"></span>
-				</label>
-			</td>
-			<td class="middle">{{code}}</td>
-			<td class="middle">{{name}}</td>
-			<td class="middle text-right">{{available}}</td>
-			<td class="middle text-right">{{price}}</td>
-			<td class="middle text-center">{{discLabel}}</td>
-			<td class="middle"><input type="number" class="form-control input-sm text-right input-qty" id="qty-{{id}}" onchange="recalAmount({{id}})"/></td>
-			<td class="middle text-right" id="line-amount-{{id}}"></td>
-		</tr>
-	{{/each}}
-</script>
 
 
 <script id="cart-template" type="text/x-handlebarsTemplate">

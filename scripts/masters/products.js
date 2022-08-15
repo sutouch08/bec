@@ -321,3 +321,35 @@ function toggleCountStock(el) {
 		}
 	});
 }
+
+
+function toggleChangeDiscount(el) {
+	let id = el.val();
+	let allow = el.is(':checked') ? 1 : 0;
+
+	$.ajax({
+		url:HOME + 'set_allow_change_discount',
+		type:'GET',
+		cache:false,
+		data:{
+			'id' : id,
+			'allow_change_discount' : allow
+		}
+	});
+}
+
+
+function toggleCustomerView(el) {
+	let id = el.val();
+	let allow = el.is(':checked') ? 1 : 0;
+
+	$.ajax({
+		url:HOME + 'set_customer_view',
+		type:'GET',
+		cache:false,
+		data:{
+			'id' : id,
+			'customer_view' : allow
+		}
+	});
+}

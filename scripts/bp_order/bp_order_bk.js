@@ -202,7 +202,9 @@ function viewCart() {
 
 
 
-function showItem(categoryCode) {
+function showItem(itemCode) {
+
+	const priceList = $('#priceList').val();
 	const quota = $('#quotaNo').val();
 	const cardCode = $('#customer_code').val();
 	const payment = $('#payment').val();
@@ -211,11 +213,12 @@ function showItem(categoryCode) {
 	load_in();
 
 	$.ajax({
-		url:HOME + 'get_category_items',
+		url:HOME + 'get_item_data',
 		type:'GET',
 		cache:false,
 		data:{
-			'category_code' : categoryCode,
+			'ItemCode' : itemCode,
+			'PriceList' : priceList,
 			'CardCode' : cardCode,
 			'quotaNo' : quota,
 			'Payment' : payment,
@@ -225,10 +228,24 @@ function showItem(categoryCode) {
 			load_out();
 			if(isJson(rs)) {
 				let ds = $.parseJSON(rs);
-				let source = $('#item-template').html();
-				let output = $('#item-table');
+				$('#ItemCode').val(ds.ItemCode);
+				$('#img').html('<img src="'+ ds.image + '" class="width-100" />');
+				$('#item-code').text(ds.ItemCode);
+				$('#item-name').text(ds.ItemName);
+				$('#sell-price').val(ds.SellPrice);
+				$('#item-qty').val(1);
 
-				render(source, ds, output);
+				let sellPrice = ds.SellPrice;
+				let price = ds.Price;
+
+				if(ds.SellPrice < ds.Price) {
+					$('#item-price').html(addCommas(sellPrice.toFixed(2)) + "<span class='old_price'>" + addCommas(price.toFixed(2))+ "</span>");
+				}
+				else {
+					$('#item-price').text(addCommas(price.toFixed(2)));
+				}
+
+				$('#btn-price').text(addCommas(sellPrice.toFixed(2)));
 			}
 
 			$('#itemModal').modal('show');
@@ -236,22 +253,6 @@ function showItem(categoryCode) {
 	})
 }
 
-
-
-function removeNonCheck() {
-	$('.item-chk').each(function() {
-		if($(this).is(':checked') == false) {
-			id = $(this).val();
-
-			$('#item-row-'+id).remove();
-		}
-	})
-}
-
-
-function closeModal() {
-	$('#itemModal').modal('hide');
-}
 
 function spinDown() {
 	let qty = parseDefault(parseInt($('#item-qty').val()), 0);

@@ -33,7 +33,7 @@
 				<td class="width-60 xxx text-right">Discount &nbsp; <?php echo $order->DiscPrcnt; ?>% </td>
 				<td class="width-40 xxx text-right"><?php echo number($order->DiscAmount, 2); ?></td>
 			</tr>
-			
+
 			<tr>
 				<td class="width-60 xxx text-right">Tax</td>
 				<td class="width-40 xxx text-right"><?php echo number($order->VatSum, 2); ?></td>
@@ -60,15 +60,4 @@
 		<?php endif; ?>
   </div>
 
-	<?php $max_disc = empty($approve_right) ? 0 : $approve_right->max_disc; ?>
-	<?php $can_approve = $max_disc >= $order->disc_diff ? TRUE : FALSE; ?>
-
-  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
-		<?php if($order->Status == 0) : ?>
-			<?php if($order->must_approve == 1 && $order->Approved == 'P' && $can_approve) : ?>
-				<button type="button" class="btn btn-sm btn-success btn-100" onclick="doApprove('<?php echo $order->code; ?>')">Approve</button>
-				<button type="button" class="btn btn-sm btn-danger btn-100" onclick="doReject('<?php echo $order->code; ?>')">Reject</button>
-			<?php endif; ?>
-		<?php endif; ?>
-  </div>
 </div>

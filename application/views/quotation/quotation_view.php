@@ -1,4 +1,5 @@
 <?php $this->load->view('include/header'); ?>
+<?php $pm = get_permission('SOODSO', $this->_user->uid, $this->_user->id_profile); ?>
 <script src="<?php echo base_url(); ?>assets/js/jquery.autosize.js"></script>
 <style>
 	.form-group {
@@ -24,7 +25,7 @@
 				<?php if($this->pm->can_add) : ?>
 					<button type="button" class="btn btn-xs btn-primary top-btn" onclick="duplicateSQ('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button>
 				<?php endif; ?>
-				<?php if($order->Status == 1 && ($order->Approved == 'A' OR $order->Approved == 'S') ) : ?>
+				<?php if($pm->can_add && $order->Status == 1 && ($order->Approved == 'A' OR $order->Approved == 'S') ) : ?>
 					<button type="button" class="btn btn-xs btn-success top-btn" onclick="createSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Create Sale Order</button>
 				<?php endif; ?>
 				<?php if($this->pm->can_edit && $order->Status == -1) : ?>

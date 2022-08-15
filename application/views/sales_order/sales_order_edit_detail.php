@@ -53,6 +53,7 @@
 					<?php
 					$disabled = $rs->is_free == 1 ? 'disabled' : '';
 					$freeRow = $rs->is_free == 1 ? 'free-row' : '';
+					$can_change = $rs->allow_change_discount == 0 ? 'disabled' : '';
 					?>
 
         <tr id="row-<?php echo $no; ?>" class="<?php echo $freeRow; ?>">
@@ -80,6 +81,7 @@
 					<input type="hidden" id="<?php echo $rs->uid; ?>" data-id="<?php echo $no; ?>" value="<?php echo $no; ?>"/>
           <input type="hidden" id="disc-type-<?php echo $no; ?>" value="<?php echo $rs->discType; ?>" />
 					<input type="hidden" id="count-stock-<?php echo $no; ?>" value="<?php echo $rs->count_stock; ?>" />
+					<input type="hidden" id="allow-change-discount-<?php echo $no; ?>"  value="<?php echo $rs->allow_change_discount; ?>" />
 
           <td class="middle text-center">
             <input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>"/>
@@ -145,7 +147,7 @@
 
           <td class="middle">
             <input type="text" class="form-control input-sm text-right " id="disc-label-<?php echo $no; ?>"
-						value="<?php echo $rs->discLabel; ?>" onchange="recalDiscount(<?php echo $no; ?>)"  <?php echo $disabled; ?>/>
+						value="<?php echo $rs->discLabel; ?>" onchange="recalDiscount(<?php echo $no; ?>)"  <?php echo $disabled; echo $can_change; ?> />
           </td>
 
           <td class="middle">
@@ -197,8 +199,9 @@
 	<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
 	<input type="hidden" class="is-free" id="is-free-{{no}}" value="0" data-id="{{no}}" data-parent="" data-parentrow=""/>
 	<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
-  <input type="hidden" id="disc-type-{{no}}" value="{{discType}}" />
-	<input type="hidden" id="count-stock-{{no}}" value="{{count_stock}}" />
+  <input type="hidden" id="disc-type-{{no}}" value="P" />
+	<input type="hidden" id="count-stock-{{no}}" value="1" />
+	<input type="hidden" id="allow-change-discount-{{no}}" value="1" />
 
 
 	<td class="middle text-center">
@@ -304,6 +307,7 @@
 	<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
   <input type="hidden" id="disc-type-{{no}}" value="F" />
 	<input type="hidden" id="count-stock-{{no}}" value="1" />
+	<input type="hidden" id="allow-change-discount-{{no}}" value="0" />
 
 
 	<td class="middle text-center">

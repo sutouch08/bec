@@ -28,8 +28,40 @@
       <tbody id="details-template">
 			<?php if(!empty($details)) : ?>
 				<?php $no = 1; ?>
+				<?php $not_ap = array(); ?>
+
 				<?php foreach($details as $rs) : ?>
-        <tr>
+					<?php $hilight = ""; ?>
+					<?php
+					if($order->must_approve && $is_approver && $rs->discDiff > 0)
+					{
+						if(isset($brand[$rs->product_brand_id]))
+						{
+							$max_disc = $brand[$rs->product_brand_id];
+
+							if($rs->discDiff > $max_disc)
+							{
+								$this->can_approve = FALSE;
+								$hilight = "color:red;";
+
+								if(! isset($not_ap[$rs->product_brand_id]))
+								{
+									$not_ap[$rs->product_brand_id]['name'] = $rs->brand_name;
+									$not_ap[$rs->product_brand_id]['disc'] = $rs->discDiff;
+								}
+								else
+								{
+									if($not_ap[$rs->product_brand_id]['disc'] < $rs->discDiff)
+									{
+										$not_ap[$rs->product_brand_id]['disc'] = $rs->discDiff;
+									}
+								}
+							}
+						}
+					}
+					?>
+
+        <tr style="<?php echo $hilight; ?>">
 					<td class="middle text-center"><?php echo $no; ?></td>
           <td class="middle text-center" id="img-<?php echo $no; ?>"><img src="<?php echo $rs->image; ?>" width="40" height="40" /></td>
           <td class="middle"><?php echo $rs->ItemCode; ?></td>
@@ -52,4 +84,5 @@
     </table>
   </div>
 </div>
+<?php $this->not_ap = $not_ap; ?>
 <hr class="padding-5"/>

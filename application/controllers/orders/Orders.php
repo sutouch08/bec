@@ -8,6 +8,9 @@ class Orders extends PS_Controller
   public $menu_sub_group_code = 'ORDER';
 	public $title = 'ORDER';
 	public $segment = 4;
+	public $not_ap = array();
+	public $can_approve = TRUE;
+	public $readOnly = FALSE;
 
   public function __construct()
   {
@@ -27,6 +30,8 @@ class Orders extends PS_Controller
 		$this->load->helper('product_images');
 		$this->load->helper('discount');
 		$this->load->helper('warehouse');
+
+		$this->readOnly = getConfig('CLOSE_SYSTEM') ==  2 ? TRUE : FALSE;
   }
 
 
@@ -103,7 +108,6 @@ class Orders extends PS_Controller
 			$json = file_get_contents('php://input');
 
 			$data = json_decode($json);
-
 
 			if(! empty($data))
 			{
@@ -240,7 +244,8 @@ class Orders extends PS_Controller
 										'user_id' => $this->_user->id,
 										'uname' => $this->_user->uname,
 										'sale_team' => $rs->sale_team,
-										'count_stock' => $rs->count_stock
+										'count_stock' => $rs->count_stock,
+										'allow_change_discount' => $rs->allow_change_discount
 									);
 
 									if(! $this->orders_model->add_detail($arr))
@@ -503,12 +508,10 @@ class Orders extends PS_Controller
 															'rule_id' => $rs->rule_id,
 															'WhsCode' => $rs->WhsCode,
 															'QuotaNo' => $rs->QuotaNo,
-															'free_item' => $rs->free_item,
 															'uid' => $rs->uid,
 															'parent_uid' => $rs->parent_uid,
 															'is_free' => $rs->is_free,
 															'discType' => $rs->discType,
-															'picked' => $rs->picked,
 															'channels_id' => $hd->Channels,
 															'payment_id' => $hd->Payment,
 															'product_id' => $pd->id,
@@ -525,7 +528,8 @@ class Orders extends PS_Controller
 															'user_id' => $this->_user->id,
 															'uname' => $this->_user->uname,
 															'sale_team' => $rs->sale_team,
-															'count_stock' => $rs->count_stock
+															'count_stock' => $rs->count_stock,
+															'allow_change_discount' => $rs->allow_change_discount
 															);
 
 														if(! $this->orders_model->add_detail($arr))
@@ -673,44 +677,100 @@ class Orders extends PS_Controller
 			if($doc->Approved === 'P' && $doc->Status == 0 && $doc->DocNum === NULL)
 			{
 				//--- ตรวจสอบสิทธิ์ในการอนุาัติ
-				$approver = $this->approver_model->get_approve_right($this->_user->id, $doc->sale_team);
+				$approver_id = $this->approver_model->is_approver($this->_user->id, $doc->sale_team);
 
-				if(! empty($approver) OR $this->_SuperAdmin)
+				if(! empty($approver_id) OR $this->_SuperAdmin)
 				{
-					if($this->_SuperAdmin OR $doc->disc_diff <= $approver->max_disc)
-					{
-						$arr = array(
-							'Approved' => 'A',
-							'Approver' => $this->_user->uname
-						);
+					$can_approve = TRUE;
 
-						if(! $this->orders_model->update($code, $arr))
+					$details = $this->orders_model->get_details($code);
+
+					if(!empty($details))
+					{
+						$brand = array();
+
+						$brands = $this->approver_model->get_approver_brand($approver_id);
+
+						if(! empty($brands))
 						{
-							$sc = FALSE;
-							$this->error = "Approve failed";
+							foreach($brands as $bs)
+							{
+								$brand[$bs->id_brand] = $bs->max_disc;
+							}
 						}
 						else
 						{
-							$arr = array(
-								'code' => $code,
-								'user_id' => $this->_user->id,
-								'uname' => $this->_user->uname,
-								'action' => 'approve'
-							);
+							$sc = FALSE;
+							$this->error = "You don't have permission to perform this operation.5";
+						}
 
-							$this->orders_model->add_logs($arr);
+
+						if($sc === TRUE)
+						{
+							foreach($details as $rs)
+							{
+								if($sc === FALSE)
+								{
+									break;
+								}
+
+								if($rs->discDiff > 0)
+								{
+									if(isset($brand[$rs->product_brand_id]))
+									{
+										if($rs->discDiff > $brand[$rs->product_brand_id])
+										{
+											$can_approve = FALSE;
+										}
+									}
+									else
+									{
+										$sc = FALSE;
+										$this->error = "You don't have permission to perform this operation.({$rs->brand_name})";
+									}
+								}
+							}
 						}
 					}
-					else
+
+					if($sc === TRUE)
 					{
-						$sc = FALSE;
-						set_error('permission');
+						if($this->_SuperAdmin OR $can_approve === TRUE)
+						{
+							$arr = array(
+								'Approved' => 'A',
+								'Approver' => $this->_user->uname
+							);
+
+							if(! $this->orders_model->update($code, $arr))
+							{
+								$sc = FALSE;
+								$this->error = "Approve failed";
+							}
+							else
+							{
+								$arr = array(
+									'code' => $code,
+									'user_id' => $this->_user->id,
+									'uname' => $this->_user->uname,
+									'action' => 'approve'
+								);
+
+								$this->orders_model->add_logs($arr);
+							}
+						}
+						else
+						{
+							$sc = FALSE;
+							$this->error = "You don't have permission to perform this operation.3";
+						}
 					}
+
 				}
 				else
 				{
 					$sc = FALSE;
-					set_error('permission');
+					$this->error = "You don't have permission to perform this operation.1";
 				}
 			}
 			else
@@ -826,51 +886,70 @@ class Orders extends PS_Controller
 		$this->load->model('masters/employee_model');
 		$this->load->model('masters/cost_center_model');
 
-		if($this->pm->can_edit OR $this->pm->can_add)
+		$totalAmount = 0;
+		$totalVat = 0;
+
+		$order = $this->orders_model->get_header($code);
+		$approver_id = NULL;
+		$brand = NULL;
+
+		if( ! empty($order))
 		{
-			$totalAmount = 0;
-			$totalVat = 0;
+			$details = $this->orders_model->get_details($order->code);
 
-			$order = $this->orders_model->get_header($code);
-			//print_r($order); exit();
-
-			if( ! empty($order))
+			if(!empty($details))
 			{
-				$details = $this->orders_model->get_details($order->code);
-
-				if(!empty($details))
+				foreach($details as $rs)
 				{
-					foreach($details as $rs)
+					$totalAmount += $rs->LineTotal;
+					$totalVat += $rs->totalVatAmount;
+					$rs->image = get_image_path($rs->product_id, 'mini');
+					$rs->ruleCode = $this->discount_model->getRuleCode($rs->rule_id);
+				}
+			}
+
+			if($order->must_approve)
+			{
+				$approver_id = $this->approver_model->is_approver($this->_user->id, $order->sale_team); //-- return id if approver of team  return false if not
+
+				if($approver_id)
+				{
+					$brands = $this->approver_model->get_approver_brand($approver_id);
+
+					if(! empty($brands))
 					{
-						$totalAmount += $rs->LineTotal;
-						$totalVat += $rs->totalVatAmount;
-						$rs->image = get_image_path($rs->product_id, 'mini');
-						$rs->ruleCode = $this->discount_model->getRuleCode($rs->rule_id);
+						$brand = array();
+
+						foreach($brands as $bs)
+						{
+							$brand[$bs->id_brand] = $bs->max_disc;
+						}
 					}
 				}
-
-				$ds = array(
-					'order' => $order,
-					'details' => $details,
-					'totalAmount' => $totalAmount,
-					'totalVat' => $totalVat,
-					'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
-					'owner' => $this->employee_model->get_name($order->OwnerCode),
-					'dimCode1' => $this->cost_center_model->get_name($order->dimCode1),
-					'dimCode2' => $this->cost_center_model->get_name($order->dimCode2),
-					'dimCode3' => $this->cost_center_model->get_name($order->dimCode3),
-					'dimCode4' => $this->cost_center_model->get_name($order->dimCode4),
-					'dimCode5' => $this->cost_center_model->get_name($order->dimCode5),
-					'logs' => $this->orders_model->get_logs($code),
-					'approve_right' => $this->approver_model->get_approve_right($this->_user->id, $order->sale_team)
-				);
-
-				$this->load->view('sales_order/sales_order_view', $ds);
 			}
-			else
-			{
-				$this->page_error();
-			}
+
+			$ds = array(
+				'order' => $order,
+				'details' => $details,
+				'totalAmount' => $totalAmount,
+				'totalVat' => $totalVat,
+				'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
+				'owner' => $this->employee_model->get_name($order->OwnerCode),
+				'dimCode1' => $this->cost_center_model->get_name($order->dimCode1),
+				'dimCode2' => $this->cost_center_model->get_name($order->dimCode2),
+				'dimCode3' => $this->cost_center_model->get_name($order->dimCode3),
+				'dimCode4' => $this->cost_center_model->get_name($order->dimCode4),
+				'dimCode5' => $this->cost_center_model->get_name($order->dimCode5),
+				'logs' => $this->orders_model->get_logs($code),
+				'is_approver' => $approver_id,
+				'brand' => $brand
+			);
+
+			$this->load->view('sales_order/sales_order_view', $ds);
+		}
+		else
+		{
+			$this->page_error();
 		}
 	}
 
@@ -1553,7 +1632,8 @@ class Orders extends PS_Controller
 					'policy_id' => $disc->policy_id,
 					'freeQty' => $disc->freeQty,
 					'discType' => $disc->type,
-					'count_stock' => $pd->count_stock
+					'count_stock' => $pd->count_stock,
+					'allow_change_discount' => $pd->allow_change_discount
 				);
 			}
 			else

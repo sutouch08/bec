@@ -73,6 +73,7 @@
 					<input type="hidden" id="<?php echo $uuid; ?>" data-id="<?php echo $no; ?>" value="<?php echo $no; ?>"/>
           <input type="hidden" id="disc-type-<?php echo $no; ?>" value="P" />
 					<input type="hidden" id="count-stock-<?php echo $no; ?>" value="1" />
+					<input type="hidden" id="allow-change-discount-<?php echo $no; ?>" value="1" />
 
           <td class="middle text-center">
             <input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>"/>
@@ -182,8 +183,9 @@
 	<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
 	<input type="hidden" class="is-free" id="is-free-{{no}}" value="0" data-id="{{no}}" data-parent="" data-parentrow=""/>
 	<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
-  <input type="hidden" id="disc-type-{{no}}" value="{{discType}}" />
-	<input type="hidden" id="count-stock-{{no}}" value="{{count_stock}}" />
+  <input type="hidden" id="disc-type-{{no}}" value="P" />
+	<input type="hidden" id="count-stock-{{no}}" value="1" />
+	<input type="hidden" id="allow-change-discount-{{no}}" value="1" />
 
 
 	<td class="middle text-center">
@@ -289,6 +291,7 @@
 	<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
   <input type="hidden" id="disc-type-{{no}}" value="F" />
 	<input type="hidden" id="count-stock-{{no}}" value="1" />
+	<input type="hidden" id="allow-change-discount-{{no}}" value="0" />
 
 
 	<td class="middle text-center">

@@ -72,7 +72,7 @@
 
 
 <script src="<?php echo base_url(); ?>scripts/sales_order/sales_order.js?v=<?php echo date('YmdH'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/sales_order/sales_order_add.js?v=<?php echo date('YmdH'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/sales_order/sales_order_add.js?v=<?php echo date('YmdHm'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/address.js"></script>
 
 

@@ -12,15 +12,5 @@
 
 	</div>
 
-	<?php
-
-		$arr = array(
-			"ItemCode" => "FG-BEC0001",
-			"WhsCode" => array("LG4-G", "LG2-G", "LG3-G"),
-			"QuotaNo" => "B22G"
-		);
-
-		echo json_encode($arr);
-	 ?>
 
 <?php $this->load->view('include/footer'); ?>

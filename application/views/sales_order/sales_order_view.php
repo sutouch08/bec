@@ -24,10 +24,10 @@
 				<?php if($this->pm->can_add) : ?>
 					<button type="button" class="btn btn-xs btn-primary" onclick="duplicateSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button>
 				<?php endif; ?>
-				<?php if(empty($order->DocEntry) && ($order->Status == 3 OR $order->Status == 0) && ($order->Approved == 'A' OR $order->Approved == 'S')) : ?>
+				<?php if(($this->pm->can_add OR $this->pm->can_edit) && empty($order->DocEntry) && ($order->Status == 3 OR $order->Status == 0) && ($order->Approved == 'A' OR $order->Approved == 'S')) : ?>
 				<button type="button" class="btn btn-xs btn-success" onclick="sendToSap('<?php echo $order->code; ?>')"><i class="fa fa-send"></i> Send to SAP</button>
 				<?php endif; ?>
-				<?php if($order->Status == 1 && ! empty($order->DocEntry) && !empty($order->DocNum)) : ?>
+				<?php if($this->pm->can_edit && $order->Status == 1 && ! empty($order->DocEntry) && !empty($order->DocNum)) : ?>
 					<button type="button" class="btn btn-xs btn-danger" onclick="cancleSap('<?php echo $order->code; ?>')">Edit Request</button>
 				<?php endif; ?>
 

@@ -13,11 +13,17 @@ function getEdit(id) {
 }
 
 
+function viewDetail(id) {
+	window.location.href = HOME + "view_detail/"+id;
+}
+
+
 function saveAdd() {
 	const user_id = $('#user').val();
-	const team_id = $('#team_id').val();
-	const disc = parseDefault(parseFloat($('#disc').val()), 0.00);
-	const status = $('#status').is(':checked') ? 1 : 0;
+	const uname = $('#user option:selected').text();
+	var error = 0;
+	var team = [];
+	var brand = [];
 
 	if(user_id == "") {
 		set_error($('#user'), $('#user-error'), "Required!");
@@ -27,21 +33,45 @@ function saveAdd() {
 		clear_error($('#user'), $('#user-error'));
 	}
 
-	if(team_id == "") {
-		set_error($('#team_id'), $('#team-error'), "Required!");
+	$('.chk-team').each(function() {
+		if($(this).is(':checked')) {
+			team.push($(this).val());
+		}
+	});
+
+	if(team.length == 0) {
+		swal("Please select Sales Team");
 		return false;
-	}
-	else {
-		clear_error($('#team_id'), $('#team-error'));
 	}
 
-	if(disc <= 0 || disc > 100) {
-		set_error($('#disc'), $('#disc-error'), "Discount must in range 0.1 - 100");
+	$('.chk-brand').each(function() {
+		if($(this).is(':checked')) {
+			id = $(this).val();
+			percent = parseDefault(parseFloat($('#brand-disc-'+id).val()), 0.00);
+			if(percent <= 0.00) {
+				error++;
+				$('#brand-disc-'+id).addClass('has-error');
+			}
+			else {
+				$('#brand-disc-'+id).removeClass('has-error');
+			}
+
+			row = {"id" : id, "max_disc" : percent};
+			brand.push(row);
+		}
+	});
+
+	if(brand.length == 0) {
+		swal("Please select Brand");
 		return false;
 	}
-	else {
-		clear_error($('#disc'), $('#disc-error'));
+
+	if(error > 0) {
+		swal("Max Disc must be greater than 0");
+		return false;
 	}
+
+	const status = $('#status').is(':checked') ? 1 : 0;
 
 	load_in();
 
@@ -51,8 +81,9 @@ function saveAdd() {
 		cache:false,
 		data:{
 			'user_id' : user_id,
-			'team_id' : team_id,
-			'disc' : disc,
+			'uname' : uname,
+			'team' : team,
+			'brand' : brand,
 			'status' : status
 		},
 		success:function(rs) {
@@ -85,11 +116,12 @@ function saveAdd() {
 
 
 function update() {
-	const id = $('#id').val();
+	const approver_id = $('#id').val();
 	const user_id = $('#user').val();
-	const team_id = $('#team_id').val();
-	const disc = parseDefault(parseFloat($('#disc').val()), 0.00);
-	const status = $('#status').is(':checked') ? 1 : 0;
+	const uname = $('#user option:selected').text();
+	var error = 0;
+	var team = [];
+	var brand = [];
 
 	if(user_id == "") {
 		set_error($('#user'), $('#user-error'), "Required!");
@@ -99,21 +131,45 @@ function update() {
 		clear_error($('#user'), $('#user-error'));
 	}
 
-	if(team_id == "") {
-		set_error($('#team_id'), $('#team-error'), "Required!");
+	$('.chk-team').each(function() {
+		if($(this).is(':checked')) {
+			team.push($(this).val());
+		}
+	});
+
+	if(team.length == 0) {
+		swal("Please select Sales Team");
 		return false;
-	}
-	else {
-		clear_error($('#team_id'), $('#team-error'));
 	}
 
-	if(disc <= 0 || disc > 100) {
-		set_error($('#disc'), $('#disc-error'), "Discount must in range 0.1 - 100");
+	$('.chk-brand').each(function() {
+		if($(this).is(':checked')) {
+			id = $(this).val();
+			percent = parseDefault(parseFloat($('#brand-disc-'+id).val()), 0.00);
+			if(percent <= 0.00) {
+				error++;
+				$('#brand-disc-'+id).addClass('has-error');
+			}
+			else {
+				$('#brand-disc-'+id).removeClass('has-error');
+			}
+
+			row = {"id" : id, "max_disc" : percent};
+			brand.push(row);
+		}
+	});
+
+	if(brand.length == 0) {
+		swal("Please select Brand");
 		return false;
 	}
-	else {
-		clear_error($('#disc'), $('#disc-error'));
+
+	if(error > 0) {
+		swal("Max Disc must be greater than 0");
+		return false;
 	}
+
+	const status = $('#status').is(':checked') ? 1 : 0;
 
 	load_in();
 
@@ -122,10 +178,11 @@ function update() {
 		type:'POST',
 		cache:false,
 		data:{
-			'id' : id,
+			'id' : approver_id,
 			'user_id' : user_id,
-			'team_id' : team_id,
-			'disc' : disc,
+			'uname' : uname,
+			'team' : team,
+			'brand' : brand,
 			'status' : status
 		},
 		success:function(rs) {
@@ -205,23 +262,3 @@ function clearFilter() {
 		goBack();
 	})
 }
-
-
-
-function update_name() {
-	const user_id = $('#user').val();
-	const data = $('#user option:selected').text();
-	if(user_id == "") {
-		$('#name').val('');
-	}
-	else {
-		ds = data.split(' : ');
-		$('#name').val(ds[1]);
-	}
-}
-
-$('.search-box').keyup(function(e) {
-	if(e.keyCode === 13) {
-		getSearch();
-	}
-})

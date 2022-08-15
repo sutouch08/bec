@@ -19,8 +19,8 @@ class Approver extends PS_Controller
 	{
 		$filter = array(
 			'uname' => get_filter('uname', 'ap_uname', ''),
-			'name' => get_filter('name', 'ap_name', ''),
 			'team' => get_filter('team', 'ap_team', 'all'),
+			'brand' => get_filter('brand', 'ap_brand', 'all'),
 			'status' => get_filter('status', 'ap_status', 'all')
 		);
 
@@ -47,7 +47,15 @@ class Approver extends PS_Controller
 
 		if($this->pm->can_add)
 		{
-			$this->load->view('approver/approver_add');
+			$this->load->model('masters/sales_team_model');
+			$this->load->model('masters/product_brand_model');
+
+			$ds = array(
+				'sales_team' => $this->sales_team_model->get_all(),
+				'brand' => $this->product_brand_model->get_all()
+			);
+
+			$this->load->view('approver/approver_add', $ds);
 		}
 		else
 		{
@@ -60,43 +68,93 @@ class Approver extends PS_Controller
 	public function add()
 	{
 		$sc = TRUE;
-
 		if($this->pm->can_add)
 		{
 			$user_id = $this->input->post('user_id');
-			$team_id = $this->input->post('team_id');
-			$disc = round($this->input->post('disc'), 2);
+			$uname = $this->input->post('uname');
+			$team = $this->input->post('team');
+			$brand = $this->input->post('brand');
 			$status = $this->input->post('status') == 1 ? 1 : 0;
 
-			if( ! empty($user_id) && ! empty($team_id) && ! empty($disc))
+			if( ! empty($user_id) && ! empty($team) && ! empty($brand))
 			{
-				if($disc > 0 && $disc <= 100)
-				{
-					if( ! $this->approver_model->is_exists_data($user_id, $team_id, $disc))
-					{
-						$arr = array(
-							'user_id' => $user_id,
-							'team_id' => $team_id,
-							'max_disc' => $disc,
-							'status' => $status
-						);
+				$arr = array(
+					'user_id' => $user_id,
+					'uname' => $uname,
+					'status' => $status,
+					'date_add' => now(),
+					'add_user' => $this->_user->uname
+				);
 
-						if( ! $this->approver_model->add($arr))
+				if(! $this->approver_model->is_exists($user_id))
+				{
+					$this->db->trans_begin();
+					$id = $this->approver_model->add($arr);
+
+					if($id)
+					{
+						foreach($team as $team_id)
 						{
-							$sc = FALSE;
-							set_error('insert', 'approver');
+							if($sc === FALSE)
+							{
+								break;
+							}
+
+							$arr = array(
+								'id_approver' => $id,
+								'id_team' => $team_id
+							);
+
+							if(! $this->approver_model->add_team($arr))
+							{
+								$sc = FALSE;
+								$this->error = "Insert team failed";
+							}
+						}
+
+						if($sc === TRUE)
+						{
+							foreach($brand as $rs)
+							{
+								if($sc === FALSE)
+								{
+									break;
+								}
+
+								$arr = array(
+									'id_approver' => $id,
+									'id_brand' => $rs['id'],
+									'max_disc' => $rs['max_disc']
+								);
+
+								if(! $this->approver_model->add_brand($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert brand failed";
+								}
+							}
 						}
 					}
 					else
 					{
 						$sc = FALSE;
-						set_error('exists', "This data");
+						$this->error = "Insert Approver failed";
+					}
+
+
+					if($sc === TRUE)
+					{
+						$this->db->trans_commit();
+					}
+					else
+					{
+						$this->db->trans_rollback();
 					}
 				}
 				else
 				{
 					$sc = FALSE;
-					$this->error = "Discount must in range 0.1 - 100";
+					$this->error = "Approver already exists";
 				}
 			}
 			else
@@ -123,8 +181,41 @@ class Approver extends PS_Controller
 
 		if($this->pm->can_edit)
 		{
-			$approver = $this->approver_model->get($id);
-			$this->load->view('approver/approver_edit', $approver);
+			$this->load->model('masters/sales_team_model');
+			$this->load->model('masters/product_brand_model');
+			$ap_brand = array();
+			$ap_team = array();
+
+			$brand = $this->approver_model->get_approver_brand($id);
+
+			if(!empty($brand))
+			{
+				foreach($brand as $bs)
+				{
+					$ap_brand[$bs->id_brand] = $bs->max_disc;
+				}
+			}
+
+			$team = $this->approver_model->get_approver_team($id);
+
+			if(!empty($team))
+			{
+				foreach($team as $tm)
+				{
+					$ap_team[$tm->id_team] = $tm->id_team;
+				}
+			}
+
+
+			$ds = array(
+				'approver' => $this->approver_model->get($id),
+				'brand' => $this->product_brand_model->get_all(),
+				'sales_team' => $this->sales_team_model->get_all(),
+				'ap_team' => $ap_team,
+				'ap_brand' => $ap_brand
+			);
+
+			$this->load->view('approver/approver_edit', $ds);
 		}
 		else
 		{
@@ -137,44 +228,97 @@ class Approver extends PS_Controller
 	public function update()
 	{
 		$sc = TRUE;
-
 		if($this->pm->can_edit)
 		{
 			$id = $this->input->post('id');
 			$user_id = $this->input->post('user_id');
-			$team_id = $this->input->post('team_id');
-			$disc = round($this->input->post('disc'), 2);
+			$uname = $this->input->post('uname');
+			$team = $this->input->post('team');
+			$brand = $this->input->post('brand');
 			$status = $this->input->post('status') == 1 ? 1 : 0;
 
-			if( ! empty($id) && ! empty($user_id) && ! empty($team_id) && ! empty($disc))
+			if( ! empty($user_id) && ! empty($team) && ! empty($brand))
 			{
-				if($disc > 0 && $disc <= 100)
+				if(! $this->approver_model->is_exists($user_id, $id))
 				{
-					if( ! $this->approver_model->is_exists_data($user_id, $team_id, $disc, $id))
-					{
-						$arr = array(
-							'user_id' => $user_id,
-							'team_id' => $team_id,
-							'max_disc' => $disc,
-							'status' => $status
-						);
+					$this->db->trans_begin();
 
-						if( ! $this->approver_model->update($id, $arr))
+					if(! $this->approver_model->drop_team($id))
+					{
+						$sc = FALSE;
+						$this->error = "Drop approver team failed";
+					}
+
+					if(! $this->approver_model->drop_brand($id))
+					{
+						$sc = FALSE;
+						$this->error = "Drop approver brand failed";
+					}
+
+					if($sc === TRUE)
+					{
+						foreach($team as $team_id)
 						{
-							$sc = FALSE;
-							set_error('update', 'approver');
+							if($sc === FALSE)
+							{
+								break;
+							}
+
+							$arr = array(
+								'id_approver' => $id,
+								'id_team' => $team_id
+							);
+
+							if(! $this->approver_model->add_team($arr))
+							{
+								$sc = FALSE;
+								$this->error = "Insert team failed";
+							}
+						}
+
+						if($sc === TRUE)
+						{
+							foreach($brand as $rs)
+							{
+								if($sc === FALSE)
+								{
+									break;
+								}
+
+								$arr = array(
+									'id_approver' => $id,
+									'id_brand' => $rs['id'],
+									'max_disc' => $rs['max_disc']
+								);
+
+								if(! $this->approver_model->add_brand($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert brand failed";
+								}
+							}
 						}
 					}
 					else
 					{
 						$sc = FALSE;
-						set_error('exists', "This data");
+						$this->error = "Insert Approver failed";
+					}
+
+
+					if($sc === TRUE)
+					{
+						$this->db->trans_commit();
+					}
+					else
+					{
+						$this->db->trans_rollback();
 					}
 				}
 				else
 				{
 					$sc = FALSE;
-					$this->error = "Discount must in range 0.1 - 100";
+					$this->error = "Approver already exists";
 				}
 			}
 			else
@@ -192,6 +336,47 @@ class Approver extends PS_Controller
 		$this->_response($sc);
 	}
 
+
+
+
+	public function view_detail($id)
+	{
+		$this->load->model('masters/sales_team_model');
+		$this->load->model('masters/product_brand_model');
+		$ap_brand = array();
+		$ap_team = array();
+
+		$brand = $this->approver_model->get_approver_brand($id);
+
+		if(!empty($brand))
+		{
+			foreach($brand as $bs)
+			{
+				$ap_brand[$bs->id_brand] = $bs->max_disc;
+			}
+		}
+
+		$team = $this->approver_model->get_approver_team($id);
+
+		if(!empty($team))
+		{
+			foreach($team as $tm)
+			{
+				$ap_team[$tm->id_team] = $tm->id_team;
+			}
+		}
+
+
+		$ds = array(
+			'approver' => $this->approver_model->get($id),
+			'brand' => $this->product_brand_model->get_all(),
+			'sales_team' => $this->sales_team_model->get_all(),
+			'ap_team' => $ap_team,
+			'ap_brand' => $ap_brand
+		);
+
+		$this->load->view('approver/approver_view_detail', $ds);
+	}
 
 
 	public function delete()
@@ -228,7 +413,7 @@ class Approver extends PS_Controller
 
 	public function clear_filter()
 	{
-		return clear_filter(array('ap_uname', 'ap_name', 'ap_team', 'ap_status'));
+		return clear_filter(array('ap_uname', 'ap_team', 'ap_brand', 'ap_status'));
 	}
 
 }

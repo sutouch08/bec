@@ -37,7 +37,7 @@ function delete_product_image($id)
 			if(! unlink($image_path))
 			{
 				$sc = FALSE;
-			}			
+			}
 		}
   }
 
@@ -61,5 +61,32 @@ function no_image_path($size)
   $path = $ci->config->item('image_path');
   $no_image_path = base_url().$path.$size.'/no_image_'.$size.'.jpg';
   return $no_image_path;
+}
+
+//----------Category image
+
+function get_category_path($code)
+{
+	$ci =& get_instance();
+  $path = $ci->config->item('image_path').'category/';
+  $no_image_path = base_url().$path.'no_image.jpg';
+	$image_path = base_url().$path.$code.'.jpg';
+	$file = $ci->config->item('image_file_path').'category/'.$code.'.jpg';
+
+	return file_exists($file) ? $image_path : $no_image_path;
+}
+
+function delete_category_image($code)
+{
+  $ci =& get_instance();
+  $path = $ci->config->item('image_file_path').'category/';
+	$image_path = $path.$code.'.jpg';
+
+	if(file_exists($image_path))
+	{
+		return unlink($image_path);
+	}
+
+	return FALSE;
 }
 ?>

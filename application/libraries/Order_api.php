@@ -58,11 +58,6 @@ class Order_api
 	{
 		$testMode = getConfig('TEST') ? TRUE : FALSE;
 
-		echo $testMode ? "Yes" : "No";
-		exit();
-
-		$this->ci->load->model('orders/orders_model');
-
 		if($testMode)
 		{
 			$arr = array(
@@ -304,7 +299,8 @@ class Order_api
 
 						$arr = array(
 							'code' => $OrderCode,
-							'status' => $res->DocStatus
+							'DocStatus' => $res->DocStatus,
+							'status' => 'S'
 						);
 
 						$this->ci->sync_logs_model->add_status_logs($arr);

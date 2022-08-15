@@ -1,7 +1,8 @@
 
-function saveAsDraft() {
+function saveAsDraft(option) {
 	$('#is_draft').val(1);
-	validateFreeItem('add');
+
+	validateFreeItem(option);
 }
 
 
@@ -376,7 +377,8 @@ function saveAdd() {
 					'WhsCode' : $('#whs-'+no).val(),
 					'QuotaNo' : $('#quota-'+no).val(),
 					'sale_team' : $('#sale_team').val(),
-					'count_stock' : $('#count-stock-'+no).val()
+					'count_stock' : $('#count-stock-'+no).val(),
+					'allow_change_discount' : $('#allow-change-discount-'+no).val()
 				}
 
 				details.push(row);
@@ -704,7 +706,8 @@ function saveUpdate() {
 					'WhsCode' : $('#whs-'+no).val(),
 					'QuotaNo' : $('#quota-'+no).val(),
 					'sale_team' : $('#sale_team').val(),
-					'count_stock' : $('#count-stock-'+no).val()
+					'count_stock' : $('#count-stock-'+no).val(),
+					'allow_change_discount' : $('#allow-change-discount-'+no).val()
 				}
 
 				details.push(row);
@@ -1335,6 +1338,7 @@ function getItemData(no) {
 					$('#sell-price-'+no).val(sellPrice);
 					$('#total-label-'+no).val(addCommas(lineTotal.toFixed(2)));
 					$('#count-stock-'+no).val(ds.count_stock);
+					$('#allow-change-discount-'+no).val(ds.allow_change_discount);
 
 					$('#img-'+no).html('<img src="'+ds.image+'" width="40px;" height="40px;" />');
 
@@ -1343,6 +1347,13 @@ function getItemData(no) {
 					}
 					else {
 						$('#price-label-'+no).removeAttr('disabled');
+					}
+
+					if(ds.allow_change_discount == '0') {
+						$('#disc-label-'+no).attr('disabled', 'disabled');
+					}
+					else {
+						$('#disc-label-'+no).removeAttr('disabled');
 					}
 
 					$('#line-qty-'+no).focus();

@@ -109,8 +109,9 @@ class Orders_model extends CI_Model
 	public function get_details($code)
 	{
 		$rs = $this->db
-		->select('od.*, uom.name AS uom_name, ch.code AS channels_code, st.code AS team_code')
+		->select('od.*, pb.name AS brand_name, uom.name AS uom_name, ch.code AS channels_code, st.code AS team_code')
 		->from('order_details AS od')
+		->join('product_brand AS pb', 'od.product_brand_id = pb.id', 'left')
 		->join('uom', 'od.UomEntry = uom.id', 'left')
 		->join('channels AS ch', 'od.channels_id = ch.id', 'left')
 		->join('sale_team AS st', 'od.sale_team = st.id', 'left')

@@ -51,16 +51,18 @@
 
 	<div class="col-lg-8 col-md-8 col-sm-7 hidden-xs padding-5"></div>
 
-	<?php $max_disc = empty($approve_right) ? 0 : $approve_right->max_disc; ?>
-	<?php $can_approve = $max_disc >= $order->disc_diff ? TRUE : FALSE; ?>
-
   <div class="col-lg-4 col-md-4 col-sm-5 col-xs-12 padding-5 text-right">
-		<?php if($order->Status == 0) : ?>
-			<?php if($order->must_approve == 1 && $order->Approved == 'P' && ($can_approve OR $this->_SuperAdmin)) : ?>
+		<?php if($order->Status == 0 && ($is_approver OR $this->_SuperAdmin)) : ?>
+			<?php if($order->must_approve == 1 && $order->Approved == 'P' && ($this->can_approve OR $this->_SuperAdmin) && ($this->readOnly === FALSE OR $this->_SuperAdmin)) : ?>
 				<button type="button" class="btn btn-sm btn-success btn-100" onclick="doApprove('<?php echo $order->code; ?>')">Approve</button>
 				<button type="button" class="btn btn-sm btn-danger btn-100" onclick="doReject('<?php echo $order->code; ?>')">Reject</button>
 			<?php else : ?>
-				<center class="red" >คุณต้องมีสิทธิ์ในการอนุมัติ อย่างน้อย <?php echo $order->disc_diff; ?> %</center>
+				<p class="red" >คุณต้องมีสิทธิ์ในการอนุมัติ</p>
+				<?php if(! empty($this->not_ap)) : ?>
+					<?php foreach($this->not_ap as $nap) : ?>
+						<p class="red"><?php echo $nap['name']; ?> : <?php echo $nap['disc'].' %'; ?></p>
+					<?php endforeach; ?>
+				<?php endif; ?>
 			<?php endif; ?>
 		<?php endif; ?>
   </div>

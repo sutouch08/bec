@@ -14,13 +14,11 @@
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Username</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<select class="width-100" id="user">
-				<option value="">Please Select</option>
-				<?php echo select_user(); ?>
-			</select>
+			<input type="text" class="form-control input-sm" value="<?php echo $approver->uname; ?>" disabled/>
     </div>
 		<div class="col-xs-12 col-sm-reset inline red margin-top-5" id="user-error"></div>
   </div>
+
 
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Sales Team</label>
@@ -36,12 +34,13 @@
 				<tbody>
 		<?php if(!empty($sales_team)) : ?>
 			<?php foreach($sales_team as $rs) : ?>
+				<?php $chk = (! empty($ap_team[$rs->id]) ? 'checked' : ''); ?>
 				<tr>
 					<td><?php echo $rs->code; ?></td>
 					<td><?php echo $rs->name; ?></td>
 					<td class="text-center">
 						<label>
-							<input type="checkbox" class="ace chk-team" value="<?php echo $rs->id; ?>" />
+							<input type="checkbox" class="ace chk-team" value="<?php echo $rs->id; ?>" <?php echo $chk; ?> disabled/>
 							<span class="lbl"></span>
 						</label>
 					</td>
@@ -53,7 +52,6 @@
     </div>
 		<div class="col-sm-reset inline red margin-top-5" id="team-error"></div>
   </div>
-
 
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Brand</label>
@@ -70,17 +68,19 @@
 				<tbody>
 		<?php if(!empty($brand)) : ?>
 			<?php foreach($brand as $rs) : ?>
+				<?php $chk = isset($ap_brand[$rs->id]) ? 'checked' : '';  ?>
+				<?php $val = isset($ap_brand[$rs->id]) ? $ap_brand[$rs->id] : 0.00; ?>
 				<tr>
 					<td class="text-center">
 						<label>
-							<input type="checkbox" class="ace chk-brand" value="<?php echo $rs->id; ?>" data-id="<?php echo $rs->id; ?>" />
+							<input type="checkbox" class="ace chk-brand" value="<?php echo $rs->id; ?>" data-id="<?php echo $rs->id; ?>" <?php echo $chk; ?> disabled/>
 							<span class="lbl"></span>
 						</label>
 					</td>
 					<td><?php echo $rs->code; ?></td>
 					<td><?php echo $rs->name; ?></td>
 					<td>
-						<input type="number" class="form-control input-sm text-center disc" id="brand-disc-<?php echo $rs->id; ?>" value="0.00" />
+						<input type="number" class="form-control input-sm text-center disc" id="brand-disc-<?php echo $rs->id; ?>" value="<?php echo $val; ?>" disabled/>
 					</td>
 				</tr>
 			<?php endforeach; ?>
@@ -91,34 +91,20 @@
 		<div class="col-sm-reset inline red margin-top-5" id="team-error"></div>
   </div>
 
-
-
 	<div class="divider-hidden"></div>
 
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label"></label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 			<label>
-				<input type="checkbox" class="ace" id="status" checked />
+				<input type="checkbox" class="ace" id="status" <?php echo is_checked(1, $approver->status); ?> disabled />
 				<span class="lbl">&nbsp; Active</span>
 			</label>
     </div>
   </div>
 
-
 	<div class="divider-hidden"></div>
-
-
-  <div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label"></label>
-    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 text-right">
-			<button type="button" class="btn btn-sm btn-success btn-100" onclick="saveAdd()">Add</button>
-    </div>
-  </div>
 </form>
 
-<script>
-	$('#user').select2();
-</script>
 <script src="<?php echo base_url(); ?>scripts/approver/approver.js?v=<?php echo date('YmdH'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

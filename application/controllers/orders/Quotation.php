@@ -8,6 +8,7 @@ class Quotation extends PS_Controller
   public $menu_sub_group_code = 'ORDER';
 	public $title = 'Quotations';
 	public $segment = 4;
+	public $readOnly = FALSE;
 
 	public function __construct()
   {
@@ -28,6 +29,8 @@ class Quotation extends PS_Controller
 		$this->load->helper('product_images');
 		$this->load->helper('discount');
 		$this->load->helper('warehouse');
+
+		$this->readOnly = getConfig('CLOSE_SYSTEM') == 2 ? TRUE : FALSE;
   }
 
 
@@ -829,45 +832,41 @@ class Quotation extends PS_Controller
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/employee_model');
 
-		if($this->pm->can_edit OR $this->pm->can_add)
+		$totalAmount = 0;
+		$totalVat = 0;
+
+		$order = $this->quotation_model->get_header($code);
+
+		if( ! empty($order))
 		{
-			$totalAmount = 0;
-			$totalVat = 0;
+			$details = $this->quotation_model->get_details($order->code);
 
-			$order = $this->quotation_model->get_header($code);
-
-			if( ! empty($order))
+			if(!empty($details))
 			{
-				$details = $this->quotation_model->get_details($order->code);
-
-				if(!empty($details))
+				foreach($details as $rs)
 				{
-					foreach($details as $rs)
-					{
-						$totalAmount += $rs->LineTotal;
-						$totalVat += $rs->totalVatAmount;
-						$rs->image = get_image_path($rs->product_id, 'mini');
-					}
+					$totalAmount += $rs->LineTotal;
+					$totalVat += $rs->totalVatAmount;
+					$rs->image = get_image_path($rs->product_id, 'mini');
 				}
-
-				$ds = array(
-					'order' => $order,
-					'details' => $details,
-					'totalAmount' => $totalAmount,
-					'totalVat' => $totalVat,
-					'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
-					'owner' => $this->employee_model->get_name($order->OwnerCode),
-					'dimCode' => $this->parseDimCode($order->dimCode1, $order->dimCode2, $order->dimCode3, $order->dimCode4, $order->dimCode5),
-					'logs' => $this->quotation_model->get_logs($code),
-					'approve_right' => $this->approver_model->get_approve_right($this->_user->id, $order->sale_team)
-				);
-
-				$this->load->view('quotation/quotation_view', $ds);
 			}
-			else
-			{
-				$this->page_error();
-			}
+
+			$ds = array(
+				'order' => $order,
+				'details' => $details,
+				'totalAmount' => $totalAmount,
+				'totalVat' => $totalVat,
+				'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
+				'owner' => $this->employee_model->get_name($order->OwnerCode),
+				'dimCode' => $this->parseDimCode($order->dimCode1, $order->dimCode2, $order->dimCode3, $order->dimCode4, $order->dimCode5),
+				'logs' => $this->quotation_model->get_logs($code)
+			);
+
+			$this->load->view('quotation/quotation_view', $ds);
+		}
+		else
+		{
+			$this->page_error();
 		}
 	}
 

@@ -15,6 +15,7 @@ class Product_category extends PS_Controller
     $this->home = base_url().'masters/product_category';
     $this->load->model('masters/product_category_model');
 		$this->load->helper('product_category');
+		$this->load->helper('product_images');
   }
 
 
@@ -313,6 +314,101 @@ class Product_category extends PS_Controller
 		{
 			$sc = FALSE;
 			$this->error = "Category not found";
+		}
+
+		$this->_response($sc);
+	}
+
+
+
+	public function change_image()
+	{
+		$sc = TRUE;
+
+		if($this->input->post('id') && $this->input->post('code'))
+		{
+			$file = isset( $_FILES['image'] ) ? $_FILES['image'] : FALSE;
+			$id = $this->input->post('id');
+			$code = $this->input->post('code'); //--- item code
+
+			if($file !== FALSE)
+			{
+				;
+				if(! $this->do_upload($file, $code))
+				{
+					$sc = FALSE;
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				$this->error = "File not found";
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('required');
+		}
+
+		$this->_response($sc);
+	}
+
+
+	public function do_upload($file, $code)
+	{
+		$sc = TRUE;
+    $this->load->library('upload');
+
+		$img_name 	= $code; //-- ตั้งชื่อรูปตาม id_product
+		$image_path = $this->config->item('image_path').'category/';
+    $image 	= new Upload($file);
+
+    if( $image->uploaded )
+    {
+			$imagePath = $image_path.'/'; //--- แต่ละ folder
+			$image->file_new_name_body = $img_name; 		//--- เปลี่ยนชือ่ไฟล์ตาม prefix + id_image
+			$image->image_resize			 = TRUE;		//--- อนุญาติให้ปรับขนาด
+			$image->image_retio_fill	 = TRUE;		//--- เติกสีให้เต็มขนาดหากรูปภาพไม่ได้สัดส่วน
+			$image->file_overwrite		 = TRUE;		//--- เขียนทับไฟล์เดิมได้เลย
+			$image->auto_create_dir		 = TRUE;		//--- สร้างโฟลเดอร์อัตโนมัติ กรณีที่ไม่มีโฟลเดอร์
+			$image->image_x					   = 800;		//--- ปรับขนาดแนวตั้ง
+			$image->image_y					   = 800;		//--- ปรับขนาดแนวนอน
+			$image->image_background_color	= "#FFFFFF";		//---  เติมสีให้ตามี่กำหนดหากรูปภาพไม่ได้สัดส่วน
+			$image->image_convert			= 'jpg';		//--- แปลงไฟล์
+
+			$image->process($imagePath);						//--- ดำเนินการตามที่ได้ตั้งค่าไว้ข้างบน
+
+			if( ! $image->processed )	//--- ถ้าไม่สำเร็จ
+			{
+				$sc = FALSE;
+				$this->error = $image->error;
+			}
+    } //--- end if
+
+    $image->clean();	//--- เคลียร์รูปภาพออกจากหน่วยความจำ
+
+		return $sc;
+	}
+
+
+	public function delete_image($code)
+	{
+		$sc = TRUE;
+
+		if(!empty($code))
+		{
+			if(! delete_category_image($code))
+			{
+
+				$sc = FALSE;
+				$this->error = "Delete image failed";
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "ไม่พบรูปภาพ";
 		}
 
 		$this->_response($sc);

@@ -77,15 +77,41 @@ class Bporders extends CI_Controller
 
 	public function index()
 	{
+		$this->side_filter = TRUE;
+		$this->show_cart = TRUE;
 
 		$ds = array(
+			'home' => $this->products_model->get_home_product(20),
+			'last_sale' => $this->orders_model->get_last_sale_product($this->_user->customer_code, 20, 0),
 			'customer' => $this->customers_model->get($this->_user->customer_code),
 			'cart' => $this->cart_model->get_customer_cart($this->_user->customer_code),
-			'cate' => $this->product_category_model->get_by_level(5, TRUE),
 			'totalQty' => 0,
-			'totalAmount' => 0
+			'totalAmount' => 0,
+			'cateCode' => NULL,
+			'brandCode' => NULL
 		);
 
+		if(!empty($ds['home']))
+		{
+			foreach($ds['home'] as $rs)
+			{
+				if(! $this->use_product_price)
+				{
+					$price = $this->getPrice($rs->code, $ds['customer']->ListNum);
+					$rs->price = $price == 0 ? $rs->price : $price;
+				}
+
+				$rs->image_path = get_image_path($rs->id);
+			}
+		}
+
+		if(!empty($ds['last_sale']))
+		{
+			foreach($ds['last_sale'] as $rs)
+			{
+				$rs->image_path = get_image_path($rs->id);
+			}
+		}
 
     if(!empty($ds['cart']))
     {
@@ -99,62 +125,6 @@ class Bporders extends CI_Controller
 
 		$this->load->view('bp_order/bp_home', $ds);
 	}
-
-
-
-	public function get_category_items()
-	{
-		$sc = TRUE;
-		$ds = array();
-		$docDate = today();
-		$category_code = $this->input->get('category_code');
-		$cardCode = $this->input->get('CardCode');
-		$payment = $this->input->get('Payment');
-		$channels = $this->input->get('Channels');
-		$quotaNo = $this->input->get('quotaNo');
-		$whsCode = getConfig('DEFAULT_WAREHOUSE');
-		$qty = 1;
-
-		$items = $this->products_model->get_product_by_category($category_code);
-
-		if(!empty($items))
-		{
-			foreach($items as $rs)
-			{
-				$pd = $this->products_model->get($rs->code);
-
-				if( ! empty($pd))
-				{
-					$stock = $this->getStock($rs->code, $whsCode, $quotaNo, $pd->count_stock);
-					$disc = $this->discount_model->get_item_discount($rs->code, $cardCode, $rs->price, $qty, $payment, $channels, $docDate);
-
-					if( ! empty($disc))
-					{
-						$arr = array(
-							'id' => $pd->id,
-							'code' => $pd->code,
-							'name' => $pd->name,
-							'price' => $disc->type == 'N' ? number($disc->sellPrice, 2) : number($pd->price, 2),
-							'sellPrice' => $disc->sellPrice,
-							'available' => $stock['Available'],
-							'discLabel' => $disc->type == 'N' ? "" : discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
-							'rule_id' => $disc->rule_id,
-							'policy_id' => $disc->policy_id,
-							'discType' => $disc->type,
-							'count_stock' => $pd->count_stock,
-							'allow_change_discount' => $pd->allow_change_discount
-						);
-
-						array_push($ds, $arr);
-					}
-				}
-			}
-		}
-
-		echo json_encode($ds);
-	}
-
-
 
 
 
@@ -903,50 +873,24 @@ class Bporders extends CI_Controller
 
 
 
-	public function getStock($ItemCode, $WhsCode, $QuotaNo, $count_stock = 1)
+	public function getStock($ItemCode, $WhsCode, $QuotaNo)
 	{
-		$test = getConfig('TEST') == 1 ? TRUE : FALSE;
+		$this->load->library('api');
+		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
 
-		if($test OR $count_stock == 0)
+		if(!empty($stock))
 		{
+			$commit = get_zero($this->orders_model->get_commit_qty($ItemCode));
+			$OnHand = $stock['OnHand'];
 			$arr = array(
-				'OnHand' => 0,
-				'Committed' => 0,
-				'QuotaQty' => 0,
-				'Available' => 0
-			);
-		}
-		else
-		{
-			$this->load->library('api');
-
-			$commit = get_zero($this->orders_model->get_commit_qty($ItemCode, $QuotaNo));
-
-			$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
-
-			$arr = array(
-				'OnHand' => 0,
+				'OnHand' => $OnHand,
 				'Committed' => $commit,
-				'QuotaQty' => 0,
-				'Available' => 0
+				'QuotaQty' => $stock['QuotaQty'],
+				'Available' => $OnHand - $commit
 			);
 
-			if(!empty($stock))
-			{
-				$OnHand = $stock['OnHand'];
-				$Quota = $stock['QuotaQty'];
-				$available = $Quota - $commit;
-
-				$arr = array(
-					'OnHand' => $OnHand,
-					'Committed' => $commit,
-					'QuotaQty' => $Quota,
-					'Available' => $available > 0 ? $available : 0
-				);
-			}
+			return $arr;
 		}
-
-    return $arr;
 	}
 
 

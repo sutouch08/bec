@@ -26,10 +26,40 @@ class Approver_model extends CI_Model
 	{
 		if(!empty($ds))
 		{
-			return $this->db->insert($this->tb, $ds);
+			$rs = $this->db->insert($this->tb, $ds);
+
+			if($rs)
+			{
+				return $this->db->insert_id();
+			}
 		}
 
 		return FALSE;
+	}
+
+
+
+	public function add_team(array $ds = array())
+	{
+		return $this->db->insert('approver_team', $ds);
+	}
+
+
+	public function add_brand(array $ds = array())
+	{
+		return $this->db->insert('approver_brand', $ds);
+	}
+
+
+	public function drop_team($id_approver)
+	{
+		return $this->db->where('id_approver', $id_approver)->delete("approver_team");
+	}
+
+
+	public function drop_brand($id_approver)
+	{
+		return $this->db->where('id_approver', $id_approver)->delete("approver_brand");
 	}
 
 
@@ -43,6 +73,8 @@ class Approver_model extends CI_Model
 		return FALSE;
 	}
 
+
+
 	public function delete($id)
 	{
 		return $this->db->where('id', $id)->delete($this->tb);
@@ -52,29 +84,34 @@ class Approver_model extends CI_Model
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
 		$this->db
-		->select('a.*, u.uname, u.name, t.name AS team_name')
+		->distinct()
+		->select('a.*, u.uname, u.name')
 		->from('approver AS a')
 		->join('user AS u', 'a.user_id = u.id', 'left')
-		->join('sale_team AS t', 'a.team_id = t.id', 'left');
+		->join('approver_brand AS ab', 'a.id = ab.id_approver', 'left')
+		->join('approver_team AS at', 'a.id = at.id_approver', 'left');
 
 		if(!empty($ds['uname']))
 		{
+			$this->db->group_start();
 			$this->db->like('u.uname', $ds['uname']);
-		}
-
-		if(!empty($ds['name']))
-		{
-			$this->db->like('u.name', $ds['name']);
-		}
-
-		if(isset($ds['team']) && $ds['team'] !== 'all')
-		{
-			$this->db->where('a.team_id', $ds['team']);
+			$this->db->or_like('u.name', $ds['uname']);
+			$this->db->group_end();
 		}
 
 		if(isset($ds['status']) && $ds['status'] !== 'all')
 		{
 			$this->db->where('a.status', $ds['status']);
+		}
+
+		if(isset($ds['team']) && $ds['team'] != 'all')
+		{
+			$this->db->where('at.id_team', $ds['team']);
+		}
+
+		if(isset($ds['brand']) && $ds['brand'] != 'all')
+		{
+			$this->db->where('ab.id_brand', $ds['brand']);
 		}
 
 		$rs = $this->db->order_by('u.uname', 'ASC')->limit($perpage, $offset)->get();
@@ -91,23 +128,20 @@ class Approver_model extends CI_Model
 	public function count_rows(array $ds = array())
 	{
 		$this->db
+		->distinct()
+		->select('a.id')
 		->from('approver AS a')
+		->join('approver AS a2', 'a.id = a2.id', 'left')
 		->join('user AS u', 'a.user_id = u.id', 'left')
-		->join('sale_team AS t', 'a.team_id = t.id', 'left');
+		->join('approver_brand AS ab', 'a.id = ab.id_approver', 'left')
+		->join('approver_team AS at', 'a2.id = at.id_approver', 'left');
 
 		if(!empty($ds['uname']))
 		{
+			$this->db->group_start();
 			$this->db->like('u.uname', $ds['uname']);
-		}
-
-		if(!empty($ds['name']))
-		{
-			$this->db->like('u.name', $ds['name']);
-		}
-
-		if(isset($ds['team']) && $ds['team'] !== 'all')
-		{
-			$this->db->where('a.team_id', $ds['team']);
+			$this->db->or_like('u.name', $ds['uname']);
+			$this->db->group_end();
 		}
 
 		if(isset($ds['status']) && $ds['status'] !== 'all')
@@ -115,25 +149,31 @@ class Approver_model extends CI_Model
 			$this->db->where('a.status', $ds['status']);
 		}
 
+		if(isset($ds['team']) && $ds['team'] != 'all')
+		{
+			$this->db->where('at.id_team', $ds['team']);
+		}
+
+		if(isset($ds['brand']) && $ds['brand'] != 'all')
+		{
+			$this->db->where('ab.id_brand', $ds['brand']);
+		}
+
 		return $this->db->count_all_results();
 	}
 
 
 
-	public function is_exists_data($user_id, $team_id, $disc, $id = NULL)
+	public function is_exists($user_id, $id = NULL)
 	{
-		if( ! empty($id))
+		if(!empty($id))
 		{
 			$this->db->where('id !=', $id);
 		}
 
-		$rs = $this->db
-		->where('user_id', $user_id)
-		->where('team_id', $team_id)
-		->where('max_disc', $disc)
-		->count_all_results($this->tb);
+		$rs = $this->db->where('user_id', $user_id)->get($this->tb);
 
-		if($rs > 0)
+		if($rs->num_rows() > 0)
 		{
 			return TRUE;
 		}
@@ -142,22 +182,53 @@ class Approver_model extends CI_Model
 	}
 
 
-
-	public function get_approve_right($user_id, $team_id)
+	public function is_approver($user_id, $team_id)
 	{
 		$rs = $this->db
-		->where('status', 1)
-		->where('user_id', $user_id)
-		->group_start()
-		->where('team_id', $team_id)
-		->or_where('team_id', -1)
-		->group_end()
-		->order_by('max_disc', 'DESC')
-		->get('approver');
+		->distinct()
+		->select('a.id')
+		->from('approver AS a')
+		->join('approver_team AS at', 'a.id = at.id_approver', 'left')
+		->where('a.user_id', $user_id)
+		->where('at.id_team', $team_id)
+		->get();
 
 		if($rs->num_rows() > 0)
 		{
-			return $rs->row();
+			return $rs->row()->id;
+		}
+
+		return FALSE;
+	}
+
+
+
+	public function get_approver_team($id)
+	{
+		$rs = $this->db->where('id_approver', $id)->get('approver_team');
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_approver_brand($id)
+	{
+		$rs = $this->db
+		->select('ab.*')
+		->select('pb.name')
+		->from('approver_brand AS ab')
+		->join('product_brand AS pb', 'ab.id_brand = pb.id', 'left')
+		->where('ab.id_approver', $id)
+		->get();
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
 		}
 
 		return NULL;

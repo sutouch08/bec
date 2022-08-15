@@ -41,7 +41,7 @@
 		</select>
   </div>
 
-	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Type</label>
 		<select class="form-control input-sm" name="type" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
@@ -49,7 +49,7 @@
 		</select>
   </div>
 
-	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Brand</label>
 		<select class="form-control input-sm" name="brand" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
@@ -57,7 +57,7 @@
 		</select>
   </div>
 
-	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Status</label>
 		<select class="form-control input-sm" name="status" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
@@ -66,12 +66,30 @@
 		</select>
   </div>
 
-	<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>นับสต็อก</label>
 		<select class="form-control input-sm" name="count_stock" onchange="getSearch()">
 			<option value="all">ทั้งหมด</option>
 			<option value="1" <?php echo is_selected('1', $count_stock); ?>>Yes</option>
 			<option value="0" <?php echo is_selected('0', $count_stock); ?>>No</option>
+		</select>
+  </div>
+
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>แก้ไขส่วนลด</label>
+		<select class="form-control input-sm" name="allow_change_discount" onchange="getSearch()">
+			<option value="all">ทั้งหมด</option>
+			<option value="1" <?php echo is_selected('1', $allow_change_discount); ?>>Yes</option>
+			<option value="0" <?php echo is_selected('0', $allow_change_discount); ?>>No</option>
+		</select>
+  </div>
+
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>ลูกค้าเห็น</label>
+		<select class="form-control input-sm" name="customer_view" onchange="getSearch()">
+			<option value="all">ทั้งหมด</option>
+			<option value="1" <?php echo is_selected('1', $customer_view); ?>>Yes</option>
+			<option value="0" <?php echo is_selected('0', $customer_view); ?>>No</option>
 		</select>
   </div>
 
@@ -97,11 +115,13 @@
 					<th class="fix-width-100 middle">Code</th>
 					<th class="min-width-200 middle">Name</th>
 					<th class="fix-width-100 middle">Model</th>
-					<th class="fix-width-150 middle">Type</th>
+					<th class="fix-width-100 middle">Type</th>
 					<th class="fix-width-150 middle">Category</th>
 					<th class="fix-width-100 middle">Brand</th>
 					<th class="fix-width-60 middle text-center">Status</th>
 					<th class="fix-width-60 middle text-center">Stock</th>
+					<th class="fix-width-60 middle text-center">Discount</th>
+					<th class="fix-width-60 middle text-center">customer</th>
 					<th class="fix-width-80"></th>
 				</tr>
 			</thead>
@@ -125,6 +145,18 @@
 								<span class="lbl"></span>
 							</label>
 						</td>
+						<td class="middle text-center">
+							<label>
+								<input type="checkbox" class="ace" onchange="toggleChangeDiscount($(this))" value="<?php echo $rs->id; ?>" <?php echo is_checked(1, $rs->allow_change_discount); ?> />
+								<span class="lbl"></span>
+							</label>
+						</td>
+						<td class="middle text-center">
+							<label>
+								<input type="checkbox" class="ace" onchange="toggleCustomerView($(this))" value="<?php echo $rs->id; ?>" <?php echo is_checked(1, $rs->customer_view); ?> />
+								<span class="lbl"></span>
+							</label>
+						</td>
 						<td class="middle text-right">
 							<button type="button" class="btn btn-minier btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
 							<?php if($this->pm->can_edit) : ?>
@@ -136,7 +168,7 @@
 			<?php endforeach; ?>
 		<?php else : ?>
 			<tr>
-				<td colspan="11" class="middle text-center">--- No data ---</td>
+				<td colspan="13" class="middle text-center">--- No data ---</td>
 			</tr>
 		<?php endif; ?>
 			</tbody>

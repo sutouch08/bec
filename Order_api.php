@@ -56,24 +56,7 @@ class Order_api
 
 	public function exportOrder($code)
 	{
-		$testMode = FALSE;
-
 		$this->ci->load->model('orders/orders_model');
-
-		if($testMode)
-		{
-			$arr = array(
-				'Status' => 1,
-				'DocEntry' => 1,
-				'DocNum' => "22000001"
-			);
-
-			$this->ci->orders_model->update($code, $arr);
-
-			return TRUE;
-		}
-
-
 
 		$logJson = getConfig('LOGS_JSON') == 1 ? TRUE : FALSE;
 

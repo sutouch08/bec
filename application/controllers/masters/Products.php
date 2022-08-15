@@ -33,7 +33,9 @@ class Products extends PS_Controller
       'type' => get_filter('type', 'item_type', 'all'),
       'brand' => get_filter('brand', 'item_brand', 'all'),
 			'status' => get_filter('status', 'item_status', 'all'),
-			'count_stock' => get_filter('count_stock', 'count_stock', 'all')
+			'count_stock' => get_filter('count_stock', 'count_stock', 'all'),
+			'allow_change_discount' => get_filter('allow_change_discount', 'allow_change_discount', 'all'),
+			'customer_view' => get_filter('customer_view', 'customer_view', 'all')
     );
 
 		$perpage = get_rows();
@@ -506,12 +508,50 @@ class Products extends PS_Controller
 	}
 
 
+	public function set_allow_change_discount()
+	{
+		$id = $this->input->get('id');
+		$allow_change_discount = $this->input->get('allow_change_discount');
+
+		$arr = array(
+			'allow_change_discount' => $allow_change_discount == 1 ? 1 : 0
+		);
+
+		$this->products_model->update_by_id($id, $arr);
+	}
+
+
+	public function set_customer_view()
+	{
+		$id = $this->input->get('id');
+		$customer_view = $this->input->get('customer_view');
+
+		$arr = array(
+			'customer_view' => $customer_view == 1 ? 1 : 0
+		);
+
+		$this->products_model->update_by_id($id, $arr);
+	}
+
+
 
   public function clear_filter()
 	{
-    $filter = array('item_code','item_name','item_model', 'item_type', 'item_category', 'item_brand', 'item_status', 'count_stock');
+    $filter = array(
+			'item_code',
+			'item_name',
+			'item_model',
+			'item_type',
+			'item_category',
+			'item_brand',
+			'item_status',
+			'count_stock',
+			'customer_view',
+			'allow_change_discount'
+		);
+
     clear_filter($filter);
 	}
-}
+} //--- end class 
 
 ?>

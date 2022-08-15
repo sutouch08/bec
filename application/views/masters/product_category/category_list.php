@@ -1,9 +1,9 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-8 padding-5">
     <h3 class="title"><?php echo $this->title; ?></h3>
   </div>
-  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
+  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-4 padding-5">
   	<p class="pull-right top-p">
 			<?php if($this->pm->can_add) : ?>
       <button type="button" class="btn btn-xs btn-success" onclick="addNew()"><i class="fa fa-plus"></i> &nbsp; Add new</button>
@@ -71,6 +71,7 @@
 			<thead>
 				<tr>
 					<th class="fix-width-60 middle text-center">#</th>
+					<th class="fix-width-60 middle text-center">img</th>
 					<th class="fix-width-100 middle">Code</th>
 					<th class="fix-width-250 middle">Name</th>
 					<th class="fix-width-100 middle text-center">Level</th>
@@ -85,17 +86,20 @@
 				<?php foreach($data as $rs) : ?>
 				<tr>
 					<td class="middle text-center"><?php echo $no; ?></td>
+					<td class="middle text-center">
+						<img src="<?php echo get_category_path($rs->code); ?>" width="60" height="60" />
+					</td>
 					<td class="middle"><?php echo $rs->code; ?></td>
 					<td class="middle"><?php echo $rs->name; ?></td>
 					<td class="middle text-center"><?php echo $rs->level; ?></td>
-					<td class="moddle"><?php echo $rs->parent; ?></td>
-					<td class="moddle text-center">
+					<td class="middle"><?php echo $rs->parent; ?></td>
+					<td class="middle text-center">
 						<label>
 							<input type="checkbox" class="ace" onchange="setActive($(this))" data-id="<?php echo $rs->id; ?>" <?php echo is_checked('1', $rs->active); ?>/>
 							<span class="lbl"></span>
 						</label>
 					</td>
-					<td class="text-right">
+					<td class="middle text-right">
 						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
 						<?php if($this->pm->can_edit) : ?>
 						<button type="button" class="btn btn-mini btn-warning" onclick="getEdit('<?php echo $rs->id; ?>')"><i class="fa fa-pencil"></i></button>

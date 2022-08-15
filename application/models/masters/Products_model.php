@@ -180,6 +180,16 @@ class Products_model extends CI_Model
 			$this->db->where('count_stock', $ds['count_stock']);
 		}
 
+		if(isset($ds['allow_change_discount']) && $ds['allow_change_discount'] != 'all')
+		{
+			$this->db->where('allow_change_discount', $ds['allow_change_discount']);
+		}
+
+		if(isset($ds['customer_view']) && $ds['customer_view'] != 'all')
+		{
+			$this->db->where('customer_view', $ds['customer_view']);
+		}
+
 		return $this->db->count_all_results($this->tb);
 	}
 
@@ -238,6 +248,16 @@ class Products_model extends CI_Model
 			$this->db->where('count_stock', $ds['count_stock']);
 		}
 
+		if(isset($ds['allow_change_discount']) && $ds['allow_change_discount'] != 'all')
+		{
+			$this->db->where('allow_change_discount', $ds['allow_change_discount']);
+		}
+
+		if(isset($ds['customer_view']) && $ds['customer_view'] != 'all')
+		{
+			$this->db->where('customer_view', $ds['customer_view']);
+		}
+
 		$rs = $this->db->limit($perpage, $offset)->get();
 
 		if($rs->num_rows() > 0)
@@ -281,21 +301,6 @@ class Products_model extends CI_Model
 	}
 
 
-
-	/*********** for filter on customer order page *****************/
-	public function get_home_product($limit = 20, $offset = 0)
-	{
-		$rs = $this->db->where('home', 1)->limit($limit, $offset)->get($this->tb);
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
-
-
 	public function count_filter_rows(array $ds = array())
 	{
 		if( ! empty($ds['brandCode']))
@@ -333,6 +338,19 @@ class Products_model extends CI_Model
 		}
 
 		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_product_by_category($cateCode)
+	{
+		$rs = $this->db->where('category_code', $cateCode)->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{

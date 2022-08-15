@@ -86,7 +86,7 @@
 		<button type="button" class="btn btn-sm btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
     <button type="button" class="btn btn-sm btn-primary btn-100 hide" id="btn-save" onclick="validateFreeItem('add')">Save</button>
     <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
-    <button type="button" class="btn btn-sm btn-info btn-100 hide" id="btn-draft" onclick="saveAsDraft()">Save AS Draft</button>
+    <button type="button" class="btn btn-sm btn-info btn-100 hide" id="btn-draft" onclick="saveAsDraft('add')">Save AS Draft</button>
   </div>
 </div>
 

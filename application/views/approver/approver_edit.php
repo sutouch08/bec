@@ -16,7 +16,7 @@
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 			<select class="width-100" id="user">
 				<option value="">Please Select</option>
-				<?php echo select_user($user_id); ?>
+				<?php echo select_user($approver->user_id); ?>
 			</select>
     </div>
 		<div class="col-xs-12 col-sm-reset inline red margin-top-5" id="user-error"></div>
@@ -24,26 +24,74 @@
 
 
 	<div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Customer Team</label>
-    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<select class="form-control" id="team_id">
-				<option value="">Please Select</option>
-        <?php echo select_team($team_id); ?>
-      </select>
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Sales Team</label>
+    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12 table-responsive">
+			<table class="table table-striped border-1">
+				<thead>
+					<tr>
+						<th class="fix-width-100">Code</th>
+						<th class="min-width-100">Name</th>
+						<th class="fix-width-40"></th>
+					</tr>
+				</thead>
+				<tbody>
+		<?php if(!empty($sales_team)) : ?>
+			<?php foreach($sales_team as $rs) : ?>
+				<?php $chk = (! empty($ap_team[$rs->id]) ? 'checked' : ''); ?>
+				<tr>
+					<td><?php echo $rs->code; ?></td>
+					<td><?php echo $rs->name; ?></td>
+					<td class="text-center">
+						<label>
+							<input type="checkbox" class="ace chk-team" value="<?php echo $rs->id; ?>" <?php echo $chk; ?>/>
+							<span class="lbl"></span>
+						</label>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+		<?php endif; ?>
+				</tbody>
+			</table>
     </div>
 		<div class="col-sm-reset inline red margin-top-5" id="team-error"></div>
   </div>
 
-
-  <div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Max Discount</label>
-    <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-12">
-			<span class="input-icon input-icon-right">
-			<input type="number" id="disc" class="form-control text-center" style="font-size:14px;"  value="<?php echo $max_disc; ?>">
-			<i class="ace-icon fa fa-percent"></i>
-			</span>
+	<div class="form-group">
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Brand</label>
+    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12 table-responsive">
+			<table class="table table-striped border-1">
+				<thead>
+					<tr>
+						<th class="fix-width-40 text-center"></th>
+						<th class="fix-width-100">Code</th>
+						<th class="min-width-100">Name</th>
+						<th class="fix-width-100">Max Disc(%)</th>
+					</tr>
+				</thead>
+				<tbody>
+		<?php if(!empty($brand)) : ?>
+			<?php foreach($brand as $rs) : ?>
+				<?php $chk = isset($ap_brand[$rs->id]) ? 'checked' : '';  ?>
+				<?php $val = isset($ap_brand[$rs->id]) ? $ap_brand[$rs->id] : 0.00; ?>
+				<tr>
+					<td class="text-center">
+						<label>
+							<input type="checkbox" class="ace chk-brand" value="<?php echo $rs->id; ?>" data-id="<?php echo $rs->id; ?>" <?php echo $chk; ?>/>
+							<span class="lbl"></span>
+						</label>
+					</td>
+					<td><?php echo $rs->code; ?></td>
+					<td><?php echo $rs->name; ?></td>
+					<td>
+						<input type="number" class="form-control input-sm text-center disc" id="brand-disc-<?php echo $rs->id; ?>" value="<?php echo $val; ?>" />
+					</td>
+				</tr>
+			<?php endforeach; ?>
+		<?php endif; ?>
+				</tbody>
+			</table>
     </div>
-		<div class="col-sm-reset inline red margin-top-5" id="disc-error"></div>
+		<div class="col-sm-reset inline red margin-top-5" id="team-error"></div>
   </div>
 
 	<div class="divider-hidden"></div>
@@ -52,7 +100,7 @@
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label"></label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 			<label>
-				<input type="checkbox" class="ace" id="status" <?php echo is_checked(1, $status); ?> />
+				<input type="checkbox" class="ace" id="status" <?php echo is_checked(1, $approver->status); ?> />
 				<span class="lbl">&nbsp; Active</span>
 			</label>
     </div>
@@ -67,10 +115,10 @@
     </div>
   </div>
 
-	<input type="hidden" id="id" value="<?php echo $id; ?>">
+	<input type="hidden" id="id" value="<?php echo $approver->id; ?>">
 </form>
 <script>
 	$('#user').select2();
 </script>
-<script src="<?php echo base_url(); ?>scripts/approver/approver.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/approver/approver.js?v=<?php echo date('YmdH'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>
