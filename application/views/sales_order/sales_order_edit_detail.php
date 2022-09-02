@@ -57,6 +57,7 @@
 					?>
 
         <tr id="row-<?php echo $no; ?>" class="<?php echo $freeRow; ?>">
+				<input type="hidden" id="product-id-<?php echo $no; ?>" value="<?php echo $rs->product_id; ?>" />
 					<input type="hidden" id="stdPrice-<?php echo $no; ?>" value="<?php echo $rs->StdPrice; ?>" />
 					<input type="hidden" id="price-<?php echo $no; ?>" value="<?php echo $rs->Price; ?>" />
 					<input type="hidden" id="sellPrice-<?php echo $no; ?>" value="<?php echo $rs->SellPrice; ?>" />
@@ -179,6 +180,7 @@
 <hr class="padding-5"/>
 <script id="row-template" type="text/x-handlebarsTemplate">
 <tr id="row-{{no}}">
+	<input type="hidden" id="product-id-{{no}}" value="0" />
 	<input type="hidden" id="stdPrice-{{no}}" value="0" />
 	<input type="hidden" id="price-{{no}}" value="0" />
 	<input type="hidden" id="sellPrice-{{no}}" value="0" />
@@ -285,6 +287,7 @@
 
 <script id="free-row-template" type="text/x-handlebarsTemplate">
 <tr id="row-{{no}}" class="free-row">
+	<input type="hidden" id="product-id-{{no}}" value="{{product_id}}" />
 	<input type="hidden" id="price-{{no}}" value="{{price}}" />
 	<input type="hidden" id="stdPrice-{{no}}" value="{{price}}" />
 	<input type="hidden" id="sellPrice-{{no}}" value="{{sellPrice}}" />

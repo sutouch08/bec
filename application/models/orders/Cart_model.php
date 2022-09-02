@@ -68,7 +68,7 @@ class Cart_model extends CI_Model
 		return $this->db->where('CardCode', $CardCode)->delete($this->tb);
 	}
 
-	
+
 
 	public function get_exists($CardCode, $ItemCode)
 	{
@@ -85,6 +85,52 @@ class Cart_model extends CI_Model
 
 		return NULL;
 	}
+
+
+	public function get_free_exists($CardCode, $ItemCode, $parent_uid)
+	{
+		$rs = $this->db
+		->where('CardCode', $CardCode)
+		->where('ItemCode', $ItemCode)
+		->where('is_free', 1)
+		->where('parent_uid', $parent_uid)
+		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
+
+
+	public function get_sum_items_qty($CardCode)
+	{
+		$rs = $this->db
+		->select('ItemCode')
+		->select_sum('Qty')
+		->select_sum('LineTotal')
+		->where('CardCode', $CardCode)
+		->where('is_free', 0)
+		->group_by('ItemCode')
+		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function remove_free_rows($CardCode)
+	{
+		return $this->db->where('CardCode', $CardCode)->where('is_free', 1)->delete($this->tb);
+	}
+
 
 
 	public function get_new_line($CardCode)

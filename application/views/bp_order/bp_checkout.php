@@ -1,5 +1,4 @@
 <?php $this->load->view('bp_order/bp_header'); ?>
-<div class="container">
 	<div class="row">
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
 			<h3 class="title">Checkout</h3>
@@ -48,55 +47,110 @@
 		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right">
 			<button type="button" class="btn btn-sm btn-primary btn-100" onclick="goBack()"><i class="fa fa-chevron-left"></i>&nbsp;&nbsp; ซื้อสินค้าต่อ</button>
 		</div>
-		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive">
 			<table class="table border-1 margin-top-5">
 				<thead>
 					<tr>
-						<th class="fix-width-60"></th>
-						<th class="">รายละเอียด</th>
-						<th class="width-10 text-center">จำนวน</th>
-						<th class="width-15 text-right">มูลค่า</th>
+						<th class="fix-width-40 text-center"></th>
+						<th class="fix-width-60 text-center">Image</th>
+						<th class="fix-width-120">Item Code</th>
+						<th class="min-width-150">Item Name</th>
+						<th class="fix-width-100 text-right">Price</th>
+						<th class="fix-width-120 text-center">Discount(%)</th>
+						<th class="fix-width-100 text-right">Qty</th>
+						<th class="fix-width-150 text-right">Amount</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody id="checkout-table">
 					<?php $totalQty = 0; ?>
 					<?php $totalAmount = 0; ?>
 					<?php $totalDiscAmount = 0; ?>
 					<?php if(!empty($cart)) : ?>
 						<?php foreach($cart as $rs) : ?>
 							<?php $discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5, '%'); ?>
-							<tr>
-								<td class="text-center">
+							<?php $freeRow = $rs->is_free == 1 ? 'free-row' : ''; ?>
+							<tr id="row-<?php echo $rs->id; ?>" class="<?php echo $freeRow; ?>">
+								<input type="hidden" id="product-id-<?php echo $rs->id; ?>" value="<?php echo $rs->product_id; ?>" />
+								<input type="hidden" class="item-code" id="item-code-<?php echo $rs->id; ?>" data-id="<?php echo $rs->id; ?>" value="<?php echo $rs->ItemCode; ?>" />
+								<input type="hidden" class="line-qty" data-no="<?php echo $rs->id; ?>" id="line-qty-<?php echo $rs->id; ?>" value="<?php echo $rs->Qty; ?>"/>
+								<input type="hidden" id="line-total-<?php echo $rs->id; ?>" value="<?php echo $rs->LineTotal; ?>" />
+								<input type="hidden" id="stdPrice-<?php echo $rs->id; ?>" value="<?php echo $rs->StdPrice; ?>" />
+								<input type="hidden" id="price-<?php echo $rs->id; ?>" value="<?php echo $rs->Price; ?>" />
+								<input type="hidden" id="sellPrice-<?php echo $rs->id; ?>" value="<?php echo $rs->SellPrice; ?>" />
+								<input type="hidden" class="is-free" id="is-free-<?php echo $rs->id; ?>" value="<?php echo $rs->is_free; ?>" data-id="<?php echo $rs->id; ?>" data-parent="<?php echo $rs->parent_uid;?>" data-parentrow="<?php echo $rs->rule_id; ?>" />
+								<input type="hidden" id="<?php echo $rs->uid; ?>" data-id="<?php echo $rs->id; ?>" value="<?php echo $rs->id; ?>"/>
+
+								<td class="middle">
+									<label>
+										<input type="checkbox" class="ace chk-out" value="<?php echo $rs->id; ?>" />
+										<span class="lbl"></span>
+									</label>
+								</td>
+								<td class="middle text-center">
 									<img src="<?php echo get_image_path($rs->product_id, "medium"); ?>" width="60" />
 								</td>
-								<td class="">
-									<span class="font-size-12 display-block">SKU : <?php echo $rs->ItemCode; ?></span>
-									<span class="font-size-12"><?php echo $rs->ItemName; ?></span>
-									<span class="font-size-12 blue display-block">ราคา : <?php echo number($rs->Price, 2); ?></span>
-									<?php if(!empty($rs->discAmount)) : ?>
-										<span class="font-size-12 green">ส่วนลด : <?php echo $discLabel; ?></span>
-									<?php endif; ?>
-								</td>
-								<td class="text-center"><?php echo number($rs->Qty); ?></td>
-								<td class="text-right"><?php echo number($rs->LineTotal, 2); ?></td>
+								<td class="middle"><?php echo $rs->ItemCode; ?></td>
+								<td class="middle"><?php echo $rs->ItemName; ?></td>
+								<td class="middle text-right"><?php echo number($rs->Price, 2); ?></td>
+								<td class="middle text-center"><?php echo $rs->discLabel; ?></td>
+								<td class="middle text-right" id="qtyLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Qty); ?></td>
+								<td class="middle text-right"><?php echo number($rs->LineTotal, 2); ?></td>
 							</tr>
 							<?php $totalQty += $rs->Qty; ?>
 							<?php $totalDiscAmount += $rs->totalDiscAmount; ?>
 							<?php $totalAmount += $rs->LineTotal; ?>
 						<?php endforeach; ?>
-						<tr class="font-size-18">
-							<td colspan="2" class="text-right">รวม</td>
-							<td class="text-center"><?php echo number($totalQty); ?></td>
-							<td class="text-right"><?php echo number($totalAmount, 2); ?></td>
-						</tr>
 					<?php else : ?>
 						<tr>
-							<td colspan="6" class="text-center">--- ไม่พบรายการสินค้า ---</td>
+							<td colspan="8" class="text-center">--- ไม่พบรายการสินค้า ---</td>
 						</tr>
 					<?php endif; ?>
 				</tbody>
+				<?php if(!empty($cart)) : ?>
+				<tfoot>
+				<tr class="font-size-18">
+							<td class="middle" colspan="2">
+								<label>
+									<input type="checkbox" class="ace" onchange="checkOutAll($(this))" />
+									<span class="lbl">&nbsp; Check all</span>
+								</label>
+							</td>
+							<td colspan="4" class="text-right">รวม</td>
+							<td class="text-right" id="total-qty"><?php echo number($totalQty); ?></td>
+							<td class="text-right" id="total-amount"><?php echo number($totalAmount, 2); ?></td>
+						</tr>
+				</tfoot>
+				<?php endif; ?>
 			</table>
 		</div>
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 magin-top-10">
+			<button type="button" class="btn btn-xs btn-danger btn-100" onclick="removeCheckRow()">Delete Checked</button>
+		</div>
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 magin-top-10">
+			<p class="pull-right" id="free-box">
+				<?php if( ! empty($freeItems)) : ?>
+					<?php foreach($freeItems as $fi) : ?>
+						<button type="button"
+						class="btn btn-sm btn-primary free-btn"
+						id="btn-free-<?php echo $fi->rule_id; ?>"
+							data-parent="<?php echo $fi->uid; ?>"
+							onclick="pickFreeItem('<?php echo $fi->rule_id; ?>')">
+							Free <?php echo $fi->freeQty; ?> Pcs.
+						</button>
+
+						<input type="hidden" class="free-item"
+						id="free-<?php echo $fi->rule_id; ?>"
+						value="<?php echo $fi->freeQty; ?>"
+						data-id="<?php echo $fi->uid; ?>"
+						data-valid="0"
+						data-rule="<?php echo $fi->rule_id; ?>"
+						data-picked="0" data-balance="<?php echo $fi->freeQty; ?>"
+						data-uid="<?php echo $fi->uid; ?>">
+					<?php endforeach; ?>
+				<?php endif; ?>
+			</p>
+		</div>
+		<div class="hide" id="free-temp"></div>
 	</div>
 	<div class="row">
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 margin-top-10">
@@ -115,7 +169,7 @@
 		<?php endif; ?>
 		</div>
 	</div>
-</div> <!-- container -->
+
 
 
 
@@ -126,6 +180,62 @@
 <input type="hidden" id="channels" value="<?php echo $this->_user->channels; ?>" />
 
 
+<script id="free-row-template" type="text/x-handlebarsTemplate">
+	<tr id="row-{{id}}" class="free-row">
+		<input type="hidden" id="product-id-{{id}}" value="{{product_id}}" />
+		<input type="hidden" class="item-code" id="item-code-{{id}}" data-id="{{id}}" value="{{ItemCode}}>" />
+		<input type="hidden" class="line-qty" data-no="{{id}}" id="line-qty-{{id}}" value="{{Qty}}"/>
+		<input type="hidden" id="line-total-{{id}}" value="{{LineTotal}}" />
+		<input type="hidden" id="stdPrice-{{id}}" value="{{StdPrice}}" />
+		<input type="hidden" id="price-{{id}}" value="{{Price}}" />
+		<input type="hidden" id="sellPrice-{{id}}" value="{{SellPrice}}" />
+		<input type="hidden" class="is-free" id="is-free-{{id}}" value="1" data-id="{{id}}"	data-parent="{{parent_uid}}" data-parentrow="{{rule_id}}" />
+		<input type="hidden" id="{{uid}}" data-id="{{id}}" value="{{id}}"/>
+		<input type="hidden" id="disc-type-{{id}}" value="F" />
+
+		<td class="middle">
+			<label>
+				<input type="checkbox" class="ace chk-out" value="{{id}}" />
+				<span class="lbl"></span>
+			</label>
+		</td>
+		<td class="middle text-center">
+			<img src="{{image_path}}" width="60" />
+		</td>
+		<td class="middle">{{ItemCode}}</td>
+		<td class="middle">{{ItemName}}</td>
+		<td class="middle text-right">{{PriceLabel}}</td>
+		<td class="middle text-center">100</td>
+		<td class="middle text-right" id="qtyLabel-{{id}}">{{QtyLabel}}</td>
+		<td class="middle text-right">{{LineTotalLabel}}</td>
+	</tr>
+</script>
+
+
+
+<div class="modal fade" id="free-item-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:800px;">
+        <div class="modal-content">
+            <div class="modal-body">
+            <div class="row">
+                <table class="table table-striped broder-1">
+									<tbody id="free-item-list">
+
+									</tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="free-input-template" type="text/x-handlebarsTemplate">
+	<input type="hidden" class="free-item" id="free-{{rule_id}}" value="{{freeQty}}" data-id="{{uid}}" data-valid="0" data-rule="" data-picked="0" data-uid="{{uid}}" />
+</script>
+
+<script id="free-btn-template" type="text/x-handlebarsTemplate">
+	<button type="button" class="btn btn-sm btn-primary free-btn" id="btn-free-{{rule_id}}" data-parent="{{uid}}" onclick="pickFreeItem('{{rule_id}}')">Free {{freeQty}}</button>
+</script>
 
 <script src="<?php echo base_url(); ?>scripts/bp_order/bp_order.js?v=<?php echo date('Ymd'); ?>"></script>
 

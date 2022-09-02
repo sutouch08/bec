@@ -18,6 +18,39 @@ class Order_api
 
 
 
+	public function getCreditBalance($CardCode)
+	{
+		$arr = array(
+			'CardCode' => $CardCode
+		);
+
+		$url = $this->url .'GetCreditBalance';
+		$curl = curl_init();
+
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+
+		$response = curl_exec($curl);
+		curl_close($curl);
+		$rs = json_decode($response);
+
+		if(! empty($rs) && ! empty($rs->status))
+		{
+			if($rs->status == 'success')
+			{
+				return $rs->Balance;
+			}
+		}
+
+    return 0.00;
+	}
+
+
+
 	public function cancle_sap_order($arr)
 	{
 		$url = $this->url .'SalesOrder';

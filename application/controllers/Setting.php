@@ -18,7 +18,7 @@ class Setting extends PS_Controller{
 
   public function index($tab = 'company')
   {
-		$groups = array('Company', 'Document', 'SAP', 'system');
+		$groups = array('Company', 'Document', 'Order', 'SAP', 'system');
 
 		$ds = array(
 			'tab' => $tab

@@ -68,6 +68,34 @@ function toggleStrongPWD(option) {
 }
 
 
+function toggleCreditLimit(option) {
+	$('#credit-limit').val(option);
+
+	if(option == 1) {
+		$('#btn-limit-on').addClass('btn-primary');
+		$('#btn-limit-off').removeClass('btn-primary');
+	}
+	else {
+		$('#btn-limit-on').removeClass('btn-primary');
+		$('#btn-limit-off').addClass('btn-primary');
+	}
+}
+
+
+function toggleStock(option) {
+	$('#available-stock').val(option);
+
+	if(option == 1) {
+		$('#btn-stock-on').addClass('btn-primary');
+		$('#btn-stock-off').removeClass('btn-primary');
+	}
+	else {
+		$('#btn-stock-off').addClass('btn-primary');
+		$('#btn-stock-on').removeClass('btn-primary');
+	}
+}
+
+
 function changeURL(tab)
 {
 	var url = HOME + 'index/'+tab;

@@ -51,6 +51,26 @@ class Orders extends PS_Controller
 	}
 
 
+	public function get_credit_balance()
+	{
+		$CardCode = trim($this->input->get('CardCode'));
+		$orderCode = trim($this->input->get('orderCode'));
+		$this->load->library('order_api');
+		$balance = $this->order_api->getCreditBalance($CardCode);
+		$used = $this->orders_model->get_credit_used($CardCode, $orderCode);
+
+		$available = $balance - $used;
+
+		$arr = array(
+			'status' => 'success',
+			'balance' => $available < 0 ? 0 : $available,
+			'used' => $used
+		);
+
+		echo json_encode($arr);
+	}
+
+
   public function index()
   {
 		$filter = array(
@@ -238,7 +258,7 @@ class Orders extends PS_Controller
 										'customer_id' => $customer->id,
 										'customer_group_id' => $customer->GroupCode,
 										'customer_type_id' => $customer->TypeCode,
-										'customer_region_id' => $customer->RegionCode,
+										'customer_region_id' => $customer->SaleTeam,
 										'customer_area_id' => $customer->AreaCode,
 										'customer_grade_id' => $customer->GradeCode,
 										'user_id' => $this->_user->id,
@@ -522,7 +542,7 @@ class Orders extends PS_Controller
 															'customer_id' => $customer->id,
 															'customer_group_id' => $customer->GroupCode,
 															'customer_type_id' => $customer->TypeCode,
-															'customer_region_id' => $customer->RegionCode,
+															'customer_region_id' => $customer->SaleTeam,
 															'customer_area_id' => $customer->AreaCode,
 															'customer_grade_id' => $customer->GradeCode,
 															'user_id' => $this->_user->id,
@@ -901,8 +921,9 @@ class Orders extends PS_Controller
 			{
 				foreach($details as $rs)
 				{
+					$vat_rate = $rs->VatRate * 0.01;
 					$totalAmount += $rs->LineTotal;
-					$totalVat += $rs->totalVatAmount;
+					$totalVat += ($rs->LineTotal * $vat_rate);
 					$rs->image = get_image_path($rs->product_id, 'mini');
 					$rs->ruleCode = $this->discount_model->getRuleCode($rs->rule_id);
 				}

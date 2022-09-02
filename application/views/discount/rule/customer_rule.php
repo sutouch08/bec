@@ -139,7 +139,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
 				<div class="col-sm-2">
-					<span class="form-control left-label text-right">Customer Region</span>
+					<span class="form-control left-label text-right">Sales Team</span>
 				</div>
         <div class="col-sm-2">
 					<div class="btn-group width-100">

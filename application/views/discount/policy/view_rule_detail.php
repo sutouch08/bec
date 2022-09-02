@@ -141,7 +141,7 @@ $currency = getConfig('CURRENTCY');
       <?php   $qs = $this->discount_rule_model->getCustomerRegionRule($rule_id); ?>
       <?php   if(! empty($qs)) : ?>
         <tr class="">
-          <td class="middle text-right"><strong>Region</strong></td>
+          <td class="middle text-right"><strong>Sales Team</strong></td>
           <td class="middle" colspan="3">
           <?php $i = 1; ?>
         <?php   foreach($qs as $rs) : ?>

@@ -21,6 +21,8 @@ class Api
 
   public function getItemStock($ItemCode, $WhsCode, $QuotaNo)
   {
+		$WhsCode = is_array($WhsCode) ? $WhsCode : array($WhsCode);
+
 		$arr = array(
 			"ItemCode" => $ItemCode,
 			"WhsCode" => $WhsCode,

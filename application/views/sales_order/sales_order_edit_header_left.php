@@ -18,7 +18,7 @@
         <input type="text" id="CardName"
 				class="form-control input-sm"
 				value="<?php echo $order->CardName; ?>"
-				<?php echo ($order->role == 'C' ? 'disabled' : ''); ?> />
+				<?php echo ($order->role == 'C' ? 'disabled' : ''); ?> disabled/>
       </div>
     </div>
 

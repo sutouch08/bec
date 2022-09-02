@@ -72,19 +72,19 @@
     <div class="modal-content">
       <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">Customer Region</h4>
+      <h4 class="modal-title">Sales Team</h4>
       </div>
       <div class="modal-body" id="cust-region-body">
         <div class="row">
           <div class="col-sm-12">
     <?php if( ! empty($customer_regions)) : ?>
       <?php foreach($customer_regions as $rs) : ?>
-        <?php $se = isset($custRegion[$rs->id]) ? 'checked' : ''; ?>
+        <?php $se = isset($custRegion[$rs->code]) ? 'checked' : ''; ?>
               <label class="display-block">
                 <input type="checkbox"
 								class="ace chk-region"
-								id="chk-region-<?php echo $rs->id; ?>"
-								value="<?php echo $rs->id; ?>" <?php echo $se; ?> />
+								id="chk-region-<?php echo $rs->code; ?>"
+								value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
                 <span class="lbl"><?php echo $rs->name; ?></span>
               </label>
       <?php endforeach; ?>

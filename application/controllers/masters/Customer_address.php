@@ -78,12 +78,32 @@ class Customer_address extends PS_Controller
 		$this->_response($sc);
 	}
 
+
+
+	public function delete($id)
+	{
+		$sc = TRUE;
+
+		if( ! $this->customer_address_model->delete($id))
+		{
+			$sc = FALSE;
+			$this->error = "Delete failed";
+		}
+
+		$this->_response($sc);
+	}
+
+
+
 	public function get_last_sync_date()
 	{
 		$date = $this->customer_address_model->get_last_sync_date();
 
 		echo $date;
 	}
+
+
+
 
 	public function count_update_rows()
 	{
@@ -93,6 +113,8 @@ class Customer_address extends PS_Controller
 
 		echo $this->api->countUpdateAddress($date);
 	}
+
+
 
 	public function sync_data()
 	{

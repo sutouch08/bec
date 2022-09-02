@@ -32,6 +32,7 @@
 <input type="hidden" id="vat_code" value="<?php echo getConfig('SALE_VAT_CODE'); //--- default sale vat code?>" />
 <input type="hidden" id="priceList" value="1" />
 <input type="hidden" id="is_draft" value="0">
+<input type="hidden" id="creditLimit" value="<?php echo getConfig('CREDIT_LIMIT') == 1 ? 1 : 0; ?>" />
 </form>
 
 <?php $this->load->view('sales_order/sales_order_ship_to_modal'); ?>

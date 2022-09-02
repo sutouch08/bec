@@ -127,6 +127,28 @@ class Orders_model extends CI_Model
 	}
 
 
+	public function get_credit_used($CardCode, $orderCode = NULL)
+	{
+		if( ! empty($orderCode))
+		{
+			$this->db->where('code !=', $orderCode);
+		}
+		
+		$rs = $this->db
+		->select_sum('DocTotal')
+		->where('CardCode', $CardCode)
+		->where_in('Status', array(0, 2))
+		->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->DocTotal;
+		}
+
+		return 0.00;
+	}
+
+
 	public function update($code, array $ds = array())
 	{
 		if(!empty($ds))

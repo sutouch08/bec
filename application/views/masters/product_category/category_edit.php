@@ -84,7 +84,7 @@
 			<div class="col-sm-12 col-xs-12 center">
 				<?php if($this->pm->can_edit) : ?>
 				<button type="button" class="btn btn-sm btn-primary" onclick="changeImage()">Upload image</button>
-				<button type="button" class="btn btn-sm btn-danger" onclick="deleteImage(<?php echo $id; ?>)">Delete image</button>
+				<button type="button" class="btn btn-sm btn-danger" onclick="deleteImage(<?php echo $code; ?>)">Delete image</button>
 				<?php endif; ?>
 			</div>
 		</div> <!-- end right column-->

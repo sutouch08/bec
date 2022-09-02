@@ -113,7 +113,7 @@ class Discount_rule extends PS_Controller
 			$this->load->model('masters/customers_model');
 			$this->load->model('masters/customer_group_model');
 			$this->load->model('masters/customer_type_model');
-			$this->load->model('masters/customer_region_model');
+			//$this->load->model('masters/customer_region_model');
 			$this->load->model('masters/customer_area_model');
 			$this->load->model('masters/customer_grade_model');
 			$this->load->model('masters/products_model');
@@ -134,7 +134,7 @@ class Discount_rule extends PS_Controller
 				"custGrade" => $this->discount_rule_model->getRuleCustomerGrade($id),
 				"customer_groups" => $this->customer_group_model->get_all(),
 				"customer_types" => $this->customer_type_model->get_all(),
-				"customer_regions" => $this->customer_region_model->get_all(),
+				"customer_regions" => $this->customers_model->get_customer_sales_team_list(),//$this->customer_region_model->get_all(),
 				"customer_areas" => $this->customer_area_model->get_all(),
 				"customer_grades" => $this->customer_grade_model->get_all(),
 				"pdList" => $this->discount_rule_model->getRuleProductId($id),

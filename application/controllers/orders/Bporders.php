@@ -14,6 +14,7 @@ class Bporders extends CI_Controller
   public $side_filter = FALSE;
 	public $show_cart = FALSE;
 	public $use_product_price = FALSE;
+  public $showAvailableStock = FALSE;
 
   public function __construct()
   {
@@ -55,6 +56,7 @@ class Bporders extends CI_Controller
 
     $this->home = base_url().'orders/bporders';
 		$this->load->model('orders/cart_model');
+    $this->load->model('orders/bp_order_model');
 		$this->load->model('orders/orders_model');
 		$this->load->model('masters/customers_model');
 		$this->load->model('masters/products_model');
@@ -71,17 +73,22 @@ class Bporders extends CI_Controller
 		$this->load->helper('warehouse');
 
 		$this->use_product_price = getConfig('USE_PRODUCT_PRICE') ? TRUE : FALSE;
+    $this->showAvailableStock = getConfig('GET_STOCK_ON_CUSTOMER_ORDER') ? TRUE : FALSE;
   }
 
 
 
 	public function index()
 	{
+		$this->show_cart = TRUE;
+
+    $search_text = trim($this->input->post('searchBox'));
 
 		$ds = array(
 			'customer' => $this->customers_model->get($this->_user->customer_code),
 			'cart' => $this->cart_model->get_customer_cart($this->_user->customer_code),
-			'cate' => $this->product_category_model->get_by_level(5, TRUE),
+			'cate' => $this->product_category_model->search_by_level(5, $search_text, TRUE), //$this->product_category_model->get_by_level(5, TRUE),
+      'search_text' => $search_text,
 			'totalQty' => 0,
 			'totalAmount' => 0
 		);
@@ -112,7 +119,10 @@ class Bporders extends CI_Controller
 		$payment = $this->input->get('Payment');
 		$channels = $this->input->get('Channels');
 		$quotaNo = $this->input->get('quotaNo');
-		$whsCode = getConfig('DEFAULT_WAREHOUSE');
+
+    $whsCode = get_customer_warehouse_listed();
+		$whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
+
 		$qty = 1;
 
 		$items = $this->products_model->get_product_by_category($category_code);
@@ -123,9 +133,16 @@ class Bporders extends CI_Controller
 			{
 				$pd = $this->products_model->get($rs->code);
 
-				if( ! empty($pd))
+				if( ! empty($pd) && $pd->customer_view == 1)
 				{
-					$stock = $this->getStock($rs->code, $whsCode, $quotaNo, $pd->count_stock);
+          $stock = array(
+    				'OnHand' => 0,
+    				'Committed' => 0,
+    				'QuotaQty' => 0,
+    				'Available' => 0
+    			);
+
+					$stock = $this->showAvailableStock ? $this->getStock($rs->code, $whsCode, $quotaNo, $pd->count_stock) : $stock;
 					$disc = $this->discount_model->get_item_discount($rs->code, $cardCode, $rs->price, $qty, $payment, $channels, $docDate);
 
 					if( ! empty($disc))
@@ -134,10 +151,13 @@ class Bporders extends CI_Controller
 							'id' => $pd->id,
 							'code' => $pd->code,
 							'name' => $pd->name,
-							'price' => $disc->type == 'N' ? number($disc->sellPrice, 2) : number($pd->price, 2),
-							'sellPrice' => $disc->sellPrice,
+							'stdPrice' => round($pd->price, 2),
+							'price' => $disc->type == 'N' ? round($disc->sellPrice, 2) : round($pd->price, 2),
+							'priceLabel' => $disc->type == 'N' ? number($disc->sellPrice, 2) : number($pd->price, 2),
+							'sellPrice' => round($disc->sellPrice, 2),
 							'available' => $stock['Available'],
 							'discLabel' => $disc->type == 'N' ? "" : discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
+							'DiscPrcnt' => round($disc->totalDiscPrecent, 2),
 							'rule_id' => $disc->rule_id,
 							'policy_id' => $disc->policy_id,
 							'discType' => $disc->type,
@@ -158,67 +178,6 @@ class Bporders extends CI_Controller
 
 
 
-	public function filter()
-	{
-		$this->side_filter = TRUE;
-		$this->show_cart = TRUE;
-
-		$filter = array(
-			'brandCode' => get_filter('brand', 'brand', ''),
-			'cateCode' => get_filter('cate', 'cate', '')
-		);
-
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_rows();
-		$segment = 4;
-
-		$rows = $this->products_model->count_filter_rows($filter);
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/filter/', $rows, $perpage, $segment);
-    $filter['data'] = $this->products_model->get_filter($filter, $perpage, $this->uri->segment($segment));
-		$this->pagination->initialize($init);
-
-		$filter['customer'] = $this->customers_model->get($this->_user->customer_code);
-
-		if(!empty($filter['data']))
-		{
-			foreach($filter['data'] as $rs)
-			{
-				if(! $this->use_product_price)
-				{
-					$price = $this->getPrice($rs->code, $filter['customer']->ListNum);
-					$rs->price = $price == 0 ? $rs->price : $price;
-				}
-
-				$rs->image_path = get_image_path($rs->id);
-			}
-		}
-
-    $filter['cart'] = $this->cart_model->get_customer_cart($this->_user->customer_code);
-		$filter['totalQty'] = 0;
-		$filter['totalAmount'] = 0;
-		$filter['cateName'] = empty($filter['cateCode']) ? NULL : $this->product_category_model->get_name($filter['cateCode']);
-		$filter['brandName'] = empty($filter['brandCode']) ? NULL : $this->product_brand_model->get_name_by_code($filter['brandCode']);
-		$filter['rows'] = $rows;
-		$filter['perpage'] = $perpage;
-
-    if(!empty($filter['cart']))
-    {
-      foreach($filter['cart'] as $rs)
-      {
-				$rs->image_path = get_image_path($rs->product_id);
-        $filter['totalQty'] += $rs->Qty;
-        $filter['totalAmount'] += $rs->LineTotal;
-      }
-    }
-
-		$filter['pagination'] = $this->pagination->create_links();
-
-		$this->load->view('bp_order/bp_filter', $filter);
-	}
-
-
-
   public function checkout()
   {
 		$this->load->model('masters/customer_address_model');
@@ -226,27 +185,37 @@ class Bporders extends CI_Controller
 
 		$billToCode = $this->customer_address_model->get_address_bill_to_code($this->_user->customer_code);
 		$shipToCode = $this->customer_address_model->get_address_ship_to_code($this->_user->customer_code);
+    $customer = $this->customers_model->get($this->_user->customer_code);
 
-    $ds = array(
-      'customer' => $this->customers_model->get($this->_user->customer_code),
-      'cart' => $this->cart_model->get_customer_cart($this->_user->customer_code),
-			'shipToCode' => $shipToCode,
-			'billToCode' => $billToCode
-    );
+    if( ! empty($customer))
+    {
+      $this->cart_model->remove_free_rows($customer->CardCode);
 
-		$last_order = $this->orders_model->get_last_sale_order($this->_user->customer_code);
+      $ds = array(
+        'customer' => $customer,
+        'cart' => $this->cart_model->get_customer_cart($this->_user->customer_code),
+        'shipToCode' => $shipToCode,
+        'billToCode' => $billToCode
+      );
 
-		$shipCode = empty($last_order) ? (empty($shipToCode) ? NULL : $shipToCode[0]->code) : $last_order->ShipToCode;
-		$billCode = empty($last_order) ? (empty($billToCode) ? NULL : $billToCode[0]->code) : $last_order->PayToCode;
-		$shipTo = empty($last_order) ? parse_address($this->customer_address_model->get_address_ship_to($this->_user->customer_code, $shipCode)) : $last_order->Address2;
-		$billTo = empty($last_order) ? parse_address($this->customer_address_model->get_address_bill_to($this->_user->customer_code, $billCode)) : $last_order->Address;
+      $shipCode = empty($last_order) ? (empty($shipToCode) ? NULL : $shipToCode[0]->code) : $last_order->ShipToCode;
+      $billCode = empty($last_order) ? (empty($billToCode) ? NULL : $billToCode[0]->code) : $last_order->PayToCode;
+      $shipTo = empty($last_order) ? parse_address($this->customer_address_model->get_address_ship_to($this->_user->customer_code, $shipCode)) : $last_order->Address2;
+      $billTo = empty($last_order) ? parse_address($this->customer_address_model->get_address_bill_to($this->_user->customer_code, $billCode)) : $last_order->Address;
 
-		$ds['shipCode'] = $shipCode;
-		$ds['billCode'] = $billCode;
-		$ds['shipTo'] = $shipTo;
-		$ds['billTo'] = $billTo;
+      //---
+      $ds['shipCode'] = $shipCode;
+      $ds['billCode'] = $billCode;
+      $ds['shipTo'] = $shipTo;
+      $ds['billTo'] = $billTo;
+      $ds['freeItems'] = $this->getFreeItemRule($customer->CardCode, $customer->GroupNum, $this->_user->channels);
 
-    $this->load->view('bp_order/bp_checkout', $ds);
+      $this->load->view('bp_order/bp_checkout', $ds);
+    }
+    else
+    {
+      $this->error_page();
+    }
   }
 
 
@@ -436,157 +405,162 @@ class Bporders extends CI_Controller
 	{
 		$sc = TRUE;
 		$cardCode = $this->input->post('CardCode');
-		$priceList = $this->input->post('PriceList');
-		$itemCode = $this->input->post('ItemCode');
+		$items = $this->input->post('items');
 		$channels = $this->input->post('Channels');
 		$payment = $this->input->post('Payment');
 		$quotaNo = $this->input->post('quotaNo');
-		$qty = $this->input->post('Qty');
+		$whsCode = getConfig('DEFAULT_WAREHOUSE');
 
 		$customer = $this->customers_model->get($cardCode);
 
 		if( ! empty($customer))
 		{
-			$pd = $this->products_model->get($itemCode);
-
-			if(! empty($pd))
+			if( ! empty($items))
 			{
-				$detail = $this->cart_model->get_exists($cardCode, $itemCode);
-
-				if(empty($detail))
+				foreach($items as $item)
 				{
-					$whsCode = getConfig('DEFAULT_WAREHOUSE');
-					$price = $this->getPrice($itemCode, $priceList);
-					$price = $price == 0 ? $pd->price : $price;
-					$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, today());
+					$itemCode = $item['ItemCode'];
+					$qty = $item['Qty'];
 
-					if( ! empty($disc))
+					$pd = $this->products_model->get($itemCode);
+
+					if(! empty($pd))
 					{
-						$lineNum = $this->cart_model->get_new_line($cardCode);
-						$discLabel = discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5);
-						$uid = uniqid(rand(1,100));
+						$detail = $this->cart_model->get_exists($cardCode, $itemCode);
 
-						$arr = array(
-							'CardCode' => $cardCode,
-							'LineNum' => $lineNum,
-							'ItemCode' => $pd->code,
-							'ItemName' => $pd->name,
-							'Qty' => $qty,
-							'UomCode' => $pd->uom_code,
-							'UomEntry' => $pd->uom_id,
-							'Price' => $price,
-							'SellPrice' => $disc->sellPrice,
-							'sysSellPrice' => $disc->sellPrice,
-							'disc1' => $disc->disc1,
-							'disc2' => $disc->disc2,
-							'disc3' => $disc->disc3,
-							'disc4' => $disc->disc4,
-							'disc5' => $disc->disc5,
-							'sysDisc1' => $disc->disc1,
-							'sysDisc2' => $disc->disc2,
-							'sysDisc3' => $disc->disc3,
-							'sysDisc4' => $disc->disc4,
-							'sysDisc5' => $disc->disc5,
-							'discLabel' => $discLabel,
-							'sysDiscLabel' => $discLabel,
-							'discDiff' => 0,
-							'DiscPrcnt' => $disc->totalDiscPrecent,
-							'discAmount' => $disc->discAmount,
-							'totalDiscAmount' => $disc->totalDiscAmount,
-							'VatGroup' => $pd->vat_group,
-							'VatRate' => $pd->vat_rate,
-							'VatAmount' => get_vat_amount($disc->sellPrice, $pd->vat_rate),
-							'totalVatAmount' => (get_vat_amount($disc->sellPrice, $pd->vat_rate) * $qty),
-							'LineTotal' => $disc->sellPrice * $qty,
-							'policy_id' => $disc->policy_id,
-							'rule_id' => $disc->rule_id,
-							'WhsCode' => $whsCode,
-							'QuotaNo' => $quotaNo,
-							'free_item' => $disc->freeQty,
-							'uid' => $uid,
-							'parent_uid' => NULL,
-							'is_free' => 0,
-							'discType' => $disc->type,
-							'picked' => 0,
-							'channels_id' => $channels,
-							'payment_id' => $payment,
-							'product_id' => $pd->id,
-							'product_model_id' => $pd->model_id,
-							'product_category_id' => $pd->category_id,
-							'product_type_id' => $pd->type_id,
-							'product_brand_id' => $pd->brand_id,
-							'customer_id' => $customer->id,
-							'customer_group_id' => $customer->GroupCode,
-							'customer_type_id' => $customer->TypeCode,
-							'customer_region_id' => $customer->RegionCode,
-							'customer_area_id' => $customer->AreaCode,
-							'customer_grade_id' => $customer->GradeCode,
-							'user_id' => $this->_user->id,
-							'uname' => $this->_user->uname,
-							'sale_team' => $this->_user->team_id
-						);
-
-						if( ! $this->cart_model->add($arr))
+						if(empty($detail))
 						{
-							$sc = FALSE;
-							$this->error = "Insert Item failed";
+							$price = $pd->price;
+							$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, today());
+
+							if( ! empty($disc))
+							{
+								$lineNum = $this->cart_model->get_new_line($cardCode);
+								$discLabel = discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5);
+								$uid = uniqid(rand(1,100));
+
+								$arr = array(
+									'CardCode' => $cardCode,
+									'LineNum' => $lineNum,
+									'ItemCode' => $pd->code,
+									'ItemName' => $pd->name,
+									'Qty' => $qty,
+									'UomCode' => $pd->uom_code,
+									'UomEntry' => $pd->uom_id,
+									'Price' => $price,
+									'SellPrice' => $disc->sellPrice,
+									'sysSellPrice' => $disc->sellPrice,
+									'disc1' => $disc->disc1,
+									'disc2' => $disc->disc2,
+									'disc3' => $disc->disc3,
+									'disc4' => $disc->disc4,
+									'disc5' => $disc->disc5,
+									'sysDisc1' => $disc->disc1,
+									'sysDisc2' => $disc->disc2,
+									'sysDisc3' => $disc->disc3,
+									'sysDisc4' => $disc->disc4,
+									'sysDisc5' => $disc->disc5,
+									'discLabel' => $discLabel,
+									'sysDiscLabel' => $discLabel,
+									'discDiff' => 0,
+									'DiscPrcnt' => $disc->totalDiscPrecent,
+									'discAmount' => $disc->discAmount,
+									'totalDiscAmount' => $disc->totalDiscAmount,
+									'VatGroup' => $pd->vat_group,
+									'VatRate' => $pd->vat_rate,
+									'VatAmount' => get_vat_amount($disc->sellPrice, $pd->vat_rate),
+									'totalVatAmount' => (get_vat_amount($disc->sellPrice, $pd->vat_rate) * $qty),
+									'LineTotal' => $disc->sellPrice * $qty,
+									'policy_id' => $disc->policy_id,
+									'rule_id' => $disc->rule_id,
+									'WhsCode' => $whsCode,
+									'QuotaNo' => $quotaNo,
+									'free_item' => $disc->freeQty,
+									'uid' => $uid,
+									'parent_uid' => NULL,
+									'is_free' => 0,
+									'discType' => $disc->type,
+									'picked' => 0,
+									'channels_id' => $channels,
+									'payment_id' => $payment,
+									'product_id' => $pd->id,
+									'product_model_id' => $pd->model_id,
+									'product_category_id' => $pd->category_id,
+									'product_type_id' => $pd->type_id,
+									'product_brand_id' => $pd->brand_id,
+									'customer_id' => $customer->id,
+									'customer_group_id' => $customer->GroupCode,
+									'customer_type_id' => $customer->TypeCode,
+									'customer_region_id' => $customer->RegionCode,
+									'customer_area_id' => $customer->AreaCode,
+									'customer_grade_id' => $customer->GradeCode,
+									'user_id' => $this->_user->id,
+									'uname' => $this->_user->uname,
+									'sale_team' => $this->_user->team_id
+								);
+
+								if( ! $this->cart_model->add($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert Item failed";
+								}
+							}
+						}
+						else
+						{
+							//---- Update detail
+							$qty = $qty + $detail->Qty;
+							$price = $pd->price;
+							$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, today());
+
+							if( ! empty($disc))
+							{
+								$discLabel = discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5);
+
+								$arr = array(
+									'Qty' => $qty,
+									'Price' => $price,
+									'SellPrice' => $disc->sellPrice,
+									'sysSellPrice' => $disc->sellPrice,
+									'disc1' => $disc->disc1,
+									'disc2' => $disc->disc2,
+									'disc3' => $disc->disc3,
+									'disc4' => $disc->disc4,
+									'disc5' => $disc->disc5,
+									'sysDisc1' => $disc->disc1,
+									'sysDisc2' => $disc->disc2,
+									'sysDisc3' => $disc->disc3,
+									'sysDisc4' => $disc->disc4,
+									'sysDisc5' => $disc->disc5,
+									'discLabel' => $discLabel,
+									'sysDiscLabel' => $discLabel,
+									'discDiff' => 0,
+									'DiscPrcnt' => $disc->totalDiscPrecent,
+									'discAmount' => $disc->discAmount,
+									'totalDiscAmount' => $disc->totalDiscAmount,
+									'VatAmount' => get_vat_amount($disc->sellPrice, $pd->vat_rate),
+									'totalVatAmount' => (get_vat_amount($disc->sellPrice, $pd->vat_rate) * $qty),
+									'LineTotal' => $disc->sellPrice * $qty,
+									'policy_id' => $disc->policy_id,
+									'rule_id' => $disc->rule_id,
+									'free_item' => $disc->freeQty,
+									'discType' => $disc->type
+								);
+
+								if( ! $this->cart_model->update($detail->id, $arr))
+								{
+									$sc = FALSE;
+									$this->error = "Update Item failed";
+								}
+							}
 						}
 					}
-				}
-				else
-				{
-					//---- Update detail
-					$qty = $qty + $detail->Qty;
-					$price = $this->getPrice($itemCode, $priceList);
-					$price = $price == 0 ? $pd->price : $price;
-					$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, today());
-
-					if( ! empty($disc))
+					else
 					{
-						$discLabel = discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5);
-
-						$arr = array(
-							'Qty' => $qty,
-							'Price' => $price,
-							'SellPrice' => $disc->sellPrice,
-							'sysSellPrice' => $disc->sellPrice,
-							'disc1' => $disc->disc1,
-							'disc2' => $disc->disc2,
-							'disc3' => $disc->disc3,
-							'disc4' => $disc->disc4,
-							'disc5' => $disc->disc5,
-							'sysDisc1' => $disc->disc1,
-							'sysDisc2' => $disc->disc2,
-							'sysDisc3' => $disc->disc3,
-							'sysDisc4' => $disc->disc4,
-							'sysDisc5' => $disc->disc5,
-							'discLabel' => $discLabel,
-							'sysDiscLabel' => $discLabel,
-							'discDiff' => 0,
-							'DiscPrcnt' => $disc->totalDiscPrecent,
-							'discAmount' => $disc->discAmount,
-							'totalDiscAmount' => $disc->totalDiscAmount,
-							'VatAmount' => get_vat_amount($disc->sellPrice, $pd->vat_rate),
-							'totalVatAmount' => (get_vat_amount($disc->sellPrice, $pd->vat_rate) * $qty),
-							'LineTotal' => $disc->sellPrice * $qty,
-							'policy_id' => $disc->policy_id,
-							'rule_id' => $disc->rule_id,
-							'free_item' => $disc->freeQty,
-							'discType' => $disc->type
-						);
-
-						if( ! $this->cart_model->update($detail->id, $arr))
-						{
-							$sc = FALSE;
-							$this->error = "Update Item failed";
-						}
+						$sc = FALSE;
+						$this->error = "Invalid Item Code";
 					}
 				}
-			}
-			else
-			{
-				$sc = FALSE;
-				$this->error = "Invalid Item Code";
 			}
 		}
 		else
@@ -596,6 +570,155 @@ class Bporders extends CI_Controller
 		}
 
 		$this->_response($sc);
+	}
+
+
+
+	public function add_free_row()
+	{
+		$sc = TRUE;
+		$cardCode = $this->input->post('CardCode');
+		$itemCode = $this->input->post('ItemCode');
+		$channels = $this->input->post('Channels');
+		$payment = $this->input->post('Payment');
+		$quotaNo = $this->input->post('quotaNo');
+		$Qty = $this->input->post('Qty');
+		$uid = $this->input->post('uid');
+    $parent_uid = $this->input->post('parent_uid');
+		$policy_id = $this->input->post('policy_id');
+		$rule_id = $this->input->post('rule_id');
+		$whsCode = getConfig('DEFAULT_WAREHOUSE');
+
+		$customer = $this->customers_model->get($cardCode);
+
+		if( ! empty($customer))
+		{
+			$pd = $this->products_model->get($itemCode);
+
+					if(! empty($pd))
+					{
+						$detail = $this->cart_model->get_free_exists($cardCode, $itemCode, $parent_uid);
+
+						if(empty($detail))
+						{
+							$lineNum = $this->cart_model->get_new_line($cardCode);
+
+								$arr = array(
+									'CardCode' => $cardCode,
+									'LineNum' => $lineNum,
+									'ItemCode' => $pd->code,
+									'ItemName' => $pd->name,
+									'Qty' => $Qty,
+									'UomCode' => $pd->uom_code,
+									'UomEntry' => $pd->uom_id,
+									'StdPrice' => $pd->price,
+									'Price' => $pd->price,
+									'discLabel' => 100,
+									'DiscPrcnt' => 100,
+									'discAmount' => $pd->price,
+									'totalDiscAmount' => $pd->price * $Qty,
+									'VatGroup' => $pd->vat_group,
+									'VatRate' => $pd->vat_rate,
+									'VatAmount' => 0.00,
+									'totalVatAmount' => 0.00,
+									'LineTotal' => 0.00,
+									'policy_id' => $policy_id,
+									'rule_id' => $rule_id,
+									'WhsCode' => $whsCode,
+									'QuotaNo' => $quotaNo,
+									'uid' => $uid,
+									'parent_uid' => $parent_uid,
+									'is_free' => 1,
+									'discType' => 'F',
+									'channels_id' => $channels,
+									'payment_id' => $payment,
+									'product_id' => $pd->id,
+									'product_model_id' => $pd->model_id,
+									'product_category_id' => $pd->category_id,
+									'product_type_id' => $pd->type_id,
+									'product_brand_id' => $pd->brand_id,
+									'customer_id' => $customer->id,
+									'customer_group_id' => $customer->GroupCode,
+									'customer_type_id' => $customer->TypeCode,
+									'customer_region_id' => $customer->RegionCode,
+									'customer_area_id' => $customer->AreaCode,
+									'customer_grade_id' => $customer->GradeCode,
+									'user_id' => $this->_user->id,
+									'uname' => $this->_user->uname,
+									'sale_team' => $this->_user->team_id
+								);
+
+								if( ! $this->cart_model->add($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert Item failed";
+								}
+						}
+						else
+						{
+							//---- Update detail
+							$qty = $Qty + $detail->Qty;
+
+              $arr = array(
+                'Qty' => $qty
+              );
+
+              if( ! $this->cart_model->update($detail->id, $arr))
+              {
+                $sc = FALSE;
+                $this->error = "Update Item failed";
+              }
+						}
+					}
+					else
+					{
+						$sc = FALSE;
+						$this->error = "Invalid Item Code";
+					}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "Invalid Customer Code";
+		}
+
+		if($sc === TRUE)
+		{
+			$detail = $this->cart_model->get_free_exists($cardCode, $itemCode, $parent_uid);
+
+			if( ! empty($detail))
+			{
+				$arr = array(
+					'id' => $detail->id,
+					'ItemCode' => $detail->ItemCode,
+					'ItemName' => $detail->ItemName,
+					'product_id' => $detail->product_id,
+					'Qty' => $detail->Qty,
+					'QtyLabel' => number($detail->Qty),
+					'Price' => $detail->Price,
+					'PriceLabel' => number($detail->Price, 2),
+					'StdPrice' => $detail->StdPrice,
+					'SellPrice' => $detail->SellPrice,
+					'discLabel' => $detail->discLabel,
+					'LineTotal' => $detail->LineTotal,
+					'LineTotalLabel' => $detail->LineTotal,
+					'rule_id' => $detail->rule_id,
+					'parent_uid' => $detail->parent_uid,
+					'uid' => $detail->uid,
+					'image_path' => get_image_path($detail->product_id)
+				);
+
+				echo json_encode($arr);
+			}
+			else
+			{
+				echo "Cart detail not found";
+			}
+		}
+		else
+		{
+			echo $this->error;
+		}
 	}
 
 
@@ -618,9 +741,12 @@ class Bporders extends CI_Controller
 					'ItemCode' => $rs->ItemCode,
 					'ItemName' => $rs->ItemName,
 					'Qty' => $rs->Qty,
+					'QtyLabel' => number($rs->Qty),
 					'SellPrice' => $rs->SellPrice,
-					'priceLabel' => number($rs->SellPrice, 2),
+					'Price' => number($rs->Price, 2),
+					'discLabel' => $rs->discLabel,
 					'LineTotal' => $rs->LineTotal,
+					'LineTotalLabel' => number($rs->LineTotal, 2),
 					'image_path' => get_image_path($rs->product_id)
 				);
 
@@ -676,17 +802,206 @@ class Bporders extends CI_Controller
 
 
 
+	public function remove_multi_cart_rows()
+	{
+		$sc = TRUE;
+		$ids = $this->input->post('ids');
+
+		if(is_array($ids))
+		{
+			if( ! $this->db->where_in('id', $ids)->delete('order_cart'))
+			{
+				$sc = FALSE;
+				$this->error = "Delete Cart Rows Failed";
+			}
+		}
+
+
+		$this->_response($sc);
+	}
+
+
+	public function remove_free_rows()
+	{
+		$sc = TRUE;
+
+		$CardCode = $this->input->post('CardCode');
+		$rs = $this->db->where('CardCode', $CardCode)->where('is_free', 1)->delete('order_cart');
+
+		if(! $rs)
+		{
+			$sc = FALSE;
+			$this->error = "Delete Free Rows Failed";
+		}
+
+		$this->_response($sc);
+	}
+
+
+
+  public function getFreeItemRule($cardCode, $payment, $channels)
+  {
+    $ds = array();
+    $arr = array();
+
+    $details = $this->cart_model->get_sum_items_qty($cardCode);
+
+    if( ! empty($details))
+    {
+      $date = today();
+
+      foreach($details as $rs)
+      {
+        $rd = $this->discount_model->get_free_item_rule($rs->ItemCode, $cardCode, $payment, $channels, $date, $rs->Qty, $rs->LineTotal);
+
+        if( ! empty($rd))
+        {
+          if($rd->freeQty > 0)
+          {
+            if(isset($ds[$rd->rule_id]))
+            {
+              $ds[$rd->rule_id]['freeQty'] += $rd->freeQty;
+            }
+            else
+            {
+              $ds[$rd->rule_id]['freeQty'] = $rd->freeQty;
+              $ds[$rd->rule_id]['policy_id'] = $rd->policy_id;
+              $ds[$rd->rule_id]['rule_id'] = $rd->rule_id;
+              $ds[$rd->rule_id]['uid'] = uniqid(rand(1,100));
+            }
+          }
+        }
+      }
+    }
+
+    if(! empty($ds))
+    {
+      foreach($ds as $rs)
+      {
+        $arr[] = (object) $rs;
+      }
+    }
+
+    return $arr;
+  }
+
+
+
+	public function get_free_item_rule()
+	{
+		$sc = TRUE;
+
+		$ds = array();
+
+		$json = json_decode($this->input->post('json'));
+
+		if(!empty($json))
+		{
+			$date = db_date($json->DocDate);
+
+			if(! empty($json->items))
+			{
+				$arr = array();
+
+				foreach($json->items as $rs)
+				{
+					$rd = $this->discount_model->get_free_item_rule($rs->itemCode, $json->CardCode, $json->Payment, $json->Channels, $date, $rs->qty, $rs->amount);
+
+					if(!empty($rd))
+					{
+						if($rd->freeQty > 0)
+						{
+							if(isset($ds[$rd->rule_id]))
+							{
+								$ds[$rd->rule_id]['freeQty'] += $rd->freeQty;
+							}
+							else
+							{
+								$ds[$rd->rule_id]['freeQty'] = $rd->freeQty;
+								$ds[$rd->rule_id]['policy_id'] = $rd->policy_id;
+								$ds[$rd->rule_id]['rule_id'] = $rd->rule_id;
+								$ds[$rd->rule_id]['uid'] = uniqid(rand(1,100));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		echo json_encode($ds);
+	}
+
+
+
+	public function get_free_item()
+	{
+		$rule_id = $this->input->get('rule_id');
+		$uid = $this->input->get('uid');
+		$freeQty = $this->input->get('freeQty');
+		$picked = $this->input->get('picked');
+		$qty = $freeQty - $picked;
+
+		$list = $this->discount_model->get_free_item_list($rule_id);
+
+		$ds = "";
+
+		if(!empty($list))
+		{
+			$ds .= "<tr><td colspan='5' class='text-center'>เลือก {$qty} ชิ้น จากรายการต่อไปนี้</td></tr>";
+			$ds .= "<tr>";
+			$ds .= "<td class='fix-width-60 middle'>Image</td>";
+			$ds .= "<td class='fix-width-100 middle'>Code</td>";
+			$ds .= "<td class='min-width-250 middle'>Description</td>";
+			$ds .= "<td class='fix-width-80 middle'>Qty</td>";
+			$ds .= "<td class='fix-width-80 middle'></td>";
+			$ds .= "</tr>";
+
+			foreach($list as $rs)
+			{
+				$uuid = uniqid(rand(1,100));
+				$img = get_image_path($rs->product_id, 'mini');
+				$pd = $this->products_model->get($rs->product_code);
+				$price = $pd->price;
+
+				$ds .= "<tr>";
+				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
+				$ds .= "<td class='fix-width-100 middle'>{$pd->code}</td>";
+				$ds .= "<td class='min-width-250 middle'>{$pd->name}</td>";
+				$ds .= "<td class='fix-width-80 middle'>";
+				$ds .= "<input type='number' class='form-control input-sm text-center auto-select' ";
+				$ds .= "id='input-{$uuid}' data-item='{$pd->id}' ";
+				$ds .= "data-uid='{$uid}' data-parent='{$uid}' ";
+				$ds .= "data-pdcode='{$pd->code}' ";
+				$ds .= "data-pdname='{$pd->name}' ";
+				$ds .= "data-price='{$price}' ";
+				$ds .= "data-uom='{$pd->uom}' data-uomcode='{$pd->uom_code}' ";
+				$ds .= "data-rule='{$rs->rule_id}' data-policy='{$rs->id_policy}' ";
+				$ds .= "data-vatcode='{$pd->vat_group}' data-vatrate='{$pd->vat_rate}' ";
+				$ds .= "data-img='{$img}' data-qty='{$qty}' value='1'>";
+				$ds .= "</td>";
+				$ds .= "<td class='fix-width-80 middle'>";
+				$ds .= "<button class='btn btn-primary btn-xs btn-block' id='btn-{$uuid}' onclick=\"addFreeRow('{$uuid}')\">Add</button>";
+				$ds .= "</td>";
+				$ds .= "</tr>";
+			}
+		}
+		else
+		{
+			$ds .= "<tr><td colspan='5' class='text-center'>ไม่พบรายการสินค้า</td></tr>";
+		}
+
+		echo $ds;
+	}
+
+
+
 
   public function history()
   {
+    $this->title = "ประวัติการสั่งซื้อ";
 		$filter = array(
 			'code' => get_filter('code', 'order_code', ''),
-			'customer' => $this->_customer === TRUE ? $this->_user->customer_code : get_filter('customer', 'order_customer', ''),
 			'role' => 'C',
-			'sale_id' => get_filter('sale_id', 'order_sale_id', 'all'),
-			'channels' => get_filter('channels', 'order_channels', 'all'),
-			'payment' => get_filter('payment', 'order_payment', 'all'),
-			'approval' => get_filter('approval', 'order_approval', 'all'),
 			'status' => get_filter('status', 'order_status', 'all'),
 			'from_date' => get_filter('from_date', 'order_from_date', ''),
 			'to_date' => get_filter('to_date', 'order_to_date', '')
@@ -695,10 +1010,10 @@ class Bporders extends CI_Controller
 		//--- แสดงผลกี่รายการต่อหน้า
 		$perpage = get_rows();
 
-		$rows = $this->orders_model->count_rows($filter);
+		$rows = $this->bp_order_model->count_rows($filter);
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
 		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-    $filter['data'] = $this->orders_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+    $filter['data'] = $this->bp_order_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
 		$this->pagination->initialize($init);
     $this->load->view('bp_order/bp_order_list', $filter);
   }
@@ -707,6 +1022,7 @@ class Bporders extends CI_Controller
 
 	public function view_detail($code)
 	{
+    $this->title = "ประวัติการสั่งซื้อ";
 		$this->load->model('users/approver_model');
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/employee_model');
@@ -740,17 +1056,10 @@ class Bporders extends CI_Controller
 					'totalAmount' => $totalAmount,
 					'totalVat' => $totalVat,
 					'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
-					'owner' => $this->employee_model->get_name($order->OwnerCode),
-					'dimCode1' => $this->cost_center_model->get_name($order->dimCode1),
-					'dimCode2' => $this->cost_center_model->get_name($order->dimCode2),
-					'dimCode3' => $this->cost_center_model->get_name($order->dimCode3),
-					'dimCode4' => $this->cost_center_model->get_name($order->dimCode4),
-					'dimCode5' => $this->cost_center_model->get_name($order->dimCode5),
-					'logs' => $this->orders_model->get_logs($code),
-					'approve_right' => $this->approver_model->get_approve_right($this->_user->id, $order->sale_team)
+					'owner' => $this->employee_model->get_name($order->OwnerCode)
 				);
 
-				$this->load->view('sales_order/sales_order_view', $ds);
+				$this->load->view('bp_order/bp_order_detail', $ds);
 			}
 			else
 			{
@@ -770,7 +1079,8 @@ class Bporders extends CI_Controller
 		$docDate = today();
 		$payment = $this->input->get('Payment');
 		$channels = $this->input->get('Channels');
-		$whsCode = getConfig('DEFAULT_WAREHOUSE');
+    $whsCode = get_customer_warehouse_listed();
+		$whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
 		$quotaNo = $this->input->get('quotaNo');
 		$qty = 1;
 
@@ -778,9 +1088,16 @@ class Bporders extends CI_Controller
 
 		if(! empty($pd))
 		{
+      $stock = array(
+        'OnHand' => 0,
+        'Committed' => 0,
+        'QuotaQty' => 0,
+        'Available' => 0
+      );
+
 			$price = $this->getPrice($itemCode, $priceList);
 			$price = $price == 0 ? $pd->price : $price;
-			$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
+			$stock = $this->showAvailableStock ? $this->getStock($itemCode, $whsCode, $quotaNo) : $stock;
 			$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $docDate);
 
 			if(!empty($disc))
@@ -832,67 +1149,6 @@ class Bporders extends CI_Controller
 	}
 
 
-	public function get_free_item()
-	{
-		$rule_id = $this->input->get('rule_id');
-		$uid = $this->input->get('uid');
-		$freeQty = $this->input->get('freeQty');
-		$picked = $this->input->get('picked');
-		$priceList = $this->input->get('priceList');
-		$qty = $freeQty - $picked;
-
-		$list = $this->discount_model->get_free_item_list($rule_id);
-
-		$ds = "";
-
-		if(!empty($list))
-		{
-			$ds .= "<tr><td colspan='5' class='text-center'>เลือก {$qty} ชิ้น จากรายการต่อไปนี้</td></tr>";
-			$ds .= "<tr>";
-			$ds .= "<td class='fix-width-60 middle'>Image</td>";
-			$ds .= "<td class='fix-width-100 middle'>Code</td>";
-			$ds .= "<td class='min-width-250 middle'>Description</td>";
-			$ds .= "<td class='fix-width-80 middle'>Qty</td>";
-			$ds .= "<td class='fix-width-80 middle'></td>";
-			$ds .= "</tr>";
-
-			foreach($list as $rs)
-			{
-				$uuid = uniqid(rand(1,100));
-				$img = get_image_path($rs->product_id, 'mini');
-				$pd = $this->products_model->get($rs->product_code);
-				$price = $this->getPrice($pd->code, $priceList);
-				$price = $price == 0 ? $pd->price : $price;
-
-				$ds .= "<tr>";
-				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
-				$ds .= "<td class='fix-width-100 middle'>{$pd->code}</td>";
-				$ds .= "<td class='min-width-250 middle'>{$pd->name}</td>";
-				$ds .= "<td class='fix-width-80 middle'>";
-				$ds .= "<input type='number' class='form-control input-sm text-center auto-select' ";
-				$ds .= "id='input-{$uuid}' data-item='{$pd->id}' ";
-				$ds .= "data-uid='{$uid}' data-parent='{$uid}' ";
-				$ds .= "data-pdcode='{$pd->code}' ";
-				$ds .= "data-pdname='{$pd->name}' ";
-				$ds .= "data-price='{$price}' ";
-				$ds .= "data-uom='{$pd->uom}' data-uomcode='{$pd->uom_code}' ";
-				$ds .= "data-rule='{$rs->rule_id}' data-policy='{$rs->id_policy}' ";
-				$ds .= "data-vatcode='{$pd->vat_group}' data-vatrate='{$pd->vat_rate}' ";
-				$ds .= "data-img='{$img}' data-qty='{$qty}' value='1'>";
-				$ds .= "</td>";
-				$ds .= "<td class='fix-width-80 middle'>";
-				$ds .= "<button class='btn btn-primary btn-xs btn-block' id='btn-{$uuid}' onclick=\"addFreeRow('{$uuid}')\">Add</button>";
-				$ds .= "</td>";
-				$ds .= "</tr>";
-			}
-		}
-		else
-		{
-			$ds .= "<tr><td colspan='5' class='text-center'>ไม่พบรายการสินค้า</td></tr>";
-		}
-
-		echo $ds;
-	}
 
 
 	public function getPrice($ItemCode, $priceList)
@@ -905,46 +1161,31 @@ class Bporders extends CI_Controller
 
 	public function getStock($ItemCode, $WhsCode, $QuotaNo, $count_stock = 1)
 	{
-		$test = getConfig('TEST') == 1 ? TRUE : FALSE;
+    $arr = array(
+      'OnHand' => 0,
+      'Committed' => 0,
+      'QuotaQty' => 0,
+      'Available' => 0
+    );
 
-		if($test OR $count_stock == 0)
-		{
-			$arr = array(
-				'OnHand' => 0,
-				'Committed' => 0,
-				'QuotaQty' => 0,
-				'Available' => 0
-			);
-		}
-		else
-		{
-			$this->load->library('api');
+    $this->load->library('api');
+    $stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
 
-			$commit = get_zero($this->orders_model->get_commit_qty($ItemCode, $QuotaNo));
+    if(!empty($stock))
+    {
+      $commit = get_zero($this->orders_model->get_commit_qty($ItemCode, $QuotaNo));
+      $OnHand = $stock['OnHand'];
+      $Quota = $stock['QuotaQty'];
+      $available = $Quota - $commit;
 
-			$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
+      $arr = array(
+        'OnHand' => $OnHand,
+        'Committed' => $commit,
+        'QuotaQty' => $Quota,
+        'Available' => $available > 0 ? $available : 0
+      );
+    }
 
-			$arr = array(
-				'OnHand' => 0,
-				'Committed' => $commit,
-				'QuotaQty' => 0,
-				'Available' => 0
-			);
-
-			if(!empty($stock))
-			{
-				$OnHand = $stock['OnHand'];
-				$Quota = $stock['QuotaQty'];
-				$available = $Quota - $commit;
-
-				$arr = array(
-					'OnHand' => $OnHand,
-					'Committed' => $commit,
-					'QuotaQty' => $Quota,
-					'Available' => $available > 0 ? $available : 0
-				);
-			}
-		}
 
     return $arr;
 	}
@@ -1005,6 +1246,7 @@ class Bporders extends CI_Controller
 	}
 
 
+
 	public function clear_filter()
 	{
 		$filter = array(
@@ -1062,6 +1304,7 @@ class Bporders extends CI_Controller
   }
 
 
+
 	public function is_expire_password($last_pass_change)
 	{
 		$today = date('Y-m-d');
@@ -1070,15 +1313,19 @@ class Bporders extends CI_Controller
 
 		$expire_days = intval(getConfig('USER_PASSWORD_AGE'));
 
-		$expire_date = date('Y-m-d', strtotime("+{$expire_days} days", strtotime($last_change)));
-
-		if($today > $expire_date)
+		if($expire_days != 0)
 		{
-			return true;
+			$expire_date = date('Y-m-d', strtotime("+{$expire_days} days", strtotime($last_change)));
+
+			if($today > $expire_date)
+			{
+				return true;
+			}
 		}
 
 		return FALSE;
 	}
+
 
 
 	public function _response($sc = TRUE)

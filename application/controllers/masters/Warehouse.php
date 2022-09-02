@@ -91,6 +91,19 @@ class Warehouse extends PS_Controller
 	}
 
 
+	public function set_customer_list()
+	{
+		$id = $this->input->post('id');
+		$list = $this->input->post('list');
+
+		$arr = array(
+			'customer_list' => $list
+		);
+
+		return $this->warehouse_model->update_by_id($id, $arr);
+	}
+
+
 	public function clear_filter()
 	{
 		return clear_filter(array("whs_code", "whs_name", "whs_type"));

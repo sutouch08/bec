@@ -116,7 +116,7 @@ function validateFreeItem(option) {
 		    showCancelButton:true,
 		    cancelButtonText:'กลับไปแก้ไข',
 		    confirmButtonText:'บันทึกออเดอร์',
-				closeOnConfirm:false
+				closeOnConfirm:true
 		  },
 		  function(){
 				if(option == 'add') {
@@ -145,17 +145,11 @@ function saveAdd() {
 
 	setTimeout(function() {
 
-		// $('.item-code').each(function() {
-		// 	let no = $(this).data('id');
-		// 	let itemCode = $(this).val();
-		// 	if(itemCode.length > 0) {
-		// 		recalDiscount(no);
-		// 	}
-		// });
-
 		let mustApprove = 0;
 		let max_diff = 0;
 		let emptyQuota = 0;
+		let is_draft = $('#is_draft').val() == '1' ? 1 : 0;
+		let creditLimit = $('#creditLimit').val() == '1' ? 1 : 0;
 
 		$('.disc-diff').each(function() {
 			if($(this).val() > 0) {
@@ -166,7 +160,7 @@ function saveAdd() {
 
 		var ds = {
 			//---- Right column
-			'isDraft' : $('#is_draft').val(),
+			'isDraft' : is_draft,
 			'SlpCode' : $('#sale_id').val(),
 			'CardCode' : $.trim($('#CardCode').val()),  //****** required
 			'CardName' : $('#CardName').val(),
@@ -409,41 +403,128 @@ function saveAdd() {
 		data.details = details;
 
 		//--- หากไม่มีข้อผิดพลาด
+		if(is_draft == 0 && creditLimit == 1) {
 
-		load_in();
-		$.ajax({
-			url:HOME + 'add',
-			type:'POST',
-			cache:false,
-			data:JSON.stringify(data),
-			success:function(rs) {
-				load_out();
-				if(isJson(rs)) {
-					var ds = $.parseJSON(rs);
-					if(ds.status === 'success') {
-						swal({
-							title:'Success',
-							type:'success',
-							timer:1000
-						});
+			load_in();
 
-						setTimeout(function(){
-							viewDetail(ds.code);
-						}, 1200);
+			const cardCode = $('#CardCode').val();
+			const docTotal = parseDefault(parseFloat($('#docTotal').val()), 0);
+			const orderCode = null;
+
+			$.ajax({
+				url:HOME + 'get_credit_balance',
+				type:'GET',
+				cache:false,
+				data:{
+					'CardCode' : cardCode,
+					'orderCode' : orderCode
+				},
+				success:function(cs) {
+					cs = $.trim(cs);
+
+					if(isJson(cs)) {
+						load_out();
+
+						bs = $.parseJSON(cs);
+						balance = bs.balance;
+
+						if(balance < docTotal) {
+							difamount = docTotal - balance;
+							setTimeout(function() {
+								swal({
+									title:'เครดิตคงเหลือไม่เพียงพอ',
+									text:'ไม่สามารถบันทึก SO ได้เนื่องจากเครดิตคงเหลือไม่เพียงพอ <br/> คงเหลือ **'+addCommas(balance.toFixed(2))+'**',
+									type:'warning',
+									html:true
+								});
+							}, 200);
+
+							$('#btn-save').removeAttr('disabled');
+							$('#btn-draft').removeAttr('disabled');
+
+							return false;
+						}
+						else {
+
+							load_in();
+
+							$.ajax({
+								url:HOME + 'add',
+								type:'POST',
+								cache:false,
+								data:JSON.stringify(data),
+								success:function(rs) {
+									load_out();
+
+									if(isJson(rs)) {
+										var ds = $.parseJSON(rs);
+
+										if(ds.status === 'success') {
+											swal({
+												title:'Success',
+												type:'success',
+												timer:1000
+											});
+
+											setTimeout(function(){
+												viewDetail(ds.code);
+											}, 1200);
+										}
+									}
+									else {
+										swal({
+											title:'Error!',
+											text:rs,
+											type:'error'
+										});
+									}
+
+									$('#btn-save').removeAttr('disabled');
+									$('#btn-draft').removeAttr('disabled');
+								}
+							});
+						}
 					}
 				}
-				else {
-					swal({
-						title:'Error!',
-						text:rs,
-						type:'error'
-					});
-				}
+			});
+		}
+		else {
+			load_in();
 
-				$('#btn-save').removeAttr('disabled');
-				$('#btn-draft').removeAttr('disabled');
-			}
-		});
+			$.ajax({
+				url:HOME + 'add',
+				type:'POST',
+				cache:false,
+				data:JSON.stringify(data),
+				success:function(rs) {
+					load_out();
+					if(isJson(rs)) {
+						var ds = $.parseJSON(rs);
+						if(ds.status === 'success') {
+							swal({
+								title:'Success',
+								type:'success',
+								timer:1000
+							});
+
+							setTimeout(function(){
+								viewDetail(ds.code);
+							}, 1200);
+						}
+					}
+					else {
+						swal({
+							title:'Error!',
+							text:rs,
+							type:'error'
+						});
+					}
+
+					$('#btn-save').removeAttr('disabled');
+					$('#btn-draft').removeAttr('disabled');
+				}
+			});
+		}
 	}, 500);
 }
 
@@ -463,18 +544,12 @@ function saveUpdate() {
 	$('#btn-draft').attr('disabled', 'disabled');
 
 	setTimeout(function() {
-		// $('.item-code').each(function() {
-		// 	let no = $(this).data('id');
-		// 	let itemCode = $(this).val();
-		// 	if(itemCode.length > 0) {
-		// 		recalDiscount(no);
-		// 		console.log("recal"+no);
-		// 	}
-		// });
 
 		let mustApprove = 0;
 		let max_diff = 0;
 		let emptyQuota = 0;
+		let is_draft = $('#is_draft').val() == '1' ? 1 : 0;
+		let creditLimit = $('#creditLimit').val() == '1' ? 1 : 0;
 
 		$('.disc-diff').each(function() {
 			if($(this).val() > 0) {
@@ -485,7 +560,7 @@ function saveUpdate() {
 
 		var ds = {
 			//---- Right column
-			'isDraft' : $('#is_draft').val(),
+			'isDraft' : is_draft,
 			'code' : $('#code').val(),
 			'SlpCode' : $('#sale_id').val(),
 			'CardCode' : $.trim($('#CardCode').val()),  //****** required
@@ -738,41 +813,131 @@ function saveUpdate() {
 		data.details = details;
 
 		//--- หากไม่มีข้อผิดพลาด
+		if(is_draft == 0 && creditLimit == 1) {
 
-		load_in();
-		$.ajax({
-			url:HOME + 'update',
-			type:'POST',
-			cache:false,
-			data:JSON.stringify(data),
-			success:function(rs) {
-				load_out();
-				if(isJson(rs)) {
-					var ds = $.parseJSON(rs);
-					if(ds.status === 'success') {
-						swal({
-							title:'Success',
-							type:'success',
-							timer:1000
-						});
+			load_in();
 
-						setTimeout(function(){
-							viewDetail(ds.code);
-						}, 1200);
+			const cardCode = $('#CardCode').val();
+			const docTotal = parseDefault(parseFloat($('#docTotal').val()), 0);
+			const orderCode = $('#code').val();
+
+			$.ajax({
+				url:HOME + 'get_credit_balance',
+				type:'GET',
+				cache:false,
+				data:{
+					'CardCode' : cardCode,
+					'orderCode' : orderCode
+				},
+				success:function(cs) {
+					cs = $.trim(cs);
+
+					if(isJson(cs)) {
+						load_out();
+
+						bs = $.parseJSON(cs);
+						balance = bs.balance;
+
+						if(balance < docTotal) {
+							difamount = docTotal - balance;
+							setTimeout(function() {
+								swal({
+									title:'เครดิตคงเหลือไม่เพียงพอ',
+									text:'ไม่สามารถบันทึก SO ได้เนื่องจากเครดิตคงเหลือไม่เพียงพอ <br/> คงเหลือ **'+addCommas(balance.toFixed(2))+'**',
+									type:'warning',
+									html:true
+								});
+							}, 200);
+
+							$('#btn-save').removeAttr('disabled');
+							$('#btn-draft').removeAttr('disabled');
+
+							return false;
+						}
+						else {
+														
+							load_in();
+
+							$.ajax({
+								url:HOME + 'update',
+								type:'POST',
+								cache:false,
+								data:JSON.stringify(data),
+								success:function(rs) {
+									load_out();
+
+									if(isJson(rs)) {
+										var ds = $.parseJSON(rs);
+
+										if(ds.status === 'success') {
+											swal({
+												title:'Success',
+												type:'success',
+												timer:1000
+											});
+
+											setTimeout(function(){
+												viewDetail(ds.code);
+											}, 1200);
+										}
+									}
+									else {
+										swal({
+											title:'Error!',
+											text:rs,
+											type:'error'
+										});
+									}
+
+									$('#btn-save').removeAttr('disabled');
+									$('#btn-draft').removeAttr('disabled');
+								}
+							});
+						}
+					}
+					else {
+						return true;
 					}
 				}
-				else {
-					swal({
-						title:'Error!',
-						text:rs,
-						type:'error'
-					});
-				}
+			});
+		}
+		else {
+			load_in();
 
-				$('#btn-save').removeAttr('disabled');
-				$('#btn-draft').removeAttr('disabled');
-			}
-		});
+			$.ajax({
+				url:HOME + 'update',
+				type:'POST',
+				cache:false,
+				data:JSON.stringify(data),
+				success:function(rs) {
+					load_out();
+					if(isJson(rs)) {
+						var ds = $.parseJSON(rs);
+						if(ds.status === 'success') {
+							swal({
+								title:'Success',
+								type:'success',
+								timer:1000
+							});
+
+							setTimeout(function(){
+								viewDetail(ds.code);
+							}, 1200);
+						}
+					}
+					else {
+						swal({
+							title:'Error!',
+							text:rs,
+							type:'error'
+						});
+					}
+
+					$('#btn-save').removeAttr('disabled');
+					$('#btn-draft').removeAttr('disabled');
+				}
+			});
+		}
 	}, 500)
 }
 
@@ -1291,8 +1456,7 @@ function getItemData(no) {
 			success:function(rs) {
 				load_out();
 				var rs = $.trim(rs);
-				if(isJson(rs)) {
-					$('#')
+				if(isJson(rs)) {					
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
 					var stdPrice = parseFloat(ds.StdPrice);
@@ -1666,7 +1830,7 @@ function recalAmount(no) {
 		vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
 		sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);
 		vatAmount = (sellPrice * vat_rate);
-		vatAmount = roundNumber(vatAmount);
+		//vatAmount = roundNumber(vatAmount);
 
 		vatTotal = (qty * vatAmount);
 		vatTotal = roundNumber(vatTotal);
@@ -1836,6 +2000,8 @@ function init() {
 		}
 	});
 
+
+
 	$('.item-name').keyup(function(e) {
 		if(e.keyCode == 13) {
 			no = $(this).data("id");
@@ -1872,36 +2038,15 @@ function init() {
 				}
 			}
 		}, 200)
-		// no++;
-		//
-		// if($('#itemCode-'+no).length) {
-		// 	$('#itemCode-'+no).focus();
-		// }
-		// else {
-		// 	addRow();
-		// 	$('#itemCode-'+no).focus();
-		// }
 	});
 
-	// $('.line-qty').keyup(function(e) {
-	// 	if(e.keyCode == 13) {
-	// 		let no = $(this).data('id');
-	// 		no++;
-	//
-	// 		if($('#itemCode-'+no).length) {
-	// 			$('#itemCode-'+no).focus();
-	// 		}
-	// 		else {
-	// 			addRow();
-	// 			$('#itemCode-'+no).focus();
-	// 		}
-	// 	}
-	// });
+
 
 	$('.line-qty').focus(function() {
 		$(this).select();
 	});
-}
+
+} //-- end init
 
 
 

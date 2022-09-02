@@ -55,7 +55,15 @@
 		</select>
   </div>
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+    <label>Order Role</label>
+		<select class="width-100 filter" name="role" id="role">
+			<option value="all">ทั้งหมด</option>
+			<option value="S" <?php echo is_selected($role, 'S'); ?>>BEC</option>
+			<option value="C" <?php echo is_selected($role, 'C'); ?>>Customer</option>
+		</select>
+  </div>
+	<div class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-6 padding-5">
     <label>Sale Employee</label>
 		<select class="width-100 filter" name="sale_id" id="sale_id">
 			<option value="all">ทั้งหมด</option>
@@ -64,7 +72,7 @@
   </div>
 
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-6 padding-5">
 		<label>Approval</label>
 		<select class="width-100 filter" name="approval" id="approval">
 			<option value="all">ทั้งหมด</option>
@@ -75,7 +83,7 @@
 		</select>
 	</div>
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>สถานะ</label>
 		<select class="width-100 filter" name="status" id="status">
 			<option value="all">ทั้งหมด</option>
@@ -90,12 +98,12 @@
 	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
 		<label>Document date</label>
 		<div class="input-daterange input-group width-100">
-			<input type="text" class="width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
-			<input type="text" class="width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
+			<input type="text" class="form-control input-sm width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
+			<input type="text" class="form-control input-sm width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
 		</div>
 	</div>
 
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-4 padding-5">
+	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-6 padding-5">
 		<label class="display-block not-show">onlyMe</label>
 		<button type="button"
 		class="hidden-sm btn btn-xs btn-block <?php echo ($onlyMe == 1 ? "btn-info" : ''); ?>"
@@ -105,11 +113,11 @@
 		onclick="toggleOnlyMe()">Me</button>
 	</div>
 
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-4 padding-5">
+	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-6 padding-5">
 		<label class="display-block not-show">buton</label>
 		<button type="button" class="btn btn-xs btn-primary btn-block" onclick="getSearch()" >Search</button>
 	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-4 padding-5">
+	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-6 padding-5">
 		<label class="display-block not-show">buton</label>
 		<button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()">Reset</button>
 	</div>

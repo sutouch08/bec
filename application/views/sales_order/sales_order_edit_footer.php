@@ -85,10 +85,17 @@
   <div class="divider-hidden"></div>
 
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
+  <?php if($order->role == 'S') : ?>
 		<button type="button" class="btn btn-sm btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
     <button type="button" class="btn btn-sm btn-primary btn-100 hide" id="btn-save" onclick="validateFreeItem('update')">Save</button>
     <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
     <button type="button" class="btn btn-sm btn-info btn-100 hide" id="btn-draft" onclick="saveAsDraft('update')">Save AS Draft</button>
+  <?php else : ?>
+    <button type="button" class="btn btn-sm btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
+    <button type="button" class="btn btn-sm btn-primary btn-100" id="btn-save" onclick="validateFreeItem('update')">Save</button>
+    <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
+    <button type="button" class="btn btn-sm btn-info btn-100" id="btn-draft" onclick="saveAsDraft('update')">Save AS Draft</button>
+  <?php endif; ?>
   </div>
 </div>
 

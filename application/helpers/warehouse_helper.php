@@ -52,4 +52,23 @@ function select_order_warehouse($option, $code = NULL)
 
 	return $ds;
 }
+
+
+
+function get_customer_warehouse_listed()
+{
+	$whsCode = array();
+	$ci =& get_instance();
+	$ci->load->model('masters/warehouse_model');
+	$wh = $ci->warehouse_model->get_customer_warehouse();
+	if( ! empty($wh))
+	{
+		foreach($wh as $rs)
+		{
+			$whsCode[] = $rs->code;
+		}
+	}
+
+	return $whsCode;
+}
 ?>

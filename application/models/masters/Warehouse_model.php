@@ -170,6 +170,19 @@ class Warehouse_model extends CI_Model
 		return FALSE;
 	}
 
+
+	public function get_customer_warehouse()
+	{
+		$rs = $this->db->select('code')->where('customer_list', 1)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
 } //--- end class
 
  ?>

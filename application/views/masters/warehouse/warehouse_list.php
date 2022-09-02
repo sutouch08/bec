@@ -63,6 +63,7 @@
 					<th class="min-width-200 middle">Name</th>
 					<th class="fix-width-100 middl text-center">Type</th>
 					<th class="fix-width-100 middl text-center">List In SO</th>
+					<th class="fix-width-100 middl text-center">List In C-User</th>
 					<th class="fix-width-150 middle text-center">Last Update</th>
 				</tr>
 			</thead>
@@ -79,6 +80,12 @@
 						<td class="middle text-center">
 							<label>
 								<input type="checkbox" class="ace" data-id="<?php echo $rs->id; ?>" onchange="toggleList($(this))" <?php echo is_checked('1', $rs->list); ?> <?php echo $disabled; ?> />
+								<span class="lbl"></span>
+							</label>
+						</td>
+						<td class="middle text-center">
+							<label>
+								<input type="checkbox" class="ace" data-id="<?php echo $rs->id; ?>" onchange="toggleCustomerList($(this))" <?php echo is_checked('1', $rs->customer_list); ?> <?php echo $disabled; ?> />
 								<span class="lbl"></span>
 							</label>
 						</td>

@@ -10,7 +10,7 @@
     <div class="form-group">
       <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 control-label no-padding-right">Name</label>
       <div class="col-lg-7 col-md-7 col-sm-8 col-xs-12">
-        <input type="text" id="CardName" class="form-control input-sm" value="" />
+        <input type="text" id="CardName" class="form-control input-sm" value="" disabled/>
       </div>
     </div>
 

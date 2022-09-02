@@ -67,11 +67,13 @@
 
 				<div class="navbar-buttons navbar-header pull-right" role="navigation">
 					<ul class="nav ace-nav">
+						<?php if($this->show_cart) : ?>
 						<li class="salmon hidden-xs">
 							<a href="javascript:void(0)" onclick="viewCart()">
 								<span class="badge badge-inverse"><i class="ace-icon fa fa-shopping-basket"></i>&nbsp;	<span id="top-amount"><?php echo number($totalAmount, 2); ?></span> THB</span>
 							</a>
-						</li>						
+						</li>
+						<?php endif; ?>
 						<li class="salmon">
 							<a data-toggle="dropdown" href="#" class="dropdown-toggle">
 
@@ -118,6 +120,7 @@
 				<div id="sidebar" class="sidebar responsive" data-sidebar="true" data-sidebar-scoll="true" data-sidebar-hover="true">
 					<?php $this->load->view('bp_order/bp_menu'); ?>
 				</div>
-			<div class="main-content">
+
+			<div class="main-content" >
 				<div class="main-content-inner">
 					<div class="page-content">

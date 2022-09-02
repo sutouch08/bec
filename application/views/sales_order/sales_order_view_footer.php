@@ -35,7 +35,7 @@
 			</tr>
 			<tr>
 				<td class="width-60 xxx text-right">Tax</td>
-				<td class="width-40 xxx text-right"><?php echo number($order->VatSum, 2); ?></td>
+				<td class="width-40 xxx text-right"><?php echo number($totalVat, 2); ?></td>
 			</tr>
 			<tr>
 				<td class="width-60 xxx text-right">Total</td>

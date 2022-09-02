@@ -34,6 +34,7 @@
 <input type="hidden" id="uname" value="<?php echo $order->uname;?>" />
 <input type="hidden" id="sale_team" value="<?php echo $order->sale_team; ?>" />
 <input type="hidden" id="is_draft" value="0">
+<input type="hidden" id="creditLimit" value="<?php echo getConfig('CREDIT_LIMIT') == 1 ? 1 : 0; ?>" />
 
 
 <?php $this->load->view('sales_order/sales_order_ship_to_modal'); ?>

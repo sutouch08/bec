@@ -197,22 +197,58 @@ class Discount_rule_model extends CI_Model
   }
 
 
+  // public function getCustomerRegionRule($id)
+  // {
+	// 	$rs = $this->db
+	// 	->select('r.region_id AS id, n.name AS name')
+	// 	->from('discount_rule_customer_region AS r')
+	// 	->join('customer_region AS n', 'r.region_id = n.id', 'left')
+	// 	->where('r.rule_id', $id)
+	// 	->get();
+  //
+	// 	if($rs->num_rows() > 0)
+	// 	{
+	// 		return $rs->result();
+	// 	}
+  //
+	// 	return NULL;
+  // }
+
+
   public function getCustomerRegionRule($id)
   {
 		$rs = $this->db
-		->select('r.region_id AS id, n.name AS name')
-		->from('discount_rule_customer_region AS r')
-		->join('customer_region AS n', 'r.region_id = n.id', 'left')
-		->where('r.rule_id', $id)
-		->get();
+		->select('region_id AS id')
+		->where('rule_id', $id)
+		->get('discount_rule_customer_region');
 
 		if($rs->num_rows() > 0)
 		{
-			return $rs->result();
+			$list = $rs->result();
+
+      foreach($list as $ds)
+      {
+        $ds->name = $this->get_customer_sales_team_name($ds->id);
+      }
+
+      return $list;
 		}
 
 		return NULL;
   }
+
+  public function get_customer_sales_team_name($id)
+  {
+    $rs = $this->db->select('SaleTeamName AS name')->where('SaleTeam', $id)->limit(1)->get('customers');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->name;
+    }
+
+    return NULL;
+  }
+
 
   public function getCustomerAreaRule($id)
   {

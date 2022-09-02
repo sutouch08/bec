@@ -59,19 +59,25 @@
 					<th class="fix-width-60 middle">Type</th>
 					<th class="fix-width-150 middle">Branch</th>
 					<th class="min-width-250 middle">Address</th>
+					<th class="fix-width-40"></th>
 				</tr>
 			</thead>
 			<tbody>
 		<?php if(!empty($data)) : ?>
 			<?php $no = $this->uri->segment($this->segment) + 1; ?>
 			<?php foreach($data as $rs) : ?>
-				<tr style="font-size:12px;">
+				<tr style="font-size:12px;" id="row-<?php echo $rs->id; ?>">
 					<td class="middle text-center"><?php echo $no; ?></td>
 					<td class="middle"><?php echo $rs->CardCode; ?></td>
 					<td class="middle"><?php echo $rs->CardName; ?></td>
 					<td class="middle"><?php echo ($rs->AdresType == 'B' ? 'Bill To' : 'Ship To'); ?></td>
 					<td class="middle"><?php echo $rs->Address.' : '.$rs->Address3; ?></td>
 					<td class="middle"><?php echo $rs->Street.' '.$rs->Block.' '.$rs->City.' '.$rs->County.' '.$rs->Country.' '.$rs->ZipCode; ?></td>
+					<td class="middle text-center">
+						<?php if($this->pm->can_delete) : ?>
+							<button type="button" class="btn btn-minier btn-danger" onclick="removeAddress(<?php echo $rs->id; ?>, '<?php echo $rs->Address; ?>')"><i class="fa fa-trash"></i></button>
+						<?php endif; ?>
+					</td>
 				</tr>
 				<?php $no++; ?>
 			<?php endforeach; ?>

@@ -239,25 +239,57 @@ class Approver extends PS_Controller
 
 			if( ! empty($user_id) && ! empty($team) && ! empty($brand))
 			{
-				if(! $this->approver_model->is_exists($user_id, $id))
+				$this->db->trans_begin();
+
+				$arr = array(
+					'status' => $status,
+					'date_upd' => now(),
+					'update_user' => $this->_user->uname
+				);
+
+				if( ! $this->approver_model->update($id, $arr))
 				{
-					$this->db->trans_begin();
+					$sc = FALSE;
+					$this->error = "Update failed";
+				}
 
-					if(! $this->approver_model->drop_team($id))
-					{
-						$sc = FALSE;
-						$this->error = "Drop approver team failed";
-					}
 
-					if(! $this->approver_model->drop_brand($id))
+				if(! $this->approver_model->drop_team($id))
+				{
+					$sc = FALSE;
+					$this->error = "Drop approver team failed";
+				}
+
+				if(! $this->approver_model->drop_brand($id))
+				{
+					$sc = FALSE;
+					$this->error = "Drop approver brand failed";
+				}
+
+				if($sc === TRUE)
+				{
+					foreach($team as $team_id)
 					{
-						$sc = FALSE;
-						$this->error = "Drop approver brand failed";
+						if($sc === FALSE)
+						{
+							break;
+						}
+
+						$arr = array(
+							'id_approver' => $id,
+							'id_team' => $team_id
+						);
+
+						if(! $this->approver_model->add_team($arr))
+						{
+							$sc = FALSE;
+							$this->error = "Insert team failed";
+						}
 					}
 
 					if($sc === TRUE)
 					{
-						foreach($team as $team_id)
+						foreach($brand as $rs)
 						{
 							if($sc === FALSE)
 							{
@@ -266,59 +298,32 @@ class Approver extends PS_Controller
 
 							$arr = array(
 								'id_approver' => $id,
-								'id_team' => $team_id
+								'id_brand' => $rs['id'],
+								'max_disc' => $rs['max_disc']
 							);
 
-							if(! $this->approver_model->add_team($arr))
+							if(! $this->approver_model->add_brand($arr))
 							{
 								$sc = FALSE;
-								$this->error = "Insert team failed";
+								$this->error = "Insert brand failed";
 							}
 						}
-
-						if($sc === TRUE)
-						{
-							foreach($brand as $rs)
-							{
-								if($sc === FALSE)
-								{
-									break;
-								}
-
-								$arr = array(
-									'id_approver' => $id,
-									'id_brand' => $rs['id'],
-									'max_disc' => $rs['max_disc']
-								);
-
-								if(! $this->approver_model->add_brand($arr))
-								{
-									$sc = FALSE;
-									$this->error = "Insert brand failed";
-								}
-							}
-						}
-					}
-					else
-					{
-						$sc = FALSE;
-						$this->error = "Insert Approver failed";
-					}
-
-
-					if($sc === TRUE)
-					{
-						$this->db->trans_commit();
-					}
-					else
-					{
-						$this->db->trans_rollback();
 					}
 				}
 				else
 				{
 					$sc = FALSE;
-					$this->error = "Approver already exists";
+					$this->error = "Insert Approver failed";
+				}
+
+
+				if($sc === TRUE)
+				{
+					$this->db->trans_commit();
+				}
+				else
+				{
+					$this->db->trans_rollback();
 				}
 			}
 			else

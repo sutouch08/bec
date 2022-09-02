@@ -56,6 +56,31 @@ class Product_category_model extends CI_Model
 	}
 
 
+	public function search_by_level($level = 5, $text = "", $active = FALSE)
+	{
+		$level = $level > 5 ? 5 : ($level < 1 ? 1 : $level);
+
+		if($active)
+		{
+			$this->db->where('active', 1);
+		}
+
+		if($text != "" && $text !== NULL)
+		{
+			$this->db->like('name', $text);
+		}
+
+		$rs = $this->db->where('level', $level)->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
 	public function get_by_parent($parent_id = 0, $active = FALSE)
 	{
 		$qr = "SELECT * FROM {$this->tb} WHERE parent_id = {$parent_id} ";
