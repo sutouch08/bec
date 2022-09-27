@@ -150,6 +150,7 @@ function saveAdd() {
 		let emptyQuota = 0;
 		let is_draft = $('#is_draft').val() == '1' ? 1 : 0;
 		let creditLimit = $('#creditLimit').val() == '1' ? 1 : 0;
+		let payment = $('#payment').val();
 
 		$('.disc-diff').each(function() {
 			if($(this).val() > 0) {
@@ -403,8 +404,8 @@ function saveAdd() {
 		data.details = details;
 
 		//--- หากไม่มีข้อผิดพลาด
-		if(is_draft == 0 && creditLimit == 1) {
-
+		if(is_draft == 0 && creditLimit == 1 && payment != '-1') {
+			
 			load_in();
 
 			const cardCode = $('#CardCode').val();
@@ -489,6 +490,7 @@ function saveAdd() {
 			});
 		}
 		else {
+
 			load_in();
 
 			$.ajax({
@@ -550,6 +552,7 @@ function saveUpdate() {
 		let emptyQuota = 0;
 		let is_draft = $('#is_draft').val() == '1' ? 1 : 0;
 		let creditLimit = $('#creditLimit').val() == '1' ? 1 : 0;
+		let payment = $('#payment').val();
 
 		$('.disc-diff').each(function() {
 			if($(this).val() > 0) {
@@ -813,7 +816,7 @@ function saveUpdate() {
 		data.details = details;
 
 		//--- หากไม่มีข้อผิดพลาด
-		if(is_draft == 0 && creditLimit == 1) {
+		if(is_draft == 0 && creditLimit == 1 && payment != '-1') {
 
 			load_in();
 
@@ -855,7 +858,7 @@ function saveUpdate() {
 							return false;
 						}
 						else {
-														
+
 							load_in();
 
 							$.ajax({
@@ -902,6 +905,7 @@ function saveUpdate() {
 			});
 		}
 		else {
+
 			load_in();
 
 			$.ajax({
@@ -1456,7 +1460,7 @@ function getItemData(no) {
 			success:function(rs) {
 				load_out();
 				var rs = $.trim(rs);
-				if(isJson(rs)) {					
+				if(isJson(rs)) {
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
 					var stdPrice = parseFloat(ds.StdPrice);

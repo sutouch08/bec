@@ -7,7 +7,7 @@
 		<?php if(empty($search_text)) : ?>
 			<i id="search-icon" class="ace-icon fa fa-search" style="font-size:20px; line-height:40px;" onclick="search()"></i>
 		<?php else : ?>
-			<i id="clear-icon" class="ace-icon fa fa-times" style="font-size:20px; line-height:40px;" onclick="clearText()"></i>
+			<i id="clear-icon" class="ace-icon fa fa-times" style="font-size:20px; line-height:40px;" onclick="clearText('index')"></i>
 		<?php endif; ?>
 		</span>
 	</div>
@@ -18,7 +18,7 @@
 	<?php if( ! empty($cate)) : ?>
 		<?php foreach($cate as $rs) : ?>
 			<div class="col-lg-2 col-md-20 col-sm-3 col-xs-6">
-				<div class="item-box pointer" onclick="showItem('<?php echo $rs->code; ?>')">
+				<div class="item-box pointer" onclick="showCategoryItem('<?php echo $rs->code; ?>')">
 					<div class="img width-100 display-block">
 						<img src="<?php echo get_category_path($rs->code); ?>" class="width-100" />
 					</div>

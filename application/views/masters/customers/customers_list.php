@@ -63,6 +63,7 @@
 		<label>Sales Team</label>
 		<select class="form-control input-sm filter" name="saleTeam">
 			<option value="all">ทั้งหมด</option>
+			<option value="0" <?php echo is_selected('0', $saleTeam); ?> >-- No Sale Team --</option>
 			<?php echo select_customer_sales_team($saleTeam); ?>
 		</select>
 	</div>

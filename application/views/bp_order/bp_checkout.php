@@ -57,6 +57,7 @@
 						<th class="min-width-150">Item Name</th>
 						<th class="fix-width-100 text-right">Price</th>
 						<th class="fix-width-120 text-center">Discount(%)</th>
+						<th class="fix-width-100 text-right">Available</th>
 						<th class="fix-width-100 text-right">Qty</th>
 						<th class="fix-width-150 text-right">Amount</th>
 					</tr>
@@ -69,16 +70,19 @@
 						<?php foreach($cart as $rs) : ?>
 							<?php $discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5, '%'); ?>
 							<?php $freeRow = $rs->is_free == 1 ? 'free-row' : ''; ?>
-							<tr id="row-<?php echo $rs->id; ?>" class="<?php echo $freeRow; ?>">
+							<?php $na = $rs->Available < $rs->Qty ? 1 : 0; ?>
+							<tr id="row-<?php echo $rs->id; ?>" class="<?php echo $freeRow; ?> <?php echo $na == 1 ? 'red' : ''; ?>">
 								<input type="hidden" id="product-id-<?php echo $rs->id; ?>" value="<?php echo $rs->product_id; ?>" />
 								<input type="hidden" class="item-code" id="item-code-<?php echo $rs->id; ?>" data-id="<?php echo $rs->id; ?>" value="<?php echo $rs->ItemCode; ?>" />
 								<input type="hidden" class="line-qty" data-no="<?php echo $rs->id; ?>" id="line-qty-<?php echo $rs->id; ?>" value="<?php echo $rs->Qty; ?>"/>
+								<input type="hidden" class="line-available" data-no="<?php echo $rs->id; ?>" id="line-available-<?php echo $rs->id; ?>" value="<?php echo $rs->Available; ?>"/>
 								<input type="hidden" id="line-total-<?php echo $rs->id; ?>" value="<?php echo $rs->LineTotal; ?>" />
 								<input type="hidden" id="stdPrice-<?php echo $rs->id; ?>" value="<?php echo $rs->StdPrice; ?>" />
 								<input type="hidden" id="price-<?php echo $rs->id; ?>" value="<?php echo $rs->Price; ?>" />
 								<input type="hidden" id="sellPrice-<?php echo $rs->id; ?>" value="<?php echo $rs->SellPrice; ?>" />
 								<input type="hidden" class="is-free" id="is-free-<?php echo $rs->id; ?>" value="<?php echo $rs->is_free; ?>" data-id="<?php echo $rs->id; ?>" data-parent="<?php echo $rs->parent_uid;?>" data-parentrow="<?php echo $rs->rule_id; ?>" />
 								<input type="hidden" id="<?php echo $rs->uid; ?>" data-id="<?php echo $rs->id; ?>" value="<?php echo $rs->id; ?>"/>
+								<input type="hidden" class="na" id="na-<?php echo $rs->id; ?>" value="<?php echo $na; ?>" />
 
 								<td class="middle">
 									<label>
@@ -93,6 +97,7 @@
 								<td class="middle"><?php echo $rs->ItemName; ?></td>
 								<td class="middle text-right"><?php echo number($rs->Price, 2); ?></td>
 								<td class="middle text-center"><?php echo $rs->discLabel; ?></td>
+								<td class="middle text-right" id="availableLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Available); ?></td>
 								<td class="middle text-right" id="qtyLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Qty); ?></td>
 								<td class="middle text-right"><?php echo number($rs->LineTotal, 2); ?></td>
 							</tr>
@@ -115,7 +120,7 @@
 									<span class="lbl">&nbsp; Check all</span>
 								</label>
 							</td>
-							<td colspan="4" class="text-right">รวม</td>
+							<td colspan="5" class="text-right">รวม</td>
 							<td class="text-right" id="total-qty"><?php echo number($totalQty); ?></td>
 							<td class="text-right" id="total-amount"><?php echo number($totalAmount, 2); ?></td>
 						</tr>
@@ -123,10 +128,10 @@
 				<?php endif; ?>
 			</table>
 		</div>
-		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 magin-top-10">
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 margin-top-10">
 			<button type="button" class="btn btn-xs btn-danger btn-100" onclick="removeCheckRow()">Delete Checked</button>
 		</div>
-		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 magin-top-10">
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 margin-top-10">
 			<p class="pull-right" id="free-box">
 				<?php if( ! empty($freeItems)) : ?>
 					<?php foreach($freeItems as $fi) : ?>
@@ -218,11 +223,13 @@
         <div class="modal-content">
             <div class="modal-body">
             <div class="row">
-                <table class="table table-striped broder-1">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
+								<table class="table table-striped broder-1" style="min-width:600px;">
 									<tbody id="free-item-list">
 
 									</tbody>
-                </table>
+								</table>
+							</div>
             </div>
             </div>
         </div>

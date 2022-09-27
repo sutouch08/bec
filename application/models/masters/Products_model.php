@@ -360,5 +360,72 @@ class Products_model extends CI_Model
 		return NULL;
 	}
 
+
+	public function count_customer_rows($ds = array())
+	{
+		$this->db
+		->where('status', 1)
+		->where('customer_view', 1);
+
+		if(isset($ds['code']) && $ds['code'] !== NULL && $ds['code'] != '')
+		{
+			$this->db
+			->group_start()
+			->like('code', $ds['code'])
+			->or_like('name', $ds['code'])
+			->group_end();
+		}
+
+		if(isset($ds['category']) && $ds['category'] != 'all')
+		{
+			$this->db->where('category_code', $ds['category']);
+		}
+
+		if(isset($ds['brand']) && $ds['brand'] != 'all')
+		{
+			$this->db->where('brand_code', $ds['brand']);
+		}
+
+		return $this->db->count_all_results($this->tb);
+	}
+
+
+
+	public function get_search_customer_item($ds = array(), $perpage = 20, $offset = 0)
+	{
+		$this->db
+		->where('status', 1)
+		->where('customer_view', 1);
+
+		if(isset($ds['code']) && $ds['code'] !== NULL && $ds['code'] != '')
+		{
+			$this->db
+			->group_start()
+			->like('code', $ds['code'])
+			->or_like('name', $ds['code'])
+			->group_end();
+		}
+
+		if(isset($ds['category']) && $ds['category'] != 'all')
+		{
+			$this->db->where('category_code', $ds['category']);
+		}
+
+		if(isset($ds['brand']) && $ds['brand'] != 'all')
+		{
+			$this->db->where('brand_code', $ds['brand']);
+		}
+
+		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
+
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
 } //--- end classs
 ?>

@@ -1670,13 +1670,16 @@ class Quotation extends PS_Controller
 		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
 
 		if(!empty($stock))
-		{
+		{			
 			$OnHand = $stock['OnHand'];
+			$Quota = $stock['QuotaQty'];
+			$available = $Quota - $commit;
+
 			$arr = array(
 				'OnHand' => $OnHand,
 				'Committed' => $commit,
-				'QuotaQty' => $stock['QuotaQty'],
-				'Available' => $OnHand - $commit
+				'QuotaQty' => $Quota,
+				'Available' => $available > 0 ? $available : 0
 			);
 		}
 

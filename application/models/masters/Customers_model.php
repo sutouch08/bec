@@ -167,7 +167,14 @@ class Customers_model extends CI_Model
 
 		if($ds['saleTeam'] != 'all')
 		{
-			$this->db->where('SaleTeam', $ds['saleTeam']);
+			if($ds['saleTeam'] == 0)
+			{
+				$this->db->where('SaleTeam IS NULL', NULL, FALSE);
+			}
+			else
+			{
+				$this->db->where('SaleTeam', $ds['saleTeam']);
+			}
 		}
 
 		if($ds['area'] != 'all')
@@ -240,7 +247,14 @@ class Customers_model extends CI_Model
 
 		if($ds['saleTeam'] != 'all')
 		{
-			$this->db->where('SaleTeam', $ds['saleTeam']);
+			if($ds['saleTeam'] == 0)
+			{
+				$this->db->where('SaleTeam IS NULL', NULL, FALSE);
+			}
+			else
+			{
+				$this->db->where('SaleTeam', $ds['saleTeam']);
+			}
 		}
 
 		if($ds['area'] != 'all')

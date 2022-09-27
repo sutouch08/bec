@@ -9,16 +9,16 @@
             <div class="modal-body" id="modal-body" style="padding-top:0px; min-height:100px; overflow:auto;">
               <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-								<table class="table table-bordered" style="margin-bottom:0px; min-width:800px;">
+								<table class="table table-striped" style="margin-bottom:0px; min-width:800px;">
 										<thead>
 											<tr>
 												<th class="fix-width-80"></th>
-												<th class="fix-width-100 text-center">Item Code</th>
-												<th class="fix-width-350 text-center">Description</th>
-												<th class="fix-width-100 text-center">Price</th>
+												<th class="fix-width-100">Item Code</th>
+												<th class="fix-width-350">Description</th>
+												<th class="fix-width-100 text-right">Price</th>
 												<th class="fix-width-120 text-center">Discount</th>
-												<th class="fix-width-100 text-center">Qty</th>
-												<th class="fix-width-120 text-center">Amount</th>
+												<th class="fix-width-100 text-right">Qty</th>
+												<th class="fix-width-120 text-right">Amount</th>
 												<th class="fix-width-20"></th>
 											</tr>
 										</thead>
@@ -42,7 +42,7 @@
 												<td class="middle text-center"><?php echo $cs->discLabel; ?></td>
 												<td class="middle text-right"><?php echo number($cs->Qty); ?></td>
 												<td class="middle text-right"><?php echo number($cs->LineTotal, 2); ?></td>
-												<td class="fix-width-20 text-right" style="vertical-align:text-top; font-size:18px; ">
+												<td class="middle fix-width-20 text-right" style="vertical-align:text-top; font-size:18px; ">
 													<a href="javascript:void(0)" style="color:#d15b47;" onclick="removeRow(<?php echo $cs->id; ?>)">
 														<i class="fa fa-trash"></i>
 													</a>
@@ -92,9 +92,6 @@
 												<th class="fix-width-60 text-center">เลือก</th>
 												<th class="fix-width-100 text-center">Item Code</th>
 												<th class="fix-width-350 text-center">Description</th>
-                        <?php if($this->showAvailableStock) : ?>
-												<th class="fix-width-80 text-center">Available</th>
-                        <?php endif; ?>
 												<th class="fix-width-100 text-center">Price</th>
 												<th class="fix-width-120 text-center">Discount</th>
 												<th class="fix-width-100 text-center">Qty</th>
@@ -134,9 +131,6 @@
 			</td>
 			<td class="middle">{{code}}</td>
 			<td class="middle">{{name}}</td>
-      <?php if($this->showAvailableStock) : ?>
-			<td class="middle text-right">{{available}}</td>
-      <?php endif; ?>
 			<td class="middle text-right">{{priceLabel}}</td>
 			<td class="middle text-center">{{discLabel}}</td>
 			<td class="middle">
@@ -162,8 +156,8 @@
 		<td class="middle text-center">{{discLabel}}</td>
 		<td class="middle text-right">{{QtyLabel}}</td>
 		<td class="middle text-right">{{LineTotalLabel}}</td>
-		<td class="fix-width-20 text-right" style="vertical-align:text-top; font-size:18px; ">
-			<a href="javascript:void(0)" style="color:#d15b47;" onclick="removeRow({{no}})">
+		<td class="middle fix-width-20 text-right" style="vertical-align:text-top; font-size:18px; ">
+			<a href="javascript:void(0)" style="color:#d15b47;" onclick="removeRow({{id}})">
 				<i class="fa fa-trash"></i>
 			</a>
 		</td>

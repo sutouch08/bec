@@ -142,14 +142,14 @@ function select_product_category($id = NULL)
 
 
 
-function select_category_level($level, $code)
+function select_category_level($level, $code, $active = TRUE)
 {
 	$ci =& get_instance();
 	$ci->load->model('masters/product_category_model');
 
 	$ds = "";
 
-	$option = $ci->product_category_model->get_by_level($level);
+	$option = $ci->product_category_model->get_by_level($level, $active);
 
 	if( ! empty($option))
 	{

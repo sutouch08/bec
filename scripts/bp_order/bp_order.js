@@ -3,6 +3,11 @@ function goBack() {
 }
 
 
+function goToPage(page) {
+	window.location.href = HOME + page;
+}
+
+
 function history() {
 	window.location.href = HOME + 'history';
 }
@@ -14,6 +19,24 @@ function viewDetail(code) {
 
 
 function placeOrder() {
+
+	var na = 0;
+
+	$('.na').each(function() {
+		if($(this).val() == '1') {
+			na++;
+		}
+	});
+
+	if(na > 0) {
+		swal({
+			title:'Oops!',
+			text:"สินค้าคงเหลือไม่เพียงพอกรุณาตรวจสอบรายการที่เป็นสีแดง",
+			type:'warning'
+		});
+
+		return false;
+	}
 
 	//--- check free item
 	var balance = 0;
@@ -283,7 +306,7 @@ function viewCart() {
 
 
 
-function showItem(categoryCode) {
+function showCategoryItem(categoryCode) {
 	const quota = $('#quotaNo').val();
 	const cardCode = $('#customer_code').val();
 	const payment = $('#payment').val();
@@ -311,6 +334,46 @@ function showItem(categoryCode) {
 
 				render(source, ds, output);
 			}
+
+			$('#itemModal').modal('show');
+		}
+	})
+}
+
+
+
+function showItem(code, id) {
+	const quota = $('#quotaNo').val();
+	const cardCode = $('#customer_code').val();
+	const payment = $('#payment').val();
+	const channels = $('#channels').val();
+
+	load_in();
+
+	$.ajax({
+		url:HOME + 'get_item',
+		type:'GET',
+		cache:false,
+		data:{
+			'ItemCode' : code,
+			'CardCode' : cardCode,
+			'quotaNo' : quota,
+			'Payment' : payment,
+			'Channels' : channels
+		},
+		success:function(rs) {
+			load_out();
+			if(isJson(rs)) {
+				let ds = $.parseJSON(rs);
+				let source = $('#item-template').html();
+				let output = $('#item-table');
+
+				render(source, ds, output);
+			}
+
+			$('#itemModal').on('shown.bs.modal', function() {
+				$('#qty-'+id).focus();
+			});
 
 			$('#itemModal').modal('show');
 		}
@@ -426,7 +489,12 @@ function recalAmount(id) {
 
 
 function checkout() {
-	window.location.href = HOME + 'checkout';
+	$('#cartModal').modal('hide');
+
+	load_in();
+	setTimeout(function() {
+		window.location.href = HOME + 'checkout';
+	}, 500)
 }
 
 
@@ -487,7 +555,7 @@ function removeCheckRow() {
 								}
 							});
 
-							recalTotal();
+							window.location.reload();
 						}
 						else {
 							setTimeout(function() {
@@ -766,8 +834,14 @@ function search() {
 	$('#search-form').submit();
 }
 
-function clearText() {
-	goBack();
+function clearText(page) {
+	goToPage(page);
+}
+
+function clear_search_filter() {
+	$.get(HOME + 'clear_item_filter', function() {
+		goToPage('items');
+	});
 }
 
 

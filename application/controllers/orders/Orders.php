@@ -1366,7 +1366,7 @@ class Orders extends PS_Controller
 
 		if(! empty($order) && ! empty($details))
 		{
-			$ds = array(
+      $ds = array(
 				"WEBORDER" => $order->code,
 				"CardCode" => $order->CardCode,
 				"CardName" => $order->CardName,
@@ -1374,14 +1374,14 @@ class Orders extends PS_Controller
 				"GroupNum" => intval($order->Payment),
 				"DocCur" => $order->DocCur,
 				"DocRate" => round($order->DocRate, 2),
-				"DocTotal" => round($order->DocTotal, 2),
+				"DocTotal" => NULL, //round($order->DocTotal, 2),
 				"DocDate" => $order->DocDate,
 				"DocDueDate" => $order->DocDueDate,
 				"TaxDate" => $order->TextDate,
 				"PayToCode" => $order->PayToCode,
 				"ShipToCode" => $order->ShipToCode,
-				"Address" => $order->Address,
-				"Address2" => $order->Address2,
+				"Address" => NULL,//$order->Address,
+				"Address2" => NULL, //$order->Address2,
 				"DiscPrcnt" => round($order->DiscPrcnt, 2),
 				"RoundDif" => round($order->RoundDif, 2),
 				"Comments" => $order->Comments,
@@ -1394,11 +1394,12 @@ class Orders extends PS_Controller
 			);
 
 
+
 			$orderLine = array();
 
 			foreach($details AS $rs)
 			{
-				$line = array(
+        $line = array(
 					"LineNum" => intval($rs->LineNum),
 					"ItemCode" => $rs->ItemCode,
 					"ItemName" => $rs->ItemName,
@@ -1406,7 +1407,7 @@ class Orders extends PS_Controller
 					"UomEntry" => intval($rs->UomEntry),
 					"Price" => round($rs->Price, 2),
 					"LineTotal" => round($rs->LineTotal, 2),
-					"DiscPrcnt" => round($rs->DiscPrcnt, 2),
+					"DiscPrcnt" => NULL, //round($rs->DiscPrcnt, 2),
 					"PriceBefDi" => round($rs->Price, 2),
 					"Currency" => $order->DocCur,
 					"Rate" => round($order->DocRate, 2),
@@ -1430,6 +1431,7 @@ class Orders extends PS_Controller
 					"OcrCode5" => $order->dimCode5,
 					"SaleTeam" => $rs->team_code
 				);
+        
 
 				array_push($orderLine, $line);
 			}

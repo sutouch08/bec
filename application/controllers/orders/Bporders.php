@@ -108,6 +108,104 @@ class Bporders extends CI_Controller
 	}
 
 
+  public function items()
+	{
+		$this->show_cart = TRUE;
+    $this->load->helper('products');
+    $ds = array();
+    $filter = array(
+      'code' => get_filter('code', 'bp_item_code', ''),
+      'brand' => get_filter('brand', 'bp_item_brand', 'all'),
+      'category' => get_filter('category', 'bp_item_category', 'all')
+    );
+
+    //--- แสดงผลกี่รายการต่อหน้า
+		$perpage = get_rows();
+
+		$rows = $this->products_model->count_customer_rows($filter);
+		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
+		$init	= pagination_config($this->home.'/items/', $rows, $perpage, $this->segment);
+    $this->pagination->initialize($init);
+    $customer = $this->customers_model->get($this->_user->customer_code);
+    $items = $this->products_model->get_search_customer_item($filter, $perpage, $this->uri->segment($this->segment));
+
+    $filter['items'] = $items;
+    $filter['cart'] = $this->cart_model->get_customer_cart($this->_user->customer_code);
+    $filter['customer'] = $customer;
+    $filter['totalQty'] = 0;
+    $filter['totalAmount'] = 0;
+
+    if(!empty($filter['cart']))
+    {
+      foreach($filter['cart'] as $rs)
+      {
+				$rs->image_path = get_image_path($rs->product_id);
+        $filter['totalQty'] += $rs->Qty;
+        $filter['totalAmount'] += $rs->LineTotal;
+      }
+    }
+
+		$this->load->view('bp_order/bp_items', $filter);
+	}
+
+
+  public function get_item()
+	{
+		$sc = TRUE;
+		$ds = array();
+		$docDate = today();
+		$ItemCode = $this->input->get('ItemCode');
+		$cardCode = $this->input->get('CardCode');
+		$payment = $this->input->get('Payment');
+		$channels = $this->input->get('Channels');
+		$quotaNo = $this->input->get('quotaNo');
+
+    $whsCode = get_customer_warehouse_listed();
+		$whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
+
+		$qty = 1;
+
+    $pd = $this->products_model->get($ItemCode);
+
+    if( ! empty($pd) && $pd->customer_view == 1)
+    {
+      $stock = array(
+        'OnHand' => 0,
+        'Committed' => 0,
+        'QuotaQty' => 0,
+        'Available' => 0
+      );
+
+      $disc = $this->discount_model->get_item_discount($pd->code, $cardCode, $pd->price, $qty, $payment, $channels, $docDate);
+
+      if( ! empty($disc))
+      {
+        $arr = array(
+          'id' => $pd->id,
+          'code' => $pd->code,
+          'name' => $pd->name,
+          'stdPrice' => round($pd->price, 2),
+          'price' => $disc->type == 'N' ? round($disc->sellPrice, 2) : round($pd->price, 2),
+          'priceLabel' => $disc->type == 'N' ? number($disc->sellPrice, 2) : number($pd->price, 2),
+          'sellPrice' => round($disc->sellPrice, 2),
+          'available' => $stock['Available'],
+          'discLabel' => $disc->type == 'N' ? "" : discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
+          'DiscPrcnt' => round($disc->totalDiscPrecent, 2),
+          'rule_id' => $disc->rule_id,
+          'policy_id' => $disc->policy_id,
+          'discType' => $disc->type,
+          'count_stock' => $pd->count_stock,
+          'allow_change_discount' => $pd->allow_change_discount
+        );
+
+        array_push($ds, $arr);
+      }
+    }
+
+		echo json_encode($ds);
+	}
+
+
 
 	public function get_category_items()
 	{
@@ -190,10 +288,25 @@ class Bporders extends CI_Controller
     if( ! empty($customer))
     {
       $this->cart_model->remove_free_rows($customer->CardCode);
+      $cart = $this->cart_model->get_customer_cart($this->_user->customer_code);
+
+      if(!empty($cart))
+      {
+        $quotaNo = $this->_user->quota_no;
+        $whsCode = get_customer_warehouse_listed();
+    		$whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
+
+        foreach($cart as $rs)
+        {
+					$stock = $this->getStock($rs->ItemCode, $whsCode, $quotaNo, $rs->count_stock);
+
+          $rs->Available = empty($stock) ? 0 : $stock['Available'];
+        }
+      }
 
       $ds = array(
         'customer' => $customer,
-        'cart' => $this->cart_model->get_customer_cart($this->_user->customer_code),
+        'cart' => $cart,
         'shipToCode' => $shipToCode,
         'billToCode' => $billToCode
       );
@@ -943,18 +1056,25 @@ class Bporders extends CI_Controller
 
 		$list = $this->discount_model->get_free_item_list($rule_id);
 
+    $quotaNo = $this->_user->quota_no;
+    $whsCode = get_customer_warehouse_listed();
+    $whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
+
 		$ds = "";
 
 		if(!empty($list))
 		{
-			$ds .= "<tr><td colspan='5' class='text-center'>เลือก {$qty} ชิ้น จากรายการต่อไปนี้</td></tr>";
+			$ds .= "<tr><td colspan='6' class='text-center'>เลือก {$qty} ชิ้น จากรายการต่อไปนี้</td></tr>";
 			$ds .= "<tr>";
 			$ds .= "<td class='fix-width-60 middle'>Image</td>";
 			$ds .= "<td class='fix-width-100 middle'>Code</td>";
-			$ds .= "<td class='min-width-250 middle'>Description</td>";
-			$ds .= "<td class='fix-width-80 middle'>Qty</td>";
+			$ds .= "<td class='min-width-100 middle'>Description</td>";
+      $ds .= "<td class='fix-width-80 middle text-center'>Available</td>";
+			$ds .= "<td class='fix-width-80 middle text-center'>Qty</td>";
 			$ds .= "<td class='fix-width-80 middle'></td>";
 			$ds .= "</tr>";
+
+      $totalAvailable = 0;
 
 			foreach($list as $rs)
 			{
@@ -963,31 +1083,44 @@ class Bporders extends CI_Controller
 				$pd = $this->products_model->get($rs->product_code);
 				$price = $pd->price;
 
-				$ds .= "<tr>";
-				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
-				$ds .= "<td class='fix-width-100 middle'>{$pd->code}</td>";
-				$ds .= "<td class='min-width-250 middle'>{$pd->name}</td>";
-				$ds .= "<td class='fix-width-80 middle'>";
-				$ds .= "<input type='number' class='form-control input-sm text-center auto-select' ";
-				$ds .= "id='input-{$uuid}' data-item='{$pd->id}' ";
-				$ds .= "data-uid='{$uid}' data-parent='{$uid}' ";
-				$ds .= "data-pdcode='{$pd->code}' ";
-				$ds .= "data-pdname='{$pd->name}' ";
-				$ds .= "data-price='{$price}' ";
-				$ds .= "data-uom='{$pd->uom}' data-uomcode='{$pd->uom_code}' ";
-				$ds .= "data-rule='{$rs->rule_id}' data-policy='{$rs->id_policy}' ";
-				$ds .= "data-vatcode='{$pd->vat_group}' data-vatrate='{$pd->vat_rate}' ";
-				$ds .= "data-img='{$img}' data-qty='{$qty}' value='1'>";
-				$ds .= "</td>";
-				$ds .= "<td class='fix-width-80 middle'>";
-				$ds .= "<button class='btn btn-primary btn-xs btn-block' id='btn-{$uuid}' onclick=\"addFreeRow('{$uuid}')\">Add</button>";
-				$ds .= "</td>";
-				$ds .= "</tr>";
+        $stock = $this->getStock($pd->code, $whsCode, $quotaNo);
+        $available = empty($stock) ? 0 : $stock['Available'];
+
+        if($available > 0)
+        {
+          $ds .= "<tr>";
+          $ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
+          $ds .= "<td class='fix-width-100 middle'>{$pd->code}</td>";
+          $ds .= "<td class='min-width-100 middle' style='white-space:normal;'>{$pd->name}</td>";
+          $ds .= "<td class='fix-width-80 middle text-center'>".number($available)."</td>";
+          $ds .= "<td class='fix-width-80 middle text-center'>";
+          $ds .= "<input type='number' class='form-control input-sm text-center auto-select' ";
+          $ds .= "id='input-{$uuid}' data-item='{$pd->id}' ";
+          $ds .= "data-uid='{$uid}' data-parent='{$uid}' ";
+          $ds .= "data-pdcode='{$pd->code}' ";
+          $ds .= "data-pdname='{$pd->name}' ";
+          $ds .= "data-price='{$price}' ";
+          $ds .= "data-uom='{$pd->uom}' data-uomcode='{$pd->uom_code}' ";
+          $ds .= "data-rule='{$rs->rule_id}' data-policy='{$rs->id_policy}' ";
+          $ds .= "data-vatcode='{$pd->vat_group}' data-vatrate='{$pd->vat_rate}' ";
+          $ds .= "data-img='{$img}' data-qty='{$qty}' value=''>";
+          $ds .= "</td>";
+          $ds .= "<td class='fix-width-80 middle'>";
+          $ds .= "<button class='btn btn-primary btn-xs btn-block' id='btn-{$uuid}' onclick=\"addFreeRow('{$uuid}')\">Add</button>";
+          $ds .= "</td>";
+          $ds .= "</tr>";
+          $totalAvailable += $available;
+        }
 			}
+
+      if($totalAvailable == 0)
+      {
+        $ds .= "<tr><td colspan='6' class='text-center'>สินค้าหมด</td></tr>";
+      }
 		}
 		else
 		{
-			$ds .= "<tr><td colspan='5' class='text-center'>ไม่พบรายการสินค้า</td></tr>";
+			$ds .= "<tr><td colspan='6' class='text-center'>ไม่พบรายการสินค้า</td></tr>";
 		}
 
 		echo $ds;
@@ -1273,9 +1406,10 @@ class Bporders extends CI_Controller
 	}
 
 
-	public function clear_side_filter($name)
+	public function clear_item_filter()
 	{
-		return delete_cookie($name);
+    $filter = array('bp_item_code', 'bp_item_category', 'bp_item_brand');
+		return clear_filter($filter);
 	}
 
 
