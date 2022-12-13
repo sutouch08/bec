@@ -78,7 +78,7 @@
 					<td class="middle text-center no"><?php echo $no; ?></td>
 					<td class="middle"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
 					<td class="middle"><?php echo $rs->code; ?></td>
-					<td class="moddle"><?php echo $rs->CardName; ?></td>
+					<td class="middle"><?php echo $rs->CardName; ?></td>
 					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
 					<td class="middle text-center"><?php echo $term; ?></td>
 					<td class="middle text-center">

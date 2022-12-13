@@ -87,7 +87,7 @@ class Bporders extends CI_Controller
 		$ds = array(
 			'customer' => $this->customers_model->get($this->_user->customer_code),
 			'cart' => $this->cart_model->get_customer_cart($this->_user->customer_code),
-			'cate' => $this->product_category_model->search_by_level(5, $search_text, TRUE), //$this->product_category_model->get_by_level(5, TRUE),
+			'cate' => $this->product_category_model->search_by_level(5, $search_text, TRUE),
       'search_text' => $search_text,
 			'totalQty' => 0,
 			'totalAmount' => 0

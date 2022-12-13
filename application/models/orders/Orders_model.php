@@ -133,16 +133,17 @@ class Orders_model extends CI_Model
 		{
 			$this->db->where('code !=', $orderCode);
 		}
-		
+
 		$rs = $this->db
 		->select_sum('DocTotal')
 		->where('CardCode', $CardCode)
-		->where_in('Status', array(0, 2))
+		->where_in('Status', array(-1, 0, 3))
+		->where('Payment !=', -1)
 		->get($this->tb);
 
 		if($rs->num_rows() === 1)
 		{
-			return $rs->row()->DocTotal;
+			return get_zero($rs->row()->DocTotal);
 		}
 
 		return 0.00;
@@ -162,7 +163,12 @@ class Orders_model extends CI_Model
 
 	public function cancle_order($code)
 	{
-		return $this->db->set('Status', 2)->where('code', $code)->update($this->tb);
+		$arr = array(
+			'Status' => 2,
+			'so_status' => 'D'
+		);
+
+		return $this->db->where('code', $code)->update($this->tb, $arr);
 	}
 
 

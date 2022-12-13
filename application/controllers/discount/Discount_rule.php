@@ -377,7 +377,7 @@ class Discount_rule extends PS_Controller
   public function set_product_rule()
   {
 		$sc = TRUE;
-
+  
     $rule_id = $this->input->post('rule_id');
 
     //--- all product ?
@@ -485,7 +485,7 @@ class Discount_rule extends PS_Controller
 			}
 
 			//--- set discount rule produt model
-			if($sc === TRUE && $item === TRUE)
+			if($sc === TRUE && $model === TRUE)
 			{
 				$modelList = $this->input->post('modelId');
 
@@ -503,6 +503,7 @@ class Discount_rule extends PS_Controller
 							"rule_id" => $rule_id,
 							"model_id" => $model_id
 						);
+
 
 						if( ! $this->discount_rule_model->set_discount_rule_product_model($arr))
 						{

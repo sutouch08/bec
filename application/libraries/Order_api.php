@@ -4,6 +4,7 @@ class Order_api
   private $url;
   protected $ci;
 	public $error;
+  private $timeout = 0; //--- timeout in seconds;
 
   public function __construct()
   {
@@ -29,13 +30,16 @@ class Order_api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT_MS, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
 
 		$response = curl_exec($curl);
+
 		curl_close($curl);
+
 		$rs = json_decode($response);
 
 		if(! empty($rs) && ! empty($rs->status))
@@ -45,8 +49,10 @@ class Order_api
 				return $rs->Balance;
 			}
 		}
-
-    return 0.00;
+    else
+    {
+      return FALSE;
+    }
 	}
 
 
@@ -58,13 +64,21 @@ class Order_api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    curl_setopt($curl, CURLOPT_TIMEOUT, 0);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
 
 		$response = curl_exec($curl);
+
+    if($response === FALSE)
+    {
+      $response = curl_error($curl);
+    }
+
 		curl_close($curl);
+
 		$rs = json_decode($response);
 
 		if(! empty($rs) && ! empty($rs->status))
@@ -153,7 +167,7 @@ class Order_api
 					"UomEntry" => intval($rs->UomEntry),
 					"Price" => round($rs->Price, 2),
 					"LineTotal" => round($rs->LineTotal, 2),
-					"DiscPrcnt" => NULL, //round($rs->DiscPrcnt, 2),
+					"DiscPrcnt" => $rs->is_free == 1 ? 100 : NULL, //round($rs->DiscPrcnt, 2),
 					"PriceBefDi" => round($rs->Price, 2),
 					"Currency" => $order->DocCur,
 					"Rate" => round($order->DocRate, 2),
@@ -195,12 +209,18 @@ class Order_api
 			$curl = curl_init();
 			curl_setopt($curl, CURLOPT_URL, $url);
 			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+      curl_setopt($curl, CURLOPT_TIMEOUT, 0);
 			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($ds));
 			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
 
 			$response = curl_exec($curl);
+
+      if($response === FALSE)
+      {
+        $response = curl_error($curl);
+      }
 
 			curl_close($curl);
 
@@ -248,11 +268,11 @@ class Order_api
 			else
 			{
 				$sc = FALSE;
-				$this->error = "Export order failed";
+				$this->error = "Export failed : {$response}";
 
 				$arr = array(
 					'Status' => 3,
-					'message' => $response//$this->error
+					'message' => $response
 				);
 
 				$this->ci->orders_model->update($code, $arr);
@@ -286,6 +306,7 @@ class Order_api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, 0);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);

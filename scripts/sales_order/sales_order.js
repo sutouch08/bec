@@ -11,10 +11,12 @@ function goBack(){
 
 
 function edit(code){
+  load_in();
   window.location.href = HOME + 'edit/' + code;
 }
 
 function goEdit(code){
+  load_in();
   window.location.href = HOME + 'edit/' + code;
 }
 

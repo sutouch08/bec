@@ -396,7 +396,7 @@ class Products extends PS_Controller
 						"price" => empty($rs->Price) ? 0.00 : get_zero($rs->Price),
 						"cost" => empty($rs->Cost) ? 0.00 : get_zero($rs->Cost),
 						"vat_group" => get_null($rs->VatGourpSa),
-						"model_code" => empty($rs->Product_ModeCode) ? NULL : $rs->Product_ModeCode,
+						"model_code" => empty($rs->Product_ModelCode) ? NULL : $rs->Product_ModelCode,
 						"brand_code" => empty($rs->Product_BrandCode) ? NULL : $rs->Product_BrandCode,
 						"type_code" => empty($rs->Product_TypeCode) ? NULL : $rs->Product_TypeCode,
 						"category_code" => empty($rs->Product_CategoryCode) ? NULL : $rs->Product_CategoryCode,
@@ -535,6 +535,68 @@ class Products extends PS_Controller
 
 
 
+  public function sync_item()
+	{
+		$this->load->library('api');
+
+		$sc = TRUE;
+
+		$itemCode = $this->input->get('code');
+
+    $rs = $this->api->getItem($itemCode);
+
+		if(! empty($rs))
+		{
+      if(isset($rs->ItemCode) && $rs->ItemCode != "" && isset($rs->ItemName))
+      {
+        $arr = array(
+          "code" => $rs->ItemCode,
+          "name" => $rs->ItemName,
+          "barcode" => empty($rs->CodeBars) ? NULL : $rs->CodeBars,
+          "uom_id" => empty($rs->SUoMEntry) ? NULL : $rs->SUoMEntry,
+          "price" => empty($rs->Price) ? 0.00 : get_zero($rs->Price),
+          "cost" => empty($rs->Cost) ? 0.00 : get_zero($rs->Cost),
+          "vat_group" => get_null($rs->VatGourpSa),
+          "model_code" => empty($rs->Product_ModelCode) ? NULL : $rs->Product_ModelCode,
+          "brand_code" => empty($rs->Product_BrandCode) ? NULL : $rs->Product_BrandCode,
+          "type_code" => empty($rs->Product_TypeCode) ? NULL : $rs->Product_TypeCode,
+          "category_code" => empty($rs->Product_CategoryCode) ? NULL : $rs->Product_CategoryCode,
+          "status" => empty($rs->validFor) ? 1 : ($rs->validFor == 'N' ? 0 : 1)
+        );
+
+        if( ! $this->products_model->is_exists($rs->ItemCode))
+        {
+          if($this->products_model->add($arr))
+          {
+            if(!empty($rs->Product_CategoryCode))
+            {
+              $this->update_item_parent_category($rs->ItemCode);
+            }
+          }
+        }
+        else
+        {
+          if($this->products_model->update($rs->ItemCode, $arr))
+          {
+            if(!empty($rs->Product_CategoryCode))
+            {
+              $this->update_item_parent_category($rs->ItemCode);
+            }
+          }
+        }
+      }
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "no data found";
+		}
+
+		$this->_response($sc);
+	}
+
+
+
   public function clear_filter()
 	{
     $filter = array(
@@ -552,6 +614,6 @@ class Products extends PS_Controller
 
     clear_filter($filter);
 	}
-} //--- end class 
+} //--- end class
 
 ?>

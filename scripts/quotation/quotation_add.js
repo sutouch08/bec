@@ -1311,7 +1311,7 @@ function recalDiscount(no) {
 		else {
 			$('#disc-diff-'+no).val(0);
 		}
-		
+
 		sellPrice = roundNumber(sellPrice);
 
 
@@ -1364,6 +1364,19 @@ function recalAmount(no) {
 			lineAmount = roundNumber(qty * sellPrice);
 
 			lineDiscAmount = roundNumber(qty * discountAmount);
+
+			if( sysSellPrice > sellPrice ) {
+
+				diff = roundNumber(sysSellPrice - sellPrice);
+
+				percentDiff = (diff/sysSellPrice) * 100;
+				percentDiff = roundNumber(percentDiff);
+
+				$('#disc-diff-'+no).val(percentDiff);
+			}
+			else {
+				$('#disc-diff-'+no).val(0);
+			}
 
 			$('#disc-error-'+no).val(0);
 			$('#disc-label-' + no).removeClass('has-error');

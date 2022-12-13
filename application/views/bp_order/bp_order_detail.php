@@ -38,7 +38,9 @@
 	</div>
 
 	<hr class="padding-5 margin-top-15 margin-bottom-15">
-
+<?php if($order->Status == 2) : ?>
+	<?php $this->load->view('cancle_watermark'); ?>
+<?php endif; ?>
 	<div class="row">
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive">
 			<table class="table border-1 margin-top-5">

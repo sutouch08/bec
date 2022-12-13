@@ -108,10 +108,8 @@ class Product_category extends PS_Controller
 						set_error('insert');
 					}
 					else
-					{
-						$this->load->library('update_api');
-
-						if( ! $this->update_api->createProductCategory($id))
+					{					    
+						if( ! $this->create_sap($id))
 						{
 							$sc = FALSE;
 							$this->error = $this->update_api->error;
@@ -172,12 +170,9 @@ class Product_category extends PS_Controller
 				{
 					$this->update_child_level($id);
 
-					$this->load->library('update_api');
-
-					if( ! $this->update_api->updateProductCategory($id))
+					if( ! $this->update_sap($id))
 					{
 						$sc = FALSE;
-						$this->error = $this->update_api->error;
 					}
 				}
 			}

@@ -24,7 +24,7 @@ class Product_category_model extends CI_Model
 
 	public function get_all()
 	{
-		$rs = $this->db->get($this->tb);
+		$rs = $this->db->order_by('code', 'ASC')->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -45,7 +45,7 @@ class Product_category_model extends CI_Model
 			$this->db->where('active', 1);
 		}
 
-		$rs = $this->db->where('level', $level)->get($this->tb);
+		$rs = $this->db->where('level', $level)->order_by('code', 'ASC')->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -70,7 +70,7 @@ class Product_category_model extends CI_Model
 			$this->db->like('name', $text);
 		}
 
-		$rs = $this->db->where('level', $level)->get($this->tb);
+		$rs = $this->db->where('level', $level)->order_by('code', 'ASC')->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -83,7 +83,7 @@ class Product_category_model extends CI_Model
 
 	public function get_by_parent($parent_id = 0, $active = FALSE)
 	{
-		$qr = "SELECT * FROM {$this->tb} WHERE parent_id = {$parent_id} ";
+		$qr = "SELECT * FROM {$this->tb} WHERE parent_id = {$parent_id} ORDER BY code ASC";
 
 		if($active)
 		{

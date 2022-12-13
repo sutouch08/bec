@@ -51,23 +51,31 @@ class Orders extends PS_Controller
 	}
 
 
-	public function get_credit_balance()
+
+  public function get_credit_balance()
 	{
 		$CardCode = trim($this->input->get('CardCode'));
 		$orderCode = trim($this->input->get('orderCode'));
 		$this->load->library('order_api');
 		$balance = $this->order_api->getCreditBalance($CardCode);
-		$used = $this->orders_model->get_credit_used($CardCode, $orderCode);
+		$used = 0; //$this->orders_model->get_credit_used($CardCode, $orderCode);
 
-		$available = $balance - $used;
+    if($balance === FALSE)
+    {
+      echo "API Request Timeout";
+    }
+    else
+    {
+      $available = $balance - $used;
 
-		$arr = array(
-			'status' => 'success',
-			'balance' => $available < 0 ? 0 : $available,
-			'used' => $used
-		);
+      $arr = array(
+        'status' => 'success',
+        'balance' => $available < 0 ? 0 : $available,
+        'used' => $used
+      );
 
-		echo json_encode($arr);
+      echo json_encode($arr);
+    }
 	}
 
 
@@ -1431,7 +1439,7 @@ class Orders extends PS_Controller
 					"OcrCode5" => $order->dimCode5,
 					"SaleTeam" => $rs->team_code
 				);
-        
+
 
 				array_push($orderLine, $line);
 			}

@@ -1,3 +1,4 @@
+var btnClick = 0;
 
 function saveAsDraft(option) {
 	$('#is_draft').val(1);
@@ -82,52 +83,14 @@ function getFreeItemRule()
 
 
 function validateFreeItem(option) {
-	let isDraft = $('#is_draft').val();
-	if(isDraft == 1) {
+	console.log(btnClick);
+	if(btnClick == 0) {
+		btnClick = 1;
+		console.log(btnClick);
+		let isDraft = $('#is_draft').val();
 
-		if(option == 'add') {
-			saveAdd();
-		}
-		else {
-			saveUpdate();
-		}
-	}
-	else {
+		if(isDraft == 1) {
 
-		let fRemain = 0;
-
-		$('.free-item').each(function() {
-			if($(this).val() > 0) {
-				fqty = parseDefault(parseInt($(this).val()), 0);
-				picked = parseDefault(parseInt($(this).data('picked')), 0);
-
-				if(fqty > 0 && picked < fqty) {
-					fRemain += fqty - picked;
-				}
-			}
-		});
-
-		if(fRemain > 0) {
-			title = 'พบรายการที่ได้รับของแถม แต่ยังไม่ได้เลือกของแถม เมื่อคุณบันทึกออเดอร์แล้ว คุณอาจไม่สามารถกลับมาเลือกของแถมภายหลังได้อีก ต้องการบันทึกออเดอร์หรือไม่ ?';
-			swal({
-		    title:'Warning!',
-		    text:title,
-		    type:'warning',
-		    showCancelButton:true,
-		    cancelButtonText:'กลับไปแก้ไข',
-		    confirmButtonText:'บันทึกออเดอร์',
-				closeOnConfirm:true
-		  },
-		  function(){
-				if(option == 'add') {
-					saveAdd();
-				}
-				else {
-					saveUpdate();
-				}
-		  });
-		}
-		else {
 			if(option == 'add') {
 				saveAdd();
 			}
@@ -135,7 +98,57 @@ function validateFreeItem(option) {
 				saveUpdate();
 			}
 		}
+		else {
+
+			let fRemain = 0;
+
+			$('.free-item').each(function() {
+				if($(this).val() > 0) {
+					fqty = parseDefault(parseInt($(this).val()), 0);
+					picked = parseDefault(parseInt($(this).data('picked')), 0);
+
+					if(fqty > 0 && picked < fqty) {
+						fRemain += fqty - picked;
+					}
+				}
+			});
+
+			if(fRemain > 0) {
+				title = 'พบรายการที่ได้รับของแถม แต่ยังไม่ได้เลือกของแถม เมื่อคุณบันทึกออเดอร์แล้ว คุณอาจไม่สามารถกลับมาเลือกของแถมภายหลังได้อีก ต้องการบันทึกออเดอร์หรือไม่ ?';
+				swal({
+					title:'Warning!',
+					text:title,
+					type:'warning',
+					showCancelButton:true,
+					cancelButtonText:'กลับไปแก้ไข',
+					confirmButtonText:'บันทึกออเดอร์',
+					closeOnConfirm:true
+				},
+				function(isConfirm){
+					if(isConfirm) {
+						if(option == 'add') {
+							saveAdd();
+						}
+						else {
+							saveUpdate();
+						}
+					}
+					else {
+						btnClick = 0;
+					}
+				});
+			}
+			else {
+				if(option == 'add') {
+					saveAdd();
+				}
+				else {
+					saveUpdate();
+				}
+			}
+		}
 	}
+
 }
 
 
@@ -204,6 +217,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -216,6 +230,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -229,6 +244,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -241,6 +257,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -274,6 +291,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -282,6 +300,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -307,7 +326,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
-
+			btnClick = 0;
 			return false;
 		}
 
@@ -319,7 +338,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
-
+			btnClick = 0;
 			return false;
 		}
 
@@ -388,6 +407,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -396,6 +416,7 @@ function saveAdd() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -405,7 +426,7 @@ function saveAdd() {
 
 		//--- หากไม่มีข้อผิดพลาด
 		if(is_draft == 0 && creditLimit == 1 && payment != '-1') {
-			
+
 			load_in();
 
 			const cardCode = $('#CardCode').val();
@@ -442,7 +463,7 @@ function saveAdd() {
 
 							$('#btn-save').removeAttr('disabled');
 							$('#btn-draft').removeAttr('disabled');
-
+							btnClick = 0;
 							return false;
 						}
 						else {
@@ -486,6 +507,19 @@ function saveAdd() {
 							});
 						}
 					}
+					else {
+						load_out();
+						$('#btn-save').removeAttr('disabled');
+						$('#btn-draft').removeAttr('disabled');
+						btnClick = 0;
+						setTimeout(function() {
+							swal({
+								title:'Error!',
+								text:cs,
+								type:'error'
+							});
+						}, 200);
+					}
 				}
 			});
 		}
@@ -524,6 +558,7 @@ function saveAdd() {
 
 					$('#btn-save').removeAttr('disabled');
 					$('#btn-draft').removeAttr('disabled');
+					btnClick = 0;
 				}
 			});
 		}
@@ -607,6 +642,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -619,6 +655,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -632,6 +669,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -644,6 +682,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -656,6 +695,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 		else {
@@ -689,6 +729,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -697,6 +738,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -722,6 +764,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -733,6 +776,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 
 			return false;
 		}
@@ -800,6 +844,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -808,6 +853,7 @@ function saveUpdate() {
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
+			btnClick = 0;
 			return false;
 		}
 
@@ -854,6 +900,7 @@ function saveUpdate() {
 
 							$('#btn-save').removeAttr('disabled');
 							$('#btn-draft').removeAttr('disabled');
+							btnClick = 0;
 
 							return false;
 						}
@@ -894,12 +941,21 @@ function saveUpdate() {
 
 									$('#btn-save').removeAttr('disabled');
 									$('#btn-draft').removeAttr('disabled');
+									btnClick = 0;
 								}
 							});
 						}
 					}
 					else {
-						return true;
+						load_out();
+
+						setTimeout(function() {
+							swal({
+								title:'Error!',
+								text:cs,
+								type:'error'
+							});
+						}, 200);
 					}
 				}
 			});
@@ -939,6 +995,7 @@ function saveUpdate() {
 
 					$('#btn-save').removeAttr('disabled');
 					$('#btn-draft').removeAttr('disabled');
+					btnClick = 0;
 				}
 			});
 		}
@@ -1844,6 +1901,19 @@ function recalAmount(no) {
 
 		lineDiscAmount = qty * discountAmount;
 		lineDiscAmount = roundNumber(lineDiscAmount);
+
+		if( sysSellPrice > sellPrice ) {
+
+			diff = roundNumber(sysSellPrice - sellPrice);
+
+			percentDiff = (diff/sysSellPrice) * 100;
+			percentDiff = roundNumber(percentDiff);
+
+			$('#disc-diff-'+no).val(percentDiff);
+		}
+		else {
+			$('#disc-diff-'+no).val(0);
+		}
 
 		$('#disc-error-'+no).val(0);
 		$('#disc-label-' + no).removeClass('has-error');

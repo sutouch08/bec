@@ -1183,6 +1183,7 @@ class Quotation extends PS_Controller
 			$curl = curl_init();
 			curl_setopt($curl, CURLOPT_URL, $url);
 			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+			curl_setopt($curl, CURLOPT_TIMEOUT, 30);
 			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($ds));
 			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -1190,6 +1191,11 @@ class Quotation extends PS_Controller
 
 			$response = curl_exec($curl);
 
+			if($response === FALSE)
+			{
+				$response = curl_error($curl);
+			}
+			
 			curl_close($curl);
 
 			$rs = json_decode($response);
@@ -1670,7 +1676,7 @@ class Quotation extends PS_Controller
 		$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
 
 		if(!empty($stock))
-		{			
+		{
 			$OnHand = $stock['OnHand'];
 			$Quota = $stock['QuotaQty'];
 			$available = $Quota - $commit;

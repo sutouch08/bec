@@ -4,6 +4,7 @@ class Api
   private $url;
   protected $ci;
 	public $error;
+  protected $timeout = 0; //-- time out in seconds;
 
   public function __construct()
   {
@@ -35,6 +36,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -72,6 +74,39 @@ class Api
   }
 
 
+  public function getItem($itemCode)
+	{
+		$arr = array(
+			'Counting' => 'N',
+      'ItemCode' => $itemCode
+		);
+
+		$url = $this->url .'Products';
+		$curl = curl_init();
+
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+
+		$response = curl_exec($curl);
+		curl_close($curl);
+		$rs = json_decode($response);
+
+		if(! empty($rs) && $rs->status == 'success')
+    {
+			return $rs->itemList[0];
+		}
+		else
+		{
+			return NULL;
+		}
+	}
+
+
 	public function getItemPrice($ItemCode, $PriceList)
   {
 		$arr = array(
@@ -84,6 +119,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -119,6 +155,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -153,6 +190,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -184,6 +222,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -216,6 +255,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -249,6 +289,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -281,6 +322,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -315,6 +357,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -346,6 +389,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -377,6 +421,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -408,6 +453,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -439,6 +485,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -470,6 +517,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -501,6 +549,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -534,6 +583,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -568,6 +618,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -600,6 +651,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -632,6 +684,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -664,6 +717,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -695,6 +749,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -728,6 +783,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -762,6 +818,7 @@ class Api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);

@@ -6,9 +6,7 @@
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-4 padding-5">
     <p class="pull-right top-p">
 			<button type="button" class="btn btn-xs btn-info btn-100 top-btn" onclick="syncData()"><i class="fa fa-refresh"></i> Sync</button>
-			<?php if($this->_SuperAdmin) : ?>
-			<button type="button" class="btn btn-xs btn-info btn-100 top-btn" onclick="forceSyncData()"><i class="fa fa-refresh"></i> Sync All</button>
-			<?php endif; ?>
+			<button type="button" class="btn btn-xs btn-info btn-100 top-btn" onclick="forceSyncData()"><i class="fa fa-refresh"></i> Sync All</button>			
 			<?php if($this->pm->can_add OR $this->pm->can_edit) : ?>
 			<button type="button" class="btn btn-xs btn-primary btn-100 top-btn" onclick="updateCategory()">Update Category</button>
 			<?php endif; ?>
@@ -122,7 +120,7 @@
 					<th class="fix-width-60 middle text-center">Stock</th>
 					<th class="fix-width-60 middle text-center">Discount</th>
 					<th class="fix-width-60 middle text-center">customer</th>
-					<th class="fix-width-80"></th>
+					<th class="fix-width-100"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -158,6 +156,7 @@
 							</label>
 						</td>
 						<td class="middle text-right">
+							<button type="button" class="btn btn-minier btn-primary" onclick="syncItem('<?php echo $rs->code; ?>')"><i class="fa fa-refresh"></i></button>
 							<button type="button" class="btn btn-minier btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
 							<?php if($this->pm->can_edit) : ?>
 							<button type="button" class="btn btn-minier btn-warning" onclick="getEdit(<?php echo $rs->id; ?>)"><i class="fa fa-pencil"></i></button>
