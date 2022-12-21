@@ -1566,6 +1566,12 @@ td.one-attribute{
 		background-color:white;
 	}
 
+  .cart-item-footer {    
+		position:absolute;
+		bottom:0px;
+		background-color:white;
+  }
+
   #cart {
     max-height: 400px;
     overflow: auto;

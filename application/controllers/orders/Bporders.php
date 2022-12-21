@@ -90,7 +90,8 @@ class Bporders extends CI_Controller
 			'cate' => $this->product_category_model->search_by_level(5, $search_text, TRUE),
       'search_text' => $search_text,
 			'totalQty' => 0,
-			'totalAmount' => 0
+			'totalAmount' => 0,
+      'docTotal' => 0
 		);
 
 
@@ -101,6 +102,7 @@ class Bporders extends CI_Controller
 				$rs->image_path = get_image_path($rs->product_id);
         $ds['totalQty'] += $rs->Qty;
         $ds['totalAmount'] += $rs->LineTotal;
+        $ds['docTotal'] += ($rs->LineTotal + $rs->totalVatAmount);
       }
     }
 
@@ -134,6 +136,7 @@ class Bporders extends CI_Controller
     $filter['customer'] = $customer;
     $filter['totalQty'] = 0;
     $filter['totalAmount'] = 0;
+    $filter['docTotal'] = 0;
 
     if(!empty($filter['cart']))
     {
@@ -142,6 +145,7 @@ class Bporders extends CI_Controller
 				$rs->image_path = get_image_path($rs->product_id);
         $filter['totalQty'] += $rs->Qty;
         $filter['totalAmount'] += $rs->LineTotal;
+        $filter['docTotal'] += ($rs->LineTotal + $rs->totalVatAmount);
       }
     }
 
@@ -371,7 +375,7 @@ class Bporders extends CI_Controller
 					'Payment' => $Payment,
 					'DocCur' => getConfig('DEFAULT_CURRENCY'),
 					'DocRate' => 1,
-					'DocTotal' => empty($hd) ? 0.00 : $hd->LineTotal,
+					'DocTotal' => empty($hd) ? 0.00 : ($hd->LineTotal + $hd->totalVatAmount),
 					'DocDate' => today(),
 					'DocDueDate' => today(),
 					'TextDate' => today(),
@@ -552,6 +556,8 @@ class Bporders extends CI_Controller
 								$discLabel = discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5);
 								$uid = uniqid(rand(1,100));
 
+                $vatAmount = get_vat_amount($disc->sellPrice, $pd->vat_rate);
+
 								$arr = array(
 									'CardCode' => $cardCode,
 									'LineNum' => $lineNum,
@@ -581,8 +587,8 @@ class Bporders extends CI_Controller
 									'totalDiscAmount' => $disc->totalDiscAmount,
 									'VatGroup' => $pd->vat_group,
 									'VatRate' => $pd->vat_rate,
-									'VatAmount' => get_vat_amount($disc->sellPrice, $pd->vat_rate),
-									'totalVatAmount' => (get_vat_amount($disc->sellPrice, $pd->vat_rate) * $qty),
+									'VatAmount' => $vatAmount,
+									'totalVatAmount' => ($vatAmount * $qty),
 									'LineTotal' => $disc->sellPrice * $qty,
 									'policy_id' => $disc->policy_id,
 									'rule_id' => $disc->rule_id,
@@ -629,6 +635,7 @@ class Bporders extends CI_Controller
 							if( ! empty($disc))
 							{
 								$discLabel = discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5);
+                $vatAmount = get_vat_amount($disc->sellPrice, $pd->vat_rate);
 
 								$arr = array(
 									'Qty' => $qty,
@@ -651,8 +658,8 @@ class Bporders extends CI_Controller
 									'DiscPrcnt' => $disc->totalDiscPrecent,
 									'discAmount' => $disc->discAmount,
 									'totalDiscAmount' => $disc->totalDiscAmount,
-									'VatAmount' => get_vat_amount($disc->sellPrice, $pd->vat_rate),
-									'totalVatAmount' => (get_vat_amount($disc->sellPrice, $pd->vat_rate) * $qty),
+									'VatAmount' => $vatAmount,
+									'totalVatAmount' => ($vatAmount * $qty),
 									'LineTotal' => $disc->sellPrice * $qty,
 									'policy_id' => $disc->policy_id,
 									'rule_id' => $disc->rule_id,
@@ -860,6 +867,7 @@ class Bporders extends CI_Controller
 					'discLabel' => $rs->discLabel,
 					'LineTotal' => $rs->LineTotal,
 					'LineTotalLabel' => number($rs->LineTotal, 2),
+          'vatAmount' => $rs->totalVatAmount,
 					'image_path' => get_image_path($rs->product_id)
 				);
 

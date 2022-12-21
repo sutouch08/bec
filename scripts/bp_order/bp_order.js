@@ -416,20 +416,27 @@ $('#item-qty').keyup(function() {
 function recalTotal() {
 	let totalAmount = 0;
 	let totalQty = 0;
+	let totalVat = 0;
 
 	$('.line-qty').each(function() {
 		let no = $(this).data('no');
 		let qty = parseDefault(parseInt($(this).val()), 0);
 		let amount = parseDefault(parseFloat($('#line-total-'+no).val()), 0.00);
+		let vat = parseDefault(parseFloat($('#line-vat-'+no).val()), 0.00);
 		totalQty += qty;
 		totalAmount += amount;
+		totalVat += vat;
 	});
+
+	let docTotal = totalAmount + totalVat;
 
 	$('#total-qty').text(addCommas(totalQty));
 	$('#total-amount').text(addCommas(totalAmount.toFixed(2)));
+	$('#total-vat').text(addCommas(totalVat.toFixed(2)));
+	$('#doc-total').text(addCommas(docTotal.toFixed(2)));
 
-	$('#bar-amount').text(addCommas(totalAmount.toFixed(2)));
-	$('#top-amount').text(addCommas(totalAmount.toFixed(2)));
+	$('#bar-amount').text(addCommas(docTotal.toFixed(2)));
+	$('#top-amount').text(addCommas(docTotal.toFixed(2)));
 }
 
 

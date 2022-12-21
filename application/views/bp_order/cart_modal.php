@@ -26,12 +26,14 @@
 									<?php $no = 1; ?>
 									<?php $totalQty = 0; ?>
 									<?php $totalAmount = 0; ?>
+                  <?php $totalVat = 0; ?>
 									<?php if(!empty($cart)) : ?>
 
 											<?php foreach($cart as $cs) : ?>
 											<tr id="cart-row-<?php echo $cs->id; ?>">
 												<input type="hidden" class="line-qty" data-no="<?php echo $cs->id; ?>" id="line-qty-<?php echo $cs->id; ?>" value="<?php echo $cs->Qty; ?>" />
 												<input type="hidden" id="line-total-<?php echo $cs->id; ?>" value="<?php echo $cs->LineTotal; ?>" />
+                        <input type="hidden" id="line-vat-<?php echo $cs->id; ?>" value="<?php echo $cs->totalVatAmount; ?>" />
 
 												<td class="middle text-center">
 													<img src="<?php echo $cs->image_path; ?>" width="60"/>
@@ -52,6 +54,7 @@
 											<?php $no++; ?>
 											<?php $totalQty += $cs->Qty; ?>
 											<?php $totalAmount += $cs->LineTotal; ?>
+                      <?php $totalVat += $cs->totalVatAmount; ?>
 										<?php endforeach; ?>
 
 								<?php endif; ?>
@@ -60,11 +63,15 @@
                 </div>
               </div>
             </div>
-            <div class="modal-footer item-footer" id="modal-footer">
+            <div class="modal-footer cart-item-footer" id="modal-footer" style="max-height:200px;">
 							<div class="col-lg-4 col-md-4 col-sm-4 col-xs-5 font-size-18 blue text-left">จำนวนรวม</div>
 							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-7 font-size-18 blue text-right" id="total-qty"><?php echo number($totalQty); ?></div>
-							<div class="col-lg-4 col-md-4 col-sm-4 col-xs-5 font-size-18 blue text-left">มูลค่ารวม</div>
+							<div class="col-lg-4 col-md-4 col-sm-4 col-xs-5 font-size-18 blue text-left">มูลค่าสินค้า</div>
 							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-7 font-size-18 blue text-right" id="total-amount"><?php echo number($totalAmount, 2); ?></div>
+              <div class="col-lg-4 col-md-4 col-sm-4 col-xs-5 font-size-18 blue text-left">VAT</div>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-7 font-size-18 blue text-right" id="total-vat"><?php echo number($totalVat, 2); ?></div>
+              <div class="col-lg-4 col-md-4 col-sm-4 col-xs-5 font-size-18 blue text-left">มูลค่ารวม</div>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-7 font-size-18 blue text-right" id="doc-total"><?php echo number($totalVat+$totalAmount, 2); ?></div>
 							<div class="divider-hidden"></div>
 							<div class="divider-hidden"></div>
 							<div class="col-lg-8 col-md-8 col-sm-8 hidden-xs">&nbsp;</div>
@@ -148,6 +155,7 @@
 	<tr id="cart-row-{{id}}">
 		<input type="hidden" class="line-qty" data-no="{{id}}" id="line-qty-{{id}}" value="{{Qty}}" />
 		<input type="hidden" id="line-total-{{id}}" value="{{LineTotal}}" />
+    <input type="hidden" id="line-vat-{{id}}" value="{{vatAmount}}" />
 
 		<td class="middle text-center"><img src="{{image_path}}" width="60"/></td>
 		<td class="middle">{{ItemCode}}</td>

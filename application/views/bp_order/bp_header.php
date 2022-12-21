@@ -70,7 +70,7 @@
 						<?php if($this->show_cart) : ?>
 						<li class="salmon hidden-xs">
 							<a href="javascript:void(0)" onclick="viewCart()">
-								<span class="badge badge-inverse"><i class="ace-icon fa fa-shopping-basket"></i>&nbsp;	<span id="top-amount"><?php echo number($totalAmount, 2); ?></span> THB</span>
+								<span class="badge badge-inverse"><i class="ace-icon fa fa-shopping-basket"></i>&nbsp;	<span id="top-amount"><?php echo number($docTotal, 2); ?></span> THB</span>
 							</a>
 						</li>
 						<?php endif; ?>

@@ -43,7 +43,7 @@
 <?php endif; ?>
 	<div class="row">
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive">
-			<table class="table border-1 margin-top-5">
+			<table class="table border-1 margin-top-5" style="min-width:1000px;">
 				<thead>
 					<tr>
 						<th class="fix-width-60 text-center">Image</th>
@@ -59,6 +59,7 @@
 					<?php $totalQty = 0; ?>
 					<?php $totalAmount = 0; ?>
 					<?php $totalDiscAmount = 0; ?>
+					<?php $totalVat = 0; ?>
 					<?php if(!empty($details)) : ?>
 						<?php foreach($details as $rs) : ?>
 							<?php $discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5, '%'); ?>
@@ -77,11 +78,24 @@
 							<?php $totalQty += $rs->Qty; ?>
 							<?php $totalDiscAmount += $rs->totalDiscAmount; ?>
 							<?php $totalAmount += $rs->LineTotal; ?>
+							<?php $totalVat += $rs->totalVatAmount; ?>
 						<?php endforeach; ?>
-							<tr class="font-size-18">
-								<td colspan="5" class="text-right">รวม</td>
+							<tr class="font-size-15">
+								<td colspan="5" rowspan="4" style="border-right:solid 1px #dddddd;"></td>
+								<td class="text-left">จำนวนรวม</td>
 								<td class="text-right" id="total-qty"><?php echo number($totalQty); ?></td>
-								<td class="text-right" id="total-amount"><?php echo number($totalAmount, 2); ?></td>
+							</tr>
+							<tr class="font-size-15">
+								<td class="text-left">มูลค่าสินค้า</td>
+								<td class="text-right"><?php echo number($totalAmount, 2); ?></td>
+							</tr>
+							<tr class="font-size-15">
+								<td class="text-left">VAT</td>
+								<td class="text-right"><?php echo number($totalVat, 2); ?></td>
+							</tr>
+							<tr class="font-size-15">
+								<td class="text-left">มูลค่ารวม</td>
+								<td class="text-right"><?php echo number($totalAmount + $totalVat, 2); ?></td>
 							</tr>
 					<?php else : ?>
 						<tr>

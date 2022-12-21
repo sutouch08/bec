@@ -48,10 +48,13 @@
 			<button type="button" class="btn btn-sm btn-primary btn-100" onclick="goBack()"><i class="fa fa-chevron-left"></i>&nbsp;&nbsp; ซื้อสินค้าต่อ</button>
 		</div>
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive">
-			<table class="table border-1 margin-top-5">
+			<table class="table border-1 margin-top-5" style="margin-bottom:10px;">
 				<thead>
 					<tr>
-						<th class="fix-width-40 text-center"></th>
+						<th class="fix-width-40 text-center"><label>
+							<input type="checkbox" class="ace" onchange="checkOutAll($(this))" />
+							<span class="lbl"></span>
+						</label></th>
 						<th class="fix-width-60 text-center">Image</th>
 						<th class="fix-width-120">Item Code</th>
 						<th class="min-width-150">Item Name</th>
@@ -66,6 +69,7 @@
 					<?php $totalQty = 0; ?>
 					<?php $totalAmount = 0; ?>
 					<?php $totalDiscAmount = 0; ?>
+					<?php $totalVatAmount = 0; ?>
 					<?php if(!empty($cart)) : ?>
 						<?php foreach($cart as $rs) : ?>
 							<?php $discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5, '%'); ?>
@@ -77,6 +81,7 @@
 								<input type="hidden" class="line-qty" data-no="<?php echo $rs->id; ?>" id="line-qty-<?php echo $rs->id; ?>" value="<?php echo $rs->Qty; ?>"/>
 								<input type="hidden" class="line-available" data-no="<?php echo $rs->id; ?>" id="line-available-<?php echo $rs->id; ?>" value="<?php echo $rs->Available; ?>"/>
 								<input type="hidden" id="line-total-<?php echo $rs->id; ?>" value="<?php echo $rs->LineTotal; ?>" />
+								<input type="hidden" id="line-vat-<?php echo $rs->id; ?>" value="<?php echo $rs->totalVatAmount; ?>" />
 								<input type="hidden" id="stdPrice-<?php echo $rs->id; ?>" value="<?php echo $rs->StdPrice; ?>" />
 								<input type="hidden" id="price-<?php echo $rs->id; ?>" value="<?php echo $rs->Price; ?>" />
 								<input type="hidden" id="sellPrice-<?php echo $rs->id; ?>" value="<?php echo $rs->SellPrice; ?>" />
@@ -104,6 +109,7 @@
 							<?php $totalQty += $rs->Qty; ?>
 							<?php $totalDiscAmount += $rs->totalDiscAmount; ?>
 							<?php $totalAmount += $rs->LineTotal; ?>
+							<?php $totalVatAmount += $rs->totalVatAmount; ?>
 						<?php endforeach; ?>
 					<?php else : ?>
 						<tr>
@@ -111,25 +117,31 @@
 						</tr>
 					<?php endif; ?>
 				</tbody>
-				<?php if(!empty($cart)) : ?>
-				<tfoot>
-				<tr class="font-size-18">
-							<td class="middle" colspan="2">
-								<label>
-									<input type="checkbox" class="ace" onchange="checkOutAll($(this))" />
-									<span class="lbl">&nbsp; Check all</span>
-								</label>
-							</td>
-							<td colspan="5" class="text-right">รวม</td>
-							<td class="text-right" id="total-qty"><?php echo number($totalQty); ?></td>
-							<td class="text-right" id="total-amount"><?php echo number($totalAmount, 2); ?></td>
-						</tr>
-				</tfoot>
-				<?php endif; ?>
 			</table>
 		</div>
-		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 margin-top-10">
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 margin-top-10 margin-bottom-10">
 			<button type="button" class="btn btn-xs btn-danger btn-100" onclick="removeCheckRow()">Delete Checked</button>
+		</div>
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+			<table class="table border-1" style="margin-bottom:0px;">
+				<tr>
+					<td class="width-50 font-size-14 blue text-left" style="border-top:0px;">จำนวนรวม</td>
+					<td class="width-50 font-size-14 blue text-right" id="total-qty"><?php echo number($totalQty); ?></td>
+				</tr>
+				<tr>
+					<td class="width-50 font-size-14 blue text-left">มูลค่าสินค้า</td>
+					<td class="width-50 font-size-14 blue text-right" id="total-amount"><?php echo number($totalAmount, 2); ?></td>
+				</tr>
+				<tr>
+					<td class="width-50 font-size-14 blue text-left">VAT</td>
+					<td class="width-50 font-size-14 blue text-right" id="total-vat"><?php echo number($totalVatAmount, 2); ?></td>
+				</tr>
+				<tr>
+					<td class="width-50 font-size-14 blue text-left">มูลค่ารวม</td>
+					<td class="width-50 font-size-14 blue text-right" id="doc-total"><?php echo number($totalVatAmount+$totalAmount, 2); ?></td>
+				</tr>
+
+			</table>
 		</div>
 		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 margin-top-10">
 			<p class="pull-right" id="free-box">
