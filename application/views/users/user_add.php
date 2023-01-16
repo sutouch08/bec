@@ -3,6 +3,16 @@
 	var USE_STRONG_PWD = <?php echo getConfig('USE_STRONG_PWD'); ?>;
 </script>
 
+<style>
+  .freez > th {
+    top:0;
+    position: sticky;
+    background-color: #f0f3f7;
+    min-height: 30px;
+    z-index: 100;
+  }
+</style>
+
 <div class="row">
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
     <h3 class="title">
@@ -74,6 +84,7 @@
 				<?php echo select_quota(); ?>
 			</select>
 		</div>
+		<div class="col-xs-12 col-sm-reset inline red" id="quota-no-error"></div>
   </div>
 
 	<div class="form-group">
@@ -109,6 +120,49 @@
 		<div class="col-xs-12 col-sm-reset inline red" id="channels-error"></div>
   </div>
 
+
+	<div class="form-group">
+		<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label ">Warehouse</label>
+		<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+			<select class="form-control filter" name="warehouse" id="warehouse" disabled>
+				<option value="">Please Select</option>
+				<?php echo select_warehouse(); ?>
+			</select>
+		</div>
+		<div class="col-xs-12 col-sm-reset inline red" id="warehouse-error"></div>
+		<div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-12 hide" id="wh-table" style="margin-top:10px; height:400px; overflow-y:scroll;">
+			<table class="table table-bordered border-1">
+				<thead>
+					<tr class="freez">
+						<th class="width-10 text-center">#</th>
+						<th class="width-20 text-left">Code</th>
+						<th class="width-70 text-left">Name</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php if( ! empty($whList)) : ?>
+					<?php foreach($whList as $rs) : ?>
+						<tr>
+							<td class="middle text-center">
+								<label>
+									<input type="checkbox" class="ace chk-wh" data-id="<?php echo $rs->id; ?>" id="wh-<?php echo $rs->id; ?>" value="<?php echo $rs->code; ?>" />
+									<span class="lbl"></span>
+								</label>
+							</td>
+							<td class="middle"><?php echo $rs->code; ?></td>
+							<td class="middle"><?php echo $rs->name; ?></td>
+						</tr>
+					<?php endforeach; ?>
+				<?php else : ?>
+					<tr><td colspan="3" class="text-center">Please Define Warehouse</td></tr>
+				<?php endif; ?>
+				</tbody>
+			</table>
+		</div>
+		<div class="col-xs-12 col-sm-reset inline red" id="warehouse-error"></div>
+  </div>
+
+	<div class="divider"></div>
 
   <div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">New password</label>

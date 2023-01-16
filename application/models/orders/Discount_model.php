@@ -222,20 +222,20 @@ class Discount_model extends CI_Model
 
 						//---- ได้ส่วนลดที่ดีที่สุดมาแล้ว
 						$sc = array(
-							'sellPrice' => round($price - $totalDiscAmount, 2), //--- ราคา หลังส่วนลด
+							'sellPrice' => round($price - $totalDiscAmount, 4), //--- ราคา หลังส่วนลด
 							'type' => $type,
-							'disAmount1' => round($discAmount1, 2), //--- ส่วนลดเป็นจำนวนเงิน (ยอดต่อหน่วย)
+							'disAmount1' => round($discAmount1, 4), //--- ส่วนลดเป็นจำนวนเงิน (ยอดต่อหน่วย)
 							'disc1' => $discLabel1, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'disAmount2' => round($discAmount2, 2),
+							'disAmount2' => round($discAmount2, 4),
 							'disc2' => $discLabel2, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'disAmount3' => round($discAmount3, 2),
+							'disAmount3' => round($discAmount3, 4),
 							'disc3' => $discLabel3, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'disAmount4' => round($discAmount4, 2),
+							'disAmount4' => round($discAmount4, 4),
 							'disc4' => $discLabel4, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'disAmount5' => round($discAmount5, 2),
+							'disAmount5' => round($discAmount5, 4),
 							'disc5' => $discLabel5, //--- ข้อความที่ใช้แสดงส่วนลด เช่น 30%, 30
-							'discAmount' => round($totalDiscAmount, 2), //--- ส่วนลด รวม 5 สเต็ปเป็นจำนวนเงิน/ 1 รายการ
-							'totalDiscAmount' => round($totalDiscAmount * $qty, 2), //--- เอายอดส่วนลดที่ได้ มา คูณ ด้วย จำนวนสั่ง เป้นส่วนลดทั้งหมด
+							'discAmount' => round($totalDiscAmount, 4), //--- ส่วนลด รวม 5 สเต็ปเป็นจำนวนเงิน/ 1 รายการ
+							'totalDiscAmount' => round($totalDiscAmount * $qty, 4), //--- เอายอดส่วนลดที่ได้ มา คูณ ด้วย จำนวนสั่ง เป้นส่วนลดทั้งหมด
 							'totalDiscPrecent' => round(discountAmountToPercent($totalDiscAmount, 1, $price), 2),
 							'rule_id' => $dis_rule,
 							'policy_id' => $dis_policy,
@@ -270,8 +270,7 @@ class Discount_model extends CI_Model
 
 		$po = $this->db->select('id')->where('active', 1)->where('start_date <=', $date)->where('end_date >=', $date)->get($this->dp);
 
-
-		if(! empty($po))
+		if($po->num_rows() > 0)
 		{
 			$arr = array();
 
@@ -280,7 +279,7 @@ class Discount_model extends CI_Model
 				$arr[] = $rs->id;
 			}
 
-			$qs = $this->db
+			$this->db
 			->distinct()
 			->select('r.*')
 			->from('discount_rule AS r')
@@ -296,8 +295,10 @@ class Discount_model extends CI_Model
 			->join('discount_rule_customer_area AS ca', 'r.id = ca.rule_id', 'left')
 			->join('discount_rule_customer_grade AS g', 'r.id = g.rule_id', 'left')
 			->join('discount_rule_channels AS ch', 'r.id = ch.rule_id', 'left')
-			->join('discount_rule_payment AS py', 'r.id = py.rule_id', 'left')
-			->where_in('id_policy', $arr)
+			->join('discount_rule_payment AS py', 'r.id = py.rule_id', 'left');
+			$this->db->where_in('id_policy', $arr);
+
+			$this->db
 			->where('r.active', 1)
 			->where('r.type', 'F')
 			->group_start()->where('r.all_product', 1)->or_where('r.all_product', 0)->group_end()
@@ -321,8 +322,9 @@ class Discount_model extends CI_Model
 			->or_where('r.minAmount', 0)
 			->or_where('r.minAmount <=', ($amount))
 			->group_end()
-			->order_by('r.priority', 'DESC')
-			->get();
+			->order_by('r.priority', 'DESC');
+
+			$qs = $this->db->get();
 
 			if($qs->num_rows() > 0)
 			{

@@ -14,7 +14,12 @@ class User_model extends CI_Model
   {
     if(!empty($data))
     {
-      return $this->db->insert($this->tb, $data);
+      $rs = $this->db->insert($this->tb, $data);
+
+			if($rs)
+			{
+				return $this->db->insert_id();
+			}
     }
 
     return FALSE;

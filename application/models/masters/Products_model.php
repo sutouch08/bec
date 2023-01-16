@@ -2,6 +2,7 @@
 class Products_model extends CI_Model
 {
 	private $tb = "products";
+	private $fa = "favorite_item";
 
   public function __construct()
   {
@@ -81,7 +82,7 @@ class Products_model extends CI_Model
 
 	public function get_code_and_name($id)
 	{
-		$rs = $this->db->select('id, code, name')->where('id', $id)->get($this->tb);
+		$rs = $this->db->select('id, code, name, count_stock')->where('id', $id)->get($this->tb);
 		if($rs->num_rows() === 1)
 		{
 			return $rs->row();
@@ -425,6 +426,54 @@ class Products_model extends CI_Model
 		}
 
 		return NULL;
+	}
+
+
+	public function get_favorite_items($user_id)
+	{
+		$rs = $this->db
+		->select('fa.user_id, pd.id, pd.code, pd.name, pd.price, pd.count_stock')
+		->from('favorite_item AS fa')
+		->join('products AS pd', 'fa.product_id = pd.id', 'left')
+		->where('fa.user_id', $user_id)
+		->get();
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function is_favorite($user_id, $product_id)
+	{
+		$rs = $this->db->where('user_id', $user_id)->where('product_id', $product_id)->get($this->fa);
+
+		if($rs->num_rows() === 1)
+		{
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+
+	public function add_to_favorite(array $ds = array())
+	{
+		if( ! empty($ds))
+		{
+			return $this->db->insert($this->fa, $ds);
+		}
+
+		return FALSE;
+	}
+
+
+	public function remove_from_favorite($user_id, $product_id)
+	{
+		return $this->db->where('user_id', $user_id)->where('product_id', $product_id)->delete($this->fa);
 	}
 
 } //--- end classs

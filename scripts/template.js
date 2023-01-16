@@ -351,7 +351,14 @@ function uniqueId()
 }
 
 
-function roundNumber(num)
+function roundNumber(num, digit)
 {
-	return Math.round((num + Number.EPSILON) * 100) / 100;
+	if(digit === undefined) {
+		digit = 2;
+	}
+	else {
+		ditit = parseDefault(parseInt(digit), 2);
+	}
+
+	return Number(parseFloat(num).toFixed(digit));
 }

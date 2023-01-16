@@ -152,13 +152,13 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped table-hover dataTable border-1" style="min-width:1000px;">
+		<table class="table table-striped table-hover dataTable border-1" style="min-width:1020px;">
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="fix-width-40 middle text-center">#</th>
 					<th class="fix-width-80 middle text-center">Document date</th>
 					<th class="fix-width-80 middle text-center shipDate <?php echo ($chk_ship == 1 ? '' : 'hide'); ?>">Shipment date</th>
-					<th class="fix-width-120 middle">Web No.</th>
+					<th class="fix-width-120 min-width-120 middle">Web No.</th>
 					<th class="fix-width-120 middle sqNo <?php echo ($chk_sqNo == 1 ? '' : 'hide'); ?>">SQ No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
 					<th class="min-width-200 middle">Customer name</th>
@@ -168,7 +168,7 @@
 					<th class="fix-width-80 middle text-center">Approval</th>
 					<th class="fix-width-80 middle text-center">Status</th>
 					<th class="fix-width-100 middle text-center user">User</th>
-					<th class="fix-width-120 middle"></th>
+					<th class="min-width-120 middle"></th>
 				</tr>
 			</thead>
 			<tbody style="font-size:12px;">

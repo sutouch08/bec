@@ -1876,7 +1876,7 @@ function recalAmount(no) {
 
 	discountAmount = disc.discountAmount;
 	sellPrice = disc.sellPrice;
-	sellPrice = roundNumber(sellPrice);
+	sellPrice = roundNumber(sellPrice, 4);
 	discPrcnt = discountAmount > 0 ? (discountAmount / price) * 100 : 0.00;
 
 	$('#totalDiscPercent-'+no).val(discPrcnt.toFixed(2));
@@ -1891,23 +1891,22 @@ function recalAmount(no) {
 		vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
 		sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);
 		vatAmount = (sellPrice * vat_rate);
-		//vatAmount = roundNumber(vatAmount);
 
 		vatTotal = (qty * vatAmount);
-		vatTotal = roundNumber(vatTotal);
+		vatTotal = roundNumber(vatTotal, 4);
 
 		lineAmount = (qty * sellPrice);
-		lineAmount = roundNumber(lineAmount);
+		lineAmount = roundNumber(lineAmount, 2);
 
 		lineDiscAmount = qty * discountAmount;
-		lineDiscAmount = roundNumber(lineDiscAmount);
+		lineDiscAmount = roundNumber(lineDiscAmount, 4);
 
 		if( sysSellPrice > sellPrice ) {
 
-			diff = roundNumber(sysSellPrice - sellPrice);
+			diff = roundNumber(sysSellPrice - sellPrice, 4);
 
 			percentDiff = (diff/sysSellPrice) * 100;
-			percentDiff = roundNumber(percentDiff);
+			percentDiff = roundNumber(percentDiff, 2);
 
 			$('#disc-diff-'+no).val(percentDiff);
 		}
@@ -1917,7 +1916,7 @@ function recalAmount(no) {
 
 		$('#disc-error-'+no).val(0);
 		$('#disc-label-' + no).removeClass('has-error');
-		$('#disc-amount-'+no).val(discountAmount.toFixed(2));
+		$('#disc-amount-'+no).val(discountAmount);
 		$('#line-disc-amount-'+no).val(lineDiscAmount);
 		$('#sellPrice-'+no).val(sellPrice);
 		$('#sell-price-'+no).val(addCommas(sellPrice));
@@ -1984,10 +1983,10 @@ function recalTotal() {
 
 	//--- update bill discount
 	var disc = parseDefault(parseFloat($('#discPrcnt').val()), 0);
-	disc = roundNumber(disc);
+	disc = roundNumber(disc, 2);
 
 	var billDiscAmount = parseFloat(total * (disc * 0.01));
-	billDiscAmount = roundNumber(billDiscAmount);
+	billDiscAmount = roundNumber(billDiscAmount, 2);
 
 	$('#discAmount').val(billDiscAmount);
 	$('#discAmountLabel').val(addCommas(billDiscAmount));
@@ -1999,18 +1998,18 @@ function recalTotal() {
 	//--- เฉลี่ยส่วนลดออกให้ทุกรายการ โดยเอาส่วนลดท้ายบิล(จำนวนเงิน)/มูลค่าสินค้าก่อนส่วนลด
 	//--- ได้มูลค่าส่วนลดท้ายบิลที่เฉลี่ยนแล้ว ต่อ บาท เช่น หารกันมาแล้ว ได้ 0.16 หมายถึงทุกๆ 1 บาท จะลดราคา 0.16 บาท
 	everageBillDisc = parseFloat((total > 0 ? billDiscAmount/total : 0));
-	everageBillDisc = roundNumber(everageBillDisc);
+	everageBillDisc = roundNumber(everageBillDisc, 2);
 
 	//--- นำผลลัพธ์ข้างบนมาคูณ กับ มูลค่าที่ต้องคิดภาษี (ตัวที่ไม่มีภาษีไม่เอามาคำนวณ)
 	//--- จะได้มูลค่าส่วนลดที่ต้องไปลบออกจากมูลค่าสินค้าที่ต้องคิดภาษี
-	totalDiscTax = roundNumber(amountBeforeDiscWithTax * everageBillDisc);
+	totalDiscTax = roundNumber(amountBeforeDiscWithTax * everageBillDisc, 2);
 
 
-	amountToPayTax = roundNumber(amountBeforeDiscWithTax - totalDiscTax);
+	amountToPayTax = roundNumber(amountBeforeDiscWithTax - totalDiscTax, 2);
 
-	taxAmount = roundNumber(amountToPayTax * taxRate);
+	taxAmount = roundNumber(amountToPayTax * taxRate, 2);
 
-	docTotal = roundNumber(amountAfterDisc + taxAmount + rounding);
+	docTotal = roundNumber(amountAfterDisc + taxAmount + rounding, 2);
 
 	$('#totalAmount').val(total);
 	$('#totalAmountLabel').val(addCommas(total.toFixed(2)));

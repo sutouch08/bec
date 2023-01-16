@@ -8,9 +8,23 @@ class Cart_model extends CI_Model
 		parent::__construct();
 	}
 
-	public function get_customer_cart($CardCode)
+
+	public function get_by_id($id)
 	{
-		$rs = $this->db->where('CardCode', $CardCode)->get($this->tb);
+		$rs = $this->db->where('id', $id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_customer_cart($CardCode, $user_id)
+	{
+		$rs = $this->db->where('CardCode', $CardCode)->where('user_id', $user_id)->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -21,13 +35,12 @@ class Cart_model extends CI_Model
 	}
 
 
-	public function get_cart_total($CardCode)
+	public function get_header($CardCode, $user_id)
 	{
 		$rs = $this->db
-		->select('sale_team, WhsCode, QuotaNo, VatGroup, VatRate')
-		->select_sum('LineTotal')
-		->select_sum('totalVatAmount')
+		->select('sale_team, WhsCode, QuotaNo, VatGroup, VatRate')		
 		->where('CardCode', $CardCode)
+		->where('user_id', $user_id)
 		->group_by('CardCode')
 		->get($this->tb);
 
@@ -37,6 +50,12 @@ class Cart_model extends CI_Model
 		}
 
 		return NULL;
+	}
+
+
+	public function cart_rows($CardCode, $user_id)
+	{
+		return $this->db->where('CardCode', $CardCode)->where('user_id', $user_id)->count_all_results($this->tb);
 	}
 
 
@@ -63,18 +82,19 @@ class Cart_model extends CI_Model
 	}
 
 
-	public function drop_customer_cart($CardCode)
+	public function drop_customer_cart($CardCode, $user_id)
 	{
-		return $this->db->where('CardCode', $CardCode)->delete($this->tb);
+		return $this->db->where('CardCode', $CardCode)->where('user_id', $user_id)->delete($this->tb);
 	}
 
 
 
-	public function get_exists($CardCode, $ItemCode)
+	public function get_exists($CardCode, $ItemCode, $user_id)
 	{
 		$rs = $this->db
 		->where('CardCode', $CardCode)
 		->where('ItemCode', $ItemCode)
+		->where('user_id', $user_id)
 		->where('is_free', 0)
 		->get($this->tb);
 
@@ -87,11 +107,12 @@ class Cart_model extends CI_Model
 	}
 
 
-	public function get_free_exists($CardCode, $ItemCode, $parent_uid)
+	public function get_free_exists($CardCode, $ItemCode, $parent_uid, $user_id)
 	{
 		$rs = $this->db
 		->where('CardCode', $CardCode)
 		->where('ItemCode', $ItemCode)
+		->where('user_id', $user_id)
 		->where('is_free', 1)
 		->where('parent_uid', $parent_uid)
 		->get($this->tb);
@@ -106,13 +127,14 @@ class Cart_model extends CI_Model
 
 
 
-	public function get_sum_items_qty($CardCode)
+	public function get_sum_items_qty($CardCode, $user_id)
 	{
 		$rs = $this->db
 		->select('ItemCode')
 		->select_sum('Qty')
 		->select_sum('LineTotal')
 		->where('CardCode', $CardCode)
+		->where('user_id', $user_id)
 		->where('is_free', 0)
 		->group_by('ItemCode')
 		->get($this->tb);
@@ -126,16 +148,16 @@ class Cart_model extends CI_Model
 	}
 
 
-	public function remove_free_rows($CardCode)
+	public function remove_free_rows($CardCode, $user_id)
 	{
-		return $this->db->where('CardCode', $CardCode)->where('is_free', 1)->delete($this->tb);
+		return $this->db->where('CardCode', $CardCode)->where('user_id', $user_id)->where('is_free', 1)->delete($this->tb);
 	}
 
 
 
 	public function get_new_line($CardCode)
 	{
-		$rs = $this->db->select_max('LineNum')->where('CardCode', $CardCode)->get($this->tb);
+		$rs = $this->db->select_max('LineNum')->where('CardCode', $CardCode)->where('user_id', $this->_user->id)->get($this->tb);
 		$i = 0;
 
 		if($rs->num_rows() === 1)

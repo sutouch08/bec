@@ -141,7 +141,7 @@
 		          </td>
 
 		          <td class="middle">
-		            <input type="text" class="form-control input-sm text-right" id="sell-price-<?php echo $no; ?>" value="<?php echo number($rs->SellPrice, 2); ?>" readonly disabled>
+		            <input type="text" class="form-control input-sm text-right" id="sell-price-<?php echo $no; ?>" value="<?php echo number($rs->SellPrice, 4); ?>" readonly disabled>
 		          </td>
 
 		          <td class="middle">

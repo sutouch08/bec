@@ -1340,7 +1340,7 @@ function recalAmount(no) {
 		disc = parseDiscount(val, price);
 
 		discountAmount = disc.discountAmount;
-		sellPrice = disc.sellPrice;
+		sellPrice = roundNumber(disc.sellPrice, 4);
 		discPrcnt = discountAmount > 0 ? (discountAmount / price) * 100 : 0.00;
 		discPrcnt = roundNumber(discPrcnt);
 
@@ -1351,23 +1351,21 @@ function recalAmount(no) {
 			$('#disc-error-'+no).val(1);
 			return false;
 		}
-		else {
-
-			sellPrice = roundNumber(sellPrice);
+		else {			
 
 			vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
 			sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);
 			vatAmount = roundNumber(sellPrice * vat_rate);
 
-			vatTotal = roundNumber(qty * vatAmount);
+			vatTotal = roundNumber(qty * vatAmount, 4);
 
-			lineAmount = roundNumber(qty * sellPrice);
+			lineAmount = roundNumber(qty * sellPrice, 2);
 
-			lineDiscAmount = roundNumber(qty * discountAmount);
+			lineDiscAmount = roundNumber(qty * discountAmount, 4);
 
 			if( sysSellPrice > sellPrice ) {
 
-				diff = roundNumber(sysSellPrice - sellPrice);
+				diff = roundNumber(sysSellPrice - sellPrice, 4);
 
 				percentDiff = (diff/sysSellPrice) * 100;
 				percentDiff = roundNumber(percentDiff);

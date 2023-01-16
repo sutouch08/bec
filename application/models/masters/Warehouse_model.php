@@ -2,10 +2,42 @@
 class Warehouse_model extends CI_Model
 {
 	private $tb = "warehouse";
+	private $tu = "user_warehouse";
 
 	public function __construct()
 	{
 		parent::__construct();
+	}
+
+
+
+
+	public function add_user_warehouse(array $ds = array())
+	{
+		if( ! empty($ds))
+		{
+			return $this->db->insert($this->tu, $ds);
+		}
+
+		return FALSE;
+	}
+
+	public function get_user_warehouse($user_id)
+	{
+		$rs = $this->db->where('user_id', $user_id)->get($this->tu);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function drop_user_warehouse($user_id)
+	{
+		return $this->db->where('user_id', $user_id)->delete($this->tu);
 	}
 
 

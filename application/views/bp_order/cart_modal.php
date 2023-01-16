@@ -1,3 +1,12 @@
+<style>
+  .freez > th {
+    top:0;
+    position: sticky;
+    background-color: #f0f3f7;
+    min-height: 30px;
+    z-index: 100;
+  }
+</style>
 <!--  Add New Address Modal  --------->
 <div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog cart-modal">
@@ -9,15 +18,16 @@
             <div class="modal-body" id="modal-body" style="padding-top:0px; min-height:100px; overflow:auto;">
               <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-								<table class="table table-striped" style="margin-bottom:0px; min-width:800px;">
+								<table class="table table-hover border-1" style="margin-bottom:0px; min-width:1040px; margin-top:3px;">
 										<thead>
-											<tr>
+											<tr class="freez">
 												<th class="fix-width-80"></th>
 												<th class="fix-width-100">Item Code</th>
-												<th class="fix-width-350">Description</th>
+												<th class="fix-width-250">Description</th>
 												<th class="fix-width-100 text-right">Price</th>
 												<th class="fix-width-120 text-center">Discount</th>
-												<th class="fix-width-100 text-right">Qty</th>
+                        <th class="fix-width-100 text-center">Available</th>
+												<th class="fix-width-150 text-center">Qty</th>
 												<th class="fix-width-120 text-right">Amount</th>
 												<th class="fix-width-20"></th>
 											</tr>
@@ -27,7 +37,7 @@
 									<?php $totalQty = 0; ?>
 									<?php $totalAmount = 0; ?>
                   <?php $totalVat = 0; ?>
-									<?php if(!empty($cart)) : ?>
+									<?php if( ! empty($cart)) : ?>
 
 											<?php foreach($cart as $cs) : ?>
 											<tr id="cart-row-<?php echo $cs->id; ?>">
@@ -38,11 +48,19 @@
 												<td class="middle text-center">
 													<img src="<?php echo $cs->image_path; ?>" width="60"/>
 												</td>
-												<td class="middle"><?php echo $cs->ItemCode; ?></td>
-												<td class="middle"><?php echo $cs->ItemName; ?></td>
+												<td class="middle" style="width:150px;"><?php echo $cs->ItemCode; ?></td>
+												<td class="middle" style="max-width:300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo $cs->ItemName; ?></td>
 												<td class="middle text-right"><?php echo number($cs->Price, 2); ?></td>
 												<td class="middle text-center"><?php echo $cs->discLabel; ?></td>
-												<td class="middle text-right"><?php echo number($cs->Qty); ?></td>
+												<td class="middle text-center" id="available-<?php echo $cs->id; ?>"><?php echo number($cs->available); ?></td>
+                        <td class="middle text-center" style="width:150px;">
+                          <input type="number"
+                          class="form-control input-sm text-center"
+                          id="input-qty-<?php echo $cs->id; ?>"
+                          value="<?php echo $cs->Qty; ?>"
+                          data-val="<?php echo $cs->Qty; ?>"
+                          onchange="updateCartQty(<?php echo $cs->id; ?>)">
+                        </td>
 												<td class="middle text-right"><?php echo number($cs->LineTotal, 2); ?></td>
 												<td class="middle fix-width-20 text-right" style="vertical-align:text-top; font-size:18px; ">
 													<a href="javascript:void(0)" style="color:#d15b47;" onclick="removeRow(<?php echo $cs->id; ?>)">
@@ -88,33 +106,52 @@
 
 
 <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width:350px; max-width:95%;">
+        <div class="modal-content">
+            <div class="modal-body" style="min-height:100px;">
+              <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="item-table">
+
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer width-100 text-center">
+							<button type="button" class="btn btn-sm btn-default btn-100" onclick="closeModal('itemModal')">ปิด</button>
+							<button type="button" class="btn btn-sm btn-success btn-100" onclick="addItemTocart()">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog item-modal">
         <div class="modal-content item-modal">
-            <div class="modal-body">
+            <div class="modal-body" style="min-height:100px;">
               <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="max-height:600px; overflow:auto;">
-									<table class="table table-bordered" style="min-width:1000px;">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="max-height:550px; overflow:auto;">
+									<table class="table table-bordered" style="min-width:900px;">
 										<thead>
-											<tr>
+											<tr class="freez">
 												<th class="fix-width-60 text-center">เลือก</th>
 												<th class="fix-width-100 text-center">Item Code</th>
-												<th class="fix-width-350 text-center">Description</th>
+												<th class="fix-width-250 text-center">Description</th>
 												<th class="fix-width-100 text-center">Price</th>
 												<th class="fix-width-120 text-center">Discount</th>
+                        <th class="fix-width-120 text-center">Available</th>
 												<th class="fix-width-100 text-center">Qty</th>
 												<th class="fix-width-120 text-center">Amount</th>
 											</tr>
 										</thead>
-										<tbody id="item-table">
+										<tbody id="cate-table">
 
 										</tbody>
 									</table>
                 </div>
               </div>
             </div>
-            <div class="modal-footer width-100 text-center item-footer">
+            <div class="modal-footer width-100 text-center">
 							<button type="button" class="btn btn-sm btn-warning" onclick="removeNonCheck()">ลบรายการที่ไม่เลือก</button>
-							<button type="button" class="btn btn-sm btn-default" onclick="closeModal()">ปิด</button>
+							<button type="button" class="btn btn-sm btn-default btn-100" onclick="closeModal('cateModal')">ปิด</button>
 							<button type="button" class="btn btn-sm btn-success btn-100" onclick="addTocart()">Add</button>
             </div>
         </div>
@@ -122,7 +159,7 @@
 </div>
 
 
-<script id="item-template" type="text/x-handlebarsTemplate">
+<script id="cate-template" type="text/x-handlebarsTemplate">
 	{{#each this}}
 		<tr id="item-row-{{id}}">
 			<input type="hidden" id="sellPrice-{{id}}" value="{{sellPrice}}"/>
@@ -140,12 +177,35 @@
 			<td class="middle">{{name}}</td>
 			<td class="middle text-right">{{priceLabel}}</td>
 			<td class="middle text-center">{{discLabel}}</td>
+      <td class="middle text-center">{{available}}</td>
 			<td class="middle">
 			<input type="number" class="form-control input-sm text-right input-qty" data-id="{{id}}" id="qty-{{id}}" onkeyup="recalAmount({{id}})"/>
 			</td>
 			<td class="middle text-right" id="line-amount-{{id}}"></td>
 		</tr>
 	{{/each}}
+</script>
+
+<script id="item-template" type="text/x-handlebarsTemplate">
+
+    <div class="width-100">
+    <table class="table table-bordered border-1" style="margin-bottom:0px;">
+      <tr><td colspan="2" class="text-center"><img src="{{image_path}}" class="width-50" /></td></tr>
+      <tr><td class="width-30 text-center">Item Code</td><td calss="width-70">{{code}}</tr>
+      <tr><td class="width-30 text-center">Description</td><td calss="width-70">{{name}}</tr>
+      <tr><td class="width-30 text-center">Price</td><td calss="width-70">{{price}}</tr>
+      <tr><td class="width-30 text-center">Discount</td><td calss="width-70">{{discLabel}}</tr>
+      <tr><td class="width-30 text-center">Available</td><td calss="width-70">{{available}}</tr>
+      <tr>
+        <td class="width-30 text-center">Qty</td>
+        <td calss="width-70">
+          <input type="number" class="form-control input-small text-center" data-id="{{id}}" data-code="{{code}}" id="item-input-qty" value="1" />
+        </td>
+        </tr>
+    </table>
+    </div>
+
+
 </script>
 
 
@@ -162,7 +222,10 @@
 		<td class="middle">{{ItemName}}</td>
 		<td class="middle text-right">{{Price}}</td>
 		<td class="middle text-center">{{discLabel}}</td>
-		<td class="middle text-right">{{QtyLabel}}</td>
+    <td class="middle text-center" id="available-{{id}}">{{available}}</td>
+		<td class="middle text-center" style="width:150px;">
+    <input type="number" class="form-control input-sm text-center" id="input-qty-{{id}}" value="{{Qty}}" data-val="{{Qty}}" onchange="updateCartQty({{id}})" />
+    </td>
 		<td class="middle text-right">{{LineTotalLabel}}</td>
 		<td class="middle fix-width-20 text-right" style="vertical-align:text-top; font-size:18px; ">
 			<a href="javascript:void(0)" style="color:#d15b47;" onclick="removeRow({{id}})">
@@ -171,4 +234,33 @@
 		</td>
 	</tr>
 	{{/each}}
+</script>
+
+<script id="cart-row-template" type="text/x-handlebarsTemplate">
+  <input type="hidden" class="line-qty" data-no="{{id}}" id="line-qty-{{id}}" value="{{Qty}}" />
+  <input type="hidden" id="line-total-{{id}}" value="{{LineTotal}}" />
+  <input type="hidden" id="line-vat-{{id}}" value="{{vatAmount}}" />
+
+  <td class="middle text-center"><img src="{{image_path}}" width="60"/></td>
+  <td class="middle">{{ItemCode}}</td>
+  <td class="middle">{{ItemName}}</td>
+  <td class="middle text-right">{{Price}}</td>
+  <td class="middle text-center">{{discLabel}}</td>
+  <td class="middle text-center" id="available-{{id}}">{{available}}</td>
+  <td class="middle text-center">
+  <input type="number" class="form-control input-sm text-center" id="input-qty-{{id}}" value="{{Qty}}" data-val={{Qty}} onchange="updateCartQty({{id}})" />
+  </td>
+  <td class="middle text-right">{{LineTotalLabel}}</td>
+  <td class="middle fix-width-20 text-right" style="vertical-align:text-top; font-size:18px; ">
+    <a href="javascript:void(0)" style="color:#d15b47;" onclick="removeRow({{id}})">
+      <i class="fa fa-trash"></i>
+    </a>
+  </td>
+</script>
+
+<script>
+
+$(document).ready(function() {
+  updateAvailable();
+});
 </script>

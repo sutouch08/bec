@@ -55,14 +55,52 @@ function saveAdd() {
 	const profile = $('#profile').val();
 	const active = $('#active').is(':checked') ? 1 : 0;
 	const force_reset = $('#force_reset').is(':checked') ? 1 : 0;
+  const warehouse = $('#warehouse').val();
+  let whList = [];
+
+  if(is_customer == 1) {
+    $('.chk-wh').each(function() {
+      if($(this).is(':checked')) {
+        whList.push({"id" : $(this).data('id'), "code" : $(this).val()});
+      }
+    });
+  }
+
+  if(is_customer == 1 && quota_no == "") {
+    set_error($('#quota_no'), $('#quota-no-error'), "Required");
+    $('#quota_no').focus();
+    return false;
+  }
+  else {
+    clear_error($('#quota_no'), $('#quota-no-error'));
+  }
 
 	if(is_customer == 1 && channels == "") {
 		set_error($('#channels'), $('#channels-error'), "Required");
+    $('#channels').focus();
 		return false;
 	}
 	else {
 		clear_error($('#channels'), $('#channels-error'));
 	}
+
+  if(is_customer == 1 && warehouse == "") {
+    set_error($('#warehouse'), $('#warehouse-error'), "Required");
+    $('#warehouse').focus();
+    return false;
+  }
+  else {
+    clear_error($('#warehouse'), $('#warehouse-error'));
+  }
+
+  if(is_customer == 1 && whList.length == 0) {
+    set_error($('#wh-table'), $('#warehouse-error'), "Required");
+    $('#wh-table').focus();
+    return false;
+  }
+  else {
+      clear_error($('#wh-table'), $('#warehouse-error'));
+  }
 
 	load_in();
 
@@ -79,6 +117,8 @@ function saveAdd() {
 			'is_customer' : is_customer,
 			'customer_code' : customer_code,
 			'channels' : channels,
+      'warehouse' : warehouse,
+      'warehouse_list' : JSON.stringify(whList),
 			'pwd' : pwd,
 			'profile' : profile,
 			'active' : active,
@@ -132,6 +172,7 @@ function update() {
 	}
 
 	const id = $('#user_id').val();
+  const uname = $('#uname').val();
 	const dname = $('#dname').val();
 	const sale_id = $('#sale_id').val();
 	const emp_id = $('#emp_id').val();
@@ -142,14 +183,53 @@ function update() {
 	const channels = $('#channels').val();
 	const profile = $('#profile').val();
 	const active = $('#active').is(':checked') ? 1 : 0;
+  const warehouse = $('#warehouse').val();
+
+  let whList = [];
+
+  if(is_customer == 1) {
+    $('.chk-wh').each(function() {
+      if($(this).is(':checked')) {
+        whList.push({"id" : $(this).data('id'), "code" : $(this).val()});
+      }
+    });
+  }
+
+  if(is_customer == 1 && quota_no == "") {
+    set_error($('#quota_no'), $('#quota-no-error'), "Required");
+    $('#quota_no').focus();
+    return false;
+  }
+  else {
+    clear_error($('#quota_no'), $('#quota-no-error'));
+  }
 
 	if(is_customer == 1 && channels == "") {
 		set_error($('#channels'), $('#channels-error'), "Required");
+    $('#channels').focus();
 		return false;
 	}
 	else {
 		clear_error($('#channels'), $('#channels-error'));
 	}
+
+  if(is_customer == 1 && warehouse == "") {
+    set_error($('#warehouse'), $('#warehouse-error'), "Required");
+    $('#warehouse').focus();
+    return false;
+  }
+  else {
+    clear_error($('#warehouse'), $('#warehouse-error'));
+  }
+
+  if(is_customer == 1 && whList.length == 0) {
+    set_error($('#wh-table'), $('#warehouse-error'), "Required");
+    $('#wh-table').focus();
+    return false;
+  }
+  else {
+      clear_error($('#wh-table'), $('#warehouse-error'));
+  }
 
 	load_in();
 
@@ -159,6 +239,7 @@ function update() {
 		cache:false,
 		data:{
 			'id' : id,
+      'uname' : uname,
 			'dname' : dname,
 			'sale_id' : sale_id,
 			'emp_id' : emp_id,
@@ -167,6 +248,8 @@ function update() {
 			'is_customer' : is_customer,
 			'customer_code' : customer_code,
 			'channels' : channels,
+      'warehouse' : warehouse,
+      'warehouse_list' : JSON.stringify(whList),
 			'profile' : profile,
 			'active' : active
 		},
@@ -492,13 +575,18 @@ function toggleCustomer() {
 	if(is_customer == 1) {
 		$('#customer').removeAttr('disabled');
 		$('#channels').removeAttr('disabled');
+    $('#warehouse').removeAttr('disabled');
+    $('#wh-table').removeClass('hide');
 		$('#customer').focus();
 	}
 	else {
 		$('#customer').val('');
 		$('#customer_code').val('');
 		$('#channels').val('').attr('disabled', 'disabled');
+    $('#warehouse').attr('disabled', 'disabled');
+    $('#wh-table').addClass('hide');
 		$('#customer').attr('disabled', 'disabled');
+
 	}
 }
 

@@ -52,8 +52,11 @@ class Users extends PS_Controller{
   {
 		if($this->pm->can_add)
 		{
+			$this->load->model('masters/warehouse_model');
+			$this->load->helper('warehouse');
 			$this->title = "Add user";
-			$this->load->view('users/user_add');
+			$ds['whList'] = $this->warehouse_model->get_all();
+			$this->load->view('users/user_add', $ds);
 		}
 		else
 		{
@@ -69,6 +72,8 @@ class Users extends PS_Controller{
 
 		if($this->pm->can_add)
 		{
+			$this->load->model('masters/warehouse_model');
+
 			if($this->input->post())
 			{
 				$uname = trim($this->input->post('uname'));
@@ -80,6 +85,8 @@ class Users extends PS_Controller{
 				$is_customer = is_true($this->input->post('is_customer'));
 				$customer_code = get_null($this->input->post('customer_code'));
 				$channels = get_null($this->input->post('channels'));
+				$warehouse = get_null($this->input->post('warehouse'));
+				$whList = json_decode($this->input->post('warehouse_list'));
 				$pwd = $this->input->post('pwd');
 				$id_profile = get_null($this->input->post('profile'));
 				$active = $this->input->post('active') == 1 ? 1 : 0;
@@ -105,14 +112,35 @@ class Users extends PS_Controller{
 								'is_customer' => $is_customer ? 1 : 0,
 								'customer_code' => $customer_code,
 								'channels' => $channels,
+								'warehouse_code' => $warehouse,
 								'last_pass_change' => date('Y-m-d'),
 								'force_reset' => $force_reset
 							);
 
-							if( ! $this->user_model->add($arr))
+							$id = $this->user_model->add($arr);
+
+							if( ! $id)
 							{
 								$sc = FALSE;
 								set_error('insert', 'user');
+							}
+							else
+							{
+								if($is_customer && ! empty($whList))
+								{
+									foreach($whList as $wh)
+									{
+										$arr = array(
+											'user_id' => $id,
+											'uname' => $uname,
+											'warehouse_id' => $wh->id,
+											'warehouse_code' => $wh->code,
+											'update_user' => $this->_user->id
+										);
+
+										$this->warehouse_model->add_user_warehouse($arr);
+									}
+								}
 							}
 						}
 						else
@@ -156,15 +184,30 @@ class Users extends PS_Controller{
 		if($this->pm->can_edit)
 		{
 			$this->load->model('masters/customers_model');
+			$this->load->model('masters/warehouse_model');
+			$this->load->helper('warehouse');
 
 			$user = $this->user_model->get($id);
 
 			if( ! empty($user))
 			{
 				$user->customer_name = $this->customers_model->get_name($user->customer_code);
+				$whList = $this->warehouse_model->get_all();
+				$userWh = $this->warehouse_model->get_user_warehouse($id);
+				$uw = array();
+
+				if( ! empty($userWh))
+				{
+					foreach($userWh as $wh)
+					{
+						$uw[$wh->warehouse_id] = $wh->warehouse_code;
+					}
+				}
 
 				$ds = array(
-					'user' => $user
+					'user' => $user,
+					'whList' => $whList,
+					'uw' => $uw
 				);
 
 				$this->load->view('users/user_edit', $ds);
@@ -191,7 +234,9 @@ class Users extends PS_Controller{
 		{
 			if($this->input->post())
 			{
+				$this->load->model('masters/warehouse_model');
 				$id = $this->input->post('id');
+				$uname = $this->input->post('uname');
 				$dname = trim($this->input->post('dname'));
 				$sale_id = $this->input->post('sale_id');
 				$emp_id = get_null($this->input->post('emp_id'));
@@ -200,6 +245,8 @@ class Users extends PS_Controller{
 				$is_customer = is_true($this->input->post('is_customer'));
 				$customer_code = get_null($this->input->post('customer_code'));
 				$channels = get_null($this->input->post('channels'));
+				$warehouse = $this->input->post('warehouse');
+				$whList = json_decode($this->input->post('warehouse_list'));
 				$id_profile = get_null($this->input->post('profile'));
 				$active = $this->input->post('active') == 1 ? 1 : 0;
 
@@ -217,13 +264,38 @@ class Users extends PS_Controller{
 							'quota_no' => $quota_no,
 							'is_customer' => $is_customer ? 1 : 0,
 							'customer_code' => $customer_code,
-							'channels' => $channels
+							'channels' => $channels,
+							'warehouse_code' => $warehouse
 						);
 
 						if( ! $this->user_model->update($id, $arr))
 						{
 							$sc = FALSE;
 							set_error('update', 'user');
+						}
+						else
+						{
+							if($is_customer)
+							{
+								//--- drop user warehouse
+								$this->warehouse_model->drop_user_warehouse($id);
+
+								if( ! empty($whList))
+								{
+									foreach($whList as $wh)
+									{
+										$arr = array(
+											'user_id' => $id,
+											'uname' => $uname,
+											'warehouse_id' => $wh->id,
+											'warehouse_code' => $wh->code,
+											'update_user' => $this->_user->id
+										);
+
+										$this->warehouse_model->add_user_warehouse($arr);
+									}
+								}
+							}
 						}
 					}
 					else
@@ -266,8 +338,24 @@ class Users extends PS_Controller{
 
 			if( ! empty($user))
 			{
+				$this->load->model('masters/warehouse_model');
+				$this->load->helper('warehouse');
+				$whList = $this->warehouse_model->get_all();
+				$userWh = $this->warehouse_model->get_user_warehouse($id);
+				$uw = array();
+
+				if( ! empty($userWh))
+				{
+					foreach($userWh as $wh)
+					{
+						$uw[$wh->warehouse_id] = $wh->warehouse_code;
+					}
+				}
+
 				$ds = array(
-					'user' => $user
+					'user' => $user,
+					'whList' => $whList,
+					'uw' => $uw
 				);
 
 				$this->load->view('users/user_detail', $ds);
@@ -299,6 +387,11 @@ class Users extends PS_Controller{
 					{
 						$sc = FALSE;
 						set_error('delete');
+					}
+					else
+					{
+						$this->load->model('masters/warehouse_model');
+						$this->warehouse_model->drop_user_warehouse($id);
 					}
 				}
 				else

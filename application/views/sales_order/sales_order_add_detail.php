@@ -2,6 +2,46 @@
   .table > tr > td {
     padding:3px;
   }
+
+  .freez > th {
+    top:0;
+    position: sticky;
+    background-color: #f8f8f8;
+    outline: solid 1px #dddddd;
+    min-height: 30px;
+    height: 30px;
+  }
+
+  @media (min-width: 768px) {
+
+    .fix-no {
+      left: 0;
+      position: sticky;
+    }
+
+    .fix-img {
+      left:40px;
+      position: sticky;
+    }
+
+    .fix-item {
+      left:100px;
+      position: sticky;
+    }
+
+    .fix-header {
+      z-index: 50;
+      background-color: #f8f8f8;
+      outline: solid 1px #dddddd;
+    }
+
+
+    td[scope=row] {
+      background-color: #f8f8f8;
+      border: 0 !important;
+      outline: solid 1px #dddddd;
+    }
+  }
 </style>
 
 <div class="row">
@@ -16,13 +56,13 @@
 
 
   <div class="divider-hidden"> </div>
-  <div class="col-sm-12 col-xs-12 padding-5 table-responsive">
-    <table class="table table-bordered border-1" style="min-width:1700px;">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="max-height:500px; overflow:auto; padding:0px; border-top:solid 1px #dddddd;">
+    <table class="table table-bordered" style="min-width:1908px; border:0;">
       <thead>
-        <tr class="font-size-10">
-          <th class="fix-width-40 middle text-center"></th>
-          <th class="fix-width-60 middle text-center">Image</th>
-          <th class="fix-width-150 middle text-center">Item Code</th>
+        <tr class="font-size-10 freez">
+          <th class="fix-width-40 middle text-center fix-no fix-header"></th>
+          <th class="fix-width-60 middle text-center fix-img fix-header">Image</th>
+          <th class="fix-width-150 middle text-center fix-item fix-header">Item Code</th>
           <th class="min-width-250 middle text-center">Description.</th>
 					<th class="fix-width-100 middle text-center">Warehouse</th>
 					<th class="fix-width-80 middle text-center">In Stock</th>
@@ -36,7 +76,7 @@
           <th class="fix-width-100 middle text-center">Price</th>
           <th class="fix-width-150 middle text-center">Discount(%)</th>
           <th class="fix-width-80 middle text-center">Tax Code</th>
-					<th class="fix-width-100 middle text-center">Price after discount</th>
+					<th class="fix-width-120 middle text-center">Price after discount</th>
           <th class="fix-width-150 middle text-center">Amount before tax</th>
 					<th class="fix-width-60 middle text-center"></th>
         </tr>
@@ -75,13 +115,13 @@
 					<input type="hidden" id="count-stock-<?php echo $no; ?>" value="1" />
 					<input type="hidden" id="allow-change-discount-<?php echo $no; ?>" value="1" />
 
-          <td class="middle text-center">
+          <td class="middle text-center fix-no" scope="row">
             <input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>"/>
             <span class="lbl"></span>
           </td>
-          <td class="middle text-center" id="img-<?php echo $no; ?>">
+          <td class="middle text-center fix-img" scope="row" id="img-<?php echo $no; ?>">
           </td>
-          <td class="middle">
+          <td class="middle fix-item" scope="row">
             <input type="text" class="form-control input-sm item-code" data-id="<?php echo $no; ?>" id="itemCode-<?php echo $no; ?>" value=""  />
           </td>
           <td class="middle">
@@ -188,12 +228,12 @@
 	<input type="hidden" id="allow-change-discount-{{no}}" value="1" />
 
 
-	<td class="middle text-center">
+	<td class="middle text-center fix-no" scope="row">
 		<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 		<span class="lbl"></span>
 	</td>
-	<td class="middle text-center" id="img-{{no}}"></td>
-	<td class="middle">
+	<td class="middle text-center fix-img" scope="row" id="img-{{no}}"></td>
+	<td class="middle fix-item" scope="row">
 		<input type="text" class="form-control input-sm item-code" data-id="{{no}}" id="itemCode-{{no}}" />
 	</td>
 	<td class="middle">
@@ -294,12 +334,12 @@
 	<input type="hidden" id="allow-change-discount-{{no}}" value="0" />
 
 
-	<td class="middle text-center">
+	<td class="middle text-center fix-no" scope="row">
 		<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 		<span class="lbl"></span>
 	</td>
-	<td class="middle text-center" id="img-{{no}}"><img src="{{img}}" width="40" height="40" /></td>
-	<td class="middle">
+	<td class="middle text-center fix-img" scope="row" id="img-{{no}}"><img src="{{img}}" width="40" height="40" /></td>
+	<td class="middle fix-item" scope="row">
 		<input type="text" class="form-control input-sm item-code" data-id="{{no}}" id="itemCode-{{no}}" value="{{product_code}}" disabled/>
 	</td>
 	<td class="middle">

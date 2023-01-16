@@ -51,18 +51,15 @@
 			<table class="table border-1 margin-top-5" style="margin-bottom:10px;">
 				<thead>
 					<tr>
-						<th class="fix-width-40 text-center"><label>
-							<input type="checkbox" class="ace" onchange="checkOutAll($(this))" />
-							<span class="lbl"></span>
-						</label></th>
 						<th class="fix-width-60 text-center">Image</th>
 						<th class="fix-width-120">Item Code</th>
 						<th class="min-width-150">Item Name</th>
 						<th class="fix-width-100 text-right">Price</th>
 						<th class="fix-width-120 text-center">Discount(%)</th>
-						<th class="fix-width-100 text-right">Available</th>
-						<th class="fix-width-100 text-right">Qty</th>
+						<th class="fix-width-100 text-center">Available</th>
+						<th class="fix-width-100 text-center">Qty</th>
 						<th class="fix-width-150 text-right">Amount</th>
+						<th class="fix-width-40 text-center">#</th>
 					</tr>
 				</thead>
 				<tbody id="checkout-table">
@@ -74,7 +71,7 @@
 						<?php foreach($cart as $rs) : ?>
 							<?php $discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5, '%'); ?>
 							<?php $freeRow = $rs->is_free == 1 ? 'free-row' : ''; ?>
-							<?php $na = $rs->Available < $rs->Qty ? 1 : 0; ?>
+							<?php $na = 0; //$rs->Available < $rs->Qty ? 1 : 0; ?>
 							<tr id="row-<?php echo $rs->id; ?>" class="<?php echo $freeRow; ?> <?php echo $na == 1 ? 'red' : ''; ?>">
 								<input type="hidden" id="product-id-<?php echo $rs->id; ?>" value="<?php echo $rs->product_id; ?>" />
 								<input type="hidden" class="item-code" id="item-code-<?php echo $rs->id; ?>" data-id="<?php echo $rs->id; ?>" value="<?php echo $rs->ItemCode; ?>" />
@@ -89,22 +86,28 @@
 								<input type="hidden" id="<?php echo $rs->uid; ?>" data-id="<?php echo $rs->id; ?>" value="<?php echo $rs->id; ?>"/>
 								<input type="hidden" class="na" id="na-<?php echo $rs->id; ?>" value="<?php echo $na; ?>" />
 
-								<td class="middle">
-									<label>
-										<input type="checkbox" class="ace chk-out" value="<?php echo $rs->id; ?>" />
-										<span class="lbl"></span>
-									</label>
-								</td>
 								<td class="middle text-center">
 									<img src="<?php echo get_image_path($rs->product_id, "medium"); ?>" width="60" />
 								</td>
 								<td class="middle"><?php echo $rs->ItemCode; ?></td>
 								<td class="middle"><?php echo $rs->ItemName; ?></td>
-								<td class="middle text-right"><?php echo number($rs->Price, 2); ?></td>
-								<td class="middle text-center"><?php echo $rs->discLabel; ?></td>
-								<td class="middle text-right" id="availableLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Available); ?></td>
-								<td class="middle text-right" id="qtyLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Qty); ?></td>
-								<td class="middle text-right"><?php echo number($rs->LineTotal, 2); ?></td>
+								<td class="middle text-right" id="priceLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Price, 2); ?></td>
+								<td class="middle text-center" id="discLabel-<?php echo $rs->id; ?>"><?php echo $rs->discLabel; ?></td>
+								<td class="middle text-center" id="availableLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Available); ?></td>
+								<td class="middle text-center"> <?php echo number($rs->Qty); ?>
+									<!--
+									<input type="number"
+										class="form-control input-sm text-center"
+										data-no="<?php echo $rs->id; ?>"
+										id="input-qty-<?php echo $rs->id; ?>"
+										value="<?php echo $rs->Qty; ?>"
+										data-val="<?php echo $rs->Qty; ?>"
+										onchange="updateCheckQty(<?php echo $rs->id; ?>)"/> -->
+								</td>
+								<td class="middle text-right" id="totalLabel-<?php echo $rs->id; ?>"><?php echo number($rs->LineTotal, 2); ?></td>
+								<td class="middle text-center">
+									<button class="btn btn-minier btn-danger" onclick="removeCheckRow(<?php echo $rs->id; ?>, '<?php echo $rs->ItemCode; ?>')"><i class="fa fa-trash"></i></button>
+								</td>
 							</tr>
 							<?php $totalQty += $rs->Qty; ?>
 							<?php $totalDiscAmount += $rs->totalDiscAmount; ?>
@@ -118,9 +121,6 @@
 					<?php endif; ?>
 				</tbody>
 			</table>
-		</div>
-		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 margin-top-10 margin-bottom-10">
-			<button type="button" class="btn btn-xs btn-danger btn-100" onclick="removeCheckRow()">Delete Checked</button>
 		</div>
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 			<table class="table border-1" style="margin-bottom:0px;">
@@ -151,7 +151,7 @@
 						class="btn btn-sm btn-primary free-btn"
 						id="btn-free-<?php echo $fi->rule_id; ?>"
 							data-parent="<?php echo $fi->uid; ?>"
-							onclick="pickFreeItem('<?php echo $fi->rule_id; ?>')">
+							onclick="pickFreeItem(<?php echo $fi->rule_id; ?>)">
 							Free <?php echo $fi->freeQty; ?> Pcs.
 						</button>
 
@@ -202,6 +202,7 @@
 		<input type="hidden" id="product-id-{{id}}" value="{{product_id}}" />
 		<input type="hidden" class="item-code" id="item-code-{{id}}" data-id="{{id}}" value="{{ItemCode}}>" />
 		<input type="hidden" class="line-qty" data-no="{{id}}" id="line-qty-{{id}}" value="{{Qty}}"/>
+		<input type="hidden" class="line-available" data-no="{{id}}" id="line-available-{{id}}" value="{{available}}"/>
 		<input type="hidden" id="line-total-{{id}}" value="{{LineTotal}}" />
 		<input type="hidden" id="stdPrice-{{id}}" value="{{StdPrice}}" />
 		<input type="hidden" id="price-{{id}}" value="{{Price}}" />
@@ -210,32 +211,29 @@
 		<input type="hidden" id="{{uid}}" data-id="{{id}}" value="{{id}}"/>
 		<input type="hidden" id="disc-type-{{id}}" value="F" />
 
-		<td class="middle">
-			<label>
-				<input type="checkbox" class="ace chk-out" value="{{id}}" />
-				<span class="lbl"></span>
-			</label>
-		</td>
 		<td class="middle text-center">
 			<img src="{{image_path}}" width="60" />
 		</td>
 		<td class="middle">{{ItemCode}}</td>
-		<td class="middle">{{ItemName}}</td>
+		<td class="middle">{{ItemName}} <span class="red">Free</span></td>
 		<td class="middle text-right">{{PriceLabel}}</td>
 		<td class="middle text-center">100</td>
-		<td class="middle text-right" id="qtyLabel-{{id}}">{{QtyLabel}}</td>
+		<td class="middle text-center" id="availableLabel-{{id}}">{{availableLabel}}</td>
+		<td class="middle text-center" id="qtyLabel-{{id}}">{{QtyLabel}}</td>
 		<td class="middle text-right">{{LineTotalLabel}}</td>
+		<td class="middle text-center">
+			<button class="btn btn-minier btn-danger" onclick="removeFreeRow({{id}}, '{{ItemCode}}')"><i class="fa fa-trash"></i></button>
+		</td>
 	</tr>
 </script>
 
 
-
 <div class="modal fade" id="free-item-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width:800px;">
+    <div class="modal-dialog" style="width:800px; max-width:95%;">
         <div class="modal-content">
             <div class="modal-body">
             <div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive">
 								<table class="table table-striped broder-1" style="min-width:600px;">
 									<tbody id="free-item-list">
 
@@ -253,7 +251,7 @@
 </script>
 
 <script id="free-btn-template" type="text/x-handlebarsTemplate">
-	<button type="button" class="btn btn-sm btn-primary free-btn" id="btn-free-{{rule_id}}" data-parent="{{uid}}" onclick="pickFreeItem('{{rule_id}}')">Free {{freeQty}}</button>
+	<button type="button" class="btn btn-sm btn-primary free-btn" id="btn-free-{{rule_id}}" data-parent="{{uid}}" onclick="pickFreeItem({{rule_id}})">Free {{freeQty}}</button>
 </script>
 
 <script src="<?php echo base_url(); ?>scripts/bp_order/bp_order.js?v=<?php echo date('Ymd'); ?>"></script>

@@ -43,12 +43,19 @@
 	<?php if( ! empty($items)) : ?>
 		<?php foreach($items as $rs) : ?>
 			<div class="col-lg-2 col-md-20 col-sm-3 col-xs-6">
-				<div class="item-box pointer" onclick="showItem('<?php echo $rs->code; ?>', <?php echo $rs->id; ?>)">
-					<div class="img width-100 display-block">
+				<div class="item-box pointer">
+					<div class="img width-100 display-block" onclick="showItem('<?php echo $rs->code; ?>', <?php echo $rs->id; ?>)">
 						<img src="<?php echo get_image_path($rs->id); ?>" class="width-100" />
 					</div>
-					<div class="item-description text-center"><?php echo $rs->name; ?></div>
-					<div class="item-price text-center"><?php echo number($rs->price, 2); ?></div>
+					<div class="item-description text-center" onclick="showItem('<?php echo $rs->code; ?>', <?php echo $rs->id; ?>)"><?php echo $rs->name; ?></div>
+					<div class="item-price text-center" onclick="showItem('<?php echo $rs->code; ?>', <?php echo $rs->id; ?>)"><?php echo number($rs->price, 2); ?></div>
+					<div class="text-center" id="item-card-<?php echo $rs->id; ?>">
+						<?php if($this->products_model->is_favorite($this->_user->id, $rs->id)) : ?>
+							<button type="button" class="btn btn-xs btn-default btn-block" onclick="removeFromFavorite(<?php echo $rs->id; ?>, 0)">Remove From Favorite</button>
+						<?php else : ?>
+							<button type="button" class="btn btn-xs btn-primary btn-block" onclick="addToFavorite(<?php echo $rs->id; ?>)">Add To Favorite</button>
+						<?php endif; ?>
+					</div>
 				</div>
 			</div>
 		<?php endforeach; ?>

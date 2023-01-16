@@ -64,12 +64,13 @@
 						<?php foreach($details as $rs) : ?>
 							<?php $discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5, '%'); ?>
 							<?php $freeRow = $rs->is_free == 1 ? 'free-row' : ''; ?>
+							<?php $freeLabel = $rs->is_free == 1 ? '<span class="red">**Free</span>' : ''; ?>
 							<tr>
 								<td class="middle text-center">
 									<img src="<?php echo get_image_path($rs->product_id, "medium"); ?>" width="60" />
 								</td>
-								<td class="middle"><?php echo $rs->ItemCode; ?></td>
-								<td class="middle"><?php echo $rs->ItemName; ?></td>
+								<td class="middle"><?php echo $rs->ItemCode; ?> </td>
+								<td class="middle"><?php echo $rs->ItemName; ?> <?php echo $freeLabel; ?></td>
 								<td class="middle text-right"><?php echo number($rs->Price, 2); ?></td>
 								<td class="middle text-center"><?php echo $rs->discLabel; ?></td>
 								<td class="middle text-right" id="qtyLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Qty); ?></td>

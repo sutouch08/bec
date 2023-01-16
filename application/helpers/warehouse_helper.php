@@ -55,17 +55,17 @@ function select_order_warehouse($option, $code = NULL)
 
 
 
-function get_customer_warehouse_listed()
+function get_customer_warehouse_listed($user_id)
 {
 	$whsCode = array();
 	$ci =& get_instance();
 	$ci->load->model('masters/warehouse_model');
-	$wh = $ci->warehouse_model->get_customer_warehouse();
+	$wh = $ci->warehouse_model->get_user_warehouse($user_id);
 	if( ! empty($wh))
 	{
 		foreach($wh as $rs)
 		{
-			$whsCode[] = $rs->code;
+			$whsCode[] = $rs->warehouse_code;
 		}
 	}
 
