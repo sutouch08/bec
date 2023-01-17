@@ -225,6 +225,8 @@ class Bporders extends CI_Controller
     $customer = $this->customers_model->get($this->_user->customer_code);
     $items = $this->products_model->get_favorite_items($this->_user->id);
     $cart = $this->cart_model->get_customer_cart($this->_user->customer_code, $this->_user->id);
+    $whsCode = get_customer_warehouse_listed($this->_user->id);
+		$whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
 
     if(!empty($cart))
     {
@@ -242,6 +244,20 @@ class Bporders extends CI_Controller
     {
       foreach($items as $rs)
       {
+        $rs->image_path = get_image_path($rs->id);
+        $stock = array(
+          'OnHand' => 0,
+          'Committed' => 0,
+          'QuotaQty' => 0,
+          'Available' => 0
+        );
+
+        $disc = $this->discount_model->get_item_discount($rs->code, $customer->CardCode, $rs->price, 1, $customer->GroupNum, $this->_user->channels, date('Y-m-d'));
+        $rs->price =  $disc->type == 'N' ? round($disc->sellPrice, 2) : round($rs->price, 2);
+        $rs->sellPrice = round($disc->sellPrice, 4);
+        $rs->discountLabel = $disc->type == 'N' ? "" : discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5);
+        $rs->DiscPrcnt = round($disc->totalDiscPrecent, 2);
+        $rs->count_stock = $rs->count_stock;
         $rs->image_path = get_image_path($rs->id);
       }
     }
@@ -296,7 +312,7 @@ class Bporders extends CI_Controller
           'stdPrice' => round($pd->price, 2),
           'price' => $disc->type == 'N' ? round($disc->sellPrice, 2) : round($pd->price, 2),
           'priceLabel' => $disc->type == 'N' ? number($disc->sellPrice, 2) : number($pd->price, 2),
-          'sellPrice' => round($disc->sellPrice, 2),
+          'sellPrice' => round($disc->sellPrice, 4),
           'available' => $stock['Available'],
           'discLabel' => $disc->type == 'N' ? "" : discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
           'DiscPrcnt' => round($disc->totalDiscPrecent, 2),
@@ -428,7 +444,7 @@ class Bporders extends CI_Controller
       $ds['billCode'] = $billCode;
       $ds['shipTo'] = $shipTo;
       $ds['billTo'] = $billTo;
-      $ds['freeItems'] = $this->getFreeItemRule($customer->CardCode, $customer->GroupNum, $this->_user->channels);
+      //$ds['freeItems'] = $this->getFreeItemRule($customer->CardCode, $customer->GroupNum, $this->_user->channels);
 
       $this->load->view('bp_order/bp_checkout', $ds);
     }

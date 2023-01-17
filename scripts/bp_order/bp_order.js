@@ -267,6 +267,84 @@ function addTocart() {
 }
 
 
+function addFavTocart() {
+	setTimeout(function() {
+		const quota = $('#quotaNo').val();
+		const cardCode = $('#customer_code').val();
+		const payment = $('#payment').val();
+		const channels = $('#channels').val();
+
+		ds = [];
+		items = [];
+
+		$('.input-qty').each(function() {
+			let id = $(this).data('id');
+			let qty = parseDefault(parseInt($(this).val()), 0);
+
+			if(qty > 0) {
+
+				let code = $('#product-code-'+id).val();
+				let arr = {"ItemCode" : code, "Qty" : qty};
+				items.push(arr);
+			}
+		});
+
+
+		if(items.length == 0) {
+			setTimeout(function() {
+				swal({
+					title:'Warning',
+					text:'กรุณาระบุจำนวนสินค้าอย่างน้อย 1 รายการ',
+					type:'warning',
+					showCancelButton:false,
+					closeOnConfirm:true
+				})
+			}, 500);
+
+
+			return false;
+		}
+
+		load_in();
+
+		$.ajax({
+			url:HOME + 'add_to_cart',
+			type:'POST',
+			cache:false,
+			data:{
+				'quotaNo' : quota,
+				'CardCode' : cardCode,
+				'Payment' : payment,
+				'Channels' : channels,
+				'items' : items
+			},
+			success:function(rs) {
+				load_out();
+
+				if(rs === 'success') {
+					swal({
+						title:'Success',
+						type:'success',
+						timer:1000
+					});
+
+					updateCart();
+					$('.input-qty').val("");
+				}
+				else {
+					swal({
+						title:'Error',
+						text:rs,
+						type:'error'
+					})
+				}
+			}
+		});
+
+	}, 200); //-- setTimeout
+}
+
+
 function addItemTocart() {
 	setTimeout(function() {
 		const quota = $('#quotaNo').val();
@@ -1120,7 +1198,7 @@ function updateAvailable() {
 
 function updateFavoriteAvailable() {
 	$('.item-box').each(function() {
-		let item_id = $(this).data('id');
+		let item_id = $(this).val();
 		$.ajax({
 			url:HOME + 'get_favorite_available/'+item_id,
 			type:'GET',
@@ -1130,13 +1208,6 @@ function updateFavoriteAvailable() {
 					let ds = $.parseJSON(rs);
 					let available = parseDefault(parseInt(ds.available), 0);
 					$('#item-card-'+ds.id).text(available);
-
-					if(available > 0) {
-						$('#item-card-'+ds.id).addClass('green');
-					}
-					else {
-						$('#item-card-'+ds.id).removeClass('green');
-					}
 				}
 			}
 		});
@@ -1184,6 +1255,29 @@ function removeFromFavorite(product_id, is_delete) {
 				if(is_delete == 1) {
 					$('#item-box-'+product_id).remove();
 				}
+			}
+			else {
+				swal({
+					title:'Error!',
+					text:rs,
+					type:'error'
+				});
+			}
+		}
+	});
+}
+
+function removeFavorite(product_id) {
+	$.ajax({
+		url:HOME + 'remove_from_favorite',
+		type:'POST',
+		cache:false,
+		data:{
+			'product_id' : product_id
+		},
+		success:function(rs) {
+			if(rs == 'success'){
+				$('#fav-row-'+product_id).remove();
 			}
 			else {
 				swal({

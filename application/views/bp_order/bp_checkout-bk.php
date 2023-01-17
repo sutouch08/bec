@@ -143,6 +143,31 @@
 
 			</table>
 		</div>
+		<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 margin-top-10">
+			<p class="pull-right" id="free-box">
+				<?php if( ! empty($freeItems)) : ?>
+					<?php foreach($freeItems as $fi) : ?>
+						<button type="button"
+						class="btn btn-sm btn-primary free-btn"
+						id="btn-free-<?php echo $fi->rule_id; ?>"
+							data-parent="<?php echo $fi->uid; ?>"
+							onclick="pickFreeItem(<?php echo $fi->rule_id; ?>)">
+							Free <?php echo $fi->freeQty; ?> Pcs.
+						</button>
+
+						<input type="hidden" class="free-item"
+						id="free-<?php echo $fi->rule_id; ?>"
+						value="<?php echo $fi->freeQty; ?>"
+						data-id="<?php echo $fi->uid; ?>"
+						data-valid="0"
+						data-rule="<?php echo $fi->rule_id; ?>"
+						data-picked="0" data-balance="<?php echo $fi->freeQty; ?>"
+						data-uid="<?php echo $fi->uid; ?>">
+					<?php endforeach; ?>
+				<?php endif; ?>
+			</p>
+		</div>
+		<div class="hide" id="free-temp"></div>
 	</div>
 	<div class="row">
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 margin-top-10">
