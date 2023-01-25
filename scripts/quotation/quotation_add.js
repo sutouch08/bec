@@ -1020,8 +1020,7 @@ function getItemData(no) {
 					$('#')
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
-					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
-					sellPrice = sellPrice.toFixed(2);
+					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);					
 					var lineTotal = parseFloat(ds.LineTotal);
 
 					$('#price-'+no).val(price)
@@ -1351,7 +1350,7 @@ function recalAmount(no) {
 			$('#disc-error-'+no).val(1);
 			return false;
 		}
-		else {			
+		else {
 
 			vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
 			sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);

@@ -72,7 +72,7 @@
           <td class="middle text-right"><?php echo number($rs->Price, 2); ?></td>
           <td class="middle text-center"><?php echo $rs->discLabel; ?></td>
           <td class="middle text-center"><?php echo $rs->VatGroup; ?></td>
-          <td class="middle text-right"><?php echo number($rs->SellPrice, 2); ?></td>
+          <td class="middle text-right"><?php echo number($rs->SellPrice, 4); ?></td>
           <td class="middle text-right"><?php echo number($rs->LineTotal, 2); ?></td>
 					<td class="middle text-center"><?php echo ($rs->is_free == 1 ? 'Free' : ''); ?></td>
 					<td class="middle text-center"><?php echo $rs->ruleCode; ?></td>

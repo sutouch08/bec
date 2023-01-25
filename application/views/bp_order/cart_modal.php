@@ -124,8 +124,8 @@
 </div>
 
 <div class="modal fade" id="cateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog item-modal">
-        <div class="modal-content item-modal">
+    <div class="modal-dialog" style="width:1000px; max-width:95%">
+        <div class="modal-content">
             <div class="modal-body" style="min-height:100px;">
               <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="max-height:550px; overflow:auto;">
@@ -137,7 +137,6 @@
 												<th class="fix-width-250 text-center">Description</th>
 												<th class="fix-width-100 text-center">Price</th>
 												<th class="fix-width-120 text-center">Discount</th>
-                        <th class="fix-width-120 text-center">Available</th>
 												<th class="fix-width-100 text-center">Qty</th>
 												<th class="fix-width-120 text-center">Amount</th>
 											</tr>
@@ -151,7 +150,7 @@
             </div>
             <div class="modal-footer width-100 text-center">
 							<button type="button" class="btn btn-sm btn-warning" onclick="removeNonCheck()">ลบรายการที่ไม่เลือก</button>
-							<button type="button" class="btn btn-sm btn-default btn-100" onclick="closeModal('cateModal')">ปิด</button>
+							<button type="button" class="btn btn-sm btn-default" onclick="closeModal('cateModal')">ปิด</button>
 							<button type="button" class="btn btn-sm btn-success btn-100" onclick="addTocart()">Add</button>
             </div>
         </div>
@@ -177,7 +176,6 @@
 			<td class="middle">{{name}}</td>
 			<td class="middle text-right">{{priceLabel}}</td>
 			<td class="middle text-center">{{discLabel}}</td>
-      <td class="middle text-center">{{available}}</td>
 			<td class="middle">
 			<input type="number" class="form-control input-sm text-right input-qty" data-id="{{id}}" id="qty-{{id}}" onkeyup="recalAmount({{id}})"/>
 			</td>

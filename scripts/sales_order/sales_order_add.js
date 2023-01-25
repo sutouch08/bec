@@ -1522,7 +1522,6 @@ function getItemData(no) {
 					var price = parseFloat(ds.Price);
 					var stdPrice = parseFloat(ds.StdPrice);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
-					sellPrice = sellPrice.toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
 
 					$('#product-id-'+no).val(ds.product_id);
@@ -1847,7 +1846,7 @@ function recalDiscount(no) {
 			$('#disc-diff-'+no).val(0);
 		}
 
-		sellPrice = roundNumber(sellPrice);
+		sellPrice = roundNumber(sellPrice, 4);
 
 
 		$('#sellPrice-'+no).val(sellPrice);
