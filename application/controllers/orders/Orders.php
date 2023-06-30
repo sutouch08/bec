@@ -362,7 +362,6 @@ class Orders extends PS_Controller
 					foreach($details as $rs)
 					{
 						$totalAmount += $rs->LineTotal;
-						$totalVat += $rs->totalVatAmount;
 						$stock = $this->getStock($rs->ItemCode, $rs->WhsCode, $rs->QuotaNo);
 						$rs->instock = !empty($stock) ? $stock['OnHand'] : 0;
 						$rs->team = !empty($stock) ? $stock['QuotaQty'] : 0;
@@ -377,7 +376,6 @@ class Orders extends PS_Controller
 					'order' => $order,
 					'details' => $details,
 					'totalAmount' => $totalAmount,
-					'totalVat' => $totalVat,
 					'whsList' => $this->warehouse_model->get_listed(),
 					'quotaList' => $this->quota_model->get_all_listed(),
 					'logs' => $this->orders_model->get_logs($code)
@@ -407,8 +405,7 @@ class Orders extends PS_Controller
 		{
 			$json = file_get_contents('php://input');
 
-			$data = json_decode($json);
-
+			$data = json_decode($json);      
 
 			if(! empty($data))
 			{
@@ -929,9 +926,7 @@ class Orders extends PS_Controller
 			{
 				foreach($details as $rs)
 				{
-					$vat_rate = $rs->VatRate * 0.01;
-					$totalAmount += $rs->LineTotal;
-					$totalVat += ($rs->LineTotal * $vat_rate);
+          $totalAmount += $rs->LineTotal;
 					$rs->image = get_image_path($rs->product_id, 'mini');
 					$rs->ruleCode = $this->discount_model->getRuleCode($rs->rule_id);
 				}
@@ -961,7 +956,6 @@ class Orders extends PS_Controller
 				'order' => $order,
 				'details' => $details,
 				'totalAmount' => $totalAmount,
-				'totalVat' => $totalVat,
 				'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
 				'owner' => $this->employee_model->get_name($order->OwnerCode),
 				'dimCode1' => $this->cost_center_model->get_name($order->dimCode1),

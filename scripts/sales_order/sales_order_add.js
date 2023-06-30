@@ -1407,7 +1407,7 @@ function updateDiscountRule(no) {
 					var price = parseFloat(ds.Price);
 					var stdPrice = parseFloat(ds.StdPrice);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
-					sellPrice = roundNumber(sellPrice).toFixed(2);
+					var sysSellPrice = parseDefault(parseFloat(ds.sysSellPrice), 0.00);
 					var lineTotal = parseFloat(ds.LineTotal);
 
 					$('#product-id-'+no).val(ds.product_id);
@@ -1438,7 +1438,7 @@ function updateDiscountRule(no) {
 					$('#uom-'+no).val(ds.UomName);
 					$('#stdPrice-label-'+no).val(addCommas(stdPrice.toFixed(2)));
 					$('#price-label-'+no).val(addCommas(price.toFixed(2)));
-					$('#sysSellPrice-'+no).val(sellPrice);
+					$('#sysSellPrice-'+no).val(sysSellPrice);
 					$('#disc-label-'+no).val(ds.discLabel);
 					$('#vat-code-'+no).val(ds.VatGroup);
 					$('#sell-price-'+no).val(sellPrice);
@@ -1997,7 +1997,7 @@ function recalTotal() {
 	//--- เฉลี่ยส่วนลดออกให้ทุกรายการ โดยเอาส่วนลดท้ายบิล(จำนวนเงิน)/มูลค่าสินค้าก่อนส่วนลด
 	//--- ได้มูลค่าส่วนลดท้ายบิลที่เฉลี่ยนแล้ว ต่อ บาท เช่น หารกันมาแล้ว ได้ 0.16 หมายถึงทุกๆ 1 บาท จะลดราคา 0.16 บาท
 	everageBillDisc = parseFloat((total > 0 ? billDiscAmount/total : 0));
-	everageBillDisc = roundNumber(everageBillDisc, 2);
+	//everageBillDisc = roundNumber(everageBillDisc, 2); //-- ไม่ต้องปัดเศษ
 
 	//--- นำผลลัพธ์ข้างบนมาคูณ กับ มูลค่าที่ต้องคิดภาษี (ตัวที่ไม่มีภาษีไม่เอามาคำนวณ)
 	//--- จะได้มูลค่าส่วนลดที่ต้องไปลบออกจากมูลค่าสินค้าที่ต้องคิดภาษี

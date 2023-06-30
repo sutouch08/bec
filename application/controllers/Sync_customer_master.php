@@ -120,7 +120,7 @@ class Sync_customer_master extends CI_Controller
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->customer_type_model->get($rs->id);
+				$cr = $this->customer_type_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
@@ -183,7 +183,7 @@ class Sync_customer_master extends CI_Controller
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->customer_region_model->get($rs->id);
+				$cr = $this->customer_region_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
@@ -244,7 +244,7 @@ class Sync_customer_master extends CI_Controller
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->customer_area_model->get($rs->id);
+				$cr = $this->customer_area_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{
@@ -305,7 +305,7 @@ class Sync_customer_master extends CI_Controller
 		{
 			foreach($res as $rs)
 			{
-				$cr = $this->customer_grade_model->get($rs->id);
+				$cr = $this->customer_grade_model->get_by_code($rs->id);
 
 				if(empty($cr))
 				{

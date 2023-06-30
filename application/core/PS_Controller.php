@@ -10,6 +10,7 @@ class PS_Controller extends CI_Controller
 	public $_customer = FALSE;
 	public $ms;
 	public $mc;
+  public $error;
 
   public function __construct()
   {
@@ -64,7 +65,7 @@ class PS_Controller extends CI_Controller
 
 		$last_change = empty($last_pass_change) ? date('2021-01-01') : $last_pass_change;
 
-		$expire_days = intval(getConfig('USER_PASSWORD_AGE')); 
+		$expire_days = intval(getConfig('USER_PASSWORD_AGE'));
 
 		if($expire_days != 0)
 		{
