@@ -1195,7 +1195,7 @@ class Quotation extends PS_Controller
 			{
 				$response = curl_error($curl);
 			}
-			
+
 			curl_close($curl);
 
 			$rs = json_decode($response);
@@ -1664,7 +1664,7 @@ class Quotation extends PS_Controller
 	public function getStock($ItemCode, $WhsCode, $QuotaNo)
 	{
 		$this->load->library('api');
-		$commit = get_zero($this->quotation_model->get_commit_qty($ItemCode, $QuotaNo));
+		$commit = get_zero($this->quotation_model->get_commit_qty($ItemCode, $WhsCode, $QuotaNo));
 
     $arr = array(
       'OnHand' => 0,

@@ -103,6 +103,7 @@ class Order_api
 
 	public function exportOrder($code)
 	{
+    $this->ci->load->model('rest/logs_model');
 		$testMode = getConfig('TEST') ? TRUE : FALSE;
 
 		if($testMode)
@@ -206,11 +207,13 @@ class Order_api
 
 			$url = $url."SalesOrder";
 
+      $json = json_encode($ds);
+
 			$curl = curl_init();
 			curl_setopt($curl, CURLOPT_URL, $url);
 			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
       curl_setopt($curl, CURLOPT_TIMEOUT, 0);
-			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($ds));
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
 			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
@@ -220,6 +223,17 @@ class Order_api
       if($response === FALSE)
       {
         $response = curl_error($curl);
+      }
+
+      if($logJson)
+      {
+        $logs = array(
+          'code' => $code,
+          'status' => 'send',
+          'json' => $json
+        );
+
+        $this->ci->logs_model->order_logs($logs);
       }
 
 			curl_close($curl);
@@ -251,19 +265,28 @@ class Order_api
 					$sc = FALSE;
 					$this->error = $rs->error;
 
-					if($logJson)
-					{
-						$this->ci->load->model('rest/logs_model');
+          if($logJson)
+          {
+            $logs = array(
+              'code' => $code,
+              'status' => 'error',
+              'json' => $rs->error
+            );
 
-						$logs = array(
-							'code' => $code,
-							'status' => 'error',
-							'json' => json_encode($ds)
-						);
-
-						$this->ci->logs_model->order_logs($logs);
-					}
+            $this->ci->logs_model->order_logs($logs);
+          }
 				}
+
+        if($logJson)
+        {
+          $logs = array(
+            'code' => $code,
+            'status' => 'response',
+            'json' => $response
+          );
+
+          $this->ci->logs_model->order_logs($logs);
+        }
 			}
 			else
 			{
@@ -276,6 +299,17 @@ class Order_api
 				);
 
 				$this->ci->orders_model->update($code, $arr);
+
+        if($logJson)
+        {
+          $logs = array(
+            'code' => $code,
+            'status' => 'response',
+            'json' => $response
+          );
+
+          $this->ci->logs_model->order_logs($logs);
+        }
 			}
 		}
 		else
@@ -358,6 +392,11 @@ class Order_api
 						);
 
 						$this->ci->sync_logs_model->add_status_logs($arr);
+
+            if($res->DocStatus == 'C')
+            {
+              $this->ci->orders_model->update_all_line_status($OrderCode, 'C');
+            }
 					}
 					else
 					{

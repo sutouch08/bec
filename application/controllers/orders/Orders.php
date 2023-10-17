@@ -405,7 +405,7 @@ class Orders extends PS_Controller
 		{
 			$json = file_get_contents('php://input');
 
-			$data = json_decode($json);      
+			$data = json_decode($json);
 
 			if(! empty($data))
 			{
@@ -428,6 +428,7 @@ class Orders extends PS_Controller
 							{
 								if( ! empty($customer))
 								{
+                  $mustApprove = empty($order->SqNo) ? $hd->mustApprove : 1;
 									$arr = array(
 										'CardCode' => $customer->CardCode,
 										'CardName' => $customer->CardName,
@@ -453,12 +454,12 @@ class Orders extends PS_Controller
 										'user_id' => $hd->user_id,
 										'uname' => $hd->uname,
 										'Comments' => get_null($hd->comments),
-										'must_approve' => $hd->mustApprove,
+										'must_approve' =>  $mustApprove,
 										'disc_diff' => $hd->maxDiff,
 										'VatGroup' => $hd->VatGroup,
 										'VatRate' => $hd->VatRate,
-										'Status' => ($hd->isDraft == 1 ? -1 : ($hd->mustApprove == 1 ? 0 : 1)),
-										'Approved' => ($hd->isDraft == 1 ? 'P' : ($hd->mustApprove == 1 ? 'P' : 'S')),
+										'Status' => ($hd->isDraft == 1 ? -1 : ($mustApprove == 1 ? 0 : 1)),
+										'Approved' => ($hd->isDraft == 1 ? 'P' : ($mustApprove == 1 ? 'P' : 'S')),
 										'upd_user_id' => $this->_user->id,
 										'OwnerCode' => $hd->OwnerCode,
 										'dimCode1' => $hd->dimCode1,
@@ -587,7 +588,7 @@ class Orders extends PS_Controller
 
 										if($hd->isDraft == 0)
 										{
-											if($hd->mustApprove == 0)
+											if($mustApprove == 0)
 											{
 												$this->load->library('order_api');
 												$rs = $this->order_api->exportOrder($code);
@@ -1208,12 +1209,12 @@ class Orders extends PS_Controller
 					'user_id' => $this->_user->id,
 					'uname' => $this->_user->uname,
 					'Comments' => $hd->Comments,
-					'must_approve' => $hd->must_approve,
+					'must_approve' => 1, //$hd->must_approve,
 					'disc_diff' => $hd->disc_diff,
 					'VatGroup' => $hd->VatGroup,
 					'VatRate' => $hd->VatRate,
 					'Status' => -1,
-					'Approved' => $hd->must_approve == 1 ? 'P' : 'S',
+					'Approved' => 'P', //$hd->must_approve == 1 ? 'P' : 'S',
 					'OwnerCode' => $hd->OwnerCode,
 					'dimCode1' => $hd->dimCode1,
 					'dimCode2' => $hd->dimCode2,
@@ -1879,7 +1880,7 @@ class Orders extends PS_Controller
 		{
 			$this->load->library('api');
 
-			$commit = get_zero($this->orders_model->get_commit_qty($ItemCode, $QuotaNo));
+			$commit = get_zero($this->orders_model->get_commit_qty($ItemCode, $WhsCode, $QuotaNo));
 
 			$stock = $this->api->getItemStock($ItemCode, $WhsCode, $QuotaNo);
 

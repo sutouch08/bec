@@ -260,7 +260,7 @@ class Sync_product_master extends CI_Controller
 								"price" => empty($rs->Price) ? 0.00 : get_zero($rs->Price),
 								"cost" => empty($rs->Cost) ? 0.00 : get_zero($rs->Cost),
 								"vat_group" => get_null($rs->VatGourpSa),
-								"model_code" => empty($rs->Product_ModeCode) ? NULL : $rs->Product_ModeCode,
+								"model_code" => empty($rs->Product_ModelCode) ? NULL : $rs->Product_ModelCode,
 								"brand_code" => empty($rs->Product_BrandCode) ? NULL : $rs->Product_BrandCode,
 								"type_code" => empty($rs->Product_TypeCode) ? NULL : $rs->Product_TypeCode,
 								"category_code" => empty($rs->Product_CategoryCode) ? NULL : $rs->Product_CategoryCode,
