@@ -149,7 +149,7 @@ class Bporders extends CI_Controller
     if( ! empty($item))
     {
       $quotaNo = $this->_user->quota_no;
-      $whsCode = $this->_user->warehouse_code;
+      $whsCode =  get_customer_warehouse_listed($this->_user->id);
       $whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
 
       $stock = $this->getStock($item->code, $whsCode, $quotaNo, $item->count_stock);
@@ -1589,7 +1589,7 @@ class Bporders extends CI_Controller
 
     if(!empty($stock))
     {
-      $commit = get_zero($this->orders_model->get_commit_qty($ItemCode, $WhsCode, $QuotaNo));
+      $commit = get_zero($this->bp_order_model->get_commit_qty($ItemCode, $WhsCode, $QuotaNo));
       $OnHand = $stock['OnHand'];
       $Quota = $stock['QuotaQty'];
       $available = $Quota - $commit;

@@ -79,6 +79,43 @@ class Bp_order_model extends CI_Model
 
     return 0;
   }
+
+  public function get_commit_qty($itemCode, $whsCode = NULL, $quotaNo = NULL)
+	{
+		$this->db
+		->select_sum('OpenQty')
+		->where('LineStatus', 'O')
+		->where('ItemCode', $itemCode);
+
+    if(empty($whsCode))
+    {
+      $this->db->where('WhsCode IS NULL', NULL, FALSE);
+    }
+    else
+    {
+      $whsCode = is_array($whsCode) ? $whsCode : array($whsCode);
+
+      $this->db->where_in('WhsCode', $whsCode);
+    }
+
+    if(empty($quotaNo))
+    {
+      $this->db->where('QuotaNo IS NULL', NULL, FALSE);
+    }
+    else
+    {
+      $this->db->where('QuotaNo', $quotaNo);
+    }
+
+		$rs = $this->db->get('order_details');
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->OpenQty;
+		}
+
+		return 0;
+	}
 }
 
 
