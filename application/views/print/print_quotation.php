@@ -305,15 +305,14 @@ while($total_page > 0 )
 					$rs->Qty." ".$rs->uom_name,
 	        number($rs->Price,2),
 					$rs->discLabel == 0 ? '0.00' : $rs->discLabel,
-					//$rs->DiscPrcnt > 0 ? number(round($rs->DiscPrcnt,2), 2) : '0.00',
 	        number($rs->LineTotal, 2)
 	      );
 
-				$row_price = ($rs->Price * $rs->Qty);
-				$total_price += $row_price;
-				$total_discount += $row_price - $rs->LineTotal;
+				//$row_price = ($rs->Price * $rs->Qty);
+				//$total_price += $row_price;
+				//$total_discount += $row_price - $rs->LineTotal;
 	      $total_amount   += $rs->LineTotal;
-				$total_vat += $rs->LineTotal * ($rs->VatRate * 0.01);
+				//$total_vat += $rs->totalVatAmount; //$rs->LineTotal * ($rs->VatRate * 0.01);
 				$n++;
 			}
     }
@@ -374,13 +373,12 @@ while($total_page > 0 )
 
   if($this->pdf_printer->current_page == $this->pdf_printer->total_page)
   {
-		$amountBfDisc = number($total_price, 2);
-		$disAmount = number($total_discount, 2);
-		$amountBfVat = number($total_amount,2);
-		$vatAmount = number($total_vat, 2);
-		$amountAfterVat = $total_amount * (1 + ($tax_rate * 0.01));
-		$netAmount = number($amountAfterVat, 2);
-		$baht_text = "( ".baht_text($amountAfterVat)." )";
+		$amountBfDisc = number($total_amount, 2);
+		$disAmount = number($doc->DiscAmount, 2);
+		$amountBfVat = number(($doc->DocTotal - $doc->VatSum),2);
+		$vatAmount = number($doc->VatSum, 2);
+		$netAmount = number($doc->DocTotal, 2);
+		$baht_text = "( ".baht_text($doc->DocTotal)." )";
 		$remark = $doc->Comments;
   }
   else
@@ -389,7 +387,6 @@ while($total_page > 0 )
 		$disAmount = "";
 		$amountBfVat = "";
 		$vatAmount = "";
-		$amountAfterVat = "";
 		$netAmount = "";
 		$baht_text = "";
 		$remark = "";

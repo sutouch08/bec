@@ -8,8 +8,6 @@
 			</tr>
 			<tr>
 				<td class="no-border">Customer Team : <?php echo $order->sale_team_name; ?></td>
-
-
 			</tr>
 			<tr>
 				<td class="no-border">Owner : <?php echo $owner; ?></td>
