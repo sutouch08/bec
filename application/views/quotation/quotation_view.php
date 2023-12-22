@@ -38,6 +38,9 @@
 				<?php if($order->Status == 1 && ! empty($order->DocEntry) && !empty($order->DocNum)) : ?>
 					<!--<button type="button" class="btn btn-xs btn-danger top-btn" onclick="cancleSap('<?php echo $order->code; ?>')">Cancel On SAP</button> -->
 				<?php endif; ?>
+				<?php if($this->_SuperAdmin) : ?>
+					<button type="button" class="btn btn-xs btn-danger" onclick="dumpJson('<?php echo $order->code; ?>')">GET JSON</button>
+				<?php endif; ?>
       </p>
     </div>
 </div><!-- End Row -->
