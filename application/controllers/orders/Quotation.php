@@ -389,6 +389,8 @@ class Quotation extends PS_Controller
 				$hd = $data->header;
 				$details = $data->details;
 
+				//print_r($hd); exit();
+
 				if(!empty($hd->code))
 				{
 					$docDate = db_date($hd->DocDate, FALSE);

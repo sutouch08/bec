@@ -65,7 +65,7 @@
       <div class="form-group">
         <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Tax</label>
         <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
-					<input type="hidden" id="tax" value="<?php echo round($order->VatSum); ?>" />
+					<input type="hidden" id="tax" value="<?php echo round($order->VatSum, 2); ?>" />
           <input type="text" id="taxLabel" class="form-control input-sm text-right" value="<?php echo number($order->VatSum, 2); ?>" disabled />
         </div>
       </div>
