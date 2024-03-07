@@ -172,10 +172,11 @@ function reIndex(){
 
 
 var downloadTimer;
+
 function get_download(token)
 {
 	load_in();
-	downloadTimer = window.setInterval(function(){
+	downloadTimer = window.setInterval(function() {
 		var cookie = getCookie("file_download_token");
 		if(cookie == token)
 		{
