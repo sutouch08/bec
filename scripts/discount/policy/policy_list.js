@@ -36,25 +36,29 @@ function getDelete(id, name){
 				timer:1000
 			});
 
-			return false;
-
-			// $.ajax({
-			// 	url: HOME + '/delete_policy/' + id,
-			// 	type:"POST",
-      //   cache:"false",
-			// 	success: function(rs){
-			// 		var rs = $.trim(rs);
-			// 		if( rs == 'success' ){
-			// 			swal({
-      //         title: 'Deleted',
-      //         type: 'success',
-      //         timer: 1000 });
-			// 			$("#row-"+id).remove();
-      //       reIndex();
-			// 		}else{
-			// 			swal("Error !", rs, "error");
-			// 		}
-			// 	}
-			// });
+			$.ajax({
+				url: HOME + '/delete_policy/' + id,
+				type:"POST",
+        cache:"false",
+				success: function(rs){
+					var rs = $.trim(rs);
+					if( rs == 'success' ){
+						swal({
+              title: 'Deleted',
+              type: 'success',
+              timer: 1000 });
+						$("#row-"+id).remove();
+            reIndex();
+					}
+          else {
+            swal({
+              title:'Error!',
+              text:rs,
+              type:'error',
+              html:true
+            })						
+					}
+				}
+			});
 	});
 }

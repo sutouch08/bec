@@ -62,7 +62,7 @@ class Check_transection_document extends PS_Controller
 
     if( ! empty($saleId) && $saleId != 'all')
     {
-      $qr .= "AND T5.[SlpCode] = '{$saleId}' ";
+      $qr .= "AND T1.[SlpCode] = '{$saleId}' ";
     }
 
     $qr .= $this->group_by_query();
@@ -93,7 +93,8 @@ class Check_transection_document extends PS_Controller
           'subTotal' => number($rs['SUBTOTAL'], 2),
           'vatTotal' => number($rs['VATTOTAL'], 2),
           'grandTotal' => number($rs['GRANDTOTAL'], 2),
-          'saleEmployee' => $rs['SlpName']
+          'slpCode' => $rs['SlpCode'],
+          'saleEmployee' => $rs['SLPNAME']
         );
 
         array_push($ds, $row);
@@ -152,7 +153,7 @@ class Check_transection_document extends PS_Controller
 
     if( ! empty($saleId) && $saleId != 'all')
     {
-      $qr .= "AND T5.[SlpCode] = '{$saleId}' ";
+      $qr .= "AND T1.[SlpCode] = '{$saleId}' ";
     }
 
     $qr .= $this->group_by_query();
@@ -259,7 +260,7 @@ class Check_transection_document extends PS_Controller
     T5.[DocNum] AS ivCode,  T5.[CardCode] AS code,
     CAST(T5.[CardName] AS NVARCHAR(255)) AS customer,
     (T5.[DocTotal] - T5.[VatSum]) AS subTotal, T5.[VatSum] AS vatTotal, T5.[DocTotal] AS grandTotal,
-    T6.[SlpName]
+    T1.[SlpCode], CAST(T6.[SlpName] AS NVARCHAR(100)) AS SlpName
     FROM BEC2.RDR1 T0
     INNER JOIN BEC2.ORDR T1 ON T0.[DocEntry] = T1.[DocEntry]
     LEFT OUTER JOIN BEC2.DLN1 T2 ON T2.[BaseEntry] = T0.[DocEntry] AND T2.[BaseLine] = T0.[LineNum]
@@ -280,7 +281,7 @@ class Check_transection_document extends PS_Controller
   private function group_by_query()
   {
     $sql = "GROUP BY T5.[U_WEBORDER], T5.[DocNum], T5.[DocDate], T5.[CardCode], T5.[CardName], T5.[DocTotal], T5.[VatSum],
-    T3.[DocNum], T1.[DocEntry], T1.[DocNum], T6.[SlpName], T7.[BeginStr], T8.[BeginStr], T9.[BeginStr]
+    T3.[DocNum], T1.[DocEntry], T1.[DocNum], T1.[SlpCode], T6.[SlpName], T7.[BeginStr], T8.[BeginStr], T9.[BeginStr]
     ORDER BY T5.[DocDate] ASC";
 
     return $sql;

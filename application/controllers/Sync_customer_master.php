@@ -38,7 +38,7 @@ class Sync_customer_master extends CI_Controller
 
   }
 
-
+  
 	public function syncCustomerGroup()
 	{
 		$this->load->model('masters/customer_group_model');
@@ -461,6 +461,7 @@ class Sync_customer_master extends CI_Controller
 
 	public function syncCustomerAddress()
 	{
+    $this->load->model('masters/customers_model');
 		$this->load->model('masters/customer_address_model');
 
 		$last_sync = $this->customer_address_model->get_last_sync_date();
@@ -488,6 +489,8 @@ class Sync_customer_master extends CI_Controller
 				{
 					foreach($ds as $rs)
 					{
+            $customer = $this->customers_model->get($rs->CardCode);
+
 						$cr = $this->customer_address_model->get($rs->CardCode, $rs->AddressType, $rs->Address);
 
 						if(empty($cr))
@@ -495,6 +498,7 @@ class Sync_customer_master extends CI_Controller
 							$arr = array(
 								'Address' => $rs->Address,
 								'CardCode' => $rs->CardCode,
+                'CardName' => (empty($customer) ? NULL : $customer->CardName),
 								'AdresType' => $rs->AddressType,
 								'Address2' => $rs->Address2,
 								'Address3' => $rs->Address3,
@@ -518,6 +522,7 @@ class Sync_customer_master extends CI_Controller
 							$arr = array(
 								'Address' => $rs->Address,
 								'CardCode' => $rs->CardCode,
+                'CardName' => (empty($customer) ? NULL : $customer->CardName),
 								'AdresType' => $rs->AddressType,
 								'Address2' => $rs->Address2,
 								'Address3' => $rs->Address3,

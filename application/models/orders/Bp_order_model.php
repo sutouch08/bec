@@ -116,6 +116,32 @@ class Bp_order_model extends CI_Model
 
 		return 0;
 	}
+
+  public function get_promotion_data($customer_code)
+  {
+    $rs = $this->db->where('A', $customer_code)->get('promotion_imported');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_promotion_header()
+  {
+    $rs = $this->db->get('promotion_header_name');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row_array();
+    }
+
+    return NULL;
+  }
+
 }
 
 

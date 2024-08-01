@@ -141,6 +141,39 @@ class Customers extends PS_Controller
 	}
 
 
+  public function delete()
+  {
+    $sc = TRUE;
+    $code = $this->input->post('code');
+
+    if($this->pm->can_delete)
+    {
+      $hasTransection = $this->customers_model->has_transection($code);
+
+      if( ! $hasTransection)
+      {
+        if( ! $this->customers_model->delete($code))
+        {
+          $sc = FALSE;
+          $this->error = "Failed to delete Customer";
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "Failed to delete customer : transection exists or link to another module";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('permission');
+    }
+
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
+
+
 	public function update_sap($id)
 	{
 		$rs = $this->customers_model->get_customer_data_by_id($id);

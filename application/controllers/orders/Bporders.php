@@ -1435,6 +1435,15 @@ class Bporders extends CI_Controller
   }
 
 
+  public function point()
+  {
+    $this->title = "Promotion Point";
+    $ds['data'] = $this->bp_order_model->get_promotion_data($this->_user->customer_code);
+    $ds['header'] = $this->bp_order_model->get_promotion_header();
+    $this->load->view('bp_order/bp_point', $ds);
+  }
+
+
 
 	public function view_detail($code)
 	{

@@ -118,6 +118,7 @@ class Customer_address extends PS_Controller
 
 	public function sync_data()
 	{
+    $this->load->model('masters/customers_model');
 		$this->load->library('api');
 
 		$sc = TRUE;
@@ -133,6 +134,7 @@ class Customer_address extends PS_Controller
 		{
 			foreach($ds as $rs)
 			{
+        $customer = $this->customers_model->get($rs->CardCode);
 				$cr = $this->customer_address_model->get($rs->CardCode, $rs->AddressType, $rs->Address);
 
 				if(empty($cr))
@@ -140,6 +142,7 @@ class Customer_address extends PS_Controller
 					$arr = array(
 						'Address' => $rs->Address,
 						'CardCode' => $rs->CardCode,
+            'CardName' => (empty($customer) ? NULL : $customer->CardName),
 						'AdresType' => $rs->AddressType,
 						'Address2' => $rs->Address2,
 						'Address3' => $rs->Address3,
@@ -159,6 +162,7 @@ class Customer_address extends PS_Controller
 					$arr = array(
 						'Address' => $rs->Address,
 						'CardCode' => $rs->CardCode,
+            'CardName' => (empty($customer) ? NULL : $customer->CardName),
 						'AdresType' => $rs->AddressType,
 						'Address2' => $rs->Address2,
 						'Address3' => $rs->Address3,

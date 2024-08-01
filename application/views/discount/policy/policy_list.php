@@ -107,8 +107,8 @@
 	</div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/discount/policy/policy.js"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/policy/policy_list.js"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/policy/policy_add.js"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/policy/policy.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/policy/policy_list.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/policy/policy_add.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

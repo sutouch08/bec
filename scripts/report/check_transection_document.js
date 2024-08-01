@@ -40,6 +40,16 @@ function getReport() {
           render(source, ds.data, output);
         }
       }
+    },
+    error:function(xhr) {
+      load_out();
+      console.log(xhr);
+      swal({
+        title:'Error!',
+        text:xhr.responseText,
+        type:'error',
+        html:true
+      })
     }
   })
 }

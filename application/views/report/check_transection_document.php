@@ -31,7 +31,7 @@
       <label>Sale Employee</label>
   		<select class="width-100 filter" name="sale_id" id="sale_id">
   			<option value="all">ทั้งหมด</option>
-  			<?php echo select_sale($sale_id); ?>
+  			<?php echo select_sale(); ?>
   		</select>
     </div>
 
@@ -54,18 +54,18 @@
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-40 fix-header" style="font-size:11px; font-weight:normal;">#</th>
-					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">WO#</th>
-					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">SO#</th>
-					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">PK#</th>
-					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">INV Date</th>
-					<th class="fix-width-60 fix-header" style="font-size:11px; font-weight:normal;">Prefix</th>
-					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">INV#</th>
 					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">Code</th>
 					<th class="min-width-300 fix-header" style="font-size:11px; font-weight:normal;">Customer</th>
-					<th class="fix-width-100 fix-header" style="font-size:11px; font-weight:normal;">Sub Total</th>
-          <th class="fix-width-100 fix-header" style="font-size:11px; font-weight:normal;">Vat Total</th>
-					<th class="fix-width-100 fix-header" style="font-size:11px; font-weight:normal;">Grand Total</th>
 					<th class="fix-width-120 fix-header" style="font-size:11px; font-weight:normal;">Sales Employee</th>
+					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">WO#</th>
+					<th class="fix-width-60 fix-header" style="font-size:11px; font-weight:normal;">Prefix</th>
+					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">INV#</th>
+					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">INV Date</th>
+					<th class="fix-width-100 fix-header" style="font-size:11px; font-weight:normal;">Sub Total</th>
+					<th class="fix-width-100 fix-header" style="font-size:11px; font-weight:normal;">Vat Total</th>
+					<th class="fix-width-100 fix-header" style="font-size:11px; font-weight:normal;">Grand Total</th>
+					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">SO#</th>
+					<th class="fix-width-80 fix-header" style="font-size:11px; font-weight:normal;">PK#</th>
 				</tr>
 			</thead>
 			<tbody id="result-table">
@@ -84,25 +84,38 @@
     {{else}}
       <tr class="font-size-10">
         <td class="middle text-center">{{no}}</td>
+				<td class="middle">{{customerCode}}</td>
+				<td class="middle">{{customerName}}</td>
+				<td class="middle">{{saleEmployee}}</td>
         <td class="middle">{{U_WEBORDER}}</td>
-        <td class="middle">{{soPrefix}} {{soCode}}</td>
-        <td class="middle">{{doPrefix}} {{doCode}}</td>
-        <td class="middle text-center">{{ivDate}}</td>
-        <td class="middle text-center">{{ivPrefix}}</td>
-        <td class="middle text-center">{{ivCode}}</td>
-        <td class="middle">{{customerCode}}</td>
-        <td class="middle">{{customerName}}</td>
-        <td class="middle text-right">{{subTotal}}</td>
-        <td class="middle text-right">{{vatTotal}}</td>
-        <td class="middle text-right">{{grandTotal}}</td>
-        <td class="middle">{{saleEmployee}}</td>
-      </tr>
+				<td class="middle text-center">{{ivPrefix}}</td>
+				<td class="middle text-center">{{ivCode}}</td>
+				<td class="middle text-center">{{ivDate}}</td>
+				<td class="middle text-right">{{subTotal}}</td>
+				<td class="middle text-right">{{vatTotal}}</td>
+				<td class="middle text-right">{{grandTotal}}</td>
+				<td class="middle">{{soPrefix}} {{soCode}}</td>
+				<td class="middle">{{doPrefix}} {{doCode}}</td>
+			</tr>
     {{/if}}
 	{{/each}}
 </script>
 
 <script>
   $('#sale_id').select2();
+	$('#fromDate').datepicker({
+		dateFormat:'dd-mm-yy',
+		onClose:function(sd) {
+			$('#toDate').datepicker('option', 'minDate', sd);
+		}
+	})
+
+	$('#toDate').datepicker({
+		dateFormat:'dd-mm-yy',
+		onClose:function(sd) {
+			$('#fromDate').datepicker('option', 'maxDate', sd);
+		}
+	})
 </script>
 
 <script src="<?php echo base_url(); ?>scripts/report/check_transection_document.js?v=<?php echo date('Ymd'); ?>"></script>

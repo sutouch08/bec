@@ -11,7 +11,12 @@ class Discount_policy_model extends CI_Model
 
   public function add(array $ds = array())
   {
-    return $this->db->insert($this->tb, $ds);
+    if($this->db->insert($this->tb, $ds))
+		{
+			return $this->db->insert_id();
+		}
+
+		return FALSE;
   }
 
 
@@ -30,35 +35,14 @@ class Discount_policy_model extends CI_Model
 
   public function delete($id)
   {
-    $sc = TRUE;
-
-    $this->db->trans_begin();
-    //---- remove rule from policy before delete
-    $rs = $this->db
-		->set('id_policy', NULL)
-		->where('id_policy', $id)
-		->update('discount_rule');
-
-    //--- delete policy
-		$rd = $this->db
-		->where('id', $id)
-		->delete($this->tb);
-
-		if($rs && $rd)
-		{
-			$this->db->trans_commit();
-		}
-		else
-		{
-			$this->db->trans_rollback();
-			$sc = FALSE;
-		}
-
-		return $sc;
+		return $this->db->where('id', $id)->delete($this->tb);
   }
 
 
-
+	public function clear_discount_rule($id_policy)
+	{
+		return $this->db->set('id_policy', NULL)->where('id_policy', $id_policy)->update('discount_rule');
+	}
 
 
   public function get($id)

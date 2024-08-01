@@ -109,11 +109,10 @@ $footer .="<div style='width:82mm; height:10mm; text-align:center; float:left; p
 $footer .= '<table style="width:100%; margin-top:5px;">
 							<tr>
 								<td class="text-center" style="font-size:14px;">
-									อนุมัติสั่งซื้อตามใบเสนอราคานี้<br/>
-									Purchase approved with this quotation
+									ผู้อนุมัติใบเสนอราคา<br/>
 								</td>
 							</tr>
-							<tr><td><br/><br/></td></tr>
+							<tr><td><br/><br/><br/><br/></td></tr>
 							<tr>
 								<td class="text-center" style="font-size:14px;">...............................................</td>
 							</tr>
@@ -129,14 +128,12 @@ $footer .="</div>";
 
 $footer .="<div style='width:82mm; height:10mm; text-align:center; float:left; padding-left:10px; padding-right:10px; border:solid 0px #555555;'>";
 $footer .= '<table style="width:100%; margin-top:5px;">
-							<tr>
-								<td class="text-center" style="font-size:14px; color:white;">
-									<br/>
-									<br/>
-									<br/>
-								</td>
-							</tr>
-							<tr><td><br/><br/></td></tr>
+              <tr>
+                <td class="text-center" style="font-size:14px;">
+                  อนุมัติสั่งซื้อตามใบเสนอราคานี้<br/>
+                </td>
+              </tr>
+							<tr><td><br/><br/><br/><br/></td></tr>
 							<tr>
 								<td class="text-center" style="font-size:14px;">...............................................</td>
 							</tr>
@@ -242,12 +239,14 @@ while($total_page > 0 )
 	$top .=					"<td style='font-size:16px; white-space:normal; padding-top:0px;'>Valid Through</td>";
 	$top .=					"<td style='font-size:16px; white-space:normal; padding-top:0px;'>".thai_date($doc->DocDueDate, FALSE, '/')." </td>";
 	$top .= 			"</tr>";
+  $top .= 			"<tr style='padding-top:5px;'>";
+	$top .=					"<td style='font-size:16px; white-space:normal; padding-top:0px;'>พนักงานขาย</td>";
+	$top .=					"<td style='font-size:16px; white-space:normal; padding-top:0px;'>".(empty($sale->name) ? "" : $sale->name)." </td>";
+	$top .= 			"</tr>";
 	$top .=				"</tbody>";
 	$top .= 		"</table>";
 	$top .= 	"</div>";
 	$top .= "</div>";
-
-
 
   $page .= $this->pdf_printer->page_start();
   $page .= $top;

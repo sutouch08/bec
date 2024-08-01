@@ -180,9 +180,35 @@ class Discount_policy extends PS_Controller
 
   public function delete_policy($id)
   {
-    $rs = $this->discount_policy_model->delete($id);
+    $sc = TRUE;
 
-    echo $rs->status === TRUE ? 'success' : $rs->message;
+    $this->db->trans_begin();
+
+    if( ! $this->discount_policy_model->clear_discount_rule($id))
+    {
+      $sc = FALSE;
+      $this->error = "Failed to clear discount rule in this policy";
+    }
+
+    if($sc === TRUE)
+    {
+      if( ! $this->discount_policy_model->delete($id))
+      {
+        $sc = FALSE;
+        $this->error = "Failed to delete policy";
+      }
+    }
+
+    if($sc === TRUE)
+    {
+      $this->db->trans_commit();
+    }
+    else
+    {
+      $this->db->trans_rollback();
+    }
+
+    echo $sc === TRUE ? 'success' : $this->error;
   }
 
 

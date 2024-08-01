@@ -1905,7 +1905,7 @@ input[type=number]::-webkit-outer-spin-button {
 	position: sticky;
 	background-color: lightsalmon;
 	min-height: 30px;
-	height: 60px;
+	height: 30px;
 }
 
 .tableFixHead {

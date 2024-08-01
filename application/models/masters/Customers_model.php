@@ -138,6 +138,22 @@ class Customers_model extends CI_Model
 	}
 
 
+	public function delete($code)
+	{
+		$this->db->trans_start();
+		$this->db->where('CardCode', $code)->delete('customer_address');
+		$this->db->where('CardCode', $code)->delete('customers');
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+	}
+
+
+	public function reset_trans_id()
+	{
+		return $this->db->set('transId', NULL)->update('customers');
+	}
+
 	public function count_rows(array $ds = array())
 	{
 		if( ! no_value($ds['code']))
@@ -311,6 +327,18 @@ class Customers_model extends CI_Model
 		}
 
 		return NULL;
+	}
+
+
+	public function has_transection($code)
+	{
+		$wo = $this->db->where('CardCode', $code)->count_all_results('orders');
+		$wq = $this->db->where('CardCode', $code)->count_all_results('quotation');
+		$us = $this->db->where('customer_code', $code)->count_all_results('user');
+
+		$count = $wo + $wq + $us;
+
+		return $count > 0 ? TRUE : FALSE;
 	}
 
 }

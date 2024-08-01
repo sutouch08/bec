@@ -33,32 +33,7 @@
 		</select>
   </div>
 
-<!--
-	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
-    <label>Type</label>
-    <select class="form-control input-sm filter" name="type">
-			<option value="all">ทั้งหมด</option>
-			<?php echo select_customer_type($type); ?>
-		</select>
-  </div>
 
-
-	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
-    <label>Grade</label>
-    <select class="form-control input-sm filter" name="grade">
-			<option value="all">ทั้งหมด</option>
-			<?php echo select_customer_grade($grade); ?>
-		</select>
-  </div>
-
-	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
-		<label>Area</label>
-		<select class="form-control input-sm filter" name="area">
-			<option value="all">ทั้งหมด</option>
-			<?php echo select_customer_area($area); ?>
-		</select>
-	</div>
--->
 	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
 		<label>Sales Team</label>
 		<select class="form-control input-sm filter" name="saleTeam">
@@ -117,11 +92,6 @@
 					<th style="width:100px;" class="middle">Code</th>
 					<th style="min-width:250px;" class="middle">Name</th>
 					<th style="width:150px;" class="middle">Group</th>
-					<!--
-					<th style="width:100px;" class="middle">Type</th>
-					<th style="width:100px;" class="middle">Grade</th>
-					<th style="width:100px;" class="middle">Area</th>
-				-->
 					<th style="width:150px;" class="middle">Sales Team</th>
 					<th style="width:80px;" class="middle text-center">Status</th>
 					<th style="width:100px;" class=""></th>
@@ -136,20 +106,13 @@
 					<td class="middle"><?php echo $rs->CardCode; ?></td>
 					<td class="middle"><?php echo $rs->CardName; ?></td>
 					<td class="middle"><?php echo $rs->group_name; ?></td>
-					<!--
-					<td class="middle"><?php echo $rs->type_name; ?></td>
-					<td class="middle"><?php echo $rs->grade_name; ?></td>
-					<td class="middle"><?php echo $rs->area_name; ?></td>
-				-->
 					<td class="middle"><?php echo $rs->SaleTeamName; ?></td>
 					<td class="middle text-center"><?php echo is_active($rs->Status); ?></td>
 					<td class="text-right">
 						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->id; ?>')"><i class="fa fa-eye"></i></button>
-						<?php if($this->pm->can_edit) : ?>
-							<!--
-						<button type="button" class="btn btn-mini btn-warning" onclick="getEdit('<?php echo $rs->id; ?>')"><i class="fa fa-pencil"></i></button>
-					-->
-						<?php endif; ?>
+				<?php if($this->pm->can_delete) : ?>
+						<button type="button" class="btn btn-mini btn-danger" onclick="getDelete('<?php echo $rs->CardCode; ?>', '<?php echo $rs->CardName; ?>')"><i class="fa fa-trash"></i></button>				
+				<?php endif; ?>
 					</td>
 				</tr>
 				<?php $no++; ?>
