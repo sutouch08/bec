@@ -23,7 +23,6 @@ class Quotation extends PS_Controller
 		$this->load->model('orders/discount_model');
 		$this->load->model('masters/warehouse_model');
 		$this->load->model('masters/cost_center_model');
-		$this->load->helper('channels');
 		$this->load->helper('order');
 		$this->load->helper('customer');
 		$this->load->helper('product_images');
@@ -40,7 +39,6 @@ class Quotation extends PS_Controller
 			'code' => get_filter('code', 'sq_code', ''),
 			'customer' => get_filter('customer', 'sq_customer', ''),
 			'sqNo' => get_filter('sqNo', 'sqNo', ''),
-			'soNo' => get_filter('soNo', 'soNo', ''),
 			'role' => get_filter('role', 'sq_role', 'all'),
 			'sale_id' => get_filter('sale_id', 'sq_sale_id', 'all'),
 			'channels' => get_filter('channels', 'sq_channels', 'all'),
@@ -55,19 +53,28 @@ class Quotation extends PS_Controller
 			'chk_payment' => get_filter('chk_payment', 'chk_payment', 0)
 		);
 
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_rows();
+		if($this->input->post('search'))
+		{
+			redirect($this->home);
+		}
+		else
+		{
+			$this->load->helper('channels');
+			$this->load->helper('payment_term');
 
-		$rows = $this->quotation_model->count_rows($filter);
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-    $filter['data'] = $this->quotation_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-		$this->pagination->initialize($init);
-    $this->load->view('quotation/quotation_list', $filter);
+			//--- แสดงผลกี่รายการต่อหน้า
+			$perpage = get_rows();
+
+			$rows = $this->quotation_model->count_rows($filter);
+			//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
+			$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
+	    $filter['data'] = $this->quotation_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+			$filter['channels'] = channels_array();
+			$filter['payments'] = payments_array();
+			$this->pagination->initialize($init);
+	    $this->load->view('quotation/quotation_list', $filter);
+		}		
   }
-
-
-
 
   public function add_new()
   {

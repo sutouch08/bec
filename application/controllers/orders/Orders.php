@@ -34,23 +34,42 @@ class Orders extends PS_Controller
 		$this->readOnly = getConfig('CLOSE_SYSTEM') ==  2 ? TRUE : FALSE;
   }
 
+  public function index()
+  {
+		$filter = array(
+			'code' => get_filter('code', 'order_code', ''),
+			'customer' => get_filter('customer', 'order_customer', ''),
+			'sqNo' => get_filter('sqNo', 'sqNo', ''),
+			'soNo' => get_filter('soNo', 'soNo', ''),
+			'role' => get_filter('role', 'order_role', 'all'),
+			'sale_id' => get_filter('sale_id', 'order_sale_id', 'all'),
+			'channels' => get_filter('channels', 'order_channels', 'all'),
+			'payment' => get_filter('payment', 'order_payment', 'all'),
+			'approval' => get_filter('approval', 'order_approval', 'all'),
+			'status' => get_filter('status', 'order_status', 'all'),
+			'from_date' => get_filter('from_date', 'order_from_date', ''),
+			'to_date' => get_filter('to_date', 'order_to_date', ''),
+			'onlyMe' => get_filter('onlyMe', 'onlyMe', 0),
+			'user_id' => get_filter('user_id', 'order_user_id', 'all')
+		);
 
-	public function test()
-	{
-		$itemCode = 'FG-BEC0027';
-		$customer_code = 'CC00002';
-		$channels = 2;
-		$payment = 27;
-		$date = '2022-08-05';
-		$qty = 1;
-		$amount = 1000;
+    if($this->input->post('search'))
+    {
+      redirect($this->home);
+    }
+    else
+    {
+      //--- แสดงผลกี่รายการต่อหน้า
+      $perpage = get_rows();
 
-		$rs = $this->discount_model->get_free_item_rule($itemCode, $customer_code, $payment, $channels, $date, $qty, $amount);
-
-		print_r($rs);
-	}
-
-
+      $rows = $this->orders_model->count_rows($filter);
+      //--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
+      $init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
+      $filter['data'] = $this->orders_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+      $this->pagination->initialize($init);
+      $this->load->view('sales_order/sales_order_list', $filter);
+    }
+  }
 
   public function get_credit_balance()
 	{
@@ -77,43 +96,6 @@ class Orders extends PS_Controller
       echo json_encode($arr);
     }
 	}
-
-
-  public function index()
-  {
-		$filter = array(
-			'code' => get_filter('code', 'order_code', ''),
-			'customer' => get_filter('customer', 'order_customer', ''),
-			'sqNo' => get_filter('sqNo', 'sqNo', ''),
-			'soNo' => get_filter('soNo', 'soNo', ''),
-			'role' => get_filter('role', 'order_role', 'all'),
-			'sale_id' => get_filter('sale_id', 'order_sale_id', 'all'),
-			'channels' => get_filter('channels', 'order_channels', 'all'),
-			'payment' => get_filter('payment', 'order_payment', 'all'),
-			'approval' => get_filter('approval', 'order_approval', 'all'),
-			'status' => get_filter('status', 'order_status', 'all'),
-			'from_date' => get_filter('from_date', 'order_from_date', ''),
-			'to_date' => get_filter('to_date', 'order_to_date', ''),
-			'onlyMe' => get_filter('onlyMe', 'onlyMe', 0),
-			'user_id' => get_filter('user_id', 'order_user_id', 'all'),
-			'chk_sqNo' => get_filter('chk_sqNo', 'chk_sqNo', 0),
-			'chk_channels' => get_filter('chk_channels', 'chk_channels', 0),
-			'chk_payment' => get_filter('chk_payment', 'chk_payment', 0),
-			'chk_ship' => get_filter('chk_ship', 'chk_ship', 0),
-		);
-
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_rows();
-
-		$rows = $this->orders_model->count_rows($filter);
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-    $filter['data'] = $this->orders_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-		$this->pagination->initialize($init);
-    $this->load->view('sales_order/sales_order_list', $filter);
-  }
-
-
 
 
   public function add_new()
@@ -2106,11 +2088,7 @@ class Orders extends PS_Controller
 			'order_status',
 			'order_from_date',
 			'order_to_date',
-			'onlyMe',
-			'chk_sqNo',
-			'chk_channels',
-			'chk_payment',
-			'chk_ship',
+			'onlyMe',			
 			'order_user_id'
 		);
 

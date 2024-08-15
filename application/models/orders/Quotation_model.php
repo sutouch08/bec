@@ -275,10 +275,8 @@ class Quotation_model extends CI_Model
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
 		$this->db
-		->select('od.*, ch.name AS channels_name, pm.name AS payment_name')
-		->from('quotation AS od')
-		->join('channels AS ch', 'od.Channels = ch.id', 'left')
-		->join('payment_term AS pm', 'od.Payment = pm.id', 'left');
+		->select('od.*')
+		->from('quotation AS od');
 
 		if( isset($ds['code']) && $ds['code'] != '')
 		{
@@ -287,12 +285,7 @@ class Quotation_model extends CI_Model
 
 		if( isset($ds['sqNo']) && $ds['sqNo'] != '')
 		{
-			$this->db->like('od.SqNo', $ds['sqNo']);
-		}
-
-		if( isset($ds['soNo']) && $ds['soNo'] != '')
-		{
-			$this->db->like('od.DocNum', $ds['soNo']);
+			$this->db->like('od.DocNum', $ds['sqNo']);
 		}
 
 		if(isset($ds['from_date']) && isset($ds['to_date']) && $ds['from_date'] != '' && $ds['to_date'] != '' )
@@ -368,12 +361,7 @@ class Quotation_model extends CI_Model
 
 		if( isset($ds['sqNo']) && $ds['sqNo'] != '')
 		{
-			$this->db->like('SqNo', $ds['sqNo']);
-		}
-
-		if( isset($ds['soNo']) && $ds['soNo'] != '')
-		{
-			$this->db->like('DocNum', $ds['soNo']);
+			$this->db->like('DocNum', $ds['sqNo']);
 		}
 
 		if(isset($ds['from_date']) && isset($ds['to_date']) && $ds['from_date'] != '' && $ds['to_date'] != '' )
