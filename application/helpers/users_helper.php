@@ -88,12 +88,12 @@ function select_sales_team($id = NULL)
 
 
 
-function select_employee($empID = NULL)
+function select_employee($empID = NULL, $active = 0)
 {
   $ds = '';
   $CI =& get_instance();
 	$CI->load->model('masters/employee_model');
-  $qs = $CI->employee_model->get_all();
+  $qs = $CI->employee_model->get_all($active);
   if(!empty($qs))
   {
     foreach($qs as $rs)

@@ -2479,7 +2479,7 @@ fieldset[disabled] .checkbox label {
 }
 .input-sm,
 .form-group-sm .form-control {
-  height: 30px;
+  height: 31px;
   padding: 5px 10px;
   font-size: 12px;
   line-height: 1.5;
@@ -2487,7 +2487,7 @@ fieldset[disabled] .checkbox label {
 }
 select.input-sm,
 select.form-group-sm .form-control {
-  height: 30px;
+  height: 31px;
   line-height: 30px;
 }
 textarea.input-sm,

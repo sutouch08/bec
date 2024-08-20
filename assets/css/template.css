@@ -1254,6 +1254,9 @@ hr.padding-5 {
 	cursor:pointer;
 }
 
+.btn-xs {
+  height: 31px;
+}
 
 .btn-100 {
   min-width: 100px;

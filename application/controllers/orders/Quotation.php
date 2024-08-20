@@ -28,6 +28,8 @@ class Quotation extends PS_Controller
 		$this->load->helper('product_images');
 		$this->load->helper('discount');
 		$this->load->helper('warehouse');
+		$this->load->helper('channels');
+		$this->load->helper('payment_term');
 
 		$this->readOnly = getConfig('CLOSE_SYSTEM') == 2 ? TRUE : FALSE;
   }
@@ -59,8 +61,7 @@ class Quotation extends PS_Controller
 		}
 		else
 		{
-			$this->load->helper('channels');
-			$this->load->helper('payment_term');
+
 
 			//--- แสดงผลกี่รายการต่อหน้า
 			$perpage = get_rows();
@@ -73,7 +74,7 @@ class Quotation extends PS_Controller
 			$filter['payments'] = payments_array();
 			$this->pagination->initialize($init);
 	    $this->load->view('quotation/quotation_list', $filter);
-		}		
+		}
   }
 
   public function add_new()

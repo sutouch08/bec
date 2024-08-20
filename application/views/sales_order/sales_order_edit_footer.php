@@ -16,11 +16,12 @@
 			<div class="form-group">
         <label class="col-lg-3 col-md-4 col-sm-4 col-xs-12 control-label no-padding-right">Owner</label>
         <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
+          <?php $active = 1; ?>
           <select class="width-100" id="owner">
 						<option value=""></option>
 						<option value="">-No Owner-</option>
 						<?php $owner = empty($order->OwnerCode) ? $this->_user->emp_id : $order->OwnerCode; ?>
-            <?php echo select_employee($owner); ?>
+            <?php echo select_employee($owner, $active); ?>
 					</select>
         </div>
       </div>

@@ -16,24 +16,19 @@
 <hr class="padding-5"/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 <div class="row">
-  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Web No.</label>
     <input type="text" class="width-100 search-box" name="code"  value="<?php echo $code; ?>" />
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>Customer</label>
 		<input type="text" class="width-100 search-box" name="customer" value="<?php echo $customer; ?>" />
 	</div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>SO No.</label>
     <input type="text" class="width-100 search-box" name="soNo"  value="<?php echo $soNo; ?>" />
-	</div>
-
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-		<label>SQ No.</label>
-    <input type="text" class="width-100 search-box" name="sqNo"  value="<?php echo $sqNo; ?>" />
 	</div>
 
 	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
@@ -136,24 +131,21 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped table-hover dataTable border-1" style="min-width:1610px;">
+		<table class="table table-striped table-hover dataTable border-1" style="min-width:1350px;">
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="fix-width-40 middle text-center">#</th>
-					<th class="fix-width-120 middle"></th>
-					<th class="fix-width-80 middle text-center">Status</th>
-					<th class="fix-width-80 middle text-center">Document date</th>
+					<th class="fix-width-100 middle text-center">Document date</th>
 					<th class="fix-width-120 middle">Web No.</th>
 					<th class="fix-width-80 middle">SO No.</th>
-					<th class="fix-width-100 middle">SQ No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
 					<th class="fix-width-350 middle">Customer name</th>
 					<th class="fix-width-100 middle text-right">Amount</th>
-					<th class="fix-width-100 middle">Channels</th>
-					<th class="fix-width-80 middle">Payment</th>
+					<th class="fix-width-80 middle text-center">Payment</th>
+					<th class="fix-width-80 middle text-center">Status</th>
 					<th class="fix-width-80 middle text-center">Approval</th>
-					<th class="fix-width-80 middle text-center">Shipment date</th>
-					<th class="fix-width-100 middle text-center user">User</th>
+					<th class="fix-width-100 middle">User</th>
+					<th class="fix-width-120 middle"></th>
 				</tr>
 			</thead>
 			<tbody style="font-size:12px;">
@@ -162,15 +154,13 @@
 			<?php foreach($data as $rs) : ?>
 				<tr>
 					<td class="middle text-center no"><?php echo $no; ?></td>
-					<td class="middle">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
-					<?php if($this->pm->can_edit && ($rs->Status == 0 OR $rs->Status == -1 OR $rs->Status == 3)) : ?>
-						<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
-					<?php endif; ?>
-					<?php if($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
-						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
-					<?php endif; ?>
-					</td>
+					<td class="middle text-center"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
+					<td class="middle"><?php echo $rs->code; ?></td>
+					<td class="middle"><?php echo $rs->DocNum; ?></td>
+					<td class="middle"><?php echo $rs->CardCode; ?></td>
+					<td class="moddle"><?php echo $rs->CardName; ?></td>
+					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
+					<td class="middle text-center"><?php echo $rs->payment_name; ?></td>
 					<td class="middle text-center">
 						<?php if($rs->Status == -1) : ?>
 							<span class="purple">Draft</span>
@@ -184,15 +174,6 @@
 							<span class="orange">Pending</span>
 						<?php endif; ?>
 					</td>
-					<td class="middle text-center"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
-					<td class="middle"><?php echo $rs->code; ?></td>
-					<td class="middle"><?php echo $rs->DocNum; ?></td>
-					<td class="middle"><?php echo $rs->SqNo; ?></td>
-					<td class="middle"><?php echo $rs->CardCode; ?></td>
-					<td class="moddle"><?php echo $rs->CardName; ?></td>
-					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
-					<td class="middle"><?php echo $rs->channels_name; ?></td>
-					<td class="middle"><?php echo $rs->payment_name; ?></td>
 					<td class="middle text-center">
 						<?php if($rs->Status == 0 OR $rs->Status == 1) : ?>
 							<?php if($rs->must_approve == 0) : ?>
@@ -208,8 +189,16 @@
 							<?php endif; ?>
 						<?php endif; ?>
 					</td>
-					<td class="middle text-center"><?php echo thai_date($rs->DocDueDate, FALSE, '.'); ?></td>
-					<td class="middle text-center"><?php echo $rs->uname; ?></td>
+					<td class="middle"><?php echo $rs->uname; ?></td>
+					<td class="middle">
+						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
+					<?php if($this->pm->can_edit && ($rs->Status == 0 OR $rs->Status == -1 OR $rs->Status == 3)) : ?>
+						<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
+					<?php endif; ?>
+					<?php if($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
+						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
+					<?php endif; ?>
+					</td>
 				</tr>
 				<?php $no++; ?>
 			<?php endforeach; ?>

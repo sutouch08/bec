@@ -18,7 +18,8 @@
         <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
           <select class="width-100" id="owner">
 						<option value=""></option>
-            <?php echo select_employee($this->_user->emp_id); ?>
+            <?php $active = 1; ?>
+            <?php echo select_employee($this->_user->emp_id, $active); ?>
 					</select>
         </div>
       </div>

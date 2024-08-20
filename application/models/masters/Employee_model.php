@@ -46,8 +46,13 @@ class Employee_model extends CI_Model
 
 
 
-	public function get_all()
+	public function get_all($active = 0)
 	{
+		if( ! empty($active))
+		{
+			$this->db->where('active', 1);
+		}
+		
 		$rs = $this->db->order_by('firstName', 'ASC')->get($this->tb);
 
 		if($rs->num_rows() > 0)
