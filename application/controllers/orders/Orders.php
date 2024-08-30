@@ -1444,15 +1444,22 @@ class Orders extends PS_Controller
 					'DocNum' => $order->DocNum
 				);
 
-				$rs = $this->order_api->cancle_sap_order($arr);
-
-				if(! $rs)
+				if( ! $this->order_api->cancle_sap_order($arr))
 				{
 					$sc = FALSE;
 					$this->error = $this->order_api->error;
 				}
 				else
 				{
+          $logs = array(
+            'code' => $code,
+            'action' => 'edit_request',
+            'user_id' => $this->_user->id,
+            'uname' => $this->_user->uname
+          );
+
+          $this->orders_model->add_logs($logs);
+
 					$arr = array(
 						'Status' => -1,
 						'DocEntry' => NULL,
@@ -2088,7 +2095,7 @@ class Orders extends PS_Controller
 			'order_status',
 			'order_from_date',
 			'order_to_date',
-			'onlyMe',			
+			'onlyMe',
 			'order_user_id'
 		);
 

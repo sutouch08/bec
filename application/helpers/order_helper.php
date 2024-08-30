@@ -60,7 +60,8 @@ function action_name($action)
 		'edit' => "Edit",
 		'approve' => "Approved",
 		'reject' => "Reject",
-		'cancel' => "Canceled"
+		'cancel' => "Canceled",
+		'edit_request' => "Cancel On SAP"
 	);
 
 	if(isset($arr[$action]))

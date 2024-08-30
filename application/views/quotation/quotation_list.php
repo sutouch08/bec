@@ -127,18 +127,18 @@
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="fix-width-40 middle text-center">#</th>
-					<th class="fix-width-120 middle"></th>
-					<th class="fix-width-80 middle text-center">Status</th>
 					<th class="fix-width-80 middle">Date</th>
 					<th class="fix-width-120 middle">Web No.</th>
 					<th class="fix-width-80 middle">SQ No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
-					<th class="fix-width-350 middle">Customer name</th>
+					<th class="min-width-350 middle">Customer name</th>
 					<th class="fix-width-100 middle text-right">Amount</th>
 					<th class="fix-width-100 middle">Channels</th>
 					<th class="fix-width-80 middle">Payment</th>
+					<th class="fix-width-80 middle text-center">Status</th>
 					<th class="fix-width-80 middle text-center">Approval</th>
 					<th class="fix-width-100 middle text-center">User</th>
+					<th class="fix-width-120 middle"></th>
 
 				</tr>
 			</thead>
@@ -148,15 +148,14 @@
 			<?php foreach($data as $rs) : ?>
 				<tr>
 					<td class="middle text-center no"><?php echo $no; ?></td>
-					<td class="middle">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
-					<?php if($this->pm->can_edit && ($rs->Status == 0 OR $rs->Status == -1 OR $rs->Status == 3)) : ?>
-						<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
-					<?php endif; ?>
-					<?php if($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
-						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
-					<?php endif; ?>
-					</td>
+					<td class="middle"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
+					<td class="middle"><?php echo $rs->code; ?></td>
+					<td class="middle"><?php echo $rs->DocNum; ?></td>
+					<td class="middle"><?php echo $rs->CardCode; ?></td>
+					<td class="moddle"><?php echo $rs->CardName; ?></td>
+					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
+					<td class="middle"><?php echo empty($channels[$rs->Channels]) ? "" : $channels[$rs->Channels]; ?></td>
+					<td class="middle"><?php echo empty($payments[$rs->Payment]) ? "" : $payments[$rs->Payment]; ?></td>
 					<td class="middle text-center">
 						<?php if($rs->Status == -1) : ?>
 							<span class="purple">Draft</span>
@@ -168,14 +167,6 @@
 							<a href="javascript:void(0)" class="red" onclick="showMessage('<?php echo $rs->code; ?>')">Failed</a>
 						<?php endif; ?>
 					</td>
-					<td class="middle"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
-					<td class="middle"><?php echo $rs->code; ?></td>
-					<td class="middle"><?php echo $rs->DocNum; ?></td>
-					<td class="middle"><?php echo $rs->CardCode; ?></td>
-					<td class="moddle"><?php echo $rs->CardName; ?></td>
-					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
-					<td class="middle"><?php echo empty($channels[$rs->Channels]) ? "" : $channels[$rs->Channels]; ?></td>
-					<td class="middle"><?php echo empty($payments[$rs->Payment]) ? "" : $payments[$rs->Payment]; ?></td>
 					<td class="middle text-center">
 						<?php if($rs->Status == 0 OR $rs->Status == 1) : ?>
 							<?php if($rs->must_approve == 0) : ?>
@@ -192,6 +183,15 @@
 						<?php endif; ?>
 					</td>
 					<td class="middle text-center"><?php echo $rs->uname; ?></td>
+					<td class="middle">
+						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
+					<?php if($this->pm->can_edit && ($rs->Status == 0 OR $rs->Status == -1 OR $rs->Status == 3)) : ?>
+						<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
+					<?php endif; ?>
+					<?php if($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
+						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
+					<?php endif; ?>
+					</td>
 				</tr>
 				<?php $no++; ?>
 			<?php endforeach; ?>
