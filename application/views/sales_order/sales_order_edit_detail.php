@@ -29,6 +29,11 @@
       position: sticky;
     }
 
+    .fix-desc {
+      left:250px;
+      position: sticky;
+    }
+
     .fix-header {
       z-index: 50;
       background-color: #f8f8f8;
@@ -56,14 +61,14 @@
   <div class="divider-hidden">
 
   </div>
-  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="max-height:500px; overflow:auto; padding:0px; border-top:solid 1px #dddddd;">
-    <table class="table table-bordered" style="min-width:1908px; border:0px;">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="max-height:500px; overflow:auto; padding:0px; margin-left:5px;">
+    <table class="table table-bordered border-1 tableFixHead" style="min-width:1908px;">
       <thead>
         <tr class="font-size-10 freez">
           <th class="fix-width-40 middle text-center fix-no fix-header"></th>
           <th class="fix-width-60 middle text-center fix-img fix-header">Image</th>
           <th class="fix-width-150 middle text-center fix-item fix-header">Item Code</th>
-          <th class="min-width-250 middle text-center">Description.</th>
+          <th class="fix-width-250 middle text-center fix-desc fix-header">Description.</th>
 					<th class="fix-width-100 middle text-center">Warehouse</th>
 					<th class="fix-width-80 middle text-center">In Stock</th>
 					<th class="fix-width-100 middle text-center">Quota No.</th>
@@ -77,7 +82,7 @@
           <th class="fix-width-150 middle text-center">Discount(%)</th>
           <th class="fix-width-80 middle text-center">Tax Code</th>
 					<th class="fix-width-120 middle text-center">Price after discount</th>
-          <th class="fix-width-150 middle text-center">Amount before tax</th>
+          <th class="min-width-150 middle text-center">Amount before tax</th>
 					<th class="fix-width-60 middle text-center"></th>
         </tr>
       </thead>
@@ -134,7 +139,7 @@
           <td class="middle fix-item" scope="row">
             <input type="text" class="form-control input-sm item-code" data-id="<?php echo $no; ?>" id="itemCode-<?php echo $no; ?>" value="<?php echo $rs->ItemCode; ?>" <?php echo $disabled; ?> />
           </td>
-          <td class="middle">
+          <td class="middle fix-desc" scope="row">
             <input type="text" class="form-control input-sm item-name" data-id="<?php echo $no; ?>" id="itemName-<?php echo $no; ?>" value="<?php echo $rs->ItemName; ?>"  <?php echo $disabled; ?>/>
           </td>
 
@@ -254,7 +259,7 @@
 	<td class="middle fix-item" scope="row">
 		<input type="text" class="form-control input-sm item-code" data-id="{{no}}" id="itemCode-{{no}}" />
 	</td>
-	<td class="middle">
+	<td class="middle fix-desc" scope="row">
 		<input type="text" class="form-control input-sm item-name" data-id="{{no}}" id="itemName-{{no}}" />
 	</td>
 
@@ -361,7 +366,7 @@
 	<td class="middle fix-item" scope="row">
 		<input type="text" class="form-control input-sm item-code" data-id="{{no}}" id="itemCode-{{no}}" value="{{product_code}}" disabled/>
 	</td>
-	<td class="middle">
+	<td class="middle fix-desc" scope="row">
 		<input type="text" class="form-control input-sm item-name" data-id="{{no}}" id="itemName-{{no}}" value="{{product_name}}" disabled/>
 	</td>
 

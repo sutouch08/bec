@@ -1923,8 +1923,8 @@ input[type=number]::-webkit-outer-spin-button {
 .tableFixHead thead th {
 	position: sticky;
 	top: -1px;
-	background-color: #f2f2f2;
-	font-size: 14px;
+	/*background-color: #f2f2f2;
+	font-size: 14px;*/
 }
 
 .tableFixHead tr>td {
@@ -1933,4 +1933,6 @@ input[type=number]::-webkit-outer-spin-button {
 
 .fix-header {
 	z-index: 2;
+  background-color: white;
+  outline: solid 1px #dddddd;
 }
