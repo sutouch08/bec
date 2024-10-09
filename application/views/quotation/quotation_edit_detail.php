@@ -72,7 +72,7 @@
           <th class="fix-width-150 middle text-center">Price</th>
           <th class="fix-width-150 middle text-center">Discount(%)</th>
           <th class="fix-width-80 middle text-center">Tax Code</th>
-					<th class="min-width-100 middle text-center">Price after discount</th>
+					<th class="fix-width-100 middle text-center">Price after discount</th>
           <th class="fix-width-150 middle text-center">Amount before tax</th>
         </tr>
       </thead>
