@@ -153,7 +153,7 @@ class Orders extends PS_Controller
 						'DiscAmount' => $hd->disAmount,
 						'VatSum' => $hd->tax,
 						'RoundDif' => $hd->roundDif,
-						'sale_team' => $hd->sale_team,
+						'sale_team' => $this->_user->team_id,
 						'user_id' => $this->_user->id,
 						'uname' => $this->_user->uname,
 						'Comments' => get_null($hd->comments),
@@ -253,7 +253,7 @@ class Orders extends PS_Controller
 										'customer_grade_id' => $customer->GradeCode,
 										'user_id' => $this->_user->id,
 										'uname' => $this->_user->uname,
-										'sale_team' => $rs->sale_team,
+										'sale_team' => $this->_user->team_id,
 										'count_stock' => $rs->count_stock,
 										'allow_change_discount' => $rs->allow_change_discount
 									);
@@ -432,7 +432,7 @@ class Orders extends PS_Controller
 										'DiscAmount' => $hd->disAmount,
 										'VatSum' => $hd->tax,
 										'RoundDif' => $hd->roundDif,
-										'sale_team' => $hd->sale_team,
+										'sale_team' => $this->_user->team_id,
 										'user_id' => $hd->user_id,
 										'uname' => $hd->uname,
 										'Comments' => get_null($hd->comments),
@@ -535,7 +535,7 @@ class Orders extends PS_Controller
 															'customer_grade_id' => $customer->GradeCode,
 															'user_id' => $this->_user->id,
 															'uname' => $this->_user->uname,
-															'sale_team' => $rs->sale_team,
+															'sale_team' => $this->_user->team_id,
 															'count_stock' => $rs->count_stock,
 															'allow_change_discount' => $rs->allow_change_discount
 															);
@@ -1001,7 +1001,7 @@ class Orders extends PS_Controller
 					'DiscAmount' => $hd->DiscAmount,
 					'VatSum' => $hd->VatSum,
 					'RoundDif' => $hd->RoundDif,
-					'sale_team' => $hd->sale_team,
+					'sale_team' => $this->_user->team_id,
 					'user_id' => $this->_user->id,
 					'uname' => $this->_user->uname,
 					'Comments' => $hd->Comments,
@@ -1097,7 +1097,7 @@ class Orders extends PS_Controller
 								'customer_grade_id' => $rs->customer_grade_id,
 								'user_id' => $this->_user->id,
 								'uname' => $this->_user->uname,
-								'sale_team' => $rs->sale_team
+								'sale_team' => $this->_user->team_id
 							);
 
 							if(! $this->orders_model->add_detail($arr))
@@ -1187,7 +1187,7 @@ class Orders extends PS_Controller
 					'DiscAmount' => $hd->DiscAmount,
 					'VatSum' => $hd->VatSum,
 					'RoundDif' => $hd->RoundDif,
-					'sale_team' => $hd->sale_team,
+					'sale_team' => $this->_user->team_id,
 					'user_id' => $this->_user->id,
 					'uname' => $this->_user->uname,
 					'Comments' => $hd->Comments,
@@ -1283,7 +1283,7 @@ class Orders extends PS_Controller
 								'customer_grade_id' => $rs->customer_grade_id,
 								'user_id' => $this->_user->id,
 								'uname' => $this->_user->uname,
-								'sale_team' => $rs->sale_team
+								'sale_team' => $this->_user->team_id
 							);
 
 							if(! $this->orders_model->add_detail($arr))
@@ -1291,7 +1291,6 @@ class Orders extends PS_Controller
 								$sc = FALSE;
 								$this->error = "Insert detail failed";
 							}
-
 						}
 					}
 				}
