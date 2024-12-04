@@ -844,6 +844,7 @@ function removeRow() {
 		}
 	})
 
+	reIndex();
 	recalTotal();
 }
 
@@ -1020,7 +1021,7 @@ function getItemData(no) {
 					$('#')
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
-					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);					
+					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
 					var lineTotal = parseFloat(ds.LineTotal);
 
 					$('#price-'+no).val(price)
@@ -1740,7 +1741,7 @@ function toggleText(el) {
 	}
 
 	render(source, data, output);
-
+	reIndex();
 	init();
 }
 

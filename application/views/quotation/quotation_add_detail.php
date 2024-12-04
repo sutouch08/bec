@@ -10,23 +10,28 @@
       position: sticky !important;
     }
 
-    .fix-type {
+    .fix-chk {
       left: 40px;
       position: sticky !important;
     }
 
+    .fix-type {
+      left: 80px;
+      position: sticky !important;
+    }
+
     .fix-img {
-      left:140px;
+      left:180px;
       position: sticky !important;
     }
 
     .fix-code {
-      left:200px;
+      left:240px;
       position: sticky !important;
     }
 
     .fix-desc {
-      left:350px;
+      left:390px;
       position: sticky !important;
     }
 
@@ -53,10 +58,11 @@
 
   </div>
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="padding:0px; margin-left:5px;">
-    <table class="table table-bordered border-1 tableFixHead" style="min-width:1700px;">
+    <table class="table table-bordered border-1 tableFixHead" style="min-width:1740px;">
       <thead>
         <tr class="font-size-10">
-          <th class="fix-width-40 middle text-center fix-header fix-no"></th>
+          <th class="fix-width-40 middle text-center fix-header fix-no">#</th>
+          <th class="fix-width-40 middle text-center fix-header fix-chk"></th>
 					<th class="fix-width-100 middle text-center fix-header fix-type">Type</th>
           <th class="fix-width-60 middle text-center fix-header fix-img">Image</th>
           <th class="fix-width-150 middle text-center fix-header fix-code">Item Code</th>
@@ -109,7 +115,8 @@
 					<input type="hidden" id="<?php echo $uuid; ?>" data-id="<?php echo $no; ?>" value="<?php echo $no; ?>"/>
           <input type="hidden" id="disc-type-<?php echo $no; ?>" value="P" />
 
-          <td class="middle text-center fix-no" scope="row">
+          <td class="middle text-center fix-no no" scope="row"><?php echo $no; ?></td>
+          <td class="middle text-center fix-chk" scope="row">
             <input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>"/>
             <span class="lbl"></span>
           </td>
@@ -223,8 +230,8 @@
 	<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
   <input type="hidden" id="disc-type-{{no}}" value="{{discType}}" />
 
-
-	<td class="middle text-center fix-no" scope="row">
+  <td class="middle text-center fix-no no" scope="row"></td>
+	<td class="middle text-center fix-chk" scope="row">
 		<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 		<span class="lbl"></span>
 	</td>
@@ -324,7 +331,8 @@
 <input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
 <input type="hidden" id="disc-type-{{no}}" value="{{discType}}" />
 
-<td class="middle text-center fix-no" scope="row">
+<td class="middle text-center fix-no no" scope="row"></td>
+<td class="middle text-center fix-chk" scope="row">
 	<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 	<span class="lbl"></span>
 </td>
@@ -400,7 +408,8 @@
 </script>
 
 <script id="text-template" type="text/x-handlebarsTemplate">
-	<td class="middle text-center fix-no" scope="row">
+  <td class="middle text-center fix-no no" scope="row"></td>
+	<td class="middle text-center fix-chk" scope="row">
 		<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 		<span class="lbl"></span>
 	</td>

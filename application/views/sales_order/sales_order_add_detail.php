@@ -19,26 +19,31 @@
       position: sticky;
     }
 
+    .fix-chk {
+      left: 40px;
+      position: sticky;
+    }
+
     .fix-img {
-      left:40px;
+      left:80px;
       position: sticky;
     }
 
     .fix-item {
-      left:100px;
+      left:140px;
       position: sticky;
     }
 
     .fix-desc {
-      left:250px;
+      left:290px;
       position: sticky;
     }
 
-    .fix-header {
+    /* .fix-header {
       z-index: 50;
       background-color: #f8f8f8;
       outline: solid 1px #dddddd;
-    }
+    } */
 
 
     td[scope=row] {
@@ -62,10 +67,11 @@
 
   <div class="divider-hidden"> </div>
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="max-height:500px; overflow:auto; padding:0px; margin-left:5px;">
-    <table class="table table-bordered border-1 tableFixHead" style="min-width:1908px;">
+    <table class="table table-bordered border-1 tableFixHead" style="min-width:1948px;">
       <thead>
         <tr class="font-size-10 freez">
-          <th class="fix-width-40 middle text-center fix-no fix-header"></th>
+          <th class="fix-width-40 middle text-center fix-no fix-header">#</th>
+          <th class="fix-width-40 middle text-center fix-chk fix-header"></th>
           <th class="fix-width-60 middle text-center fix-img fix-header">Image</th>
           <th class="fix-width-150 middle text-center fix-item fix-header">Item Code</th>
           <th class="fix-width-250 middle text-center fix-desc fix-header">Description.</th>
@@ -120,7 +126,8 @@
 					<input type="hidden" id="count-stock-<?php echo $no; ?>" value="1" />
 					<input type="hidden" id="allow-change-discount-<?php echo $no; ?>" value="1" />
 
-          <td class="middle text-center fix-no" scope="row">
+          <td class="middle text-center fix-no no" scope="row"><?php echo $no; ?></td>
+          <td class="middle text-center fix-chk" scope="row">
             <input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>"/>
             <span class="lbl"></span>
           </td>
@@ -233,7 +240,8 @@
 	<input type="hidden" id="allow-change-discount-{{no}}" value="1" />
 
 
-	<td class="middle text-center fix-no" scope="row">
+  <td class="middle text-center fix-no no" scope="row"></td>
+  <td class="middle text-center fix-chk" scope="row">
 		<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 		<span class="lbl"></span>
 	</td>
@@ -339,7 +347,8 @@
 	<input type="hidden" id="allow-change-discount-{{no}}" value="0" />
 
 
-	<td class="middle text-center fix-no" scope="row">
+  <td class="middle text-center fix-no no" scope="row"></td>
+  <td class="middle text-center fix-chk" scope="row">
 		<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 		<span class="lbl"></span>
 	</td>

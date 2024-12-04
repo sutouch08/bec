@@ -1333,6 +1333,7 @@ function removeRow() {
 		}
 	})
 
+	reIndex();
 	recalTotal();
 }
 
@@ -1341,6 +1342,8 @@ function removeFreeRow() {
 	$('.free-row').remove();
 	$('.free-item').remove();
 	$('.free-btn').remove();
+
+	reIndex();
 }
 
 
@@ -1791,6 +1794,8 @@ function addFreeRow(uuid) {
 	if(picked == freeQty) {
 		$('#btn-free-' + parent_row).addClass('hide');
 	}
+
+	reIndex();
 }
 
 
