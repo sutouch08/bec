@@ -196,6 +196,7 @@ function saveAdd() {
 						"LineNum" : lineNum,
 						"ItemCode" : itemCode,
 						"Description" : $('#itemName-'+no).val(),
+						"StdPrice" : $('#stdPrice-'+no).val(),
 						"Price" : $('#price-'+no).val(),
 						"SellPrice" : $('#sellPrice-'+no).val(),
 						"sysSellPrice" : $('#sysSellPrice-'+no).val(),
@@ -494,6 +495,7 @@ function saveUpdate() {
 						"LineNum" : lineNum,
 						"ItemCode" : itemCode,
 						"Description" : $('#itemName-'+no).val(),
+						"StdPrice" : $('#stdPrice-'+no).val(),
 						"Price" : $('#price-'+no).val(),
 						"SellPrice" : $('#sellPrice-'+no).val(),
 						"sysSellPrice" : $('#sysSellPrice-'+no).val(),
@@ -908,13 +910,15 @@ function updateDiscountRule(no) {
 				load_out();
 				var rs = $.trim(rs);
 				if(isJson(rs)) {
-					var ds = $.parseJSON(rs);
+					var ds = JSON.parse(rs);
+					var stdPrice = parseFloat(ds.StdPrice);
 					var price = parseFloat(ds.Price);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
 					sellPrice = sellPrice.toFixed(2);
 					var lineTotal = parseFloat(ds.LineTotal);
 
 					$('#price-'+no).val(price)
+					$('#stdPrice-'+no).val(stdPrice);
 					$('#sellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);
 					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
@@ -1021,9 +1025,11 @@ function getItemData(no) {
 					$('#')
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
+					var stdPrice = parseFloat(ds.StdPrice);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
 					var lineTotal = parseFloat(ds.LineTotal);
 
+					$('#stdPrice-'+no).val(stdPrice);
 					$('#price-'+no).val(price)
 					$('#sellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);

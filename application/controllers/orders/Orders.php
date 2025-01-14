@@ -1234,6 +1234,7 @@ class Orders extends PS_Controller
 								'OpenQty' => $rs->Qty,
 								'UomCode' => $rs->UomCode,
 								'UomEntry' => $rs->UomEntry,
+                'StdPrice' => $rs->StdPrice,
 								'Price' => $rs->Price,
 								'SellPrice' => $rs->SellPrice,
 								'sysSellPrice' => $rs->sysSellPrice,

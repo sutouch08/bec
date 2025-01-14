@@ -66,7 +66,7 @@
 
 
   <div class="divider-hidden"> </div>
-  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="max-height:500px; overflow:auto; padding:0px; margin-left:5px;">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 border-1 table-responsive" style="height:400px; overflow:auto; padding:0px; margin-left:5px;">
     <table class="table table-bordered border-1 tableFixHead" style="min-width:1948px;">
       <thead>
         <tr class="font-size-10 freez">

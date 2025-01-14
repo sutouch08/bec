@@ -3,6 +3,15 @@
     padding:3px;
   }
 
+  .freez > th {
+    top:0;
+    position: sticky;
+    background-color: white;
+    outline: solid 1px #dddddd;
+    min-height: 30px;
+    height: 30px;
+  }
+
   @media (min-width: 768px) {
 
     .fix-no {
@@ -57,10 +66,10 @@
   <div class="divider-hidden">
 
   </div>
-  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="padding:0px; margin-left:5px;">
-    <table class="table table-bordered border-1 tableFixHead" style="min-width:1740px;">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 border-1 table-responsive" style="padding:0px; margin-left:5px; height:400px; overflow:auto;">
+    <table class="table table-bordered border-1 tableFixHead" style="min-width:1790px;">
       <thead>
-        <tr class="font-size-10">
+        <tr class="font-size-10 freez">
           <th class="fix-width-40 middle text-center fix-header fix-no">#</th>
           <th class="fix-width-40 middle text-center fix-header fix-chk"></th>
 					<th class="fix-width-100 middle text-center fix-header fix-type">Type</th>
@@ -78,7 +87,7 @@
           <th class="fix-width-100 middle text-center">Price</th>
           <th class="fix-width-150 middle text-center">Discount(%)</th>
           <th class="fix-width-80 middle text-center">Tax Code</th>
-					<th class="fix-width-100 middle text-center">Price after discount</th>
+					<th class="fix-width-150 middle text-center">Price after discount</th>
           <th class="fix-width-150 middle text-center">Amount before tax</th>
         </tr>
       </thead>
@@ -90,6 +99,7 @@
 				<?php $uuid = uniqid(rand(1,100)); ?>
 				<tr id="row-<?php echo $no; ?>">
 					<input type="hidden" id="price-<?php echo $no; ?>" value="0" />
+          <input type="hidden" id="stdPrice-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="sellPrice-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="sysSellPrice-<?php echo $no; ?>" value="0" />
 					<input type="hidden" class="line-num" id="line-num-<?php echo $no; ?>" value="<?php echo $no; ?>" />
@@ -208,6 +218,7 @@
 <script id="row-template" type="text/x-handlebarsTemplate">
 <tr id="row-{{no}}">
 	<input type="hidden" id="price-{{no}}" value="0" />
+  <input type="hidden" id="stdPrice-{{no}}" value="0" />
 	<input type="hidden" id="sellPrice-{{no}}" value="0" />
 	<input type="hidden" id="sysSellPrice-{{no}}" value="0" />
 	<input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
@@ -309,6 +320,7 @@
 
 <script id="normal-template" type="text/x-handlebarsTemplate">
 <input type="hidden" id="price-{{no}}" value="0" />
+<input type="hidden" id="stdPrice-{{no}}" value="0" />
 <input type="hidden" id="sellPrice-{{no}}" value="0" />
 <input type="hidden" id="sysSellPrice-{{no}}" value="0" />
 <input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
