@@ -316,12 +316,8 @@ class Discount_model extends CI_Model
 			->group_start()->where('g.grade_id IS NULL', NULL, FALSE)->or_where('g.grade_id', $cs->GradeCode)->group_end()
 			->group_start()->where('ch.channels_id IS NULL', NULL, FALSE)->or_where('ch.channels_id', $channels_id)->group_end()
 			->group_start()->where('py.payment_id IS NULL', NULL, FALSE)->or_where('py.payment_id', $payment_id)->group_end()
-			->group_start()
-			->where('r.minQty', 0)
-			->or_where('r.minQty <=', $qty)
-			->or_where('r.minAmount', 0)
-			->or_where('r.minAmount <=', ($amount))
-			->group_end()
+			->group_start()->where('r.minQty', 0)->or_where('r.minQty <=', $qty)->group_end()
+			->group_start()->or_where('r.minAmount', 0)->or_where('r.minAmount <=', ($amount))->group_end()
 			->order_by('r.priority', 'DESC');
 
 			$qs = $this->db->get();
