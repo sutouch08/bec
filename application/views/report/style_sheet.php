@@ -29,9 +29,9 @@
     }
 
     .fix-header {
-      z-index: 50;
       background-color: white;
       outline: solid 1px #dddddd;
+      margin-top:-1px;
     }
 
     td[scope=row] {

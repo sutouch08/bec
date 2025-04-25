@@ -1,16 +1,16 @@
 <?php
-class Import_promotion extends PS_Controller
+class Import_promotion2 extends PS_Controller
 {
-  public $menu_code = 'REPOIM';
+  public $menu_code = 'REPOIM2';
   public $menu_group_code = 'RE';
-  public $title = 'ตรวจสอบโปรโมชั่น 1';
+  public $title = 'ตรวจสอบโปรโมชั่น 2';
   public $segment = 4;
 
   public function __construct()
   {
     parent::__construct();
-    $this->home = base_url() . 'report/import_promotion';
-    $this->load->model('report/import_promotion_model');
+    $this->home = base_url() . 'report/import_promotion2';
+    $this->load->model('report/import_promotion2_model');
   }
 
 
@@ -22,12 +22,12 @@ class Import_promotion extends PS_Controller
       'sales' => get_filter('sales', 'd_sales', 'all')
     );
 
-    $filter['data'] = $this->import_promotion_model->get_list($filter);
+    $filter['data'] = $this->import_promotion2_model->get_list($filter);
     $filter['division_list'] = $this->get_division_list($filter['division']);
     $filter['sales_list'] = $this->get_sales_list($filter['sales']);
-    $filter['header'] = $this->import_promotion_model->get_header();
+    $filter['header'] = $this->import_promotion2_model->get_header();
 
-    $this->load->view('report/import_promotion', $filter);
+    $this->load->view('report/import_promotion2', $filter);
   }
 
 
@@ -35,7 +35,7 @@ class Import_promotion extends PS_Controller
   {
     if($this->input->post())
     {
-      if($this->import_promotion_model->update_header($this->input->post()))
+      if($this->import_promotion2_model->update_header($this->input->post()))
       {
         redirect($this->home);
       }
@@ -44,7 +44,7 @@ class Import_promotion extends PS_Controller
 
   public function get_division_list($value = NULL)
   {
-    $list = $this->import_promotion_model->get_division_list();
+    $list = $this->import_promotion2_model->get_division_list();
 
     $option = "";
 
@@ -62,7 +62,7 @@ class Import_promotion extends PS_Controller
 
   public function get_sales_list($value = NULL)
   {
-    $list = $this->import_promotion_model->get_sales_list();
+    $list = $this->import_promotion2_model->get_sales_list();
 
     $option = "";
 
@@ -89,7 +89,7 @@ class Import_promotion extends PS_Controller
     $config = array(   // initial config for upload class
       "allowed_types" => "xlsx",
       "upload_path" => $path,
-      "file_name"	=> "import_promotion",
+      "file_name"	=> "import_promotion2",
       "max_size" => 5120,
       "overwrite" => TRUE
     );
@@ -122,7 +122,7 @@ class Import_promotion extends PS_Controller
             $this->db->trans_begin();
 
             //---- drop current data
-            if( ! $this->import_promotion_model->drop_data())
+            if( ! $this->import_promotion2_model->drop_data())
             {
               $sc = FALSE;
               $this->error = "Failed to remove previous data";
@@ -176,7 +176,7 @@ class Import_promotion extends PS_Controller
                       'Z' => empty($rs['Z']) ? 0.00 : str_replace(",", "", $rs['Z'])
                     );
 
-                    if( ! $this->import_promotion_model->add($arr))
+                    if( ! $this->import_promotion2_model->add($arr))
                     {
                       $sc = FALSE;
                       $this->error = "Failed to insert data at row ({$i})";
@@ -211,7 +211,7 @@ class Import_promotion extends PS_Controller
     {
       $sc = TRUE;
 
-      if( ! $this->import_promotion_model->clear_data())
+      if( ! $this->import_promotion2_model->clear_data())
       {
         $sc = FALSE;
         $this->error = "Failed to delete data";

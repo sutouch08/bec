@@ -80,6 +80,7 @@ class Bp_order_model extends CI_Model
     return 0;
   }
 
+
   public function get_commit_qty($itemCode, $whsCode = NULL, $quotaNo = NULL)
 	{
 		$this->db
@@ -117,6 +118,7 @@ class Bp_order_model extends CI_Model
 		return 0;
 	}
 
+
   public function get_promotion_data($customer_code)
   {
     $rs = $this->db->where('A', $customer_code)->get('promotion_imported');
@@ -133,6 +135,32 @@ class Bp_order_model extends CI_Model
   public function get_promotion_header()
   {
     $rs = $this->db->get('promotion_header_name');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row_array();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_promotion2_data($customer_code)
+  {
+    $rs = $this->db->where('A', $customer_code)->get('promotion2_imported');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_promotion2_header()
+  {
+    $rs = $this->db->get('promotion2_header_name');
 
     if($rs->num_rows() > 0)
     {

@@ -270,8 +270,6 @@ class Bporders extends CI_Controller
 	}
 
 
-
-
   public function get_item()
 	{
 		$sc = TRUE;
@@ -327,7 +325,6 @@ class Bporders extends CI_Controller
 
 		echo json_encode($ds);
 	}
-
 
 
 	public function get_category_items()
@@ -396,16 +393,13 @@ class Bporders extends CI_Controller
 	}
 
 
-
-
-
   public function checkout()
   {
-		$this->load->model('masters/customer_address_model');
-		$this->load->helper('address');
+    $this->load->model('masters/customer_address_model');
+    $this->load->helper('address');
 
-		$billToCode = $this->customer_address_model->get_address_bill_to_code($this->_user->customer_code);
-		$shipToCode = $this->customer_address_model->get_address_ship_to_code($this->_user->customer_code);
+    $billToCode = $this->customer_address_model->get_address_bill_to_code($this->_user->customer_code);
+    $shipToCode = $this->customer_address_model->get_address_ship_to_code($this->_user->customer_code);
     $customer = $this->customers_model->get($this->_user->customer_code);
 
     if( ! empty($customer))
@@ -417,11 +411,11 @@ class Bporders extends CI_Controller
       {
         $quotaNo = $this->_user->quota_no;
         $whsCode = get_customer_warehouse_listed($this->_user->id);
-    		$whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
+        $whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
 
         foreach($cart as $rs)
         {
-					$stock = $this->getStock($rs->ItemCode, $whsCode, $quotaNo, $rs->count_stock);
+          $stock = $this->getStock($rs->ItemCode, $whsCode, $quotaNo, $rs->count_stock);
 
           $rs->Available = empty($stock) ? 0 : $stock['Available'];
         }
@@ -682,7 +676,6 @@ class Bporders extends CI_Controller
 	}
 
 
-
 	public function add_to_cart()
 	{
 		$sc = TRUE;
@@ -858,7 +851,6 @@ class Bporders extends CI_Controller
 	}
 
 
-
 	public function add_free_row()
 	{
 		$sc = TRUE;
@@ -1013,7 +1005,6 @@ class Bporders extends CI_Controller
 	}
 
 
-
 	public function get_cart_table()
 	{
 		$cardCode = $this->input->get('CardCode');
@@ -1158,8 +1149,6 @@ class Bporders extends CI_Controller
 	}
 
 
-
-
 	public function remove_cart_row()
 	{
 		$sc = TRUE;
@@ -1173,7 +1162,6 @@ class Bporders extends CI_Controller
 
 		$this->_response($sc);
 	}
-
 
 
 	public function remove_multi_cart_rows()
@@ -1210,7 +1198,6 @@ class Bporders extends CI_Controller
 
 		$this->_response($sc);
 	}
-
 
 
   public function getFreeItemRule($cardCode, $payment, $channels)
@@ -1260,7 +1247,6 @@ class Bporders extends CI_Controller
   }
 
 
-
 	public function get_free_item_rule()
 	{
 		$sc = TRUE;
@@ -1304,7 +1290,6 @@ class Bporders extends CI_Controller
 
 		echo json_encode($ds);
 	}
-
 
 
 	public function get_free_item()
@@ -1410,8 +1395,6 @@ class Bporders extends CI_Controller
 	}
 
 
-
-
   public function history()
   {
     $this->title = "ประวัติการสั่งซื้อ";
@@ -1443,6 +1426,14 @@ class Bporders extends CI_Controller
     $this->load->view('bp_order/bp_point', $ds);
   }
 
+
+  public function promo2()
+  {
+    $this->title = "Promotion Point";
+    $ds['data'] = $this->bp_order_model->get_promotion2_data($this->_user->customer_code);
+    $ds['header'] = $this->bp_order_model->get_promotion2_header();
+    $this->load->view('bp_order/bp_promo2', $ds);
+  }
 
 
 	public function view_detail($code)

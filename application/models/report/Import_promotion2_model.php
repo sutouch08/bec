@@ -1,7 +1,8 @@
 <?php
-class Import_promotion_model extends CI_Model
+class Import_promotion2_model extends CI_Model
 {
-  private $tb = "promotion_imported";
+  private $tb = "promotion2_imported";
+  private $th = "promotion2_header_name";
 
   public function __construct()
   {
@@ -97,7 +98,7 @@ class Import_promotion_model extends CI_Model
 
   public function get_header()
   {
-    $rs = $this->db->get('promotion_header_name');
+    $rs = $this->db->get($this->th);
 
     if($rs->num_rows() > 0)
     {
@@ -111,7 +112,7 @@ class Import_promotion_model extends CI_Model
   {
     if( ! empty($ds))
     {
-      return $this->db->where('id', 1)->update('promotion_header_name', $ds);
+      return $this->db->where('id', 1)->update($this->th, $ds);
     }
 
     return FALSE;
