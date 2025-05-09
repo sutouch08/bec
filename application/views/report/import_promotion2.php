@@ -52,7 +52,7 @@
   </div>
 </form>
 <hr class="margin-top-15">
-<?php $arr = ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X','Z']; ?>
+<?php $arr = ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']; ?>
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center padding-5">
     <h4><?php echo $header['title']; ?></h4>
