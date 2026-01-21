@@ -67,6 +67,7 @@
 					<?php $totalAmount = 0; ?>
 					<?php $totalDiscAmount = 0; ?>
 					<?php $totalVatAmount = 0; ?>
+					<?php $totalSKU = 0; ?>
 					<?php if(!empty($cart)) : ?>
 						<?php foreach($cart as $rs) : ?>
 							<?php $discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3, $rs->disc4, $rs->disc5, '%'); ?>
@@ -94,16 +95,7 @@
 								<td class="middle text-right" id="priceLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Price, 2); ?></td>
 								<td class="middle text-center" id="discLabel-<?php echo $rs->id; ?>"><?php echo $rs->discLabel; ?></td>
 								<td class="middle text-center" id="availableLabel-<?php echo $rs->id; ?>"><?php echo number($rs->Available); ?></td>
-								<td class="middle text-center"> <?php echo number($rs->Qty); ?>
-									<!--
-									<input type="number"
-										class="form-control input-sm text-center"
-										data-no="<?php echo $rs->id; ?>"
-										id="input-qty-<?php echo $rs->id; ?>"
-										value="<?php echo $rs->Qty; ?>"
-										data-val="<?php echo $rs->Qty; ?>"
-										onchange="updateCheckQty(<?php echo $rs->id; ?>)"/> -->
-								</td>
+								<td class="middle text-center"> <?php echo number($rs->Qty); ?></td>
 								<td class="middle text-right" id="totalLabel-<?php echo $rs->id; ?>"><?php echo number($rs->LineTotal, 2); ?></td>
 								<td class="middle text-center">
 									<button class="btn btn-minier btn-danger" onclick="removeCheckRow(<?php echo $rs->id; ?>, '<?php echo $rs->ItemCode; ?>')"><i class="fa fa-trash"></i></button>
@@ -113,6 +105,7 @@
 							<?php $totalDiscAmount += $rs->totalDiscAmount; ?>
 							<?php $totalAmount += $rs->LineTotal; ?>
 							<?php $totalVatAmount += $rs->totalVatAmount; ?>
+							<?php $totalSKU++; ?>
 						<?php endforeach; ?>
 					<?php else : ?>
 						<tr>
@@ -140,7 +133,6 @@
 					<td class="width-50 font-size-14 blue text-left">มูลค่ารวม</td>
 					<td class="width-50 font-size-14 blue text-right" id="doc-total"><?php echo number($totalVatAmount+$totalAmount, 2); ?></td>
 				</tr>
-
 			</table>
 		</div>
 	</div>
@@ -170,6 +162,8 @@
 <input type="hidden" id="customer_code" value="<?php echo $customer->CardCode; ?>" />
 <input type="hidden" id="payment" value="<?php echo $customer->GroupNum; ?>" />
 <input type="hidden" id="channels" value="<?php echo $this->_user->channels; ?>" />
+<input type="hidden" id="limit-sku-per-order" value="<?php echo getConfig('CUSTOMER_ORDER_LIMIT_SKU'); ?>" />
+<input type="hidden" id="total-sku" value="<?php echo $totalSKU; ?>"/>
 
 
 <script id="free-row-template" type="text/x-handlebarsTemplate">

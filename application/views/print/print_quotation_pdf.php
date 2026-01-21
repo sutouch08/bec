@@ -300,7 +300,7 @@ while($total_page > 0 )
 	        $n,
 	        $rs->ItemCode,
 					$Description,
-					$rs->Qty." ".$rs->uom_name,
+					number($rs->Qty)." ".$rs->uom_name,
 	        number($rs->Price,2),
 					$rs->discLabel == 0 ? '0.00' : $rs->discLabel,
 					//$rs->DiscPrcnt > 0 ? number(round($rs->DiscPrcnt,2), 2) : '0.00',

@@ -472,6 +472,7 @@ class Bporders extends CI_Controller
 
       if( ! empty($cart))
       {
+        $hd = $this->cart_model->get_header($CardCode, $this->_user->id);
         $orders = array();
         $pages = $limit > 0 ? ceil($this->cart_model->cart_rows($CardCode, $this->_user->id) / $limit) : 1;
         $page = 0;
@@ -504,8 +505,7 @@ class Bporders extends CI_Controller
             if( ! empty($order))
             {
               $code = $this->get_new_code();
-              $hd = $this->cart_model->get_header($CardCode, $this->_user->id);
-
+              
               $docTotal = 0;
               $vatSum = 0;
 

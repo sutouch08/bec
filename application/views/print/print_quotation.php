@@ -301,7 +301,7 @@ while($total_page > 0 )
 	        $n,
 	        $rs->ItemCode,
 					$Description,
-					$rs->Qty." ".$rs->uom_name,
+					number($rs->Qty)." ".$rs->uom_name,
 	        number($rs->Price,2),
 					$rs->discLabel == 0 ? '0.00' : $rs->discLabel,
 	        number($rs->LineTotal, 2)

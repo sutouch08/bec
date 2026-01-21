@@ -19,7 +19,6 @@ function viewDetail(code) {
 
 
 function placeOrder() {
-
 	var na = 0;
 
 	$('.na').each(function() {
@@ -59,8 +58,32 @@ function placeOrder() {
 			closeOnConfirm:true
 		},
 		function(){
-			saveAdd();
+			save();
 		});
+	}
+	else {
+		save();
+	}
+}
+
+
+function save() {
+	let totalSKU = parseDefault(parseInt($('#total-sku').val()), 0);
+	let limitSKU = parseDefault(parseInt($('#limit-sku-per-order').val()), 0);
+
+	if(limitSKU > 0 && totalSKU > limitSKU) {
+		let orderCount = Math.ceil(totalSKU/limitSKU);
+		swal({
+			title:'Info',
+			text:'ออเดอร์จะถูก Split เป็น '+orderCount+' ออเดอร์ <br/>เนื่องจากจำนวนรายการต่อออเดอร์เกินกว่าที่กำหนด<br/> ('+ limitSKU+' รายการ/ออเดอร์)',
+			type:'info',
+			html:true,
+			closeOnConfirm:true
+		}, function() {
+			setTimeout(() => {
+				saveAdd();
+			}, 100);
+		})
 	}
 	else {
 		saveAdd();
