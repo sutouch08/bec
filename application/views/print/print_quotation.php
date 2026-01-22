@@ -93,7 +93,7 @@ $pattern = array(
             "font-size:14px; vertical-align:text-top; text-align:center; padding:3px; border-left:solid 1px #555555; min-height:5mm;", //-- ลำดับ
             "font-size:14px; vertical-align:text-top; text-align:center; padding:3px; border-left:solid 1px #555555; min-height:5mm;",  //--- Item code
             "font-size:14px; vertical-align:text-top; text-align:left; padding:3px; border-left:solid 1px #555555; min-height:5mm; white-space:pre-wrap;", //--- Model
-            "font-size:14px; vertical-align:text-top; text-align:center; padding:3px; border-left:solid 1px #555555; min-height:5mm;", //--- จำนวน
+            "font-size:14px; vertical-align:text-top; text-align:right; padding:3px; border-left:solid 1px #555555; min-height:5mm; white-space:nowrap; overflow:clip;", //--- จำนวน
 						"font-size:14px; vertical-align:text-top; text-align:right; padding:3px; border-left:solid 1px #555555; min-height:5mm;", //---- หน่วยละ
             "font-size:14px; vertical-align:text-top; text-align:center; padding:3px; border-left:solid 1px #555555; min-height:5mm;", //--- ส่วนลด
 						"font-size:14px; vertical-align:text-top; text-align:right; padding:3px; border-left:solid 1px #555555; border-right:solid 1px #555555;min-height:5mm;" //--- จำนวนเงิน
@@ -301,7 +301,7 @@ while($total_page > 0 )
 	        $n,
 	        $rs->ItemCode,
 					$Description,
-					number($rs->Qty)." ".$rs->uom_name,
+					number($rs->Qty)." &nbsp; &nbsp; ".$rs->uom_name,
 	        number($rs->Price,2),
 					$rs->discLabel == 0 ? '0.00' : $rs->discLabel,
 	        number($rs->LineTotal, 2)

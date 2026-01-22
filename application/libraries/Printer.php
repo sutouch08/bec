@@ -93,7 +93,7 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	<div style='width:100%;  text-align:center; margin-top:15px; font-size:12px;'><span><strong>Loading....</strong></span></div>";
 	$header .= "	</div></div></div></div></div> "; // modal fade;
 	$header .= "	<div class='hidden-print' style='margin-top:10px; padding-bottom:10px; padding-right:5mm; width:200mm; margin-left:auto; margin-right:auto; text-align:right'>";
-	
+
 	$header .= "	<button class='btn btn-primary' onclick='print()'><i class='fa fa-print'></i> &nbsp; พิมพ์</button>";
 	$header .= "	</div><div style='width:100%'>";
 
@@ -155,7 +155,7 @@ public function add_subheader($sub_header)
 
 public function thead(array $dataset)
 {
-	$thead	= "<table class='table' style='margin-bottom:-2px;'>";
+	$thead	= "<table class='table' style='margin-bottom:-2px; table-layout:fixed;'>";
 	$thead 	.= "<thead>";
 	$thead	.= "<tr style='height:".$this->row_height."mm; line-height:".$this->row_height."mm; font-size:10px;'>";
 	foreach($dataset as $data)

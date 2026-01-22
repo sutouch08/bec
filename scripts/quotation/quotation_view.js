@@ -59,10 +59,12 @@ function createSO(code) {
 
 
 
-function printSQ(code) {
-	var prop 			= "width=800, height=900. left="+center+", scrollbars=yes";
-	var center    = ($(document).width() - 800)/2;
-	var code  = $("#order_code").val();
-  var target  = HOME + 'print_sq/'+code;
-  window.open(target, '_blank', prop);
+function printSQ() {
+	let code  = $("#order_code").val();
+	let width = 1200;
+	let height = 950;
+	let left = (window.innerWidth - width) / 2;
+	let target = HOME + 'print_sq/'+code;
+	let prop = `width=${width}, height=${height}, left=${left}, scrollbars=yes`;
+	window.open(target, '_blank', prop);
 }

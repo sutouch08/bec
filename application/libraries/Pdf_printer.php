@@ -141,7 +141,7 @@ public function add_subheader($sub_header)
 
 public function thead(array $dataset)
 {
-	$thead	= "<table class='table' style='margin-bottom:-2px;'>";
+	$thead	= "<table class='table' style='table-layout:fixed; margin-bottom:-2px;'>";
 	$thead 	.= "<thead>";
 	$thead	.= "<tr style='height:".$this->row_height."mm; line-height:".$this->row_height."mm; font-size:10px;'>";
 	foreach($dataset as $data)

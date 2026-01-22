@@ -90,7 +90,7 @@ $pattern = array(
             "text-align:center; padding:3px; min-height:5mm;", //-- ลำดับ
             "text-align:center; padding:3px; min-height:5mm;",  //--- Item code
             "text-align:left; padding:3px; min-height:5mm; white-space:pre-wrap;", //--- Model
-            "text-align:center; padding:3px; min-height:5mm;", //--- จำนวน
+            "text-align:right; padding:3px; min-height:5mm;", //--- จำนวน
 						"text-align:right; padding:3px; min-height:5mm;", //---- หน่วยละ
             "text-align:center; padding:3px; min-height:5mm;", //--- ส่วนลด
 						"text-align:right; padding:3px; min-height:5mm;" //--- จำนวนเงิน
@@ -300,7 +300,7 @@ while($total_page > 0 )
 	        $n,
 	        $rs->ItemCode,
 					$rs->ItemName,
-					$rs->Qty." ".$rs->uom_name,
+					number($rs->Qty)." &nbsp; ".$rs->uom_name,
 	        number($rs->Price,2),
 					$rs->DiscPrcnt > 0 ? number(round($rs->DiscPrcnt,2), 2) : '0.00',
 	        number($rs->LineTotal, 2)
