@@ -26,9 +26,9 @@
         </tr>
       </thead>
       <tbody id="details-template">
+			<?php $not_ap = array(); ?>
 			<?php if(!empty($details)) : ?>
 				<?php $no = 1; ?>
-				<?php $not_ap = array(); ?>
 
 				<?php foreach($details as $rs) : ?>
 					<?php $hilight = ""; ?>
