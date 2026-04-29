@@ -144,10 +144,10 @@
           	<img src="<?php echo $rs->image; ?>" width="40" height="40" />
           </td>
           <td class="middle fix-item" scope="row">
-            <input type="text" class="form-control input-sm item-code" data-id="<?php echo $no; ?>" id="itemCode-<?php echo $no; ?>" value="<?php echo $rs->ItemCode; ?>" <?php echo $disabled; ?> />
+            <input type="text" class="form-control input-sm item-code" data-id="<?php echo $no; ?>" id="itemCode-<?php echo $no; ?>" value="<?php echo escape_str($rs->ItemCode); ?>" <?php echo $disabled; ?> />
           </td>
           <td class="middle fix-desc" scope="row">
-            <input type="text" class="form-control input-sm item-name" data-id="<?php echo $no; ?>" id="itemName-<?php echo $no; ?>" value="<?php echo $rs->ItemName; ?>"  <?php echo $disabled; ?>/>
+            <input type="text" class="form-control input-sm item-name" data-id="<?php echo $no; ?>" id="itemName-<?php echo $no; ?>" value="<?php echo escape_str($rs->ItemName); ?>"  <?php echo $disabled; ?>/>
           </td>
 
 					<td class="middle">

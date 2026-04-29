@@ -453,10 +453,8 @@ function no_value($val)
 }
 
 
-function test($val)
+function escape_str($str)
 {
-	$sc = isset($val) ? $val : "no";
-
-	echo $sc;
+	return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');	
 }
  ?>
