@@ -2,6 +2,7 @@
 class Approver_model extends CI_Model
 {
 	public $tb = "approver";
+	public $ids = [];
 
 	public function __construct()
 	{
@@ -44,10 +45,20 @@ class Approver_model extends CI_Model
 		return $this->db->insert('approver_team', $ds);
 	}
 
+	public function add_teams(array $ds = array())
+	{
+		return $this->db->insert_batch('approver_team', $ds);
+	}
+
 
 	public function add_brand(array $ds = array())
 	{
 		return $this->db->insert('approver_brand', $ds);
+	}
+
+	public function add_brands(array $ds = array())
+	{
+		return $this->db->insert_batch('approver_brand', $ds);
 	}
 
 
@@ -80,89 +91,117 @@ class Approver_model extends CI_Model
 		return $this->db->where('id', $id)->delete($this->tb);
 	}
 
+	public function ids_init($brand_id, $team_id)
+	{
+		if(! empty($brand_id))
+		{
+			$bids = $this->get_approver_ids_by_brand($brand_id);
+			$this->ids = empty($this->ids) ? $bids : array_intersect($this->ids, $bids);
+		}
 
+		if(! empty($team_id))
+		{
+			$tids = $this->get_approver_ids_by_team($team_id);
+			$this->ids = empty($this->ids) ? $tids : array_intersect($this->ids, $tids);
+		}			
+	}
+
+
+	public function count_rows(array $ds = array())
+	{
+		$teamId = isset($ds['team']) && $ds['team'] != 'all' ? $ds['team'] : NULL;
+		$brandId = isset($ds['brand']) && $ds['brand'] != 'all' ? $ds['brand'] : NULL;
+
+		if((! empty($teamId) || ! empty($brandId)) && empty($this->ids))
+		{
+			$this->ids_init($brandId, $teamId);
+		}
+
+		if (isset($ds['user_id']) && $ds['user_id'] !== 'all')
+		{
+			$this->db->where('user_id', $ds['user_id']);
+		}
+
+		if (isset($ds['status']) && $ds['status'] !== 'all')
+		{
+			$this->db->where('status', $ds['status']);
+		}
+
+		if(isset($ds['ap_order']) && $ds['ap_order'] !== 'all')
+		{
+			$this->db->where('ap_order', $ds['ap_order']);
+		}
+
+		if(isset($ds['ap_promotion']) && $ds['ap_promotion'] !== 'all')
+		{
+			$this->db->where('ap_promotion', $ds['ap_promotion']);
+		}
+
+		if(isset($ds['visible_gp']) && $ds['visible_gp'] !== 'all')
+		{
+			$this->db->where('visible_gp', $ds['visible_gp']);
+		}
+
+		if ($teamId OR $brandId)
+		{
+			$this->db->where_in('id', $this->ids);
+		}
+
+		return $this->db->count_all_results($this->tb);
+	}
+	
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
-		$this->db
-		->distinct()
-		->select('a.*, u.uname, u.name')
-		->from('approver AS a')
-		->join('user AS u', 'a.user_id = u.id', 'left')
-		->join('approver_brand AS ab', 'a.id = ab.id_approver', 'left')
-		->join('approver_team AS at', 'a.id = at.id_approver', 'left');
+		$teamId = isset($ds['team']) && $ds['team'] != 'all' ? $ds['team'] : NULL;
+		$brandId = isset($ds['brand']) && $ds['brand'] != 'all' ? $ds['brand'] : NULL;
 
-		if(!empty($ds['uname']))
+		if((! empty($teamId) || ! empty($brandId)) && empty($this->ids))
 		{
-			$this->db->group_start();
-			$this->db->like('u.uname', $ds['uname']);
-			$this->db->or_like('u.name', $ds['uname']);
-			$this->db->group_end();
+			$this->ids_init($brandId, $teamId);
 		}
 
-		if(isset($ds['status']) && $ds['status'] !== 'all')
+		if (isset($ds['user_id']) && $ds['user_id'] !== 'all')
 		{
-			$this->db->where('a.status', $ds['status']);
+			$this->db->where('user_id', $ds['user_id']);
 		}
 
-		if(isset($ds['team']) && $ds['team'] != 'all')
+		if (isset($ds['status']) && $ds['status'] !== 'all')
 		{
-			$this->db->where('at.id_team', $ds['team']);
+			$this->db->where('status', $ds['status']);
 		}
 
-		if(isset($ds['brand']) && $ds['brand'] != 'all')
+		if(isset($ds['ap_order']) && $ds['ap_order'] !== 'all')
 		{
-			$this->db->where('ab.id_brand', $ds['brand']);
+			$this->db->where('ap_order', $ds['ap_order']);
 		}
 
-		$rs = $this->db->order_by('u.uname', 'ASC')->limit($perpage, $offset)->get();
+		if(isset($ds['ap_promotion']) && $ds['ap_promotion'] !== 'all')
+		{
+			$this->db->where('ap_promotion', $ds['ap_promotion']);
+		}
 
-		if($rs->num_rows() > 0)
+		if(isset($ds['visible_gp']) && $ds['visible_gp'] !== 'all')
+		{
+			$this->db->where('visible_gp', $ds['visible_gp']);
+		}
+
+		if ($teamId OR $brandId)
+		{
+			$this->db->where_in('id', $this->ids);
+		}
+				
+		$rs = $this->db
+		->order_by('uname', 'ASC')
+		->limit($perpage, $offset)
+		->get($this->tb);
+
+		if ($rs->num_rows() > 0)
 		{
 			return $rs->result();
 		}
 
 		return NULL;
 	}
-
-
-	public function count_rows(array $ds = array())
-	{
-		$this->db
-		->distinct()
-		->select('a.id')
-		->from('approver AS a')
-		->join('approver AS a2', 'a.id = a2.id', 'left')
-		->join('user AS u', 'a.user_id = u.id', 'left')
-		->join('approver_brand AS ab', 'a.id = ab.id_approver', 'left')
-		->join('approver_team AS at', 'a2.id = at.id_approver', 'left');
-
-		if(!empty($ds['uname']))
-		{
-			$this->db->group_start();
-			$this->db->like('u.uname', $ds['uname']);
-			$this->db->or_like('u.name', $ds['uname']);
-			$this->db->group_end();
-		}
-
-		if(isset($ds['status']) && $ds['status'] !== 'all')
-		{
-			$this->db->where('a.status', $ds['status']);
-		}
-
-		if(isset($ds['team']) && $ds['team'] != 'all')
-		{
-			$this->db->where('at.id_team', $ds['team']);
-		}
-
-		if(isset($ds['brand']) && $ds['brand'] != 'all')
-		{
-			$this->db->where('ab.id_brand', $ds['brand']);
-		}
-
-		return $this->db->count_all_results();
-	}
-
-
 
 	public function is_exists($user_id, $id = NULL)
 	{
@@ -171,14 +210,12 @@ class Approver_model extends CI_Model
 			$this->db->where('id !=', $id);
 		}
 
-		$rs = $this->db->where('user_id', $user_id)->get($this->tb);
+		return $this->db->where('user_id', $user_id)->count_all_results($this->tb) > 0;
+	}
 
-		if($rs->num_rows() > 0)
-		{
-			return TRUE;
-		}
-
-		return FALSE;
+	function is_promotion_approver($user_id)
+	{
+		return $this->db->where('user_id', $user_id)->where('ap_promotion', 1)->where('status', 1)->count_all_results($this->tb) > 0;
 	}
 
 
@@ -232,6 +269,40 @@ class Approver_model extends CI_Model
 		}
 
 		return NULL;
+	}
+
+	private function get_approver_ids_by_brand($brand_id)
+	{
+		$arr = ["x"];
+		$qr = "SELECT id_approver FROM approver_brand WHERE id_brand = {$brand_id}";
+		$qs = $this->db->query($qr);
+
+		if($qs->num_rows() > 0)
+		{			
+			foreach($qs->result() as $rs)
+			{
+				$arr[] = $rs->id_approver;
+			}			
+		}
+
+		return $arr;
+	}
+
+	private function get_approver_ids_by_team($team_id)
+	{
+		$arr = ["x"];
+		$qr = "SELECT id_approver FROM approver_team WHERE id_team = {$team_id}";
+		$qs = $this->db->query($qr);
+
+		if($qs->num_rows() > 0)
+		{			
+			foreach($qs->result() as $rs)
+			{
+				$arr[] = $rs->id_approver;
+			}			
+		}
+
+		return $arr;
 	}
 
 } //--- end class

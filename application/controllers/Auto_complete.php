@@ -90,7 +90,10 @@ class Auto_complete extends CI_Controller
 	public function get_item_code_and_name()
 	{
 		$txt = $_REQUEST['term'];
+		$price = isset($_GET['price']) ? TRUE : FALSE;
 		$sc = array();
+
+		$this->db->select('id, code, name, price');
 
 		if($txt != '*')
 		{
@@ -103,7 +106,7 @@ class Auto_complete extends CI_Controller
 		{
 			foreach($rs->result() as $rd)
 			{
-				$sc[] = $rd->id.' | '.$rd->code.' | '.$rd->name;
+				$sc[] = $rd->id.' | '.$rd->code.' | '.$rd->name . ($price ? ' | '.$rd->price : '');
 			}
 		}
 		else
@@ -132,6 +135,35 @@ class Auto_complete extends CI_Controller
 			foreach($rs->result() as $rd)
 			{
 				$sc[] = $rd->id.' | '.$rd->name;
+			}
+		}
+		else
+		{
+			$sc[] = "Not found";
+		}
+
+		echo json_encode($sc);
+	}
+
+
+	public function get_item_model()
+	{
+		$txt = $_REQUEST['term'];
+		$sc = array();
+		$this->db->select('id, code, name');
+
+		if($txt != "*")
+		{
+			$this->db->like('code', $txt)->or_like('name', $txt);
+		}
+
+		$rs = $this->db->limit(50)->get('product_model');
+
+		if($rs->num_rows() > 0)
+		{
+			foreach($rs->result() as $rd)
+			{
+				$sc[] = $rd->id.' | '.$rd->code.' | '.$rd->name;
 			}
 		}
 		else

@@ -1,38 +1,93 @@
-function goBack() {
-  window.location.href = HOME;
+const addNew = () => {
+  window.location.href = `${HOME}add_new`;
 }
 
-
-function goAdd() {
-  window.location.href = HOME + 'add_new';
+const edit = (id) => {
+  window.location.href = `${HOME}edit/${id}`;
 }
 
-
-
-function goEdit(id) {
-  window.location.href = HOME + 'edit/' + id;
+const viewDetail = (id) => {
+  window.location.href = `${HOME}view_detail/${id}`;
 }
 
-
-
-function viewDetail(id) {
-  window.location.href = HOME  + 'view_detail/'+id;
-}
-
-
-
-
-
-$('#fromDate').datepicker({
+$('#start-date').datepicker({
   dateFormat:'dd-mm-yy',
   onClose:function(sd){
-    $('#toDate').datepicker('option', 'minDate', sd);
+    $('#end-date').datepicker('option', 'minDate', sd);
   }
 });
 
-$('#toDate').datepicker({
+$('#end-date').datepicker({
   dateFormat:'dd-mm-yy',
   onClose:function(sd){
-    $('#fromDate').datepicker('option', 'maxDate', sd);
+    $('#start-date').datepicker('option', 'maxDate', sd);
   }
 });
+
+function setActive(id, el) {
+  let active = $(el).prop('checked') ? 1 : 0;
+  $.ajax({
+    url: `${HOME}set_active`,
+    type: 'POST',
+    cache: false,
+    data: {
+      id: id,
+      active: active
+    },
+    success: function(rs) {
+     if(rs.trim() !== 'success') {
+      showError(rs);
+      $(el).prop('checked', !active);
+     }
+    },
+    error: function(rs) {
+      showError(rs);
+      $(el).prop('checked', !active);
+    }
+  });
+}
+
+function confirmDelete(id, name) {
+  swal({
+    title: "คุณแน่ใจ ?",
+    text: "ต้องการลบ '" + name + "' หรือไม่ ?",
+    type: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#FA5858",
+    confirmButtonText: 'ใช่, ฉันต้องการลบ',
+    cancelButtonText: 'ยกเลิก',
+    closeOnConfirm: true
+  }, function () {
+    load_in();
+    setTimeout(() => {
+      $.ajax({
+        url: `${HOME}delete`,
+        type: 'POST',
+        cache: 'false',
+        data: {
+          'id' : id
+        },
+        success: function (rs) {
+          load_out();
+          if (rs === 'success') {
+            swal({
+              title: 'Deleted',
+              type: 'success',
+              timer: 1000
+            });
+            $("#row-" + id).remove();
+            reIndex();
+          }
+          else {
+            swal({
+              title: 'Error!',
+              text: rs,
+              type: 'error',
+              html: true
+            })
+          }
+        }
+      });
+    }, 200);
+  });
+}  

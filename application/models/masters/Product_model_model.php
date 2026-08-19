@@ -135,8 +135,6 @@ class Product_model_model extends CI_Model
   }
 
 
-
-
   public function is_exists_name($name, $id = NULL)
   {
     if( ! empty($id))

@@ -8,7 +8,6 @@ class Discount_policy_model extends CI_Model
     parent::__construct();
   }
 
-
   public function add(array $ds = array())
   {
     if($this->db->insert($this->tb, $ds))
@@ -18,8 +17,6 @@ class Discount_policy_model extends CI_Model
 
 		return FALSE;
   }
-
-
 
   public function update($id, array $ds = array())
   {
@@ -31,20 +28,11 @@ class Discount_policy_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function delete($id)
   {
 		return $this->db->where('id', $id)->delete($this->tb);
   }
-
-
-	public function clear_discount_rule($id_policy)
-	{
-		return $this->db->set('id_policy', NULL)->where('id_policy', $id_policy)->update('discount_rule');
-	}
-
-
+	
   public function get($id)
   {
     $rs = $this->db
@@ -58,6 +46,17 @@ class Discount_policy_model extends CI_Model
     return NULL;
   }
 
+  public function get_all()
+  {
+    $rs = $this->db->order_by('id', 'DESC')->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
 
   public function get_code($id)
   {
@@ -74,7 +73,6 @@ class Discount_policy_model extends CI_Model
     return NULL;
   }
 
-
   public function get_name($id)
   {
     $rs = $this->db
@@ -89,11 +87,7 @@ class Discount_policy_model extends CI_Model
 
     return NULL;
   }
-
-
-
-
-
+  
   public function count_rows(array $ds = array())
   {
 		if(isset($ds['code']) && $ds['code'] != "")
@@ -111,19 +105,18 @@ class Discount_policy_model extends CI_Model
 			$this->db->where('active', $ds['active']);
 		}
 
-		if( ! empty($ds['start_date']) && ! empty($ds['end_date']))
-		{
-			$this->db
-			->group_start()
-			->where('start_date >=', from_date($ds['start_date']))
-			->where('end_date <=', to_date($ds['end_date']))
-			->group_end();
-		}
+    if (! empty($ds['start_date']))
+    {
+      $this->db->where('start_date >=', from_date($ds['start_date']));
+    }
+
+    if (! empty($ds['end_date']))
+    {
+      $this->db->where('end_date <=', to_date($ds['end_date']));
+    }
 
     return $this->db->count_all_results($this->tb);
   }
-
-
 
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
@@ -142,14 +135,15 @@ class Discount_policy_model extends CI_Model
 			$this->db->where('active', $ds['active']);
 		}
 
-		if( ! empty($ds['start_date']) && ! empty($ds['end_date']))
-		{
-			$this->db
-			->group_start()
-			->where('start_date >=', from_date($ds['start_date']))
-			->where('end_date <=', to_date($ds['end_date']))
-			->group_end();
-		}
+    if( ! empty($ds['start_date']))
+    {
+      $this->db->where('start_date >=', from_date($ds['start_date']));
+    }
+
+    if( ! empty($ds['end_date']))
+    {
+      $this->db->where('end_date <=', to_date($ds['end_date']));
+    }    
 
 		$rs = $this->db->order_by('code', 'DESC')->limit($perpage, $offset)->get($this->tb);
 
@@ -160,8 +154,6 @@ class Discount_policy_model extends CI_Model
 
 		return NULL;
   }
-
-
 
   public function get_by_code($code)
   {
@@ -177,9 +169,6 @@ class Discount_policy_model extends CI_Model
     return NULL;
   }
 
-
-
-
   public function get_max_code($code)
   {
     $qr = "SELECT MAX(code) AS code FROM discount_policy WHERE code LIKE '".$code."%' ORDER BY code DESC";
@@ -187,6 +176,25 @@ class Discount_policy_model extends CI_Model
     return $rs->row()->code;
   }
 
+  public function add_logs(array $ds = array())
+  {
+    return $this->db->insert('discount_policy_logs', $ds);
+  }
+
+  public function get_logs($id)
+  {
+    $rs = $this->db
+    ->where('id_policy', $id)
+    ->order_by('date_upd', 'DESC')
+    ->get('discount_policy_logs');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
 
 
   public function search($txt)

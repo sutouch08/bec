@@ -24,7 +24,6 @@ class Discount_model extends CI_Model
 	}
 
 
-
   public function get_item_discount($item_code, $customer_code, $price, $qty, $payment_id, $channels_id, $date = '', $order_code = NULL)
 	{
     $this->load->model('masters/products_model');
@@ -60,7 +59,6 @@ class Discount_model extends CI_Model
 		if( $pd->code != "" && $cs->CardCode != "" )
 		{
 			//--- get active policy
-
 			$po = $this->db->select('id')->where('active', 1)->where('start_date <=', $date)->where('end_date >=', $date)->get($this->dp);
 
 			if($po->num_rows() > 0)
@@ -72,9 +70,10 @@ class Discount_model extends CI_Model
 					$arr[] = $rs->id;
 				}
 
-				$qs = $this->db
+				$this->db
 				->distinct()
 				->select('r.*')
+				->select('p.sell_price AS sell_price')
 				->from('discount_rule AS r')
 				->join('discount_rule_product AS p', 'r.id = p.rule_id', 'left')
 				->join('discount_rule_product_model AS pm', 'r.id = pm.rule_id', 'left')
@@ -88,29 +87,96 @@ class Discount_model extends CI_Model
 				->join('discount_rule_customer_area AS ca', 'r.id = ca.rule_id', 'left')
 				->join('discount_rule_customer_grade AS g', 'r.id = g.rule_id', 'left')
 				->join('discount_rule_channels AS ch', 'r.id = ch.rule_id', 'left')
-				->join('discount_rule_payment AS py', 'r.id = py.rule_id', 'left')
+				->join('discount_rule_payment AS py', 'r.id = py.rule_id', 'left')				
 				->where_in('id_policy', $arr)
 				->where('r.active', 1)
-				->where('r.type !=', 'F')
-				->group_start()->where('r.all_product', 1)->or_where('r.all_product', 0)->group_end()
-				->group_start()->where('p.product_id IS NULL', NULL, FALSE)->or_where('p.product_id', $pd->id)->group_end()
-				->group_start()->where('pm.model_id IS NULL', NULL, FALSE)->or_where('pm.model_id', $pd->model_id)->group_end()
-				->group_start()->where('pc.category_id IS NULL', NULL, FALSE)->or_where('pc.category_id', $pd->category_id)->group_end()
-				->group_start()->where('pt.type_id IS NULL', NULL, FALSE)->or_where('pt.type_id', $pd->type_id)->group_end()
-				->group_start()->where('pb.brand_id IS NULL', NULL, FALSE)->or_where('pb.brand_id', $pd->brand_id)->group_end()
-				->group_start()->where('r.all_customer', 1)->or_where('r.all_customer', 0)->group_end()
-				->group_start()->where('c.customer_id IS NULL', NULL, FALSE)->or_where('c.customer_id', $cs->id)->group_end()
-				->group_start()->where('cg.group_code IS NULL', NULL, FALSE)->or_where('cg.group_code', $cs->GroupCode)->group_end()
-				->group_start()->where('ct.type_id IS NULL', NULL, FALSE)->or_where('ct.type_id', $cs->TypeCode)->group_end()
-				->group_start()->where('cr.region_id IS NULL', NULL, FALSE)->or_where('cr.region_id', $cs->SaleTeam)->group_end()
-				->group_start()->where('ca.area_id IS NULL', NULL, FALSE)->or_where('ca.area_id', $cs->AreaCode)->group_end()
-				->group_start()->where('g.grade_id IS NULL', NULL, FALSE)->or_where('g.grade_id', $cs->GradeCode)->group_end()
-				->group_start()->where('ch.channels_id IS NULL', NULL, FALSE)->or_where('ch.channels_id', $channels_id)->group_end()
-				->group_start()->where('py.payment_id IS NULL', NULL, FALSE)->or_where('py.payment_id', $payment_id)->group_end()
-				->group_start()->where('r.minQty', 0)->or_where('r.minQty <=', $qty)->group_end()
-				->group_start()->where('r.minAmount', 0)->or_where('r.minAmount <=', ($price * $qty))->group_end()
-				->order_by('r.priority', 'DESC')
-				->get();
+				->where('r.type !=', 'F');
+
+				//---- Product Condition
+				//$this->db->where_in('r.all_product', array(0, 1));
+				
+				$this->db->group_start()->where('p.product_id IS NULL', NULL, FALSE)->or_where('p.product_id', $pd->id)->group_end();
+				$this->db->where("NOT EXISTS (SELECT 1 FROM discount_rule_product_exclude AS pe WHERE r.id = pe.rule_id AND pe.product_id = {$pd->id})", NULL, FALSE);
+				
+				if($pd->model_id != NULL)
+				{
+					$this->db->group_start()->where('pm.model_id IS NULL', NULL, FALSE)->or_where('pm.model_id', $pd->model_id)->group_end();
+				}
+
+				if($pd->category_id != NULL)
+				{
+					$this->db->group_start()->where('pc.category_id IS NULL', NULL, FALSE)->or_where('pc.category_id', $pd->category_id)->group_end();
+				}
+
+				if($pd->type_id != NULL)
+				{
+					$this->db->group_start()->where('pt.type_id IS NULL', NULL, FALSE)->or_where('pt.type_id', $pd->type_id)->group_end();
+				}
+
+				if($pd->brand_id != NULL)
+				{
+					$this->db->group_start()->where('pb.brand_id IS NULL', NULL, FALSE)->or_where('pb.brand_id', $pd->brand_id)->group_end();
+				}
+
+				//--- Customer Condition
+				//$this->db->where_in('r.all_customer', array(0, 1));
+				$this->db->group_start()->where('c.customer_id IS NULL', NULL, FALSE)->or_where('c.customer_id', $cs->id)->group_end();
+
+				if($cs->GroupCode != NULL)
+				{
+					$this->db->group_start()->where('cg.group_code IS NULL', NULL, FALSE)->or_where('cg.group_code', $cs->GroupCode)->group_end();
+				}
+
+				if($cs->TypeCode != NULL)
+				{
+					$this->db->group_start()->where('ct.type_id IS NULL', NULL, FALSE)->or_where('ct.type_id', $cs->TypeCode)->group_end();
+				}
+
+				if($cs->SaleTeam != NULL)
+				{
+					$this->db->group_start()->where('cr.region_id IS NULL', NULL, FALSE)->or_where('cr.region_id', $cs->SaleTeam)->group_end();
+				}
+
+				if($cs->AreaCode != NULL)
+				{
+					$this->db->group_start()->where('ca.area_id IS NULL', NULL, FALSE)->or_where('ca.area_id', $cs->AreaCode)->group_end();
+				}
+
+				if($cs->GradeCode != NULL)
+				{
+					$this->db->group_start()->where('g.grade_id IS NULL', NULL, FALSE)->or_where('g.grade_id', $cs->GradeCode)->group_end();
+				}
+
+				//---- channels condition
+				$this->db->group_start()->where('ch.channels_id IS NULL', NULL, FALSE)->or_where('ch.channels_id', $channels_id)->group_end();
+
+				//---- payment condition
+				$this->db->group_start()->where('py.payment_id IS NULL', NULL, FALSE)->or_where('py.payment_id', $payment_id)->group_end();
+
+				//---- min condition
+				$this->db->group_start()->where('r.minQty', 0)->or_where('r.minQty <=', $qty)->group_end();
+				$this->db->group_start()->where('r.minAmount', 0)->or_where('r.minAmount <=', ($price * $qty))->group_end();
+				$this->db->order_by('r.priority', 'DESC');
+
+				// ->group_start()->where('pm.model_id IS NULL', NULL, FALSE)->or_where('pm.model_id', $pd->model_id)->group_end()				
+				// ->group_start()->where('pc.category_id IS NULL', NULL, FALSE)->or_where('pc.category_id', $pd->category_id)->group_end()
+				// ->group_start()->where('pt.type_id IS NULL', NULL, FALSE)->or_where('pt.type_id', $pd->type_id)->group_end()
+				// ->group_start()->where('pb.brand_id IS NULL', NULL, FALSE)->or_where('pb.brand_id', $pd->brand_id)->group_end()
+				// ->group_start()->where('r.all_customer', 1)->or_where('r.all_customer', 0)->group_end()
+				// ->group_start()->where('c.customer_id IS NULL', NULL, FALSE)->or_where('c.customer_id', $cs->id)->group_end()
+				// ->group_start()->where('cg.group_code IS NULL', NULL, FALSE)->or_where('cg.group_code', $cs->GroupCode)->group_end()
+				// ->group_start()->where('ct.type_id IS NULL', NULL, FALSE)->or_where('ct.type_id', $cs->TypeCode)->group_end()
+				// ->group_start()->where('cr.region_id IS NULL', NULL, FALSE)->or_where('cr.region_id', $cs->SaleTeam)->group_end()
+				// ->group_start()->where('ca.area_id IS NULL', NULL, FALSE)->or_where('ca.area_id', $cs->AreaCode)->group_end()
+				// ->group_start()->where('g.grade_id IS NULL', NULL, FALSE)->or_where('g.grade_id', $cs->GradeCode)->group_end()
+				// ->group_start()->where('ch.channels_id IS NULL', NULL, FALSE)->or_where('ch.channels_id', $channels_id)->group_end()
+				// ->group_start()->where('py.payment_id IS NULL', NULL, FALSE)->or_where('py.payment_id', $payment_id)->group_end()
+				// ->group_start()->where('r.minQty', 0)->or_where('r.minQty <=', $qty)->group_end()
+				// ->group_start()->where('r.minAmount', 0)->or_where('r.minAmount <=', ($price * $qty))->group_end()
+				// ->order_by('r.priority', 'DESC')
+				// ->get();
+
+				$qs = $this->db->get();
 
 				if($qs->num_rows() > 0)
 				{
@@ -145,6 +211,9 @@ class Discount_model extends CI_Model
 						//--- หากเงื่อนไขถัดไปได้ส่วนลดรวมมากกว่าเงื่อนไขก่อนหน้า ตัวแปรด้านบนจะถูกแทนค่าใหม่ ถ้าไม่ดีกว่าจะได้ค่าเดิม
 						foreach($qs->result() as $rs)
 						{
+							// echo "<pre>";
+							// print_r($rs);
+							// echo "</pre>";
 							if($rs->priority >= $priority)
 							{
 								$discount1 = 0;
@@ -161,7 +230,7 @@ class Discount_model extends CI_Model
 								{
 									//--- step 1
 									//--- ถ้ามีการกำหนดราคาขาย จะไม่สนใจส่วนลด ส่วนต่างราคาขาย จะถูกแปลงเป็นส่วนลดแทน
-									$discount1 =	$price - $rs->price;
+									$discount1 =	$price - $rs->sell_price;
 									$rs->disc1 = discountAmountToPercent($discount1, 1, $price);
 								} //--- end if
 
@@ -250,8 +319,6 @@ class Discount_model extends CI_Model
 	}
 
 
-
-
 	public function get_free_item_rule($item_code, $customer_code, $payment_id, $channels_id, $date, $qty, $amount)
 	{
 		$this->load->model('masters/products_model');
@@ -295,30 +362,77 @@ class Discount_model extends CI_Model
 			->join('discount_rule_customer_area AS ca', 'r.id = ca.rule_id', 'left')
 			->join('discount_rule_customer_grade AS g', 'r.id = g.rule_id', 'left')
 			->join('discount_rule_channels AS ch', 'r.id = ch.rule_id', 'left')
-			->join('discount_rule_payment AS py', 'r.id = py.rule_id', 'left');
+			->join('discount_rule_payment AS py', 'r.id = py.rule_id', 'left');			
+
 			$this->db->where_in('id_policy', $arr);
 
-			$this->db
-			->where('r.active', 1)
-			->where('r.type', 'F')
-			->group_start()->where('r.all_product', 1)->or_where('r.all_product', 0)->group_end()
-			->group_start()->where('p.product_id IS NULL', NULL, FALSE)->or_where('p.product_id', $pd->id)->group_end()
-			->group_start()->where('pm.model_id IS NULL', NULL, FALSE)->or_where('pm.model_id', $pd->model_id)->group_end()
-			->group_start()->where('pc.category_id IS NULL', NULL, FALSE)->or_where('pc.category_id', $pd->category_id)->group_end()
-			->group_start()->where('pt.type_id IS NULL', NULL, FALSE)->or_where('pt.type_id', $pd->type_id)->group_end()
-			->group_start()->where('pb.brand_id IS NULL', NULL, FALSE)->or_where('pb.brand_id', $pd->brand_id)->group_end()
-			->group_start()->where('r.all_customer', 1)->or_where('r.all_customer', 0)->group_end()
-			->group_start()->where('c.customer_id IS NULL', NULL, FALSE)->or_where('c.customer_id', $cs->id)->group_end()
-			->group_start()->where('cg.group_code IS NULL', NULL, FALSE)->or_where('cg.group_code', $cs->GroupCode)->group_end()
-			->group_start()->where('ct.type_id IS NULL', NULL, FALSE)->or_where('ct.type_id', $cs->TypeCode)->group_end()
-			->group_start()->where('cr.region_id IS NULL', NULL, FALSE)->or_where('cr.region_id', $cs->SaleTeam)->group_end()
-			->group_start()->where('ca.area_id IS NULL', NULL, FALSE)->or_where('ca.area_id', $cs->AreaCode)->group_end()
-			->group_start()->where('g.grade_id IS NULL', NULL, FALSE)->or_where('g.grade_id', $cs->GradeCode)->group_end()
-			->group_start()->where('ch.channels_id IS NULL', NULL, FALSE)->or_where('ch.channels_id', $channels_id)->group_end()
-			->group_start()->where('py.payment_id IS NULL', NULL, FALSE)->or_where('py.payment_id', $payment_id)->group_end()
-			->group_start()->where('r.minQty', 0)->or_where('r.minQty <=', $qty)->group_end()
-			->group_start()->or_where('r.minAmount', 0)->or_where('r.minAmount <=', ($amount))->group_end()
-			->order_by('r.priority', 'DESC');
+			$this->db->where('r.active', 1)->where('r.type', 'F');
+
+			//--- Product Condition
+			$this->db->where("NOT EXISTS (SELECT 1 FROM discount_rule_product_exclude AS pe WHERE r.id = pe.rule_id AND pe.product_id = {$pd->id})", NULL, FALSE);
+			//$this->db->where_in('r.all_product', array(0, 1));
+			$this->db->group_start()->where('p.product_id IS NULL', NULL, FALSE)->or_where('p.product_id', $pd->id)->group_end();
+
+			if($pd->model_id != NULL)
+			{
+				$this->db->group_start()->where('pm.model_id IS NULL', NULL, FALSE)->or_where('pm.model_id', $pd->model_id)->group_end();
+			}
+
+			if($pd->category_id != NULL)
+			{
+				$this->db->group_start()->where('pc.category_id IS NULL', NULL, FALSE)->or_where('pc.category_id', $pd->category_id)->group_end();
+			}
+
+			if($pd->type_id != NULL)
+			{
+				$this->db->group_start()->where('pt.type_id IS NULL', NULL, FALSE)->or_where('pt.type_id', $pd->type_id)->group_end();
+			}
+
+			if($pd->brand_id != NULL)
+			{
+				$this->db->group_start()->where('pb.brand_id IS NULL', NULL, FALSE)->or_where('pb.brand_id', $pd->brand_id)->group_end();
+			}
+
+
+			//---- Customer Condition
+			//$this->db->where_in('r.all_customer', array(0, 1));
+			$this->db->group_start()->where('c.customer_id IS NULL', NULL, FALSE)->or_where('c.customer_id', $cs->id)->group_end();
+			
+			if($cs->GroupCode != NULL)
+			{
+				$this->db->group_start()->where('cg.group_code IS NULL', NULL, FALSE)->or_where('cg.group_code', $cs->GroupCode)->group_end();
+			}
+
+			if($cs->TypeCode != NULL)
+			{
+				$this->db->group_start()->where('ct.type_id IS NULL', NULL, FALSE)->or_where('ct.type_id', $cs->TypeCode)->group_end();
+			}
+
+			if($cs->SaleTeam != NULL)
+			{
+				$this->db->group_start()->where('cr.region_id IS NULL', NULL, FALSE)->or_where('cr.region_id', $cs->SaleTeam)->group_end();
+			}
+
+			if($cs->AreaCode != NULL)
+			{
+				$this->db->group_start()->where('ca.area_id IS NULL', NULL, FALSE)->or_where('ca.area_id', $cs->AreaCode)->group_end();
+			}
+
+			if($cs->GradeCode != NULL)
+			{
+				$this->db->group_start()->where('g.grade_id IS NULL', NULL, FALSE)->or_where('g.grade_id', $cs->GradeCode)->group_end();
+			}
+
+			//---- channels condition			
+			$this->db->group_start()->where('ch.channels_id IS NULL', NULL, FALSE)->or_where('ch.channels_id', $channels_id)->group_end();
+
+			//---- payment condition			
+			$this->db->group_start()->where('py.payment_id IS NULL', NULL, FALSE)->or_where('py.payment_id', $payment_id)->group_end();
+
+			//---- min condition
+			$this->db->group_start()->where('r.minQty', 0)->or_where('r.minQty <=', $qty)->group_end();
+			$this->db->group_start()->where('r.minAmount', 0)->or_where('r.minAmount <=', ($amount))->group_end();
+			$this->db->order_by('r.priority', 'DESC');					
 
 			$qs = $this->db->get();
 
@@ -386,15 +500,6 @@ class Discount_model extends CI_Model
 	}
 
 
-
-
-
-
-
-
-
-
-
 	public function count_order_rule_group($order_code, $rule_id, $all_product, $all_customer, $all_channels, $all_payment)
 	{
 		$qr = "SELECT od.Qty, od.Price FROM order_details AS od ";
@@ -452,6 +557,7 @@ class Discount_model extends CI_Model
 		return $qr;
 	}
 
+
 	public function getRuleProductId($rule_id)
 	{
 		$qr = "SELECT product_id FROM discount_rule_product WHERE rule_id = {$rule_id}";
@@ -459,8 +565,10 @@ class Discount_model extends CI_Model
 
 		if($qs->num_rows() > 0)
 		{
-			return $rs->result();
+			return $qs->result();
 		}
+
+		return NULL;
 	}
 
 
@@ -469,10 +577,10 @@ class Discount_model extends CI_Model
 		if($rule_id)
 		{
 			$rs = $this->db
-			->select('product_id, product_code, rule_id, id_policy')
-			->from('discount_rule_free_product AS fd')
-			->join('discount_rule AS r', 'fd.rule_id = r.id', 'left')
-			->where('fd.rule_id', $rule_id)
+			->select('f.rule_id, f.product_id, f.product_code, f.sell_price, r.id_policy, r.code, r.name')
+			->from('discount_rule_free_product AS f')
+			->join('discount_rule AS r', 'f.rule_id = r.id', 'left')
+			->where('f.rule_id', $rule_id)
 			->get();
 
 			if($rs->num_rows() > 0)

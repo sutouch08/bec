@@ -9,7 +9,6 @@ function _check_login()
   }
 }
 
-
 function get_permission($menu, $uid = NULL, $id_profile = NULL)
 {
   $CI =& get_instance();
@@ -55,7 +54,6 @@ function get_permission($menu, $uid = NULL, $id_profile = NULL)
   return $pm;
 }
 
-
 function reject_permission()
 {
   $pm = new stdClass();
@@ -67,7 +65,6 @@ function reject_permission()
 
   return $pm;
 }
-
 
 function select_sales_team($id = NULL)
 {
@@ -86,8 +83,6 @@ function select_sales_team($id = NULL)
   return $ds;
 }
 
-
-
 function select_employee($empID = NULL, $active = 0)
 {
   $ds = '';
@@ -105,8 +100,6 @@ function select_employee($empID = NULL, $active = 0)
   return $ds;
 }
 
-
-
 function select_saleman($sale_id = '')
 {
   $ds = '';
@@ -123,7 +116,6 @@ function select_saleman($sale_id = '')
 
   return $ds;
 }
-
 
 function select_user($user_id = NULL)
 {
@@ -143,6 +135,41 @@ function select_user($user_id = NULL)
 	return $ds;
 }
 
+function select_user_id($user_id = NULL)
+{
+  $ds = '';
+  $ci =& get_instance();
+  $ci->load->model('users/user_model');
+  $option = $ci->user_model->get_all_active();
+
+  if( ! empty($option))
+  {
+    foreach($option as $rs)
+    {
+      $ds .= "<option value=\"{$rs->id}\" data-uname=\"{$rs->uname}\" ".is_selected($rs->id, $user_id).">{$rs->uname} | {$rs->name}</option>";
+    }
+  }
+
+  return $ds;
+}
+
+function select_uname($uname = '')
+{
+  $ds = "";
+  $ci =& get_instance();
+  $ci->load->model('users/user_model');
+  $option = $ci->user_model->get_all();
+
+  if( ! empty($option))
+  {
+    foreach($option as $rs)
+    {
+      $ds .= "<option value=\"{$rs->uname}\" data-id=\"{$rs->id}\" ".is_selected($rs->uname, $uname).">{$rs->uname} | {$rs->name}</option>";
+    }
+  }
+
+  return $ds;
+}
 
 function select_profile($id_profile = '')
 {
@@ -171,7 +198,6 @@ function _can_view_page($can_view)
   }
 }
 
-
 function profile_name_in($text)
 {
   if($text !== '')
@@ -180,9 +206,6 @@ function profile_name_in($text)
     $CI->db->select('id');
   }
 }
-
-
-
 
 function user_in($txt)
 {
@@ -202,7 +225,6 @@ function user_in($txt)
   return $sc;
 }
 
-
 function select_quota($code = NULL)
 {
 	$sc = '';
@@ -220,6 +242,14 @@ function select_quota($code = NULL)
 	}
 
 	return $sc;
+}
+
+function display_name($user_id)
+{
+	$ci =& get_instance();
+	$ci->load->model('users/user_model');
+	$user = $ci->user_model->get_by_id($user_id);
+	return $user ? $user->uname.' | '.$user->name : '';
 }
 
 

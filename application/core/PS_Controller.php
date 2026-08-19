@@ -14,16 +14,10 @@ class PS_Controller extends CI_Controller
 
   public function __construct()
   {
-    parent::__construct();
-
-
-    //--- check is user has logged in ?
+    parent::__construct();    
     _check_login();
-
     $uid = get_cookie('uid');
-
 		$this->_user = $this->user_model->get_user_by_uid($uid);
-
 		$this->close_system   = getConfig('CLOSE_SYSTEM'); //--- ปิดระบบทั้งหมดหรือไม่
 		$this->_SuperAdmin = $this->_user->id_profile == -987654321 ? TRUE : FALSE;
 		$this->_customer = empty($this->_user->customer_code) ? FALSE : TRUE;
@@ -55,9 +49,7 @@ class PS_Controller extends CI_Controller
 		{
 			$this->deny_page();
 		}
-
   }
-
 
 	public function is_expire_password($last_pass_change)
 	{
@@ -79,7 +71,6 @@ class PS_Controller extends CI_Controller
 
 		return FALSE;
 	}
-
 
 	public function _response($sc = TRUE)
   {
@@ -105,7 +96,6 @@ class PS_Controller extends CI_Controller
   {
     return $this->load->view('expired_page');
   }
-
 
   public function error_page()
   {

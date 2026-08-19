@@ -21,7 +21,7 @@
     </div>
     <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 padding-5">
     	<p class="pull-right top-p">
-        <button type="button" class="btn btn-xs btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
+        <button type="button" class="btn btn-xs btn-warning top-btn" onclick="goTo('<?php echo $backUrl; ?>')"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
 				<?php if($this->pm->can_add) : ?>
 					<button type="button" class="btn btn-xs btn-primary top-btn" onclick="duplicateSQ('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button>
 				<?php endif; ?>
@@ -29,7 +29,7 @@
 					<button type="button" class="btn btn-xs btn-success top-btn" onclick="createSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Create Sale Order</button>
 				<?php endif; ?>
 				<?php if($this->pm->can_edit && $order->Status == -1) : ?>
-					<button type="button" class="btn btn-xs btn-warning top-btn" onclick="edit('<?php echo $order->code; ?>')"><i class="fa fa-pencil"></i> Edit</button>
+					<button type="button" class="btn btn-xs btn-warning top-btn" onclick="edit('<?php echo $order->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-pencil"></i> Edit</button>
 				<?php endif; ?>
 				<button type="button" class="btn btn-xs btn-info top-btn" onclick="printSQ()"><i class="fa fa-print"></i> Print</button>
 				<?php if(empty($order->DocEntry) && ($order->Status == 3 OR $order->Status == 0) && ($order->Approved == 'A' OR $order->Approved == 'S')) : ?>

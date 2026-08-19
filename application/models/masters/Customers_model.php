@@ -341,5 +341,20 @@ class Customers_model extends CI_Model
 		return $count > 0 ? TRUE : FALSE;
 	}
 
+
+	public function get_credit_details($CardCode)
+	{
+		$qr = "SELECT [CardCode], [CreditLine], [Balance], [DNotesBal], [OrdersBal] FROM BEC2.OCRD WHERE [CardCode] = '{$CardCode}'";
+		$rs = $this->conn->query($this->hana->SQLtoHANA($qr));		
+		$res = $rs->fetchAll();
+
+		if(!empty($res) && count($res) === 1)
+		{
+			return (object) $res[0];
+		}
+		
+		return NULL;
+	}
+
 }
 ?>

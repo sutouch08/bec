@@ -3,10 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Sync_all_customers extends CI_Controller
 {
-  public $title = 'Sync customer master';
-  private $host = "odbc:SAPHANA";
-  private $user = "SYSTEM";
-  private $pwd = "BXSbec2022";
+  public $title = 'Sync customer master';  
   private $conn;
 
   public function __construct()
@@ -22,13 +19,7 @@ class Sync_all_customers extends CI_Controller
   {
 		$this->syncAllCustomers();
 		$this->syncCustomerAddress();
-  }
-
-  public function test_query()
-  {
-
-
-  }
+  }  
 
   public function webCount()
   {

@@ -123,7 +123,7 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="double-scroll">
-		<table class="table table-striped table-hover dataTable border-1" style="min-width:1330px; border-collapse:inherit;">
+		<table class="table table-striped table-hover tableNarrow border-1" style="min-width:1330px; border-collapse:inherit;">
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="fix-width-40 middle text-center">#</th>
@@ -144,6 +144,7 @@
 			</thead>
 			<tbody style="font-size:12px;">
 		<?php if( ! empty($data)) : ?>
+			<?php $pageNo = $this->uri->segment($this->segment); ?>
 			<?php $no = $this->uri->segment($this->segment) + 1; ?>
 			<?php foreach($data as $rs) : ?>
 				<tr>
@@ -184,9 +185,9 @@
 					</td>
 					<td class="middle text-center"><?php echo $rs->uname; ?></td>
 					<td class="middle">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
+						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-eye"></i></button>
 					<?php if($this->pm->can_edit && ($rs->Status == 0 OR $rs->Status == -1 OR $rs->Status == 3)) : ?>
-						<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
+						<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-pencil"></i></button>
 					<?php endif; ?>
 					<?php if($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
 						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>

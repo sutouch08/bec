@@ -12,7 +12,7 @@ function select_product_brand($code = NULL)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= "<option data-id='{$rs->id}' value='{$rs->code}' ".is_selected($rs->code, $code).">{$rs->name}</option>";
+			$ds .= "<option data-id=\"{$rs->id}\" value=\"{$rs->code}\" ".is_selected($rs->code, $code).">{$rs->name}</option>";
 		}
 	}
 
@@ -33,7 +33,7 @@ function select_product_type($code = NULL)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= "<option data-id='{$rs->id}' value='{$rs->code}' ".is_selected($rs->code, $code).">{$rs->name}</option>";
+			$ds .= "<option data-id=\"{$rs->id}\" value=\"{$rs->code}\" ".is_selected($rs->code, $code).">{$rs->name}</option>";
 		}
 	}
 
@@ -208,4 +208,94 @@ function model_in($txt = "")
 }
 
 
- ?>
+function selectItemSKU($id = '')
+{
+	$ds = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/products_model');
+	$option = $ci->products_model->get_all_active();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$ds .= "<option data-id=\"{$rs->id}\" data-code=\"{$rs->code}\" data-name=\"{$rs->name}\" value=\"{$rs->id}\" ".is_selected($rs->id, $id).">{$rs->code} | {$rs->name}</option>";
+		}
+	}
+
+	return $ds;
+}
+
+function selectItemModels($id = '')
+{
+	$ds = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/product_model_model');
+	$option = $ci->product_model_model->get_all();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$ds .= "<option data-id=\"{$rs->id}\" data-code=\"{$rs->code}\" data-name=\"{$rs->name}\" value=\"{$rs->code}\" ".is_selected($rs->id, $id).">{$rs->code} | {$rs->name}</option>";
+		}
+	}
+
+	return $ds;
+}
+
+function selectItemTypes($id = '')
+{
+	$ds = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/product_type_model');
+	$option = $ci->product_type_model->get_all();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$ds .= "<option data-id=\"{$rs->id}\" data-code=\"{$rs->code}\" data-name=\"{$rs->name}\" value=\"{$rs->code}\" ".is_selected($rs->id, $id).">{$rs->code} | {$rs->name}</option>";
+		}
+	}
+
+	return $ds;
+}
+
+function selectItemBrands($id = '')
+{
+	$ds = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/product_brand_model');
+	$option = $ci->product_brand_model->get_all();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$ds .= "<option data-id=\"{$rs->id}\" data-code=\"{$rs->code}\" data-name=\"{$rs->name}\" value=\"{$rs->code}\" ".is_selected($rs->id, $id).">{$rs->code} | {$rs->name}</option>";
+		}
+	}
+
+	return $ds;
+}
+
+function selectItemCategory($id = '')
+{
+	$ds = '';
+	$ci =& get_instance();
+	$ci->load->model('masters/product_category_model');
+	$option = $ci->product_category_model->get_all();
+
+	if( ! empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$ds .= "<option data-id=\"{$rs->id}\" data-code=\"{$rs->code}\" data-name=\"{$rs->name}\" value=\"{$rs->code}\" ".is_selected($rs->id, $id).">{$rs->code} | {$rs->name}</option>";
+		}
+	}
+
+	return $ds;
+}
+
+

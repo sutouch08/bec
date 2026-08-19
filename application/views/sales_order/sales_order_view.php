@@ -20,7 +20,7 @@
     </div>
     <div class="col-sm-6 col-xs-6 padding-5">
     	<p class="pull-right top-p">
-        <button type="button" class="btn btn-xs btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
+        <button type="button" class="btn btn-xs btn-warning" onclick="goTo('<?php echo $backUrl; ?>')"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
 				<?php if($this->pm->can_add) : ?>
 					<button type="button" class="btn btn-xs btn-primary" onclick="duplicateSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button>
 				<?php endif; ?>

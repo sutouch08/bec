@@ -39,39 +39,6 @@ class Customer_address_model extends CI_Model
   }
 
 
-
-
-  // public function count_rows(array $ds = array())
-  // {
-	// 	$this->db
-	// 	->from('customer_address AS ca')
-	// 	->join('customers AS c', 'ca.CardCode = c.CardCode', 'left');
-  //
-	// 	if(isset($ds['address']) && $ds['address'] != "")
-  //   {
-	// 		$this->db->group_start();
-  //     $this->db->like('ca.Address', $ds['address']);
-	// 		$this->db->or_like('ca.Address3', $ds['address']);
-	// 		$this->db->group_end();
-  //   }
-  //
-	// 	if(isset($ds['customer']) && $ds['customer'] != "")
-	// 	{
-	// 		$this->db
-	// 		->group_start()
-	// 		->like('c.CardCode', $ds['customer'])
-	// 		->or_like('c.CardName', $ds['customer'])
-	// 		->group_end();
-	// 	}
-  //
-	// 	if($ds['type'] != "all")
-	// 	{
-	// 		$this->db->where('ca.AdresType', $ds['type']);
-	// 	}
-  //
-  //   return $this->db->count_all_results();
-  // }
-
   public function count_rows(array $ds = array())
   {
 		if(isset($ds['address']) && $ds['address'] != "")
@@ -98,46 +65,6 @@ class Customer_address_model extends CI_Model
 
     return $this->db->count_all_results($this->tb);
   }
-
-
-  // public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
-  // {
-	// 	$this->db
-	// 	->select('ca.*, c.CardName')
-	// 	->from('customer_address AS ca')
-	// 	->join('customers AS c', 'ca.CardCode = c.CardCode', 'left');
-  //
-	// 	if(isset($ds['address']) && $ds['address'] != "")
-  //   {
-	// 		$this->db->group_start();
-  //     $this->db->like('ca.Address', $ds['address']);
-	// 		$this->db->or_like('ca.Address3', $ds['address']);
-	// 		$this->db->group_end();
-  //   }
-  //
-	// 	if(isset($ds['customer']) && $ds['customer'] != "")
-	// 	{
-	// 		$this->db
-	// 		->group_start()
-	// 		->like('c.CardCode', $ds['customer'])
-	// 		->or_like('c.CardName', $ds['customer'])
-	// 		->group_end();
-	// 	}
-  //
-	// 	if($ds['type'] != "all")
-	// 	{
-	// 		$this->db->where('ca.AdresType', $ds['type']);
-	// 	}
-  //
-  //   $rs = $this->db->order_by('ca.CardCode', 'ASC')->limit($perpage, $offset)->get();
-  //
-  //   if($rs->num_rows() > 0)
-  //   {
-  //     return $rs->result();
-  //   }
-  //
-  //   return NULL;
-  // }
 
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {

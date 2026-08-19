@@ -30,6 +30,7 @@ class Quotation extends PS_Controller
 		$this->load->helper('warehouse');
 		$this->load->helper('channels');
 		$this->load->helper('payment_term');
+		$this->load->helper('projects');
 
 		$this->readOnly = getConfig('CLOSE_SYSTEM') == 2 ? TRUE : FALSE;
   }
@@ -321,7 +322,7 @@ class Quotation extends PS_Controller
 
 
 
-  public function edit($code)
+  public function edit($code, $pageNo = 0)
   {
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/customer_address_model');
@@ -363,7 +364,8 @@ class Quotation extends PS_Controller
 					'totalVat' => $totalVat,
 					'whsList' => $this->warehouse_model->get_listed(),
 					'quotaList' => $this->quota_model->get_all_listed(),
-					'logs' => $this->quotation_model->get_logs($code)
+					'logs' => $this->quotation_model->get_logs($code),
+					'backUrl' => $this->home.'/index/'.$pageNo,
 				);
 
 				$this->load->view('quotation/quotation_edit', $ds);
@@ -838,7 +840,7 @@ class Quotation extends PS_Controller
 
 
 
-	public function view_detail($code)
+	public function view_detail($code, $pageNo = 0)
 	{
 		$this->load->model('users/approver_model');
 		$this->load->model('masters/sales_person_model');
@@ -871,7 +873,9 @@ class Quotation extends PS_Controller
 				'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
 				'owner' => $this->employee_model->get_name($order->OwnerCode),
 				'dimCode' => $this->parseDimCode($order->dimCode1, $order->dimCode2, $order->dimCode3, $order->dimCode4, $order->dimCode5),
-				'logs' => $this->quotation_model->get_logs($code)
+				'logs' => $this->quotation_model->get_logs($code),
+				'backUrl' => $this->home.'/index/'.$pageNo,
+				'pageNo' => $pageNo
 			);
 
 			$this->load->view('quotation/quotation_view', $ds);

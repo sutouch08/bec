@@ -8,8 +8,6 @@ class User_model extends CI_Model
     parent::__construct();
   }
 
-
-
   public function add(array $data = array())
   {
     if(!empty($data))
@@ -25,9 +23,6 @@ class User_model extends CI_Model
     return FALSE;
   }
 
-
-
-
   public function update($id, array $ds = array())
   {
     if(!empty($ds))
@@ -38,14 +33,10 @@ class User_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function delete($id)
   {
     return $this->db->where('id', $id)->delete($this->tb);
   }
-
-
 
   public function get($id)
   {
@@ -67,6 +58,16 @@ class User_model extends CI_Model
     return FALSE;
   }
 
+	public function get_by_id($id)
+	{
+		$rs = $this->db->where('id', $id)->get($this->tb);
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
 
   public function get_user_by_uid($uid)
   {
@@ -78,7 +79,6 @@ class User_model extends CI_Model
 
     return FALSE;
   }
-
 
   public function get_by_uname($uname)
   {
@@ -101,8 +101,6 @@ class User_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function get_name($uname)
   {
     $rs = $this->db->where('uname', $uname)->get($this->tb);
@@ -114,7 +112,16 @@ class User_model extends CI_Model
     return "";
   }
 
+	public function get_name_by_id($id)
+	{
+		$rs = $this->db->select('name')->where('id', $id)->get($this->tb);
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->name;
+		}
 
+		return NULL;
+	}
 
 	public function get_all()
 	{
@@ -128,7 +135,6 @@ class User_model extends CI_Model
 		return NULL;
 	}
 
-
 	public function get_all_active()
 	{
 		$rs = $this->db->where('id >', 0, FALSE)->where('active', 1)->get($this->tb);
@@ -141,7 +147,6 @@ class User_model extends CI_Model
 		return NULL;
 	}
 
-
 	public function get_all_batch_no()
 	{
 		$rs = $this->db->distinct()->select('batch_no')->where('batch_no IS NOT NULL', NULL, FALSE)->get($this->tb);
@@ -153,8 +158,6 @@ class User_model extends CI_Model
 
 		return NULL;
 	}
-
-
 
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
@@ -225,9 +228,6 @@ class User_model extends CI_Model
 		}
 	}
 
-
-
-
   public function count_rows(array $ds = array())
   {
 		$this->db
@@ -290,8 +290,6 @@ class User_model extends CI_Model
     return $this->db->count_all_results();
   }
 
-
-
   public function get_permission($menu, $id_profile)
   {
     if(!empty($menu))
@@ -320,8 +318,6 @@ class User_model extends CI_Model
     return FALSE;
   }
 
-
-
   private function get_profile_permission($menu, $id_profile)
   {
     $rs = $this->db
@@ -336,8 +332,6 @@ class User_model extends CI_Model
 
 		return FALSE;
   }
-
-
 
   public function is_exists_uname($uname, $id = NULL)
   {
@@ -356,8 +350,6 @@ class User_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function is_exists_display_name($dname, $id = NULL)
   {
     if( ! empty($id))
@@ -375,16 +367,12 @@ class User_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function get_user_credentials($uname)
   {
     $this->db->where('uname', $uname);
     $rs = $this->db->get($this->tb);
     return $rs->row();
   }
-
-
 
   public function verify_uid($uid)
   {
@@ -395,8 +383,6 @@ class User_model extends CI_Model
 
     return $rs->num_rows() === 1 ? TRUE : FALSE;
   }
-
-
 
 	public function has_transection($id)
 	{

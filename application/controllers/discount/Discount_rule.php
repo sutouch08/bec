@@ -16,9 +16,8 @@ class Discount_rule extends PS_Controller
     $this->load->model('discount/discount_policy_model');
     $this->load->model('discount/discount_rule_model');
 		$this->load->helper('discount_policy');
-    $this->load->helper('discount_rule');
+    $this->load->helper('discount_rule');		
   }
-
 
   public function index()
   {
@@ -27,26 +26,26 @@ class Discount_rule extends PS_Controller
 			'name' => get_filter('name', 'rule_name', ''),
 			'active' => get_filter('active', 'rule_active', 'all'),
 			'type' => get_filter('type', 'rule_type', 'all'),
-			'policy' => get_filter('policy', 'rule_policy', ''),
-			'priority' => get_filter('priority', 'rule_priority', 'all')
+			'policy' => get_filter('policy', 'rule_policy', 'all'),
+			'priority' => get_filter('priority', 'rule_priority', 'all'),
+			'fromDate' => get_filter('fromDate', 'rule_fromDate', ''),
+			'toDate' => get_filter('toDate', 'rule_toDate', '')
 		);
 
-		$perpage = get_rows();
-
-
-		$rows = $this->discount_rule_model->count_rows($filter);
-
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-
-		$filter['data'] = $this->discount_rule_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-
-  	$this->pagination->initialize($init);
-
-    $this->load->view('discount/rule/rule_list', $filter);
+		if($this->input->post('search'))
+		{
+			redirect($this->home);
+		}
+		else 
+		{
+			$perpage = get_rows();
+			$rows = $this->discount_rule_model->count_rows($filter);			
+			$filter['data'] = $this->discount_rule_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+			$init	= pagination_config($this->home . '/index/', $rows, $perpage, $this->segment);
+			$this->pagination->initialize($init);
+			$this->load->view('discount/rule/rule_list', $filter);
+		}		
   }
-
-
 
   public function add_new()
   {
@@ -61,37 +60,385 @@ class Discount_rule extends PS_Controller
     }
   }
 
-
-
   public function add()
   {
 		$sc = TRUE;
-
+		$id = NULL;
+		$code = NULL;
+		
     if($this->pm->can_add)
     {
-      if($this->input->post('name'))
-      {
-        $code = $this->get_new_code();
-        $name = trim($this->input->post('name'));
+      $ds = json_decode($this->input->post('data'));			
 
-        $arr = array(
-          'code' => $code,
-          'name' => $name,
-          'user' => $this->_user->uname
-        );
-
-        $id = $this->discount_rule_model->add($arr);
-
-        if(! $id)
-        {
-          set_error('insert');
-        }
-      }
-      else
-      {
-        $sc = FALSE;
+			if(empty($ds))
+			{
+				$sc = FALSE;
 				set_error('required');
-      }
+			}
+
+			if($sc === TRUE)
+			{
+				$code = $this->get_new_code();
+				$arr = array(
+					"code" => $code,
+					"name" => $ds->name,
+					"type" => $ds->type,
+					"id_policy" => get_null($ds->id_policy),
+					"all_product" => $ds->all_products,
+					"all_customer" => $ds->all_customers,
+					"all_channels" => $ds->all_channels,
+					"all_payment" => $ds->all_payments,
+					"minQty" => $ds->min_qty,
+					"minAmount" => $ds->min_amount,
+					"freeQty" => $ds->premium_qty,
+					"canGroup" => $ds->can_group,
+					"priority" => $ds->priority,
+					"active" => $ds->active,
+					"user" => $this->_user->uname
+				);
+
+				if( ! empty($ds->discount))
+				{
+					foreach($ds->discount as $disc)
+					{
+						$arr['disc'.$disc->step] = $disc->discount;
+					}
+				}
+
+				$this->db->trans_begin();
+
+				$id = $this->discount_rule_model->add($arr);
+
+				if( ! $id)
+				{
+					$sc = FALSE;
+					$this->error = "Insert discount rule failed";
+				}
+
+				if($sc === TRUE)
+				{
+					//--- set all product
+					if( ! $ds->all_products)
+					{
+						if( ! empty($ds->products))
+						{
+							foreach($ds->products as $pd)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"product_id" => $pd->id,
+									"product_code" => $pd->code,
+									"sell_price" => $pd->sell_price
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_product($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product rule failed";
+									break;
+								}
+							}
+						}
+
+						if($sc === TRUE && ! empty($ds->models))
+						{
+							foreach($ds->models as $model)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"model_id" => $model->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_product_model($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product model rule failed";
+									break;
+								}
+							}
+						}
+
+						if($sc === TRUE && ! empty($ds->product_categories))
+						{
+							foreach($ds->product_categories as $cate)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"category_id" => $cate->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_product_category($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product category rule failed";
+									break;
+								}
+							}
+						}
+
+						if($sc === TRUE && ! empty($ds->product_types))
+						{
+							foreach($ds->product_types as $type)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"type_id" => $type->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_product_type($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product type rule failed";
+									break;
+								}
+							}
+						}
+
+						if($sc === TRUE && ! empty($ds->product_brands))
+						{
+							foreach($ds->product_brands as $brand)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"brand_id" => $brand->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_product_brand($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product brand rule failed";
+									break;
+								}
+							}
+						}
+					} //--- end if all_products == false
+
+					if($sc === TRUE && ! empty($ds->exclude_products))
+					{
+						foreach($ds->exclude_products as $item)
+						{
+							$arr = array(
+								"rule_id" => $id,
+								"product_id" => $item->id,
+								"product_code" => $item->code
+							);
+
+							if( ! $this->discount_rule_model->set_discount_rule_exclude_product($arr))
+							{
+								$sc = FALSE;
+								$this->error = "Insert exclude product rule failed";
+								break;
+							}
+						}
+					}
+
+					if($ds->type == 'F' && ! empty($ds->premiums))
+					{
+						foreach($ds->premiums as $item)
+						{
+							$arr = array(
+								"rule_id" => $id,
+								"product_id" => $item->id,
+								"product_code" => $item->code,
+								"sell_price" => $item->sell_price
+							);
+
+							if( ! $this->discount_rule_model->set_discount_rule_free_product($arr))
+							{
+								$sc = FALSE;
+								$this->error = "Insert free item rule failed";
+								break;
+							}
+						}
+					}
+
+					//--- set all customer
+					if( ! $ds->all_customers)
+					{
+						if($sc === TRUE && ! empty($ds->customers))
+						{
+							foreach($ds->customers as $cus)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"customer_id" => $cus->id,
+									"customer_code" => $cus->code,
+									"customer_name" => $cus->name
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_customer($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer rule failed";
+									break;
+								}
+							}
+						}
+
+						if($sc === TRUE && ! empty($ds->sales_teams))
+						{
+							foreach($ds->sales_teams as $team)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"region_id" => $team->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_customer_region($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert sales team rule failed";
+									break;
+								}
+							}
+						}
+
+						if($sc === TRUE && ! empty($ds->customer_groups))
+						{
+							foreach($ds->customer_groups as $group)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"group_code" => $group->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_customer_group($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer group rule failed";
+									break;
+								}
+							}
+						}
+
+						if($sc === TRUE && ! empty($ds->customer_types))
+						{
+							foreach($ds->customer_types as $type)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"type_id" => $type->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_customer_type($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer type rule failed";
+									break;
+								}
+							}
+						}						
+
+						if($sc === TRUE && ! empty($ds->customer_areas))
+						{
+							foreach($ds->customer_areas as $area)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"area_id" => $area->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_customer_area($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer area rule failed";
+									break;
+								}
+							}
+						}
+
+						if($sc === TRUE && ! empty($ds->customer_grades))
+						{
+							foreach($ds->customer_grades as $grade)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"grade_id" => $grade->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_customer_grade($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer grade rule failed";
+									break;
+								}
+							}
+						}
+					} //--- end if all_customers == false
+
+					if( ! $ds->all_channels)
+					{
+						if($sc === TRUE && ! empty($ds->channels))
+						{
+							foreach($ds->channels as $ch)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"channels_id" => $ch->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_channels($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert channel rule failed";
+									break;
+								}
+							}
+						}
+					} //--- end if all_channels == false
+
+					if( ! $ds->all_payments)
+					{
+						if($sc === TRUE && ! empty($ds->payments))
+						{
+							foreach($ds->payments as $pay)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"payment_id" => $pay->id
+								);
+
+								if( ! $this->discount_rule_model->set_discount_rule_payment($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert payment rule failed";
+									break;
+								}
+							}
+						}
+					} //--- end if all_payments == false					
+				} //-- end if sc == true
+
+				if($sc === TRUE)
+				{
+					$this->db->trans_commit();
+
+					if(! empty($ds->id_policy))
+					{
+						$arr = array(
+							'active' => 0,
+							'update_user' => $this->_user->uname,
+							'date_upd' => now()
+						);
+
+						if($this->discount_policy_model->update($ds->id_policy, $arr))
+						{
+							$logs = array(
+								"policy_id" => $ds->id_policy,
+								"action" => "discount rule added",
+								"reference" => $code,
+								"user" => $this->_user->uname
+							);
+
+							$this->discount_policy_model->add_logs($logs);
+						}
+					}
+				}
+				else
+				{
+					$this->db->trans_rollback();
+				}
+			}
     }
     else
     {
@@ -99,54 +446,37 @@ class Discount_rule extends PS_Controller
 			set_error('permission');
     }
 
-		echo $sc === TRUE ? $id : $this->error;
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'error',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'id' => $id
+		);
+
+		echo json_encode($arr);
   }
 
-
-
-  public function edit($id, $tab = "discount")
+  public function edit($id, $pageNo = 0)
   {
-		if($this->pm->can_add OR $this->pm->can_edit)
-		{
-			$this->load->model('masters/channels_model');
-			$this->load->model('masters/payment_term_model');
-			$this->load->model('masters/customers_model');
-			$this->load->model('masters/customer_group_model');
-			$this->load->model('masters/customer_type_model');
-			//$this->load->model('masters/customer_region_model');
-			$this->load->model('masters/customer_area_model');
-			$this->load->model('masters/customer_grade_model');
-			$this->load->model('masters/products_model');
-			$this->load->model('masters/product_model_model');
-			$this->load->model('masters/product_category_model');
-			$this->load->model('masters/product_type_model');
-			$this->load->model('masters/product_brand_model');
-
+		if($this->pm->can_edit)
+		{			
 			$data = array(
-				"rule" => $this->discount_rule_model->get($id),
-				"channels" => $this->channels_model->get_all(),
-				"payments" => $this->payment_term_model->get_all(),
-				"cusList" => $this->discount_rule_model->getRuleCustomerId($id),
-				"custGroup" => $this->discount_rule_model->getRuleCustomerGroup($id),
-				"custType" => $this->discount_rule_model->getRuleCustomerType($id),
-				"custRegion" => $this->discount_rule_model->getRuleCustomerRegion($id),
-				"custArea" => $this->discount_rule_model->getRuleCustomerArea($id),
-				"custGrade" => $this->discount_rule_model->getRuleCustomerGrade($id),
-				"customer_groups" => $this->customer_group_model->get_all(),
-				"customer_types" => $this->customer_type_model->get_all(),
-				"customer_regions" => $this->customers_model->get_customer_sales_team_list(),//$this->customer_region_model->get_all(),
-				"customer_areas" => $this->customer_area_model->get_all(),
-				"customer_grades" => $this->customer_grade_model->get_all(),
-				"pdList" => $this->discount_rule_model->getRuleProductId($id),
-				"pdModel" => $this->discount_rule_model->getRuleProductModel($id),
-				"pdType" => $this->discount_rule_model->getRuleProductType($id),
-				"pdCategory" => $this->discount_rule_model->getRuleProductCategory($id),
-				"pdBrand" => $this->discount_rule_model->getRuleProductBrand($id),
-				"product_categorys" => $this->product_category_model->get_by_level(5),
-				"product_types" => $this->product_type_model->get_all(),
-				"product_brands" => $this->product_brand_model->get_all(),
-				"free_items" => $this->discount_rule_model->getRuleFreeProduct($id),
-				"tab" => $tab
+				"rule" => $this->discount_rule_model->get($id),				
+				"customers" => $this->discount_rule_model->getRuleCustomerId($id),
+				"custGroups" => $this->discount_rule_model->getRuleCustomerGroup($id),
+				"custTypes" => $this->discount_rule_model->getRuleCustomerType($id),
+				"custRegions" => $this->discount_rule_model->getRuleCustomerRegion($id),
+				"custAreas" => $this->discount_rule_model->getRuleCustomerArea($id),
+				"custGrades" => $this->discount_rule_model->getRuleCustomerGrade($id),
+				"products" => $this->discount_rule_model->getRuleProductId($id),
+				"pdModels" => $this->discount_rule_model->getRuleProductModel($id),
+				"pdTypes" => $this->discount_rule_model->getRuleProductType($id),
+				"pdCategories" => $this->discount_rule_model->getRuleProductCategory($id),
+				"pdBrands" => $this->discount_rule_model->getRuleProductBrand($id),
+				"premiums" => $this->discount_rule_model->getRuleFreeProduct($id),
+				"pdExclude" => $this->discount_rule_model->getRuleExcludeProduct($id),
+				"channels" => $this->discount_rule_model->getRuleChannels($id),
+				"payments" => $this->discount_rule_model->getRulePayment($id),
+				"backUrl" => $this->home . '/index/' . $pageNo,
 			);
 
 			$this->load->view('discount/rule/rule_edit', $data);
@@ -158,104 +488,664 @@ class Discount_rule extends PS_Controller
 		}
   }
 
-
-
-  public function update_rule($id)
-  {
-    $arr = array(
-      'name' => $this->input->post('name'),
-      'active' => $this->input->post('active')
-    );
-
-    $rs = $this->discount_rule_model->update($id, $arr);
-
-    echo $rs === TRUE ? 'success' : 'แก้ไขรายการไม่สำเร็จ';
-  }
-
-
-
-
-  //---- set discount on discount tab
-  public function set_discount()
-  {
-    $sc = TRUE;
-
-		if($this->input->post('rule_id') && $this->input->post('discType'))
+	public function update()
+	{
+		$sc = TRUE;
+		$id = NULL;
+		$promo_id = NULL;
+		
+		if ($this->pm->can_edit)
 		{
-			$rule_id  = $this->input->post('rule_id');
-			$discType = $this->input->post('discType');
-			$price = $this->input->post('price');
-			$disc1 = $this->input->post('disc1');
-			$disc2 = $this->input->post('disc2');
-			$disc3 = $this->input->post('disc3');
-			$disc4 = $this->input->post('disc4');
-			$disc5 = $this->input->post('disc5');
-			$freeQty = $this->input->post('freeQty');
-			$minQty   = $this->input->post('minQty');
-	    $minAmount = $this->input->post('minAmount');
-	    $canGroup = $this->input->post('canGroup');
-			$freeItems = $this->input->post('freeItems');
-			$priority = $this->input->post('priority');
+			$ds = json_decode($this->input->post('data'));
 
-			$arr = array(
-				"minQty" => $minQty,
-				"minAmount" => $minAmount,
-				"canGroup" => $canGroup,
-				"type" => $discType,
-				"price" => $discType == 'N' ? $price : 0.00,
-				"freeQty" => $freeQty,
-				"disc1" => $discType == 'P' ? $disc1 : 0.00,
-				"disc2" => $discType == 'P' ? $disc2 : 0.00,
-				"disc3" => $discType == 'P' ? $disc3 : 0.00,
-				"disc4" => $discType == 'P' ? $disc4 : 0.00,
-				"disc5" => $discType == 'P' ? $disc5 : 0.00,
-				"priority" => $priority,
-				"update_user" => $this->_user->uname
-			);
-
-			$this->db->trans_begin();
-
-			//--- drop free items
-			if( ! $this->discount_rule_model->drop_free_product($rule_id))
+			if (empty($ds))
 			{
 				$sc = FALSE;
-				$this->error = "Delete Free item rule failed";
+				set_error('required');
 			}
 
-			if($sc === TRUE && ! $this->discount_rule_model->update($rule_id, $arr))
+			if($sc === TRUE)
 			{
-				$sc = FALSE;
-				$this->error = "Update discount rule failed";
-			}
+				$id = $ds->id;
+				$rule = $this->discount_rule_model->get($id);
 
-			if($sc === TRUE && ! empty($freeItems))
-			{
-				$this->load->model('masters/products_model');
-
-				foreach($freeItems as $id => $qty)
+				if (empty($rule))
 				{
-					if($sc === FALSE)
+					$sc = FALSE;
+					set_error('not_found');
+				}
+				else 
+				{
+					$promo_id = $rule->id_policy;
+				}
+			}
+
+			if ($sc === TRUE)
+			{
+				$arr = array(					
+					"name" => $ds->name,
+					"type" => $ds->type,
+					"id_policy" => get_null($ds->id_policy),
+					"all_product" => $ds->all_products,
+					"all_customer" => $ds->all_customers,
+					"all_channels" => $ds->all_channels,
+					"all_payment" => $ds->all_payments,
+					"minQty" => $ds->min_qty,
+					"minAmount" => $ds->min_amount,
+					"freeQty" => $ds->premium_qty,
+					"canGroup" => $ds->can_group,
+					"priority" => $ds->priority,
+					"active" => $ds->active,
+					"update_user" => $this->_user->uname
+				);
+
+				if (! empty($ds->discount))
+				{
+					foreach ($ds->discount as $disc)
 					{
-						break;
+						$arr['disc' . $disc->step] = $disc->discount;
+					}
+				}
+
+				$this->db->trans_begin();			
+
+				if (! $this->discount_rule_model->update($id, $arr))
+				{
+					$sc = FALSE;
+					$this->error = "Update discount rule failed";
+				}
+
+				//--- clear all rule details
+				if($sc === TRUE)
+				{
+					if( ! $this->discount_rule_model->drop_rule_product($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete product rule failed";
 					}
 
-					$pd = $this->products_model->get_code_and_name($id);
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_model($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete product model rule failed";
+					}
 
-					if( ! empty($pd))
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_category($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete product category rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_type($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete product type rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_brand($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete product brand rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_exclude_product($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete exclude product rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_free_product($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete free item rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete customer rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_group($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete customer group rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_type($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete customer type rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_region($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete customer region rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_area($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete customer area rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_grade($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete customer grade rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_channels($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete channel rule failed";
+					}
+
+					if($sc === TRUE && ! $this->discount_rule_model->drop_rule_payment($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete payment rule failed";
+					}
+				}
+
+				if ($sc === TRUE)
+				{
+					//--- set all product
+					if (! $ds->all_products)
+					{
+						if (! empty($ds->products))
+						{
+							foreach ($ds->products as $pd)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"product_id" => $pd->id,
+									"product_code" => $pd->code,
+									"sell_price" => $pd->sell_price
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_product($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->models))
+						{
+							foreach ($ds->models as $model)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"model_id" => $model->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_product_model($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product model rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->product_categories))
+						{
+							foreach ($ds->product_categories as $cate)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"category_id" => $cate->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_product_category($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product category rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->product_types))
+						{
+							foreach ($ds->product_types as $type)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"type_id" => $type->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_product_type($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product type rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->product_brands))
+						{
+							foreach ($ds->product_brands as $brand)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"brand_id" => $brand->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_product_brand($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert product brand rule failed";
+									break;
+								}
+							}
+						}
+					} //--- end if all_products == false
+
+					if ($sc === TRUE && ! empty($ds->exclude_products))
+					{
+						foreach ($ds->exclude_products as $item)
+						{
+							$arr = array(
+								"rule_id" => $id,
+								"product_id" => $item->id,
+								"product_code" => $item->code
+							);
+
+							if (! $this->discount_rule_model->set_discount_rule_exclude_product($arr))
+							{
+								$sc = FALSE;
+								$this->error = "Insert exclude product rule failed";
+								break;
+							}
+						}
+					}
+
+					if ($ds->type == 'F' && ! empty($ds->premiums))
+					{
+						foreach ($ds->premiums as $item)
+						{
+							$arr = array(
+								"rule_id" => $id,
+								"product_id" => $item->id,
+								"product_code" => $item->code,
+								"sell_price" => $item->sell_price
+							);
+
+							if (! $this->discount_rule_model->set_discount_rule_free_product($arr))
+							{
+								$sc = FALSE;
+								$this->error = "Insert free item rule failed";
+								break;
+							}
+						}
+					}
+
+					//--- set all customer
+					if (! $ds->all_customers)
+					{
+						if ($sc === TRUE && ! empty($ds->customers))
+						{
+							foreach ($ds->customers as $cus)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"customer_id" => $cus->id,
+									"customer_code" => $cus->code,
+									"customer_name" => $cus->name
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_customer($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->sales_teams))
+						{
+							foreach ($ds->sales_teams as $team)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"region_id" => $team->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_customer_region($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert sales team rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->customer_groups))
+						{
+							foreach ($ds->customer_groups as $group)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"group_code" => $group->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_customer_group($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer group rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->customer_types))
+						{
+							foreach ($ds->customer_types as $type)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"type_id" => $type->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_customer_type($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer type rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->customer_areas))
+						{
+							foreach ($ds->customer_areas as $area)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"area_id" => $area->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_customer_area($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer area rule failed";
+									break;
+								}
+							}
+						}
+
+						if ($sc === TRUE && ! empty($ds->customer_grades))
+						{
+							foreach ($ds->customer_grades as $grade)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"grade_id" => $grade->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_customer_grade($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert customer grade rule failed";
+									break;
+								}
+							}
+						}
+					} //--- end if all_customers == false
+
+					if (! $ds->all_channels)
+					{
+						if ($sc === TRUE && ! empty($ds->channels))
+						{
+							foreach ($ds->channels as $ch)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"channels_id" => $ch->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_channels($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert channel rule failed";
+									break;
+								}
+							}
+						}
+					} //--- end if all_channels == false
+
+					if (! $ds->all_payments)
+					{
+						if ($sc === TRUE && ! empty($ds->payments))
+						{
+							foreach ($ds->payments as $pay)
+							{
+								$arr = array(
+									"rule_id" => $id,
+									"payment_id" => $pay->id
+								);
+
+								if (! $this->discount_rule_model->set_discount_rule_payment($arr))
+								{
+									$sc = FALSE;
+									$this->error = "Insert payment rule failed";
+									break;
+								}
+							}
+						}
+					} //--- end if all_payments == false					
+				} //-- end if sc == true
+
+				if ($sc === TRUE)
+				{
+					$this->db->trans_commit();
+
+					if(!empty($promo_id))
 					{
 						$arr = array(
-							"rule_id" => $rule_id,
-							"product_id" => $id,
-							"product_code" => $pd->code,
+							'active' => 0,
+							'update_user' => $this->_user->uname,
+							'date_upd' => now()
 						);
 
-						if( ! $this->discount_rule_model->set_discount_rule_free_product($arr))
+						if($this->discount_policy_model->update($promo_id, $arr))
 						{
-							$sc = FALSE;
-							$this->error = "Set free Items failed";
+							$logs = array(
+								'policy_id' => $promo_id,
+								'action' => 'discount rule changed',
+								'reference' => $rule->code,
+								'user' => $this->_user->uname,
+								'date_upd' => now()
+							);
+
+							$this->discount_policy_model->add_logs($logs);
+						}
+					}
+
+					if(!empty($ds->id_policy) && $ds->id_policy != $promo_id)
+					{
+						$arr = array(
+							'active' => 0,
+							'update_user' => $this->_user->uname,
+							'date_upd' => now()
+						);
+
+						if($this->discount_policy_model->update($ds->id_policy, $arr))
+						{
+							$logs = array(
+								'policy_id' => $ds->id_policy,
+								'action' => 'discount rule added',
+								'reference' => $rule->code,
+								'user' => $this->_user->uname,
+								'date_upd' => now()
+							);
+
+							$this->discount_policy_model->add_logs($logs);
 						}
 					}
 				}
+				else
+				{
+					$this->db->trans_rollback();
+				}
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('permission');
+		}
+
+		$this->_response($sc);
+	}
+
+	public function view_detail($id, $pageNo = 0)
+	{
+		$rule = $this->discount_rule_model->get($id);
+
+		if(!empty($rule))
+		{
+			$promo = $this->discount_policy_model->get($rule->id_policy);
+
+			$data = array(
+				"rule" => $this->discount_rule_model->get($id),
+				"promotion" => $promo,
+				"customers" => $this->discount_rule_model->getRuleCustomerId($id),
+				"custGroups" => $this->discount_rule_model->getRuleCustomerGroup($id),
+				"custTypes" => $this->discount_rule_model->getRuleCustomerType($id),
+				"custRegions" => $this->discount_rule_model->getRuleCustomerRegion($id),
+				"custAreas" => $this->discount_rule_model->getRuleCustomerArea($id),
+				"custGrades" => $this->discount_rule_model->getRuleCustomerGrade($id),
+				"products" => $this->discount_rule_model->getRuleProductId($id),
+				"pdModels" => $this->discount_rule_model->getRuleProductModel($id),
+				"pdTypes" => $this->discount_rule_model->getRuleProductType($id),
+				"pdCategories" => $this->discount_rule_model->getRuleProductCategory($id),
+				"pdBrands" => $this->discount_rule_model->getRuleProductBrand($id),
+				"premiums" => $this->discount_rule_model->getRuleFreeProduct($id),
+				"pdExclude" => $this->discount_rule_model->getRuleExcludeProduct($id),
+				"channels" => $this->discount_rule_model->getRuleChannels($id),
+				"payments" => $this->discount_rule_model->getRulePayment($id),
+				"backUrl" => $this->home . '/index/' . $pageNo,
+			);
+
+			$this->load->view('discount/rule/rule_view', $data);			
+		}
+		else
+		{
+			$this->load->view('page_error');
+		}		
+	}  
+
+	public function delete()
+	{
+		$sc = TRUE;
+		$id = $this->input->post('id');
+
+		if($this->pm->can_delete)
+		{
+			$this->db->trans_begin();
+
+			if(! $this->discount_rule_model->drop_rule_product($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete product rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_model($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete product model rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_category($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete product category rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_type($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete product type rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_brand($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete product brand rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_exclude_product($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete exclude product rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_free_product($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete premium product rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete customer rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_group($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete customer group rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_type($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete customer type rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_region($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete sales team rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_area($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete customer area rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_customer_grade($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete customer grade rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_channels($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete channels rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->drop_rule_payment($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete payment rule failed";
+			}
+
+			if($sc === TRUE && ! $this->discount_rule_model->delete($id))
+			{
+				$sc = FALSE;
+				$this->error = "Delete discount rule failed";
 			}
 
 			if($sc === TRUE)
@@ -270,578 +1160,491 @@ class Discount_rule extends PS_Controller
 		else
 		{
 			$sc = FALSE;
-			set_error('required');
+			set_error('permission');
 		}
 
 		$this->_response($sc);
+	}
 
-  }
-
-
-
-
-
-  //---- set rule in customer tab
-  public function set_customer_rule()
-  {
+	public function delete_multiple()
+	{
 		$sc = TRUE;
+		$rules = $this->input->post('rules');
 
-    if($this->input->post('rule_id'))
-    {
-      $rule_id = $this->input->post('rule_id');
-
-      //--- all customer ?
-      $all = $this->input->post('all_customer') == 'Y' ? TRUE : FALSE;
-
-      //--- customer name ?
-      $custId = $this->input->post('customer_id') == 'Y' ? TRUE : FALSE;
-
-      //--- customer group ?
-      $group = $this->input->post('customer_group') == 'Y' ? TRUE : FALSE;
-
-      //--- customer type ?
-      $type = $this->input->post('customer_type') == 'Y' ? TRUE : FALSE;
-
-      //--- customer region ?
-      $region = $this->input->post('customer_region') == 'Y' ? TRUE : FALSE;
-
-      //--- customer area ?
-      $area = $this->input->post('customer_area') == 'Y' ? TRUE : FALSE;
-
-      //--- customer grade ?
-      $grade = $this->input->post('customer_grade') == 'Y' ? TRUE : FALSE;
-
-      if($all === TRUE)
-      {
-        if( ! $this->discount_rule_model->set_all_customer($rule_id, 1))
+		if($this->pm->can_delete)
+		{
+			if(!empty($rules))
+			{
+				foreach($rules as $id)
 				{
-					$sc = FALSE;
-					$this->error = "Set all customer failed";
+					$this->db->trans_begin();
+					
+					$res = TRUE;
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_product($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete product rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_product_model($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete product model rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_product_category($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete product category rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_product_type($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete product type rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_product_brand($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete product brand rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_exclude_product($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete exclude product rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_free_product($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete premium product rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_customer($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete customer rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_customer_group($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete customer group rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_customer_type($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete customer type rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_customer_region($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete sales team rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_customer_area($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete customer area rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_customer_grade($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete customer grade rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_channels($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete channels rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->drop_rule_payment($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete payment rule failed";
+					}
+
+					if($res === TRUE && ! $this->discount_rule_model->delete($id))
+					{
+						$res = FALSE;
+						$this->error = "Delete discount rule failed";
+					}
+
+					if($res === TRUE)
+					{
+						$this->db->trans_commit();
+					}
+					else
+					{
+						$this->db->trans_rollback();
+					}
 				}
-      }
+			}
 			else
 			{
-				//--- เปลี่ยนเงื่อนไข set all_customer = 0
-				if( ! $this->discount_rule_model->set_all_customer($rule_id, 0))
-				{
-					$sc = FALSE;
-					$this->error = "Set all customer failed";
-				}
-
-				//--- กรณีระบุชื่อลูกค้า
-				if($sc === TRUE && $custId === TRUE)
-				{
-					$cusList = $this->input->post('custId');
-
-					if( ! empty($cusList))
-					{
-						$result = $this->discount_rule_model->set_customer_list($rule_id, $cusList);
-						if($result->status === FALSE)
-						{
-							$sc = FALSE;
-							$this->error = $result->message;
-						}
-					}
-				}
-
-				//--- กรณีไม่ระบุชื่อลูกค้า
-				if($sc === TRUE && $custId === FALSE)
-				{
-					$group = $this->input->post('customerGroup');
-					$type  = $this->input->post('customerType');
-					$region  = $this->input->post('customerRegion');
-					$area  = $this->input->post('customerArea');
-					$grade = $this->input->post('customerGrade');
-
-					$result = $this->discount_rule_model->set_customer_attr($rule_id, $group, $type, $region, $area, $grade);
-
-					if($result->status === FALSE)
-					{
-						$sc = FALSE;
-						$this->error = $result->message;
-					}
-				} //--- end if custId == false
+				$sc = FALSE;
+				set_error('required');
 			}
-    }
+		}
 		else
 		{
 			$sc = FALSE;
-			set_error('required');
+			set_error('permission');
+		}
+		
+		$this->_response($sc);
+	}
+
+	public function set_active()
+	{
+		$sc = TRUE;
+		$id = $this->input->post('id');
+		$active = $this->input->post('active');
+
+		$rule = $this->discount_rule_model->get($id);
+
+		if(empty($rule))
+		{
+			$sc = FALSE;
+			$this->error = "Rule not found";
+		}
+
+		if($sc === TRUE && ! $this->discount_rule_model->update($id, array('active' => $active)))
+		{
+			$sc = FALSE;
+			$this->error = "Update active failed";
+		}
+
+		if($sc === TRUE && ! empty($rule->id_policy))
+		{
+			$arr = array(
+				'active' => 0,
+				'update_user' => $this->_user->uname,
+				'date_upd' => now()
+			);
+
+			if($this->discount_policy_model->update($rule->id_policy, $arr))
+			{
+				$logs = array(
+					'policy_id' => $rule->id_policy,
+					'action' => 'discount rule changed',
+					'reference' => $rule->code,
+					'user' => $this->_user->uname,
+					'date_upd' => now()
+				);
+
+				$this->discount_policy_model->add_logs($logs);
+			}
 		}
 
 		echo $sc === TRUE ? 'success' : $this->error;
-  }
+	}
 
-
-
-  public function set_product_rule()
-  {
+	public function get_sku_list()
+	{
 		$sc = TRUE;
-  
-    $rule_id = $this->input->post('rule_id');
+		$this->load->library('excel');
+		$file = isset($_FILES['uploadFile']) ? $_FILES['uploadFile'] : FALSE;
+		$ds = array(); //---- ได้เก็บข้อมูล
+		$setPrice = array(); //--- เก็บราคาสินค้า
 
-    //--- all product ?
-    $all = is_true($this->input->post('all_product'));
-
-		//--- product SKU ?
-		$item = is_true($this->input->post('product_id'));
-
-    //--- product model ?
-    $model = is_true($this->input->post('product_model'));
-
-    //--- product category ?
-    $category = is_true($this->input->post('product_category'));
-
-    //--- product type ?
-    $type = is_true($this->input->post('product_type'));
-
-    //--- product brand ?
-    $brand = is_true($this->input->post('product_brand'));
-
-		$this->db->trans_begin();
-
-		if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product($rule_id))
+		if ($file !== FALSE)
 		{
-			$sc = FALSE;
-			$this->error = "Delete product rule failed";
-		}
+			$path = $this->config->item('upload_path') . 'discount_rule/';
+			$file	= 'uploadFile';
 
-		if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_model($rule_id))
-		{
-			$sc = FALSE;
-			$this->error = "Delete product model rule failed";
-		}
+			$config = array(   // initial config for upload class
+				"allowed_types" => "xlsx",
+				"upload_path" => $path,
+				"file_name"	=> 'Import-discount-sku',
+				"max_size" => 5120,
+				"overwrite" => TRUE
+			);
 
-		if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_category($rule_id))
-		{
-			$sc = FALSE;
-			$this->error = "Delete product category rule failed";
-		}
+			$this->load->library("upload", $config);
 
-		if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_type($rule_id))
-		{
-			$sc = FALSE;
-			$this->error = "Delete product type rule failed";
-		}
-
-		if($sc === TRUE && ! $this->discount_rule_model->drop_rule_product_brand($rule_id))
-		{
-			$sc = FALSE;
-			$this->error = "Delete product brand rule failed";
-		}
-
-    if($sc === TRUE && $all === TRUE)
-    {
-      if( ! $this->discount_rule_model->set_all_product($rule_id, 1))
+			if (! $this->upload->do_upload($file))
 			{
 				$sc = FALSE;
-				$this->error = "Set all product failed";
+				$this->error = $this->upload->display_errors();
 			}
-    }
 
-		if($sc === TRUE && $all === FALSE)
-		{
-			//--- เปลี่ยนเงื่อนไข set all_product = 0
-      if($sc === TRUE && ! $this->discount_rule_model->set_all_product($rule_id, 0))
+			if ($sc === TRUE)
 			{
-				$sc = FALSE;
-				$this->error = "Set all product failed";
+				$info = $this->upload->data();
+				$excel = PHPExcel_IOFactory::load($info['full_path']);
+				$excel->setActiveSheetIndex(0);
+
+				$sheet	= $excel->getSheet(0);
+
+				if (empty($sheet))
+				{
+					$sc = FALSE;
+					$this->error = "Cannot read file or file not contain any data";
+				}
+
+				if ($sc === TRUE)
+				{
+					$rows = $sheet->getHighestRow();
+
+					$i = 1;
+					$j = 1;
+					$k = 1;
+
+					$items = [];
+
+					while ($i <= $rows)
+					{
+						if ($i > 1)
+						{
+							$code = $sheet->getCell("A{$i}")->getValue();
+							$sellPrice = round(parseFloat($sheet->getCell("B{$i}")->getValue()), 2);
+
+							if (! empty($code))
+							{
+								if (empty($items[$j][$code]))
+								{
+									$items[$j][$code] = $code;
+									$setPrice[$code] = $sellPrice;
+
+									$k++;
+
+									if ($k == 20)
+									{
+										$j++;
+										$k = 1;
+									}
+								}
+							}
+
+							$i++;
+						}
+						else
+						{
+							$i++;
+						}
+					}
+
+					if (! empty($items))
+					{
+						foreach ($items as $cs)
+						{
+							$list = $this->get_items($cs);
+
+							if (! empty($list))
+							{
+								foreach ($list as $rs)
+								{
+									$ds[] = (object) array(
+										"id" => $rs->id,
+										"code" => $rs->code,
+										"name" => $rs->name,
+										"price" => number($rs->price,2),
+										"sell_price" => isset($setPrice[$rs->code]) ? $setPrice[$rs->code] : 0
+									);
+								}
+							}
+						}
+					}
+				} //--- $sc
 			}
-
-			//--- set discount rule produt
-			if($sc === TRUE && $item === TRUE)
-			{
-				$items = $this->input->post('productId');
-
-				if( ! empty($items))
-				{
-					$this->load->model('masters/products_model');
-
-					foreach($items as $product_id)
-					{
-						if($sc === FALSE)
-						{
-							break;
-						}
-
-						$pd = $this->products_model->get_code_and_name($product_id);
-
-						if(! empty($pd))
-						{
-							$arr = array(
-								"rule_id" => $rule_id,
-								"product_id" => $pd->id,
-								"product_code" => $pd->code
-							);
-
-							if( ! $this->discount_rule_model->set_discount_rule_product($arr))
-							{
-								$sc = FALSE;
-								$this->error = "Insert product rule failed";
-							}
-						}
-					}
-				}
-			}
-
-			//--- set discount rule produt model
-			if($sc === TRUE && $model === TRUE)
-			{
-				$modelList = $this->input->post('modelId');
-
-				if( ! empty($modelList))
-				{
-
-					foreach($modelList as $model_id)
-					{
-						if($sc === FALSE)
-						{
-							break;
-						}
-
-						$arr = array(
-							"rule_id" => $rule_id,
-							"model_id" => $model_id
-						);
-
-
-						if( ! $this->discount_rule_model->set_discount_rule_product_model($arr))
-						{
-							$sc = FALSE;
-							$this->error = "Insert product rule failed";
-						}
-					}
-				}
-			}
-
-      //--- กรณีไม่ระบุชื่อสินค้า
-      if($sc === TRUE && $model === FALSE && $item === FALSE)
-      {
-				//--- set discount rule product category
-				if($category === TRUE)
-				{
-					$cateList = $this->input->post('productCategory');
-
-					if( ! empty($cateList))
-					{
-						foreach($cateList as $cate_id)
-						{
-							if($sc === FALSE)
-							{
-								break;
-							}
-
-							$arr = array(
-								"rule_id" => $rule_id,
-								"category_id" => $cate_id
-							);
-
-							if( ! $this->discount_rule_model->set_discount_rule_product_category($arr))
-							{
-								$sc = FALSE;
-								$this->error = "Insert product category failed";
-							}
-						}
-					}
-				}
-
-				//--- set rule product type
-				if($type === TRUE)
-				{
-					$typeList = $this->input->post('productType');
-
-					if( ! empty($typeList))
-					{
-						foreach($typeList as $type_id)
-						{
-							if($sc === FALSE)
-							{
-								break;
-							}
-
-							$arr = array(
-								"rule_id" => $rule_id,
-								"type_id" => $type_id
-							);
-
-							if( ! $this->discount_rule_model->set_discount_rule_product_type($arr))
-							{
-								$sc = FALSE;
-								$this->error = "Insert product type failed";
-							}
-						}
-					}
-				}
-
-				//--- set rule product brand
-				if($brand === TRUE)
-				{
-					$brandList = $this->input->post('productBrand');
-
-					if( ! empty($brandList))
-					{
-						foreach($brandList as $brand_id)
-						{
-							if($sc === FALSE)
-							{
-								break;
-							}
-
-							$arr = array(
-								"rule_id" => $rule_id,
-								"brand_id" => $brand_id
-							);
-
-							if( ! $this->discount_rule_model->set_discount_rule_product_brand($arr))
-							{
-								$sc = FALSE;
-								$this->error = "Insert product brand failed";
-							}
-						}
-					}
-				}
-      }
-		}
-
-		if($sc === TRUE)
-		{
-			$this->db->trans_commit();
 		}
 		else
 		{
-			$this->db->trans_rollback();
-		}
-
-		$this->_response($sc);
-  }
-
-
-
-  public function set_channels_rule()
-  {
-		$sc = TRUE;
-
-    $rule_id = $this->input->post('rule_id');
-
-    //--- all channels ?
-    $all = is_true($this->input->post('all_channels'));
-		$chList = $this->input->post('channels');
-
-		$this->db->trans_begin();
-
-		//--- drop rule channels
-		if( ! $this->discount_rule_model->drop_rule_channels($rule_id))
-		{
 			$sc = FALSE;
-			$this->error = "Delete rule channels failed";
+			$this->error = "Upload file not found";
 		}
 
-    if($sc === TRUE && $all === TRUE)
-    {
-      if( ! $this->discount_rule_model->set_all_channels($rule_id, 1))
-			{
-				$sc = FALSE;
-				$this->error = "Set all channels failed";
-			}
-    }
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'failed',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'data' => $ds
+		);
 
-    if($sc === TRUE && $all === FALSE)
-    {
-			if( ! $this->discount_rule_model->set_all_channels($rule_id, 0))
-			{
-				$sc = FALSE;
-				$this->error = "Set all channels failed";
-			}
+		echo json_encode($arr);
+	}
 
-      if($sc === TRUE && ! empty($chList))
-			{
-				foreach($chList as $ch_id)
-				{
-					$arr = array(
-						"rule_id" => $rule_id,
-						"channels_id" => $ch_id
-					);
+	public function get_customer_list()
+	{
+		$sc = TRUE;
+		$this->load->library('excel');
+		$file = isset($_FILES['uploadFile']) ? $_FILES['uploadFile'] : FALSE;
+		$ds = array(); //---- ได้เก็บข้อมูล
 
-					if( ! $this->discount_rule_model->set_discount_rule_channels($arr))
-					{
-						$sc = FALSE;
-						$this->error = "Insert channels failed";
-					}
-				}
-			}
-    }
-
-		if($sc === TRUE)
+		if ($file !== FALSE)
 		{
-			$this->db->trans_commit();
+			$path = $this->config->item('upload_path') . 'discount_rule/';
+			$file	= 'uploadFile';
+
+			$config = array(   // initial config for upload class
+				"allowed_types" => "xlsx",
+				"upload_path" => $path,
+				"file_name"	=> 'Import-discount-customer',
+				"max_size" => 5120,
+				"overwrite" => TRUE
+			);
+
+			$this->load->library("upload", $config);
+
+			if (! $this->upload->do_upload($file))
+			{
+				$sc = FALSE;
+				$this->error = $this->upload->display_errors();
+			}
+
+			if ($sc === TRUE)
+			{
+				$info = $this->upload->data();
+				$excel = PHPExcel_IOFactory::load($info['full_path']);
+				$excel->setActiveSheetIndex(0);
+
+				$sheet	= $excel->getSheet(0);
+
+				if (empty($sheet))
+				{
+					$sc = FALSE;
+					$this->error = "Cannot read file or file not contain any data";
+				}
+
+				if ($sc === TRUE)
+				{
+					$rows = $sheet->getHighestRow();
+
+					$i = 1;
+					$j = 1;
+					$k = 1;
+
+					$items = [];
+
+					while ($i <= $rows)
+					{
+						if ($i > 1)
+						{
+							$code = $sheet->getCell("A{$i}")->getValue();
+
+							if (! empty($code))
+							{
+								if (empty($items[$j][$code]))
+								{
+									$items[$j][$code] = $code;
+
+									$k++;
+
+									if ($k == 20)
+									{
+										$j++;
+										$k = 1;
+									}
+								}
+							}
+
+							$i++;
+						}
+						else
+						{
+							$i++;
+						}
+					}
+
+					if (! empty($items))
+					{
+						foreach ($items as $cs)
+						{
+							$list = $this->get_customers($cs);
+
+							if (! empty($list))
+							{
+								foreach ($list as $rs)
+								{
+									$ds[] = $rs;
+								}
+							}
+						}
+					}
+				} //--- $sc
+			}
 		}
 		else
 		{
-			$this->db->trans_rollback();
-		}
-
-		$this->_response($sc);
-  }
-
-
-
-
-  public function set_payment_rule()
-  {
-		$sc = TRUE;
-
-    $rule_id = $this->input->post('rule_id');
-    //--- all channels ?
-    $all = is_true($this->input->post('all_payment'));
-		$paymentList = $this->input->post('payment');
-
-		$this->db->trans_begin();
-
-		//--- drop payment rule
-		if( ! $this->discount_rule_model->drop_rule_payment($rule_id))
-		{
 			$sc = FALSE;
-			$this->error = "Delete payment rule failed";
+			$this->error = "Upload file not found";
 		}
 
-    if($sc === TRUE && $all === TRUE)
-    {
-      if( ! $this->discount_rule_model->set_all_payment($rule_id, 1))
-			{
-				$sc = FALSE;
-				$this->error = "Set all payment failed";
-			}
-    }
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'failed',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'data' => $ds
+		);
 
-    if($sc === TRUE && $all === FALSE)
-    {
-			if( ! $this->discount_rule_model->set_all_payment($rule_id, 0))
-			{
-				$sc = FALSE;
-				$this->error = "Set all payment failed";
-			}
+		echo json_encode($arr);
+	}
 
-			if($sc === TRUE && ! empty($paymentList))
-			{
-				foreach($paymentList as $pm_id)
-				{
-					if($sc === FALSE)
-					{
-						break;
-					}
-
-					$arr = array(
-						"rule_id" => $rule_id,
-						"payment_id" => $pm_id
-					);
-
-					if( ! $this->discount_rule_model->set_discount_rule_payment($arr))
-					{
-						$sc = FALSE;
-						$this->error = "Insert payment rule failed";
-					}
-				}
-			}
-    }
-
-		if($sc === TRUE)
+	public function get_items(array $ds = array())
+	{
+		if (! empty($ds))
 		{
-			$this->db->trans_commit();
+			$rs = $this->db->select('id, code, name, price')->where_in('code', $ds)->where('status', 1)->get('products');
+
+			if ($rs->num_rows() > 0)
+			{
+				return $rs->result();
+			}
+		}
+
+		return NULL;
+	}
+
+	public function get_customers(array $ds = array())
+	{
+		if (! empty($ds))
+		{
+			$rs = $this->db->select('id, CardCode AS code, CardName AS name')->where_in('CardCode', $ds)->where('status', 1)->get('customers');
+
+			if ($rs->num_rows() > 0)
+			{
+				return $rs->result();
+			}
+		}
+
+		return NULL;
+	}
+
+	public function get_sku_template()
+	{		
+		$this->load->helper('download');
+		$file = 'templates/import-discount-sku-template.xlsx';
+
+		if (file_exists($file))
+		{
+			force_download($file, NULL);
 		}
 		else
 		{
-			$this->db->trans_rollback();
+			$this->page_error();
 		}
+	}
 
-		$this->_response($sc);
-  }
+	function get_customer_template()
+	{
+		$this->load->helper('download');
+		$file = 'templates/import-discount-customer-template.xlsx';
 
-
-
-
-  public function add_policy_rule()
-  {
-    $sc = TRUE;
-
-    $id_policy = $this->input->post('id_policy');
-  	$rule = $this->input->post('rule');
-
-  	if(!empty($rule))
-  	{
-  		foreach($rule as $rule_id)
-  		{
-  			if($this->discount_rule_model->update_policy($rule_id, $id_policy) === FALSE)
-  			{
-  				$sc = FALSE;
-  				$message = 'เพิ่มกฏไม่สำเร็จ';
-  			}
-  		}	//--- end foreach
-  	}	//--- end if empty
-
-  	echo $sc === TRUE ? 'success' : $message;
-  }
-
-
-
-  public function unlink_rule()
-  {
-    $sc = TRUE;
-    $rule_id = $this->input->post('rule_id');
-    if($this->discount_rule_model->update_policy($rule_id, NULL) === FALSE)
-    {
-      $sc = FALSE;
-      $message = 'ลบกฏไม่สำเร็จ';
-    }
-
-    echo $sc === TRUE ? 'success' : $message;
-  }
-
-
-  public function delete_rule()
-  {
-    $sc = TRUE;
-    //--- check before delete
-    $id = $this->input->post('rule_id');
-    $rule = $this->discount_rule_model->get($id);
-
-    if(!empty($rule))
-    {
-      if(!empty($rule->id_policy))
-      {
-        $policy_code = $this->discount_policy_model->get_code($rule->id_policy);
-        $sc = FALSE;
-        $this->error = "มีการเชื่อมโยงเงื่อนไขไว้กับนโยบายเลขที่ : {$policy_code} กรุณาลบการเชื่อมโยงก่อนลบเงื่อนไขนี้";
-      }
-      else
-      {
-        if(! $this->discount_rule_model->delete_rule($id))
-        {
-          $sc = FALSE;
-          $this->error = "ลบรายการไม่สำเร็จ";
-        }
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = "Not found";
-    }
-
-    echo $sc === TRUE ? 'success' : $this->error;
-  }
-
-
-
-  public function view_rule_detail($id)
-  {
-    $this->load->library('printer');
-    $rule = $this->discount_rule_model->get($id);
-    $policy = $this->discount_policy_model->get($rule->id_policy);
-    $ds['rule_id'] = $id;
-    $ds['rule'] = $rule;
-    $ds['policy'] = $policy;
-    $this->load->view('discount/policy/view_rule_detail', $ds);
-  }
+		if (file_exists($file))
+		{
+			force_download($file, NULL);
+		}
+		else
+		{
+			$this->page_error();
+		}
+	}
 
   public function get_new_code()
   {
@@ -865,12 +1668,9 @@ class Discount_rule extends PS_Controller
     return $new_code;
   }
 
-
-
-
   public function clear_filter()
   {
-    $filter = array('rule_code', 'rule_name', 'rule_active','rule_type', 'rule_policy', 'rule_priority');
+    $filter = array('rule_code', 'rule_name', 'rule_active','rule_type', 'rule_policy', 'rule_priority', 'rule_fromDate', 'rule_toDate');
     clear_filter($filter);
   }
 } //--- end grade

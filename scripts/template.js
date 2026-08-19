@@ -1,4 +1,8 @@
 
+function goTo(url) {
+	window.location.href = url;
+}
+
 //--- save side bar layout to cookie
 function toggle_layout(){
 	var sidebar_layout = getCookie('sidebar_layout');
@@ -162,8 +166,8 @@ $('#set_rows').keyup(function(e){
 
 
 
-function reIndex(){
-  $('.no').each(function(index, el) {
+function reIndex(className = 'no') {
+  $('.' + className).each(function(index, el) {
     no = index +1;
     $(this).text(addCommas(no));
   });
@@ -250,6 +254,22 @@ function parseDefault(value, def){
 	return value;
 }
 
+function parseDefaultInt(value, def){
+	const parsedValue = parseInt(value);
+	if(isNaN(parsedValue)){
+		return def; //--- return default value
+	}
+	return parsedValue;
+}
+
+function parseDefaultFloat(value, def){
+	const parsedValue = parseFloat(value);
+	if(isNaN(parsedValue)){
+		return def; //--- return default value
+	}
+	return parsedValue;
+}
+
 //--- return discount array
 function parseDiscount(discount_label, price)
 {
@@ -298,12 +318,23 @@ function parseDiscount(discount_label, price)
 	return discLabel;
 }
 
+function goBack(url = null) {
+	if(url) {
+		window.location.href = url;
+	}
+	else {
+		window.location.href = HOME;
+	}	
+}
 
 function getSearch() {
   $('#searchForm').submit();
 }
 
-
+function clearFilter() {
+	const url = `${HOME}clear_filter`;
+	$.get(url, function (rs) { goBack(); });
+}
 
 
 $('.search-box').keyup(function(e){
@@ -318,10 +349,7 @@ $('.filter').change(function() {
 })
 
 
-function clearFilter() {
-	let url = HOME + 'clear_filter';
-	$.get(url, function(rs){ goBack(); });
-}
+
 
 function sort(field){
 	var el = $("#sort_"+field);
@@ -369,4 +397,54 @@ function roundNumber(num, digit)
 	}
 
 	return Number(parseFloat(num).toFixed(digit));
+}
+
+
+$.fn.hasError = function (msg) {
+	let name = this.attr('id');
+	$('#' + name + '-error').text(msg);
+	return this.addClass('has-error');
+};
+
+
+$.fn.clearError = function () {
+	this.removeClass('has-error');
+	let name = this.attr('id');
+	return $('#' + name + '-error').text('');
+};
+
+
+function clearErrorByClass(className) {
+	$('.' + className).each(function () {
+		let name = $(this).attr('id');
+		$('#' + name + '-error').text('');
+		$(this).removeClass('has-error');
+	})
+}
+
+
+function showError(response) {
+	load_out();
+
+	setTimeout(() => {
+		swal({
+			title: 'Error!',
+			text: (typeof response === 'object') ? response.responseText : response,
+			type: 'error',
+			html: true
+		})
+	}, 100);
+}
+
+function showWarning(message) {
+	load_out();
+
+	setTimeout(() => {
+		swal({
+			title: 'Warning!',
+			text: (typeof message === 'object') ? message.responseText : message,
+			type: 'warning',
+			html: true
+		})
+	}, 100);
 }

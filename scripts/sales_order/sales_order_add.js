@@ -6,8 +6,6 @@ function saveAsDraft(option) {
 	validateFreeItem(option);
 }
 
-
-
 function getFreeItemRule()
 {
 	removeFreeRow();
@@ -47,7 +45,7 @@ function getFreeItemRule()
 	if(Object.keys(items).length) {
 		load_in();
 		$.ajax({
-			url:HOME + 'get_free_item_rule',
+			url: `${HOME}get_free_item_rule`,
 			type:'POST',
 			cache:false,
 			data:{
@@ -80,7 +78,6 @@ function getFreeItemRule()
 	$('#btn-save').removeClass('hide');
 	$('#btn-draft').removeClass('hide');
 }
-
 
 function validateFreeItem(option) {
 	console.log(btnClick);
@@ -151,7 +148,6 @@ function validateFreeItem(option) {
 
 }
 
-
 function saveAdd() {
 	$('#btn-save').attr('disabled', 'disabled');
 	$('#btn-draft').attr('disabled', 'disabled');
@@ -180,10 +176,10 @@ function saveAdd() {
 			'CardName' : $('#CardName').val(),
 			'Payment' : $('#payment').val(),
 			'Channels' : $('#channels').val(),
-			'dimCode1' : $('#dimCode1').val(),
-			'dimCode2' : $('#dimCode2').val(),
-			'dimCode3' : $('#dimCode3').val(),
-			'dimCode4' : $('#dimCode4').val(),
+			'dimCode1' : null,
+			'dimCode2' : null,
+			'dimCode3' : null,
+			'dimCode4' : null,
 			'dimCode5' : $('#dimCode5').val(),
 			'OwnerCode' : $('#owner').val(),
 			'ShipToCode' : $('#shipToCode').val(),
@@ -263,47 +259,15 @@ function saveAdd() {
 		else {
 			$('#TextDate').removeClass('has-error');
 		}
-
-		let dimCount = 0;
-
-		if(ds.dimCode1 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode2 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode3 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode4 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode5 != '') {
-			dimCount++;
-		}
-
-		if(dimCount == 0) {
+		
+		if(ds.dimCode5 == '') {
 			swal("กรุณาเลือกหน่วยงาน");
 
 			$('#btn-save').removeAttr('disabled');
 			$('#btn-draft').removeAttr('disabled');
 			btnClick = 0;
 			return false;
-		}
-
-		if(dimCount > 1) {
-			swal("กรุณาเลือกเพียง 1 หน่วยงานเท่านั้น");
-
-			$('#btn-save').removeAttr('disabled');
-			$('#btn-draft').removeAttr('disabled');
-			btnClick = 0;
-			return false;
-		}
-
+		}		
 
 		var disc_error = 0;
 		//--- check discount
@@ -565,16 +529,11 @@ function saveAdd() {
 	}, 500);
 }
 
-
-
 function updateAsDraft() {
 	$('#is_draft').val(1);
 
 	validateFreeItem('update');
 }
-
-
-
 
 function saveUpdate() {
 	$('#btn-save').attr('disabled', 'disabled');
@@ -1002,7 +961,6 @@ function saveUpdate() {
 	}, 500)
 }
 
-
 function updateShipTo() {
 	var ds = {
 		'address' : $('#s_address').val(),
@@ -1033,8 +991,6 @@ function updateShipTo() {
 	$('#shipToModal').modal('hide');
 }
 
-
-
 function updateBillTo() {
 	var ds = {
 		'address' : $('#b_address').val(),
@@ -1064,8 +1020,6 @@ function updateBillTo() {
 	$('#billToModal').modal('hide');
 }
 
-
-
 $('#CardCode').autocomplete({
 	source:BASE_URL + 'auto_complete/get_customer_code_and_name',
 	autoFocus:true,
@@ -1090,6 +1044,9 @@ $('#CardCode').autocomplete({
 			//---- create Address bill to
 			get_address_bill_to_code(code);
 
+			//-- get available credit
+			get_available_credit(code);
+
 			$('#itemCode-1').focus();
 
 		}
@@ -1101,7 +1058,6 @@ $('#CardCode').autocomplete({
 		}
 	}
 })
-
 
 function get_price_list(code) {
 	$.ajax({
@@ -1137,8 +1093,6 @@ function get_customer(code) {
 		}
 	})
 }
-
-
 
 function editShipTo() {
 	$('#shipToModal').modal('show');
@@ -1210,11 +1164,9 @@ function get_address_ship_to() {
 	})
 }
 
-
 function editBillTo() {
 	$('#billToModal').modal('show');
 }
-
 
 function get_address_bill_to_code(code)
 {
@@ -1241,7 +1193,6 @@ function get_address_bill_to_code(code)
 		}
 	})
 }
-
 
 function get_address_bill_to() {
 	var code = $('#CardCode').val();
@@ -1282,11 +1233,23 @@ function get_address_bill_to() {
 	})
 }
 
+function get_available_credit(code) {
+	$.ajax({
+		url:HOME + 'get_credit_balance',
+		type:'GET',
+		cache:false,
+		data:{
+			'CardCode' : code
+		},
+		success:function(rs) {
+			let available = parseDefaultFloat(rs, 0);
+			$('#available-credit').val(addCommas(available.toFixed(2)));
+		}
+	})
+}
 
 function addRow() {
 	var no = $('#row-no').val();
-
-
 	var data = {"no" : no, "uid" : uniqueId()};
 	var source = $('#row-template').html();
 	var output = $('#details-template');
@@ -1337,7 +1300,6 @@ function removeRow() {
 	recalTotal();
 }
 
-
 function removeFreeRow() {
 	$('.free-row').remove();
 	$('.free-item').remove();
@@ -1345,7 +1307,6 @@ function removeFreeRow() {
 
 	reIndex();
 }
-
 
 function updateDiscountRule(no) {
 	let itemCode = $('#itemCode-'+no).val();
@@ -1464,7 +1425,6 @@ function updateDiscountRule(no) {
 
 }
 
-
 function getItemData(no) {
 	let itemCode = $('#itemCode-'+no).val();
 	let cardCode = $('#CardCode').val();
@@ -1475,15 +1435,11 @@ function getItemData(no) {
 	let whs = $('#whs-'+no).val();
 	let quotaNo = $('#quota-'+no).val();
 
-
-
 	setTimeout(function() {
-
 		if(cardCode == "") {
 			swal('กรุณาระบุลูกค้า');
 			return false;
 		}
-
 
 		load_in();
 
@@ -1600,8 +1556,6 @@ function getItemData(no) {
 
 }
 
-
-
 function getStock(no)  {
 	let whsCode = $('#whs-'+no).val();
 	let quota = $('#quota-'+no).val();
@@ -1628,7 +1582,6 @@ function getStock(no)  {
 	});
 }
 
-
 function updateFreeItem() {
 	let freeQty = 0;
 	$('.free-item').each(function() {
@@ -1646,36 +1599,43 @@ function updateFreeItem() {
 	}
 }
 
-
-
 function pickFreeItem(rule_id) {
-	freeQty = $('#free-'+rule_id).val();
-	uid = $('#free-'+rule_id).data('uid');
-	picked = $('#free-'+rule_id).data('picked');
+	freeQty = $('#free-' + rule_id).val();
+	uid = $('#free-' + rule_id).data('uid');
+	picked = $('#free-' + rule_id).data('picked');
 
-	if(rule_id != "" && rule_id > 0 && freeQty > 0 && picked < freeQty) {
+	if (rule_id != "" && rule_id > 0 && freeQty > 0 && picked < freeQty) {
 		load_in();
 
 		$.ajax({
-			url:HOME + 'get_free_item',
-			type:'GET',
-			cache:false,
-			data:{
-				'rule_id' : rule_id,
-				'freeQty' : freeQty,
-				'picked' : picked,
-				'uid' : uid
+			url: `${HOME}get_free_item`,
+			type: 'GET',
+			cache: false,
+			data: {
+				'rule_id': rule_id,
+				'freeQty': freeQty,
+				'picked': picked,
+				'uid': uid
 			},
-			success:function(rs) {
+			success: function (rs) {
 				load_out();
-				setTimeout(function() {
-					$('#free-item-list').html(rs);
-					$('.auto-select').focus(function() {
-						$(this).select();
-					});
-					$('#free-item-modal').modal('show');
+				
+				if(isJson(rs)) {
+					let ds = JSON.parse(rs);
 
-				}, 500)
+					$('#free-item-modal-label').text(`กรุณาเลือก ${ds.freeQty} ชิ้น จากรายการต่อไปนี้`);
+
+					let source = $('#free-item-template').html();
+					let output = $('#free-item-table');
+					let data = ds.items;
+
+					render(source, data, output);
+
+					$('#free-item-modal').modal('show');
+				}
+				else {
+					showError(rs);
+				}
 			}
 		});
 	}
@@ -1696,8 +1656,15 @@ function addFreeRow(uuid) {
 	let uom_name = el.data('uom');
 	let vat_code = el.data('vatcode');
 	let vat_rate = el.data('vatrate');
+	let stdPrice = el.data('stdprice');
 	let price = el.data('price');
-	let priceLabel = addCommas(price);
+	let sell_price = el.data('sellprice');
+	let stdPriceLabel = el.data('stdpricelabel');
+	let priceLabel = el.data('pricelabel');
+	let sellPriceLabel = el.data('sellpricelabel');
+	let discAmount = parseDefaultFloat(el.data('discamount'), 0);
+	let discPercent = parseDefaultFloat(el.data('discpercent'), 0);
+	let lineDiscAmount = discAmount * qty;
 	let uid = uuid;
 	let picked = 0;
 	let freeQty = 0;
@@ -1749,7 +1716,6 @@ function addFreeRow(uuid) {
 		let cqty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
 		let nqty = cqty + qty;
 		$('#line-qty-'+no).val(nqty);
-
 	}
 	else {
 
@@ -1757,7 +1723,7 @@ function addFreeRow(uuid) {
 		no++;
 
 		$('#row-no').val(no);
-
+		
 		var data = {
 			"no" : no,
 			"uid" : uid,
@@ -1767,12 +1733,16 @@ function addFreeRow(uuid) {
 			"product_code" : product_code,
 			"product_name" : product_name,
 			"qty" : qty,
+			"stdPrice" : stdPrice,
 			"price" : price,
+			"sellPrice" : sell_price,
+			"stdPriceLabel" : stdPriceLabel,
 			"priceLabel" : priceLabel,
-			"sellPrice" : 0,
-			"sysSellPrice" : 0,
-			"discAmount" : price,
-			"lineDiscAmount" : qty * price,
+			"sellPriceLabel" : sellPriceLabel,
+			"sysSellPrice" : sell_price,
+			"discAmount" : discAmount,
+			"lineDiscAmount" : lineDiscAmount,
+			"discPercent" : discPercent,
 			"vat_code" : vat_code,
 			"vat_rate" : vat_rate,
 			"rule_id" : rule_id,
@@ -1797,10 +1767,6 @@ function addFreeRow(uuid) {
 
 	reIndex();
 }
-
-
-
-
 
 function recalDiscount(no) {
 	regex = /[^0-9+.]+/gi;
@@ -1860,10 +1826,6 @@ function recalDiscount(no) {
 		recalAmount(no);
 	}
 }
-
-
-
-
 
 function recalAmount(no) {
   currentInput = removeCommas($('#disc-label-'+no).val());
@@ -1937,10 +1899,6 @@ function recalAmount(no) {
 	}
 }
 
-
-
-
-
 function getDiscDiff(old_price, new_price) {
 	let diff = old_price - new_price;
 
@@ -1950,11 +1908,6 @@ function getDiscDiff(old_price, new_price) {
 
 	return 0;
 }
-
-
-
-
-
 
 function recalTotal() {
 	var total = 0.00; //--- total amount after row discount
@@ -2023,10 +1976,6 @@ function recalTotal() {
 	$('#docTotalLabel').val(addCommas(docTotal.toFixed(2)));
 }
 
-
-
-
-
 $('#discPrcnt').change(function() {
 	var total = parseDefault(parseFloat($('#totalAmount').val()), 0);
 	var disc = $(this).val();
@@ -2046,9 +1995,6 @@ $('#discPrcnt').change(function() {
 		recalTotal();
 	}
 });
-
-
-
 
 function init() {
 
@@ -2126,8 +2072,6 @@ function init() {
 } //-- end init
 
 
-
-
 function nextFocus(name, el) {
 	var no = getNo(el);
 	$('#'+name+'-'+no).focus();
@@ -2137,11 +2081,7 @@ $(document).ready(function(){
 	init();
 })
 
-
-
-
 $('.autosize').autosize({append: "\n"});
-
 
 function duplicateSO(code) {
 	swal({
@@ -2204,7 +2144,6 @@ function duplicateSO(code) {
 
 }
 
-
 function recal_all_discount() {
 	let count = 0;
 	let no = [];
@@ -2231,8 +2170,6 @@ function recal_all_discount() {
 	}
 }
 
-
-
 function recal_order_discount(no_arr) {
 	console.log(no_arr);
 	var p = $.when();
@@ -2248,7 +2185,6 @@ function recal_order_discount(no_arr) {
 	});
 }
 
-
 function dumpJson(code) {
 	$.ajax({
 		url:HOME + 'getJSON',
@@ -2262,3 +2198,21 @@ function dumpJson(code) {
 		}
 	})
 }
+
+const dragger = () => {
+	const el = document.getElementById('details-template');
+	const sortable = Sortable.create(el, {
+		animation: 150,
+		handle: '.handle',
+		onEnd: function (evt) {
+			console.log('Moved:', evt.oldIndex, '→', evt.newIndex);
+			reIndex();			
+		}
+	});
+}
+
+window.addEventListener('load', function() {
+	dragger();
+});
+
+

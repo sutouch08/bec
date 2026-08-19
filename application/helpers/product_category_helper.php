@@ -276,4 +276,5 @@ function getChild($parent_id, $id, $cate, $mode = "")
 	return $sc;
 }
 
+
  ?>

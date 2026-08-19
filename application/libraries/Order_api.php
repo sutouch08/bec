@@ -4,7 +4,7 @@ class Order_api
   private $url;
   protected $ci;
 	public $error;
-  private $timeout = 0; //--- timeout in seconds;
+  private $timeout = 3; //--- timeout in seconds;
 
   public function __construct()
   {
@@ -30,7 +30,7 @@ class Order_api
 
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
-    curl_setopt($curl, CURLOPT_TIMEOUT_MS, $this->timeout);
+    curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -38,9 +38,14 @@ class Order_api
 
 		$response = curl_exec($curl);
 
+		if($response === FALSE)
+		{
+			$response = curl_error($curl);
+		}
+
 		curl_close($curl);
 
-		$rs = json_decode($response);
+		$rs = json_decode($response);			
 
 		if(! empty($rs) && ! empty($rs->status))
 		{

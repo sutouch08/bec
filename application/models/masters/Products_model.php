@@ -10,6 +10,23 @@ class Products_model extends CI_Model
   }
 
 
+	public function get_all_active()
+	{
+		$rs = $this->db
+		->select('id, code, name')
+		->where('status', 1)
+		->order_by('code', 'ASC')
+		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
 	public function get_all()
 	{
 		$rs = $this->db->order_by('code', 'ASC')->get($this->tb);
@@ -21,6 +38,7 @@ class Products_model extends CI_Model
 
 		return NULL;
 	}
+
 
 	public function get($code)
 	{

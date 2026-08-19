@@ -1,30 +1,21 @@
-function addNew(){
-  window.location.href = HOME + 'add_new';
+const addNew = () => {
+	window.location.href = `${HOME}add_new`;
 }
 
-
-
-function goBack(){
-  window.location.href = HOME;
+const edit = (code, pageNo) => {
+	load_in();
+	window.location.href = `${HOME}edit/${code}/${pageNo}`;
 }
 
-
-
-function edit(code){
-  load_in();
-  window.location.href = HOME + 'edit/' + code;
+const goEdit = (code, pageNo) => {
+	load_in();
+	window.location.href = `${HOME}edit/${code}/${pageNo}`;
 }
 
-function goEdit(code){
-  load_in();
-  window.location.href = HOME + 'edit/' + code;
+const viewDetail = (code, pageNo) => {
+	load_in();
+	window.location.href = `${HOME}view_detail/${code}/${pageNo}`;
 }
-
-
-function viewDetail(code){
-  window.location.href = HOME + 'view_detail/'+code;
-}
-
 
 function cancleOrder(code){
 	swal({
@@ -76,9 +67,6 @@ function cancleOrder(code){
 	});
 }
 
-
-
-
 function toggleOnlyMe() {
 	let option = parseDefault(parseInt($('#onlyMe').val()), 0);
 
@@ -91,8 +79,6 @@ function toggleOnlyMe() {
 
 	getSearch();
 }
-
-
 
 function doApprove(code) {
 
@@ -127,8 +113,6 @@ function doApprove(code) {
   })
 }
 
-
-
 function doReject(code) {
 
   $.ajax({
@@ -161,7 +145,6 @@ function doReject(code) {
     }
   })
 }
-
 
 function cancleSap(code) {
 	swal({
@@ -208,8 +191,6 @@ function cancleSap(code) {
   });
 }
 
-
-
 function sendToSap(code) {
 
   load_in();
@@ -246,10 +227,7 @@ function sendToSap(code) {
   })
 }
 
-
-
-
-function leave(){
+function leave(backUrl = null){
   swal({
     title:'คุณแน่ใจ ?',
     text:'รายการทั้งหมดจะไม่ถูกบันทึก ต้องการออกหรือไม่ ?',
@@ -259,11 +237,14 @@ function leave(){
     confirmButtonText:'ออกจากหน้านี้',
   },
   function(){
-    goBack();
+		if(backUrl == null) {
+			goBack();
+		}
+		else {
+    	window.location.href = backUrl;
+		}
   });
 }
-
-
 
 function showMessage(code) {
 	$.ajax({
@@ -294,8 +275,6 @@ function showMessage(code) {
 	})
 }
 
-
-
 $("#fromDate").datepicker({
 	dateFormat: 'dd-mm-yy',
 	onClose: function(ds){
@@ -320,7 +299,6 @@ $('#DocDate').datepicker({
 $('#ShipDate').datepicker({
   dateFormat:'dd-mm-yy'
 });
-
 
 $('#TextDate').datepicker({
   dateFormat:'dd-mm-yy'

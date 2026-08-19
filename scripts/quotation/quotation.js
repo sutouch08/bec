@@ -10,17 +10,17 @@ function goBack(){
 
 
 
-function edit(code){
-  window.location.href = HOME + 'edit/' + code;
+function edit(code, pageNo = 0){
+  window.location.href = HOME + 'edit/' + code + '/' + pageNo;
 }
 
-function goEdit(code){
-  window.location.href = HOME + 'edit/' + code;
+function goEdit(code, pageNo = 0){
+  window.location.href = HOME + 'edit/' + code + '/' + pageNo;
 }
 
 
-function viewDetail(code){
-  window.location.href = HOME + 'view_detail/'+code;
+function viewDetail(code, pageNo = 0){
+  window.location.href = HOME + 'view_detail/'+code + '/' + pageNo;
 }
 
 
@@ -178,7 +178,7 @@ function sendToSap(code) {
 
 
 
-function leave(){
+function leave(backUrl = null){
   swal({
     title:'คุณแน่ใจ ?',
     text:'รายการทั้งหมดจะไม่ถูกบันทึก ต้องการออกหรือไม่ ?',
@@ -188,7 +188,12 @@ function leave(){
     confirmButtonText:'ออกจากหน้านี้',
   },
   function(){
-    goBack();
+		if(backUrl == null) {
+			goBack();
+		}
+		else {
+    	window.location.href = backUrl;
+		}
   });
 }
 

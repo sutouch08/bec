@@ -1765,3 +1765,19 @@ function dumpJson(code) {
 		}
 	})
 }
+
+const dragger = () => {
+	const el = document.getElementById('details-template');
+	const sortable = Sortable.create(el, {
+		animation: 150,
+		handle: '.handle',
+		onEnd: function (evt) {
+			console.log('Moved:', evt.oldIndex, '→', evt.newIndex);
+			reIndex();
+		}
+	});
+}
+
+window.addEventListener('load', function () {
+	dragger();
+});

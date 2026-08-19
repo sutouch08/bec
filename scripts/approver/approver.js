@@ -1,67 +1,164 @@
-function goBack() {
-	window.location.href = HOME;
+const addNew = () => {
+	window.location.href = `${HOME}add_new`;
 }
 
-
-function addNew() {
-	window.location.href = HOME + "add_new";
+const edit = (id) => {
+	window.location.href = `${HOME}edit/${id}`;
 }
 
-
-function getEdit(id) {
-	window.location.href = HOME + "edit/"+id;
+const viewDetail = (id) => {
+	window.location.href = `${HOME}view_detail/${id}`;
 }
 
+function toggleActive(id, el) {
+	const status = $(el).is(':checked') ? 1 : 0;
 
-function viewDetail(id) {
-	window.location.href = HOME + "view_detail/"+id;
-}
-
-
-function saveAdd() {
-	const user_id = $('#user').val();
-	const uname = $('#user option:selected').text();
-	var error = 0;
-	var team = [];
-	var brand = [];
-
-	if(user_id == "") {
-		set_error($('#user'), $('#user-error'), "Required!");
-		return false;
-	}
-	else {
-		clear_error($('#user'), $('#user-error'));
-	}
-
-	$('.chk-team').each(function() {
-		if($(this).is(':checked')) {
-			team.push($(this).val());
+	$.ajax({
+		url: `${HOME}set_active`,
+		type:'POST',
+		data:{
+			'id' : id,
+			'active' : status
+		},
+		success:function(rs) {			
+			if(rs.trim() !== 'success') {
+				showError(rs);
+				$(el).prop('checked', !status);
+			}			
+		},
+		error:function(rs) {
+			showError(rs);
 		}
 	});
+}
 
-	if(team.length == 0) {
+function toggleOrderApproval(id, el) {
+	const status = $(el).is(':checked') ? 1 : 0;
+
+	$.ajax({
+		url: `${HOME}set_order_approval`,
+		type:'POST',
+		data:{
+			'id' : id,
+			'ap_order' : status
+		},
+		success:function(rs) {			
+			if(rs.trim() !== 'success') {
+				showError(rs);
+				$(el).prop('checked', !status);
+			}			
+		},
+		error:function(rs) {
+			showError(rs);
+		}
+	});
+}
+
+function togglePromotionApproval(id, el) {
+	const status = $(el).is(':checked') ? 1 : 0;
+
+	$.ajax({
+		url: `${HOME}set_promotion_approval`,
+		type:'POST',
+		data:{
+			'id' : id,
+			'ap_promotion' : status
+		},
+		success:function(rs) {			
+			if(rs.trim() !== 'success') {
+				showError(rs);
+				$(el).prop('checked', !status);
+			}			
+		},
+		error:function(rs) {
+			showError(rs);
+		}
+	});
+}
+
+function toggleVisibleGP(id, el) {
+	const status = $(el).is(':checked') ? 1 : 0;
+
+	$.ajax({
+		url: `${HOME}set_visible_gp`,
+		type:'POST',
+		data:{
+			'id' : id,
+			'visible_gp' : status
+		},
+		success:function(rs) {			
+			if(rs.trim() !== 'success') {
+				showError(rs);
+				$(el).prop('checked', !status);
+			}			
+		},
+		error:function(rs) {
+			showError(rs);
+		}
+	});
+}
+
+function checkAllTeam() {
+	if($('#check-all-team').is(':checked')) {
+		$('.chk-team').prop('checked', true);
+	}
+	else {
+		$('.chk-team').prop('checked', false);
+	}
+}
+
+function checkAllBrand() {
+	if($('#check-all-brand').is(':checked')) {
+		$('.chk-brand').prop('checked', true);
+	}
+	else {
+		$('.chk-brand').prop('checked', false);
+	}
+}
+
+function add() {
+	clearErrorByClass('r');
+	let error = 0;
+	let h = {
+		'user_id' : $('#user').val(),
+		'uname' : $('#user option:selected').data('uname'),
+		'team' : [],
+		'brand' : [],
+		'status' : $('input[name="status"]:checked').val(),
+		'ap_order' : $('input[name="ap_order"]:checked').val(),
+		'ap_promotion' : $('input[name="ap_promotion"]:checked').val(),
+		'visible_gp' : $('input[name="visible_gp"]:checked').val()
+	};
+	
+	if(h.user_id == "") {
+		$('#user').hasError();
+		swal("Please select User");
+		return false;
+	}		
+
+	$('.chk-team:checked').each(function() {
+		h.team.push({'id' : $(this).val()});
+	});
+
+	if(h.team.length == 0) {
 		swal("Please select Sales Team");
 		return false;
 	}
 
-	$('.chk-brand').each(function() {
-		if($(this).is(':checked')) {
-			id = $(this).val();
-			percent = parseDefault(parseFloat($('#brand-disc-'+id).val()), 0.00);
-			if(percent <= 0.00) {
-				error++;
-				$('#brand-disc-'+id).addClass('has-error');
-			}
-			else {
-				$('#brand-disc-'+id).removeClass('has-error');
-			}
+	$('.chk-brand:checked').each(function() {
+		id = $(this).val();
+		percent = parseDefaultFloat($(`#brand-disc-${id}`).val(), 0.00);
 
-			row = {"id" : id, "max_disc" : percent};
-			brand.push(row);
+		if(percent <= 0.00) {
+			$('#brand-disc-'+id).hasError();
+			error++;
+		}
+		else {
+			h.brand.push({"id" : id, "max_disc" : percent});
 		}
 	});
 
-	if(brand.length == 0) {
+	if(h.brand.length == 0) {
 		swal("Please select Brand");
 		return false;
 	}
@@ -71,194 +168,180 @@ function saveAdd() {
 		return false;
 	}
 
-	const status = $('#status').is(':checked') ? 1 : 0;
-
 	load_in();
 
 	$.ajax({
-		url:HOME + 'add',
+		url: `${HOME}add`,
 		type:'POST',
 		cache:false,
 		data:{
-			'user_id' : user_id,
-			'uname' : uname,
-			'team' : team,
-			'brand' : brand,
-			'status' : status
+			'data' : JSON.stringify(h)			
 		},
 		success:function(rs) {
-			load_out();
+			load_out();			
 
-			rs = $.trim(rs);
-
-			if(rs === 'success') {
+			if(rs.trim() === 'success') {
 				swal({
 					title:'Success',
+					text: 'Approver has been added <br/> Do you want to add new approver ?',
 					type:'success',
-					timer:1000
-				});
-
-				setTimeout(function() {
-					addNew()
-				}, 1500);
+					html:true,
+					showCancelButton:true,
+					confirmButtonColor:'#DD6B55',
+					confirmButtonText:'Yes',
+					cancelButtonText:'No'
+				}, function(isConfirm) {
+					if(isConfirm) {
+						addNew();
+					}
+					else {
+						goBack();
+					}
+				});				
 			}
 			else {
-				swal({
-					title:'Error!',
-					text: rs,
-					type:'error'
-				});
+				showError(rs);
 			}
+		},
+		error:function(rs) {
+			showError(rs);
 		}
 	});
 }
-
-
 
 function update() {
-	const approver_id = $('#id').val();
-	const user_id = $('#user').val();
-	const uname = $('#user option:selected').text();
-	var error = 0;
-	var team = [];
-	var brand = [];
+	clearErrorByClass('r');
+	let error = 0;
+	let h = {
+		'id' : $('#id').val(),
+		'user_id': $('#user').val(),
+		'uname': $('#user option:selected').data('uname'),
+		'team': [],
+		'brand': [],
+		'status': $('input[name="status"]:checked').val(),
+		'ap_order': $('input[name="ap_order"]:checked').val(),
+		'ap_promotion': $('input[name="ap_promotion"]:checked').val(),
+		'visible_gp': $('input[name="visible_gp"]:checked').val()
+	};
 
-	if(user_id == "") {
-		set_error($('#user'), $('#user-error'), "Required!");
+	if (h.user_id == "") {
+		$('#user').hasError();
+		swal("Please select User");
 		return false;
 	}
-	else {
-		clear_error($('#user'), $('#user-error'));
-	}
 
-	$('.chk-team').each(function() {
-		if($(this).is(':checked')) {
-			team.push($(this).val());
-		}
+	$('.chk-team:checked').each(function () {
+		h.team.push({ 'id': $(this).val() });
 	});
 
-	if(team.length == 0) {
+	if (h.team.length == 0) {
 		swal("Please select Sales Team");
 		return false;
 	}
 
-	$('.chk-brand').each(function() {
-		if($(this).is(':checked')) {
-			id = $(this).val();
-			percent = parseDefault(parseFloat($('#brand-disc-'+id).val()), 0.00);
-			if(percent <= 0.00) {
-				error++;
-				$('#brand-disc-'+id).addClass('has-error');
-			}
-			else {
-				$('#brand-disc-'+id).removeClass('has-error');
-			}
+	$('.chk-brand:checked').each(function () {
+		id = $(this).val();
+		percent = parseDefaultFloat($(`#brand-disc-${id}`).val(), 0.00);
 
-			row = {"id" : id, "max_disc" : percent};
-			brand.push(row);
+		if (percent <= 0.00) {
+			$('#brand-disc-' + id).hasError();
+			error++;
+		}
+		else {
+			h.brand.push({ "id": id, "max_disc": percent });
 		}
 	});
 
-	if(brand.length == 0) {
+	if (h.brand.length == 0) {
 		swal("Please select Brand");
 		return false;
 	}
 
-	if(error > 0) {
+	if (error > 0) {
 		swal("Max Disc must be greater than 0");
 		return false;
 	}
 
-	const status = $('#status').is(':checked') ? 1 : 0;
-
 	load_in();
 
 	$.ajax({
-		url:HOME + 'update',
-		type:'POST',
-		cache:false,
-		data:{
-			'id' : approver_id,
-			'user_id' : user_id,
-			'uname' : uname,
-			'team' : team,
-			'brand' : brand,
-			'status' : status
+		url: `${HOME}update`,
+		type: 'POST',
+		cache: false,
+		data: {
+			'data': JSON.stringify(h)
 		},
-		success:function(rs) {
+		success: function (rs) {
 			load_out();
 
-			rs = $.trim(rs);
-
-			if(rs === 'success') {
+			if (rs.trim() === 'success') {
 				swal({
-					title:'Success',
-					type:'success',
-					timer:1000
+					title: 'Success',
+					text: 'Approver has been updated',
+					type: 'success',
+					timer: 1000
 				});
 			}
 			else {
-				swal({
-					title:'Error!',
-					text: rs,
-					type:'error'
-				});
+				showError(rs);
 			}
+		},
+		error: function (rs) {
+			showError(rs);
 		}
 	});
 }
 
 
-
-function getDelete(id, code) {
+function confirmDelete(id, code) {
 	swal({
 		title:'คุณแน่ใจ ?',
 		text:'ต้องการลบ '+code+' หรือไม่ ?',
 		type:'warning',
 		showCancelButton:true,
 		confirmButtonColor:'#DD6B55',
-		confirmButtonText:'ใช่, ฉันต้องการลบ',
-		cancelButtonText:'ยกเลิก',
-		closeOnConfirm:false
+		confirmButtonText:'Yes',
+		cancelButtonText:'No',
+		html:true,
+		closeOnConfirm:true
 	}, function() {
-			$.ajax({
-				url:HOME + 'delete',
-				type:'POST',
-				cache:false,
-				data:{
-					'id' : id
-				},
-				success:function(rs) {
-					if(rs === 'success') {
-						swal({
-							title:'Deleted',
-							type:'success',
-							timer:1000
-						});
-
-						setTimeout(function() {
-							goBack();
-						}, 1500);
-					}
-					else {
-						swal({
-							title:'Error!',
-							text: rs,
-							type:'error'
-						});
-					}
-				}
-			});
+		setTimeout(() => {
+			doDelete(id);
+		}, 100);
 	});
 }
 
+function doDelete(id) {
+	load_in();
+	$.ajax({
+		url:`${HOME}delete`,
+		type:'POST',
+		cache:false,
+		data:{
+			'id' : id
+		},
+		success:function(rs) {
+			load_out();			
+			if(rs.trim() === 'success') {
+				swal({
+					title:'Deleted',
+					type:'success',
+					timer:1000
+				});
 
-function getSearch() {
-	$('#searchForm').submit();
+				$(`#row-${id}`).remove();
+				reIndex();
+			}
+			else {
+				showError(rs);
+			}
+		},
+		error:function(rs) {
+			showError(rs);
+		}
+	});
 }
 
-function clearFilter() {
-	$.get(HOME + "clear_filter", function() {
-		goBack();
-	})
-}
+$('.disc').focusin(function() {
+	$(this).select();
+});

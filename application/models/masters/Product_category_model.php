@@ -35,6 +35,18 @@ class Product_category_model extends CI_Model
 	}
 
 
+	public function get_all_active()
+	{
+		$rs = $this->db->where('active', 1)->order_by('code', 'ASC')->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
 
 	public function get_by_level($level, $active = FALSE)
 	{

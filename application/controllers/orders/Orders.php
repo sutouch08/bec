@@ -6,11 +6,12 @@ class Orders extends PS_Controller
   public $menu_code = 'SOODSO';
 	public $menu_group_code = 'SO';
   public $menu_sub_group_code = 'ORDER';
-	public $title = 'ORDER';
+	public $title = 'Orders';
 	public $segment = 4;
 	public $not_ap = array();
 	public $can_approve = TRUE;
 	public $readOnly = FALSE;
+	public $conn = NULL;
 
   public function __construct()
   {
@@ -30,6 +31,7 @@ class Orders extends PS_Controller
 		$this->load->helper('product_images');
 		$this->load->helper('discount');
 		$this->load->helper('warehouse');
+		$this->load->helper('projects');
 
 		$this->readOnly = getConfig('CLOSE_SYSTEM') ==  2 ? TRUE : FALSE;
   }
@@ -42,6 +44,7 @@ class Orders extends PS_Controller
 			'sqNo' => get_filter('sqNo', 'sqNo', ''),
 			'soNo' => get_filter('soNo', 'soNo', ''),
 			'role' => get_filter('role', 'order_role', 'all'),
+			'project' => get_filter('project', 'order_project', 'all'),
 			'sale_id' => get_filter('sale_id', 'order_sale_id', 'all'),
 			'channels' => get_filter('channels', 'order_channels', 'all'),
 			'payment' => get_filter('payment', 'order_payment', 'all'),
@@ -77,8 +80,8 @@ class Orders extends PS_Controller
 		$orderCode = trim($this->input->get('orderCode'));
 		$this->load->library('order_api');
 		$balance = $this->order_api->getCreditBalance($CardCode);
-		$used = 0; //$this->orders_model->get_credit_used($CardCode, $orderCode);
-
+		$used = $this->orders_model->get_credit_used($CardCode, $orderCode);
+				
     if($balance === FALSE)
     {
       echo "API Request Timeout";
@@ -87,14 +90,38 @@ class Orders extends PS_Controller
     {
       $available = $balance - $used;
 
-      $arr = array(
-        'status' => 'success',
-        'balance' => $available < 0 ? 0 : $available,
-        'used' => $used
-      );
+			echo $available < 0 ? 0 : $available;
 
-      echo json_encode($arr);
+      // $arr = array(
+      //   'status' => 'success',
+      //   'balance' => $available < 0 ? 0 : $available,
+      //   'used' => $used
+      // );
+
+      // echo json_encode($arr);
     }
+	}
+
+	public function get_available_credit()
+	{
+		$this->load->library('hana');
+		$this->conn = $this->hana->connect();
+		$creditBalance = 0.00;
+		$CardCode = $this->input->get('CardCode');
+
+		if(! empty($CardCode))
+		{
+			$credit = $this->customers_model->get_credit_details($CardCode);
+
+			if(! empty($credit))
+			{
+				$orderUsed = $this->orders_model->get_credit_used($CardCode);
+				$CreditLine = floatval($credit->CreditLine);
+				$creditBalance = $CreditLine - ($credit->Balance + $credit->DNotesBal + $credit->OrdersBal + $orderUsed);
+			}
+		}
+
+		echo $creditBalance;		
 	}
 
 
@@ -322,7 +349,7 @@ class Orders extends PS_Controller
 
 
 
-  public function edit($code)
+  public function edit($code, $pageNo = 0)
   {
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/customer_address_model');
@@ -360,7 +387,8 @@ class Orders extends PS_Controller
 					'totalAmount' => $totalAmount,
 					'whsList' => $this->warehouse_model->get_listed(),
 					'quotaList' => $this->quota_model->get_all_listed(),
-					'logs' => $this->orders_model->get_logs($code)
+					'logs' => $this->orders_model->get_logs($code),
+					'backUrl' => $this->home.'/index/'.$pageNo,
 				);
 
 				$this->load->view('sales_order/sales_order_edit', $ds);
@@ -887,7 +915,7 @@ class Orders extends PS_Controller
 
 
 
-	public function view_detail($code)
+	public function view_detail($code, $segment = 0)
 	{
 		$this->load->model('users/approver_model');
 		$this->load->model('masters/sales_person_model');
@@ -948,7 +976,8 @@ class Orders extends PS_Controller
 				'dimCode5' => $this->cost_center_model->get_name($order->dimCode5),
 				'logs' => $this->orders_model->get_logs($code),
 				'is_approver' => $approver_id,
-				'brand' => $brand
+				'brand' => $brand,
+				'backUrl' => $this->home."/index/{$segment}"
 			);
 
 			$this->load->view('sales_order/sales_order_view', $ds);
@@ -1773,7 +1802,6 @@ class Orders extends PS_Controller
 	}
 
 
-
 	public function get_free_item()
 	{
 		$rule_id = $this->input->get('rule_id');
@@ -1784,55 +1812,117 @@ class Orders extends PS_Controller
 
 		$list = $this->discount_model->get_free_item_list($rule_id);
 
-		$ds = "";
+		$ds = array(
+			'freeQty' => $qty,
+			'items' => []
+		);
 
-		if(!empty($list))
-		{
-			$ds .= "<tr><td colspan='5' class='text-center'>เลือก {$qty} ชิ้น จากรายการต่อไปนี้</td></tr>";
-			$ds .= "<tr>";
-			$ds .= "<td class='fix-width-60 middle'>Image</td>";
-			$ds .= "<td class='fix-width-100 middle'>Code</td>";
-			$ds .= "<td class='min-width-250 middle'>Description</td>";
-			$ds .= "<td class='fix-width-80 middle'>Qty</td>";
-			$ds .= "<td class='fix-width-80 middle'></td>";
-			$ds .= "</tr>";
-
-			foreach($list as $rs)
+		if (!empty($list))
+		{			
+			foreach ($list as $rs)
 			{
-				$uuid = uniqid(rand(1,100));
-				$img = get_image_path($rs->product_id, 'mini');
+				$uuid = uniqid(rand(1, 100));
+					
 				$pd = $this->products_model->get($rs->product_code);
-				$price = $pd->price;
+				$stdPrice = $pd->price;
+				$diff = $stdPrice - $rs->sell_price;
+				$discPercent = ($stdPrice > 0 && $diff > 0) ? ($diff / $stdPrice) * 100 : 0;
+				$discAmount = $stdPrice > 0 && $diff > 0 ? $diff : 0;
+				$price = $stdPrice <= 0 ? $rs->sell_price : $stdPrice;
 
-				$ds .= "<tr>";
-				$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
-				$ds .= "<td class='fix-width-100 middle'>{$pd->code}</td>";
-				$ds .= "<td class='min-width-250 middle'>{$pd->name}</td>";
-				$ds .= "<td class='fix-width-80 middle'>";
-				$ds .= "<input type='number' class='form-control input-sm text-center auto-select' ";
-				$ds .= "id='input-{$uuid}' data-item='{$pd->id}' ";
-				$ds .= "data-uid='{$uid}' data-parent='{$uid}' ";
-				$ds .= "data-pdcode='{$pd->code}' ";
-				$ds .= "data-pdname='{$pd->name}' ";
-				$ds .= "data-price='{$price}' ";
-				$ds .= "data-uom='{$pd->uom}' data-uomcode='{$pd->uom_code}' ";
-				$ds .= "data-rule='{$rs->rule_id}' data-policy='{$rs->id_policy}' ";
-				$ds .= "data-vatcode='{$pd->vat_group}' data-vatrate='{$pd->vat_rate}' ";
-				$ds .= "data-img='{$img}' data-qty='{$qty}' value='1'>";
-				$ds .= "</td>";
-				$ds .= "<td class='fix-width-80 middle'>";
-				$ds .= "<button class='btn btn-primary btn-xs btn-block' id='btn-{$uuid}' onclick=\"addFreeRow('{$uuid}')\">Add</button>";
-				$ds .= "</td>";
-				$ds .= "</tr>";
+				$ds['items'][] = array(
+					'id' => $pd->id,
+					'uuid' => $uuid,
+					'uid' => $uid,
+					'img' => get_image_path($pd->id, 'mini'),
+					'code' => $pd->code,
+					'name' => $pd->name,
+					'qty' => $qty,
+					'std_price' => $stdPrice,
+					'price' => $price,
+					'sell_price' => $rs->sell_price,
+					'stdPriceLabel' => number($stdPrice, 2),
+					'priceLabel' => number($price, 2),
+					'sellPriceLabel' => number($rs->sell_price, 2),
+					'discPercent' => round($discPercent, 2),
+					'discAmount' => $discAmount,
+					'uom' => $pd->uom,
+					'uom_code' => $pd->uom_code,
+					'rule_id' => $rs->rule_id,
+					'id_policy' => $rs->id_policy,
+					'vat_group' => $pd->vat_group,
+					'vat_rate' => $pd->vat_rate
+				);
 			}
 		}
 		else
 		{
-			$ds .= "<tr><td colspan='5' class='text-center'>ไม่พบรายการสินค้า</td></tr>";
+			$ds['items'] = array('nodata' => TRUE);
 		}
 
-		echo $ds;
+		echo json_encode($ds);
 	}
+
+
+	// public function get_free_item()
+	// {
+	// 	$rule_id = $this->input->get('rule_id');
+	// 	$uid = $this->input->get('uid');
+	// 	$freeQty = $this->input->get('freeQty');
+	// 	$picked = $this->input->get('picked');
+	// 	$qty = $freeQty - $picked;
+
+	// 	$list = $this->discount_model->get_free_item_list($rule_id);
+
+	// 	$ds = "";
+
+	// 	if(!empty($list))
+	// 	{
+	// 		$ds .= "<tr><td colspan='5' class='text-center'>เลือก {$qty} ชิ้น จากรายการต่อไปนี้</td></tr>";
+	// 		$ds .= "<tr>";
+	// 		$ds .= "<td class='fix-width-60 middle'>Image</td>";
+	// 		$ds .= "<td class='fix-width-100 middle'>Code</td>";
+	// 		$ds .= "<td class='min-width-250 middle'>Description</td>";
+	// 		$ds .= "<td class='fix-width-80 middle'>Qty</td>";
+	// 		$ds .= "<td class='fix-width-80 middle'></td>";
+	// 		$ds .= "</tr>";
+
+	// 		foreach($list as $rs)
+	// 		{
+	// 			$uuid = uniqid(rand(1,100));
+	// 			$img = get_image_path($rs->product_id, 'mini');
+	// 			$pd = $this->products_model->get($rs->product_code);
+	// 			$price = $pd->price;
+
+	// 			$ds .= "<tr>";
+	// 			$ds .= "<td class='text-center'><img src='{$img}' width='40' height='40' /></td>";
+	// 			$ds .= "<td class='fix-width-100 middle'>{$pd->code}</td>";
+	// 			$ds .= "<td class='min-width-250 middle'>{$pd->name}</td>";
+	// 			$ds .= "<td class='fix-width-80 middle'>";
+	// 			$ds .= "<input type='number' class='form-control input-sm text-center auto-select' ";
+	// 			$ds .= "id='input-{$uuid}' data-item='{$pd->id}' ";
+	// 			$ds .= "data-uid='{$uid}' data-parent='{$uid}' ";
+	// 			$ds .= "data-pdcode='{$pd->code}' ";
+	// 			$ds .= "data-pdname='{$pd->name}' ";
+	// 			$ds .= "data-price='{$price}' ";
+	// 			$ds .= "data-uom='{$pd->uom}' data-uomcode='{$pd->uom_code}' ";
+	// 			$ds .= "data-rule='{$rs->rule_id}' data-policy='{$rs->id_policy}' ";
+	// 			$ds .= "data-vatcode='{$pd->vat_group}' data-vatrate='{$pd->vat_rate}' ";
+	// 			$ds .= "data-img='{$img}' data-qty='{$qty}' value='1'>";
+	// 			$ds .= "</td>";
+	// 			$ds .= "<td class='fix-width-80 middle'>";
+	// 			$ds .= "<button class='btn btn-primary btn-xs btn-block' id='btn-{$uuid}' onclick=\"addFreeRow('{$uuid}')\">Add</button>";
+	// 			$ds .= "</td>";
+	// 			$ds .= "</tr>";
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		$ds .= "<tr><td colspan='5' class='text-center'>ไม่พบรายการสินค้า</td></tr>";
+	// 	}
+
+	// 	echo $ds;
+	// }
 
 
 	public function getPrice($ItemCode, $priceList)
@@ -2089,6 +2179,7 @@ class Orders extends PS_Controller
 			'soNo',
 			'order_role',
 			'order_sale_id',
+			'order_project',
 			'order_channels',
 			'order_payment',
 			'order_approval',
