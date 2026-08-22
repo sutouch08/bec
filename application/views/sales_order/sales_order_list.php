@@ -158,8 +158,9 @@
 			</thead>
 			<tbody style="font-size:12px;">
 				<?php if (! empty($data)) : ?>
-					<?php $no = $this->uri->segment($this->segment) + 1; ?>
-					<?php $pageNo = $this->uri->segment($this->segment); ?>
+					<?php $segment = $this->uri->segment($this->segment); ?>
+					<?php $no = ($segment == "" OR $segment == 'undefined') ? 0 : $segment + 1; ?>
+					<?php $pageNo = $segment; ?>
 					<?php foreach ($data as $rs) : ?>
 						<tr>
 							<td class="middle text-center no"><?php echo $no; ?></td>
@@ -173,6 +174,8 @@
 							<td class="middle text-center">
 								<?php if ($rs->Status == -1) : ?>
 									<span class="purple">Draft</span>
+									<?php elseif ($rs->Status == 4) : ?>
+									<span class="purple">Reserved</span>
 								<?php elseif ($rs->Status == 1) : ?>
 									<span class="green">Success</span>
 								<?php elseif ($rs->Status == 2) : ?>
@@ -201,7 +204,7 @@
 							<td class="middle"><?php echo $rs->uname; ?></td>
 							<td class="middle">
 								<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-eye"></i></button>
-								<?php if ($this->pm->can_edit && ($rs->Status == 0 or $rs->Status == -1 or $rs->Status == 3)) : ?>
+								<?php if ($this->pm->can_edit && ($rs->Status != 1 && $rs->Status != 2)) : ?>
 									<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-pencil"></i></button>
 								<?php endif; ?>
 								<?php if ($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>

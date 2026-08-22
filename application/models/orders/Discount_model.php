@@ -53,6 +53,7 @@ class Discount_model extends CI_Model
 			'totalDiscPrecent' => 0,
 			'freeQty' => 0,
 			'rule_id' => NULL,
+			'rule_code' => NULL,
 			'policy_id' => NULL
 		); //-- end array
 
@@ -204,16 +205,13 @@ class Discount_model extends CI_Model
 						$freeQty = 0;
 
 						$dis_rule = NULL; //---  ที่พัก rule id ที่ดีที่สุด
-
+						$dis_code = NULL; //---  ที่พัก rule code ที่ดีที่สุด
 						$dis_policy = NULL;
 
 						//---- วนรอบจนหมดเงื่อนไข
 						//--- หากเงื่อนไขถัดไปได้ส่วนลดรวมมากกว่าเงื่อนไขก่อนหน้า ตัวแปรด้านบนจะถูกแทนค่าใหม่ ถ้าไม่ดีกว่าจะได้ค่าเดิม
 						foreach($qs->result() as $rs)
-						{
-							// echo "<pre>";
-							// print_r($rs);
-							// echo "</pre>";
+						{							
 							if($rs->priority >= $priority)
 							{
 								$discount1 = 0;
@@ -221,8 +219,8 @@ class Discount_model extends CI_Model
 								$discount3 = 0;
 								$discount4 = 0;
 								$discount5 = 0;
-								$amount = $qty * $price;
-								$isSetMin = ($rs->minQty > 0 OR $rs->minAmount > 0) ? TRUE : FALSE; //--- มีการกำหนดขั้นต่ำหรือไม่
+								// $amount = $qty * $price;
+								// $isSetMin = ($rs->minQty > 0 OR $rs->minAmount > 0) ? TRUE : FALSE; //--- มีการกำหนดขั้นต่ำหรือไม่
 
 
 								//---- ถ้ามีการกำหนดราคาขาย
@@ -275,6 +273,7 @@ class Discount_model extends CI_Model
 
 								//--- ถ้าส่วนลดรวมดีกว่าก่อนหน้านี้ เปลี่ยนมาใช้เงื่อนไขนี้แทน
 								$dis_rule = ( $sumDiscount >= $totalDiscAmount ) ? $rs->id : $dis_rule;
+								$dis_code = ( $sumDiscount >= $totalDiscAmount ) ? $rs->code : $dis_code;
 								$dis_policy = ($sumDiscount >= $totalDiscAmount) ? $rs->id_policy : $dis_policy;
 								$type = ($sumDiscount >= $totalDiscAmount) ? $rs->type : $type;
 
@@ -307,6 +306,7 @@ class Discount_model extends CI_Model
 							'totalDiscAmount' => round($totalDiscAmount * $qty, 4), //--- เอายอดส่วนลดที่ได้ มา คูณ ด้วย จำนวนสั่ง เป้นส่วนลดทั้งหมด
 							'totalDiscPrecent' => round(discountAmountToPercent($totalDiscAmount, 1, $price), 2),
 							'rule_id' => $dis_rule,
+							'rule_code' => $dis_code,
 							'policy_id' => $dis_policy,
 							'freeQty' => $freeQty
 						); //-- end array

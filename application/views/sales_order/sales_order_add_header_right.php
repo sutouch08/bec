@@ -1,4 +1,4 @@
-<div class="col-lg-4 col-md-5 col-sm-5 col-xs-12 padding-5 last">
+<div class="col-lg-4 col-md-5 col-sm-5 col-xs-12 padding-5">
 	<div class="form-horizontal">
 		<div class="form-group">
 			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Web Order</label>
@@ -11,7 +11,7 @@
 			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Posting Date</label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
 				<span class="input-icon input-icon-right">
-					<input type="text" id="TextDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly />
+					<input type="text" id="TextDate" class="form-control input-sm r" value="<?php echo date('d-m-Y'); ?>" readonly />
 					<i class="ace-icon fa fa-calendar-o"></i>
 				</span>
 			</div>
@@ -21,7 +21,7 @@
 			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Delivery Date</label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
 				<span class="input-icon input-icon-right">
-					<input type="text" id="ShipDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly />
+					<input type="text" id="ShipDate" class="form-control input-sm r" value="<?php echo date('d-m-Y'); ?>" readonly />
 					<i class="ace-icon fa fa-calendar-o"></i>
 				</span>
 			</div>
@@ -32,7 +32,7 @@
 			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Document Date</label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
 				<span class="input-icon input-icon-right">
-					<input type="text" id="DocDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly onchange="recal_all_discount()" />
+					<input type="text" id="DocDate" class="form-control input-sm r" value="<?php echo date('d-m-Y'); ?>" readonly onchange="recal_all_discount()" />
 					<i class="ace-icon fa fa-calendar-o"></i>
 				</span>
 			</div>
@@ -41,57 +41,17 @@
 		<div class="form-group">
 			<label class="col-lg-5 col-md-4 col-sm-4 col-xs-12 sap-label">Projects</label>
 			<div class="col-lg-7 col-md-8 col-sm-8 col-xs-12">
-				<select class="form-control input-sm" id="projects" name="projects">
+				<select class="form-control input-sm r" id="projects" name="projects">
 					<option value="">Please Select</option>
 					<?php echo select_projects(); ?>
 				</select>
 			</div>
 		</div>
 
-		<!-- <div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 sap-label">CEO</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode1" name="dimCode1" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(1); ?>
-				</select>
-      </div>
-    </div>
-
-		<div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 sap-label">COO/CFO</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode2" name="dimCode2" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(2); ?>
-				</select>
-      </div>
-    </div>
-
-		<div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 sap-label">สายงานขายและการตลาด</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode3" name="dimCode3" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(3); ?>
-				</select>
-      </div>
-    </div>
-
-		<div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 sap-label">ฝ่าย</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode4" name="dimCode4" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(4); ?>
-				</select>
-      </div>
-    </div> -->
-
 		<div class="form-group">
 			<label class="col-lg-5 col-md-4 col-sm-4 col-xs-12 sap-label">แผนก</label>
 			<div class="col-lg-7 col-md-8 col-sm-8 col-xs-12">
-				<select class="form-control input-sm" id="dimCode5" name="dimCode5">
+				<select class="form-control input-sm r" id="dimCode5" name="dimCode5">
 					<option value="">Please Select</option>
 					<?php echo select_cost_center(5); ?>
 				</select>
@@ -101,10 +61,8 @@
 		<div class="form-group">
 			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Available Credit</label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
-				<input type="text" id="available-credit" class="form-control input-sm" value="" disabled />
+				<input type="text" id="available-credit" class="form-control input-sm text-right" value="" disabled />
 			</div>
 		</div>
-
 	</div>
-
 </div>

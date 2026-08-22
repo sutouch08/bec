@@ -196,7 +196,21 @@ class Discount_policy_model extends CI_Model
     return NULL;
   }
 
+  public function get_code_by_ids(array $ids = array())
+  {
+    $rs = $this->db
+    ->select('id, code, name')
+    ->where_in('id', $ids)
+    ->get($this->tb);
 
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+  
   public function search($txt)
   {
     $rs = $this->db->select('id')

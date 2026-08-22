@@ -128,8 +128,8 @@ function selectMultipleSalesTeam(array $selected = array())
 	{
 		foreach ($option as $rs)
 		{
-			$se = in_array($rs->id, $selected) ? 'selected' : '';
-			$ds .= "<option data-id=\"{$rs->id}\" data-code=\"{$rs->code}\" data-name=\"{$rs->name}\" value=\"{$rs->id}\" {$se}>{$rs->name}</option>";
+			$se = in_array($rs->code, $selected) ? 'selected' : '';
+			$ds .= "<option data-id=\"{$rs->id}\" data-code=\"{$rs->code}\" data-name=\"{$rs->name}\" value=\"{$rs->code}\" {$se}>{$rs->name}</option>";
 		}
 	}
 

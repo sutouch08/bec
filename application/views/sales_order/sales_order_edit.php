@@ -26,50 +26,8 @@
 <input type="hidden" id="user_id" value="<?php echo $order->user_id; ?>" />
 <input type="hidden" id="uname" value="<?php echo $order->uname; ?>" />
 <input type="hidden" id="sale_team" value="<?php echo $order->sale_team; ?>" />
-<input type="hidden" id="is_draft" value="0">
+<input type="hidden" id="saveType" value="0"> <!-- 0 = Normal save, 1 = Draft, 2 = Reserve -->
 <input type="hidden" id="creditLimit" value="<?php echo getConfig('CREDIT_LIMIT') == 1 ? 1 : 0; ?>" />
-
-
-<?php $this->load->view('sales_order/sales_order_ship_to_modal'); ?>
-<?php $this->load->view('sales_order/sales_order_bill_to_modal'); ?>
-
-
-<script id="ship-to-template" type="text/x-handlebarsTemplate">
-	{{#each this}}
-		<option value="{{code}}">{{code}}</option>
-	{{/each}}
-</script>
-
-<script id="bill-to-template" type="text/x-handlebarsTemplate">
-	{{#each this}}
-		<option value="{{code}}">{{code}}</option>
-	{{/each}}
-</script>
-
-
-<script id="series-template" type="text/x-handlebarsTemplate">
-	{{#each this}}
-		<option value="{{code}}" {{is_selected}}>{{name}}</option>
-	{{/each}}
-</script>
-
-
-<!--  Add New Address Modal  --------->
-<div class="modal fade" id="free-item-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog" style="max-width:800px;">
-		<div class="modal-content">
-			<div class="modal-body">
-				<div class="row">
-					<table class="table table-striped broder-1">
-						<tbody id="free-item-list">
-
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
 
 <script src="<?php echo base_url(); ?>scripts/sales_order/sales_order.js?v=<?php echo date('YmdH'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/sales_order/sales_order_add.js?v=<?php echo date('YmdHm'); ?>"></script>

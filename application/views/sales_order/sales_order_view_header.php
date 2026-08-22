@@ -1,5 +1,4 @@
-<div class="row">
-  <!-- Left column -->
+<div class="row">  
 	<?php $statusName = "Unknow"; ?>
 	<?php
 	if($order->Status == -1)
@@ -13,6 +12,10 @@
 	elseif($order->Status == 3)
 	{
 		$statusName = "Interface Failed";
+	}
+	elseif($order->Status == 4)
+	{
+		$statusName = "Reserved";
 	}
 	else
 	{

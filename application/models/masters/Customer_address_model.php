@@ -163,11 +163,11 @@ class Customer_address_model extends CI_Model
 		return FALSE;
   }
 
-
 	public function get_address_ship_to_code($CardCode)
 	{
 		$rs = $this->db
 		->select('Address AS code, Address3 AS name')
+		->select('Street AS address, Block AS sub_district, City AS district, County AS province, Country AS country, ZipCode AS postcode')
 		->where('CardCode', $CardCode)
 		->where('AdresType', 'S')
 		->get($this->tb);
@@ -184,12 +184,13 @@ class Customer_address_model extends CI_Model
 	public function get_address_bill_to_code($CardCode)
 	{
 		$rs = $this->db
-		->select('Address AS code, Address3 AS name')
-		->where('CardCode', $CardCode)
-		->where('AdresType', 'B')
-		->get($this->tb);
+			->select('Address AS code, Address3 AS name')
+			->select('Street AS address, Block AS sub_district, City AS district, County AS province, Country AS country, ZipCode AS postcode')
+			->where('CardCode', $CardCode)
+			->where('AdresType', 'B')
+			->get($this->tb);
 
-		if($rs->num_rows() > 0)
+		if ($rs->num_rows() > 0)
 		{
 			return $rs->result();
 		}

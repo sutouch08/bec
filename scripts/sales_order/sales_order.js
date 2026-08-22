@@ -2,17 +2,17 @@ const addNew = () => {
 	window.location.href = `${HOME}add_new`;
 }
 
-const edit = (code, pageNo) => {
+const edit = (code, pageNo = 0) => {
 	load_in();
 	window.location.href = `${HOME}edit/${code}/${pageNo}`;
 }
 
-const goEdit = (code, pageNo) => {
+const goEdit = (code, pageNo = 0) => {
 	load_in();
 	window.location.href = `${HOME}edit/${code}/${pageNo}`;
 }
 
-const viewDetail = (code, pageNo) => {
+const viewDetail = (code, pageNo = 0) => {
 	load_in();
 	window.location.href = `${HOME}view_detail/${code}/${pageNo}`;
 }

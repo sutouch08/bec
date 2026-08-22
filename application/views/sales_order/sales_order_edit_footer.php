@@ -3,26 +3,26 @@
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
     <div class="form-horizontal">
 
-			<div class="form-group">
+      <div class="form-group">
         <label class="col-lg-3 col-md-4 col-sm-4 control-label no-padding-right">Sales Employee</label>
         <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
           <select class="width-100" id="sale_id">
-						<?php $sale_id = empty($order->SlpCode) ? $this->_user->sale_id : $order->SlpCode; ?>
+            <?php $sale_id = empty($order->SlpCode) ? $this->_user->sale_id : $order->SlpCode; ?>
             <?php echo select_saleman($sale_id); ?>
-					</select>
+          </select>
         </div>
       </div>
 
-			<div class="form-group">
+      <div class="form-group">
         <label class="col-lg-3 col-md-4 col-sm-4 col-xs-12 control-label no-padding-right">Owner</label>
         <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
           <?php $active = 1; ?>
           <select class="width-100" id="owner">
-						<option value=""></option>
-						<option value="">-No Owner-</option>
-						<?php $owner = empty($order->OwnerCode) ? $this->_user->emp_id : $order->OwnerCode; ?>
+            <option value=""></option>
+            <option value="">-No Owner-</option>
+            <?php $owner = empty($order->OwnerCode) ? $this->_user->emp_id : $order->OwnerCode; ?>
             <?php echo select_employee($owner, $active); ?>
-					</select>
+          </select>
         </div>
       </div>
 
@@ -43,7 +43,7 @@
       <div class="form-group">
         <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Total Before Discount</label>
         <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
-					<input type="hidden" id="totalAmount" value="<?php echo round($totalAmount, 2); ?>">
+          <input type="hidden" id="totalAmount" value="<?php echo round($totalAmount, 2); ?>">
           <input type="text" class="form-control input-sm text-right" id="totalAmountLabel" value="<?php echo number($totalAmount, 2); ?>" disabled>
         </div>
       </div>
@@ -52,12 +52,12 @@
         <label class="col-lg-6 col-md-4 col-sm-4 col-xs-3 control-label no-padding-right">Discount</label>
         <div class="col-lg-2 col-md-4 col-sm-3 col-xs-3 padding-5">
           <span class="input-icon input-icon-right">
-          <input type="number" id="discPrcnt" class="form-control input-sm" value="<?php echo $order->DiscPrcnt; ?>"/>
-          <i class="ace-icon fa fa-percent"></i>
+            <input type="number" id="discPrcnt" class="form-control input-sm" value="<?php echo $order->DiscPrcnt; ?>" />
+            <i class="ace-icon fa fa-percent"></i>
           </span>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
-					<input type="hidden" id="discAmount" value="<?php echo $order->DiscAmount; ?>" />
+          <input type="hidden" id="discAmount" value="<?php echo $order->DiscAmount; ?>" />
           <input type="text" id="discAmountLabel" class="form-control input-sm text-right" value="<?php echo number($order->DiscAmount, 2); ?>" disabled>
         </div>
       </div>
@@ -66,7 +66,7 @@
       <div class="form-group">
         <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Tax</label>
         <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
-					<input type="hidden" id="tax" value="<?php echo round($order->VatSum, 2); ?>" />
+          <input type="hidden" id="tax" value="<?php echo round($order->VatSum, 2); ?>" />
           <input type="text" id="taxLabel" class="form-control input-sm text-right" value="<?php echo number($order->VatSum, 2); ?>" disabled />
         </div>
       </div>
@@ -74,8 +74,8 @@
       <div class="form-group">
         <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Total</label>
         <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
-					<input type="hidden" id="docTotal" value="<?php echo round($order->DocTotal, 2); ?>"/>
-          <input type="text" id="docTotalLabel" class="form-control input-sm text-right" value="<?php echo number($order->DocTotal, 2); ?>" disabled/>
+          <input type="hidden" id="docTotal" value="<?php echo round($order->DocTotal, 2); ?>" />
+          <input type="text" id="docTotalLabel" class="form-control input-sm text-right" value="<?php echo number($order->DocTotal, 2); ?>" disabled />
         </div>
       </div>
     </div>
@@ -84,23 +84,38 @@
   <div class="divider-hidden"></div>
   <div class="divider-hidden"></div>
   <div class="divider-hidden"></div>
-
-	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
-  <?php if($order->role == 'S') : ?>
-		<button type="button" class="btn btn-sm btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
-    <button type="button" class="btn btn-sm btn-primary btn-100 hide" id="btn-save" onclick="validateFreeItem('update')">Save</button>
-    <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
-    <button type="button" class="btn btn-sm btn-info btn-100 hide" id="btn-draft" onclick="saveAsDraft('update')">Save AS Draft</button>
-  <?php else : ?>
-    <button type="button" class="btn btn-sm btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
-    <button type="button" class="btn btn-sm btn-primary btn-100" id="btn-save" onclick="validateFreeItem('update')">Save</button>
-    <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
-    <button type="button" class="btn btn-sm btn-info btn-100" id="btn-draft" onclick="saveAsDraft('update')">Save AS Draft</button>
-  <?php endif; ?>
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
+    <button type="button" class="btn btn-white btn-default btn-100" onclick="leave()">Cancel</button>    
+    <button type="button" class="btn btn-white btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
+    <div class="btn-group dropup">
+      <button type="button" class="btn btn-white btn-primary btn-100 dropdown-toggle" data-toggle="dropdown">
+        <i class="fa fa-save"></i>&nbsp; Save <i class="ace-icon fa fa-angle-down icon-on-right"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <li class="primary"><a id="btn-draft" href="javascript:saveAsDraft('update')">Save as Draft</a></li>
+        <li class="purple"><a id="btn-reserv" href="javascript:saveAsReserve('update')">Save AS Reserv</a></li>
+        <li class="success"><a id="btn-save" href="javascript:validateFreeItem('update')">Save</a></li>
+      </ul>
+    </div>    
   </div>
+
+
+  <!-- <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
+    <?php if ($order->role == 'S') : ?>
+      <button type="button" class="btn btn-sm btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
+      <button type="button" class="btn btn-sm btn-primary btn-100 hide" id="btn-save" onclick="validateFreeItem('update')">Save</button>
+      <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
+      <button type="button" class="btn btn-sm btn-info btn-100 hide" id="btn-draft" onclick="saveAsDraft('update')">Save AS Draft</button>
+    <?php else : ?>
+      <button type="button" class="btn btn-sm btn-info btn-100" id="btn-check-free" onclick="getFreeItemRule()">ตรวจสอบของแถม</button>
+      <button type="button" class="btn btn-sm btn-primary btn-100" id="btn-save" onclick="validateFreeItem('update')">Save</button>
+      <button type="button" class="btn btn-sm btn-warning btn-100" onclick="leave()">Cancel</button>
+      <button type="button" class="btn btn-sm btn-info btn-100" id="btn-draft" onclick="saveAsDraft('update')">Save AS Draft</button>
+    <?php endif; ?>
+  </div> -->
 </div>
 
 <script>
   $('#owner').select2();
-	$('#sale_id').select2();
+  $('#sale_id').select2();
 </script>

@@ -33,14 +33,12 @@
 					<th class="fix-width-80 middle text-center">Tax Code</th>
 					<th class="fix-width-120 middle text-center">Price after discount</th>
 					<th class="fix-width-150 middle text-center">Amount before tax</th>
-					<th class="fix-width-60 middle text-center"></th>
+					<th class="fix-width-100 middle">Disc Rule No.</th>
+					<th class="fix-width-60 middle text-center">Premium</th>
 				</tr>
 			</thead>
 			<tbody id="details-template">
-				<?php $no = 1; ?>
-				<?php $dwh = getConfig('DEFAULT_WAREHOUSE'); ?>
-				<?php $whs = select_listed_warehouse($dwh); ?>
-				<?php $qn = select_listed_quota($this->_user->quota_no); ?>
+				<?php $no = 1; ?>				
 				<?php $uuid = uniqid(rand(1, 100)); ?>
 				<tr id="row-<?php echo $no; ?>">
 					<input type="hidden" id="product-id-<?php echo $no; ?>" value="0" />
@@ -60,7 +58,7 @@
 					<input type="hidden" id="uom-code-<?php echo $no; ?>" value="" />
 					<input type="hidden" class="disc-diff" id="disc-diff-<?php echo $no; ?>" value="0" />
 					<input type="hidden" id="rule-id-<?php echo $no; ?>" value="" />
-					<input type="hidden" id="policy-id-<?php echo $no; ?>" value="" />
+					<input type="hidden" class="policy" id="policy-id-<?php echo $no; ?>" value="" />
 					<input type="hidden" class="disc-error" id="disc-error-<?php echo $no; ?>" value="0" data-id="<?php echo $no; ?>" />
 					<input type="hidden" class="is-free" id="is-free-<?php echo $no; ?>"
 						value="0" data-id="<?php echo $no; ?>"
@@ -87,7 +85,7 @@
 					<td class="middle">
 						<select class="form-control input-sm whs" data-id="<?php echo $no; ?>" id="whs-<?php echo $no; ?>" onchange="getStock(<?php echo $no; ?>)">
 							<option value=""></option>
-							<?php echo $whs; ?>
+							<?php echo $whsList; ?>
 						</select>
 					</td>
 
@@ -98,7 +96,7 @@
 					<td class="middle">
 						<select class="form-control input-sm quota" data-id="<?php echo $no; ?>" id="quota-<?php echo $no; ?>" onchange="getStock(<?php echo $no; ?>)">
 							<option value=""></option>
-							<?php echo $qn; ?>
+							<?php echo $quotaList; ?>
 						</select>
 					</td>
 
@@ -126,13 +124,11 @@
 						<input type="text" class="form-control input-sm text-right number" id="stdPrice-label-<?php echo $no; ?>" value="" disabled />
 					</td>
 					<td class="middle">
-						<input type="text" class="form-control input-sm text-right number" id="price-label-<?php echo $no; ?>"
-							value="" onchange="recalAmount(<?php echo $no; ?>)" disabled />
+						<input type="text" class="form-control input-sm text-right number" id="price-label-<?php echo $no; ?>" value="" onchange="recalAmount(<?php echo $no; ?>)" disabled />
 					</td>
 
 					<td class="middle">
-						<input type="text" class="form-control input-sm text-right " id="disc-label-<?php echo $no; ?>"
-							value="" onchange="recalDiscount(<?php echo $no; ?>)" />
+						<input type="text" class="form-control input-sm text-right r" id="disc-label-<?php echo $no; ?>" value="" onchange="recalDiscount(<?php echo $no; ?>)" />
 					</td>
 					<td class="middle">
 						<input type="text" class="form-control input-sm text-center" id="vat-code-<?php echo $no; ?>" value="" disabled />
@@ -145,6 +141,9 @@
 					<td class="middle">
 						<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-<?php echo $no; ?>" value="" readonly disabled />
 					</td>
+					<td class="middle">
+						<input type="text" class="form-control input-sm text-center" id="disc-rule-<?php echo $no; ?>" value="" disabled />
+					</td>
 					<td class="middle text-center">
 					</td>
 				</tr>
@@ -154,8 +153,11 @@
 
 		<input type="hidden" id="row-no" value="<?php echo $no; ?>" />
 	</div>
+	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
+		<p class="margin-top-15" id="promotions-applied">Promotions applied : - </p>
+	</div>
 </div>
 <hr class="padding-5" />
 
 
-<?php $this->load->view('sales_order/sales_detail_template'); ?>
+<?php $this->load->view('sales_order/sales_order_detail_template'); ?>

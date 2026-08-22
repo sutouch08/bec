@@ -47,6 +47,18 @@ class Customers_model extends CI_Model
 		return NULL;
 	}
 
+	public function get_customer_address($code)
+	{
+		$rs = $this->db->where('CardCode', $code)->get('customer_address');
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
 
 	public function get_customer_data_by_id($id)
 	{

@@ -1,6 +1,8 @@
 <style>
-  .form-group {
+  .form-horizontal .form-group {
     margin-bottom: 5px;
+    margin-left:0px;
+    margin-right:-5px;
   }
 
   .input-icon>.ace-icon {

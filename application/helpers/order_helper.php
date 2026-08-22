@@ -72,5 +72,35 @@ function action_name($action)
 	return NULL;
 }
 
+function available_credit($cardCode, $orderCode = NULL)
+{
+	$ci =& get_instance();
+	$ci->load->model('orders/orders_model');
+	$ci->load->model('masters/customers_model');
+	$ci->load->library('order_api');	
+	$balance = $ci->order_api->getCreditBalance($cardCode);
+	$used = $ci->orders_model->get_credit_used($cardCode, $orderCode);
+	$available = $balance - $used;
+	return $available < 0 ? 0 : $available;
+}
 
- ?>
+
+function order_status_name($status, $approved = 'P')
+{		
+	$arr = array(
+		'-1' => "Draft",
+		'1' => "Success",
+		'2' => "Canceled",
+		'3' => "Interface Failed",
+		'4' => "Reserved",
+		'0' => [
+			'P' => "Pending Approval",
+			'R' => "Rejected",
+			'A' => "Approved",
+			'S' => "Approve by system"
+		]
+	);
+
+	return $status == 0 ? $arr[$status][$approved] : (isset($arr[$status]) ? $arr[$status] : "Unknown");
+}
+
