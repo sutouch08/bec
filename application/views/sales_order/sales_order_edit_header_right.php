@@ -66,9 +66,16 @@
 		</div>
 
 		<div class="form-group">
-			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Available Credit</label>
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Available Credit <span class="font-size-11"> (exclude this order)</span></label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
-				<input type="text" id="available-credit" class="form-control input-sm text-right" value="<?php echo available_credit($order->CardCode, $order->code); ?>" disabled />
+				<input type="text" id="available-credit" class="form-control input-sm text-right" value="<?php echo number($availableCredit, 2); ?>" disabled />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Available Reserve <span class="font-size-11"> (exclude this order)</span></label>
+			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
+				<input type="text" id="available-reserve" class="form-control input-sm text-right" value="<?php echo number($availableReserve, 2); ?>" disabled />
 			</div>
 		</div>
 	</div>

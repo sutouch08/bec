@@ -33,7 +33,7 @@
 
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>User</label>
-			<select class="form-control input-sm filter" name="user_id" id="user_id">
+			<select class="form-control input-sm" name="user_id" id="user_id">
 				<option value="all">ทั้งหมด</option>
 				<?php echo select_user($user_id); ?>
 			</select>
@@ -41,14 +41,14 @@
 
 		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>Channels</label>
-			<select class="form-control input-sm filter" name="channels" id="channels">
+			<select class="form-control input-sm" name="channels" id="channels">
 				<option value="all">ทั้งหมด</option>
 				<?php echo select_channels($channels); ?>
 			</select>
 		</div>
 		<div class="col-lg-3 col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>Projects</label>
-			<select class="form-control input-sm filter" name="project" id="project">
+			<select class="form-control input-sm" name="project" id="project">
 				<option value="all">ทั้งหมด</option>
 				<?php echo select_projects($project); ?>
 			</select>
@@ -56,7 +56,7 @@
 
 		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>Payment</label>
-			<select class="form-control input-sm filter" name="payment" id="payment">
+			<select class="form-control input-sm" name="payment" id="payment">
 				<option value="all">ทั้งหมด</option>
 				<?php echo select_payment_term($payment); ?>
 			</select>
@@ -64,7 +64,7 @@
 
 		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>Order Role</label>
-			<select class="form-control input-sm filter" name="role" id="role">
+			<select class="form-control input-sm" name="role" id="role">
 				<option value="all">ทั้งหมด</option>
 				<option value="S" <?php echo is_selected($role, 'S'); ?>>BEC</option>
 				<option value="C" <?php echo is_selected($role, 'C'); ?>>Customer</option>
@@ -72,7 +72,7 @@
 		</div>
 		<div class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-6 padding-5">
 			<label>Sale Employee</label>
-			<select class="form-control input-sm filter" name="sale_id" id="sale_id">
+			<select class="form-control input-sm" name="sale_id" id="sale_id">
 				<option value="all">ทั้งหมด</option>
 				<?php echo select_sale($sale_id); ?>
 			</select>
@@ -81,7 +81,7 @@
 
 		<div class="col-lg-1 col-md-2-harf col-sm-2-harf col-xs-6 padding-5">
 			<label>Approval</label>
-			<select class="form-control input-sm filter" name="approval" id="approval">
+			<select class="form-control input-sm" name="approval" id="approval">
 				<option value="all">ทั้งหมด</option>
 				<option value="P" <?php echo is_selected('P', $approval); ?>>Pending</option>
 				<option value="A" <?php echo is_selected('A', $approval); ?>>Approved</option>
@@ -92,7 +92,7 @@
 
 		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>สถานะ</label>
-			<select class="form-control input-sm filter" name="status" id="status">
+			<select class="form-control input-sm" name="status" id="status">
 				<option value="all">ทั้งหมด</option>
 				<option value="-1" <?php echo is_selected('-1', $status); ?>>Draft</option>
 				<option value="4" <?php echo is_selected('4', $status); ?>>Reserved</option>
@@ -139,7 +139,7 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped table-hover dataTable border-1" style="min-width:1350px;">
+		<table class="table table-striped table-hover table-narrow border-1" style="min-width:1350px;">
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="fix-width-40 middle text-center">#</th>
@@ -147,19 +147,19 @@
 					<th class="fix-width-120 middle">Web No.</th>
 					<th class="fix-width-80 middle">SO No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
-					<th class="fix-width-350 middle">Customer name</th>
+					<th class="min-width-350 middle">Customer name</th>
 					<th class="fix-width-100 middle text-right">Amount</th>
 					<th class="fix-width-80 middle text-center">Payment</th>
 					<th class="fix-width-80 middle text-center">Status</th>
 					<th class="fix-width-80 middle text-center">Approval</th>
 					<th class="fix-width-100 middle">User</th>
-					<th class="fix-width-120 middle"></th>
+					<th class="fix-width-100 middle"></th>
 				</tr>
 			</thead>
 			<tbody style="font-size:12px;">
 				<?php if (! empty($data)) : ?>
 					<?php $segment = $this->uri->segment($this->segment); ?>
-					<?php $no = ($segment == "" OR $segment == 'undefined') ? 0 : $segment + 1; ?>
+					<?php $no = ($segment == "" OR $segment == 'undefined') ? 1 : $segment + 1; ?>
 					<?php $pageNo = $segment; ?>
 					<?php foreach ($data as $rs) : ?>
 						<tr>
@@ -168,7 +168,7 @@
 							<td class="middle"><?php echo $rs->code; ?></td>
 							<td class="middle"><?php echo $rs->DocNum; ?></td>
 							<td class="middle"><?php echo $rs->CardCode; ?></td>
-							<td class="moddle"><?php echo $rs->CardName; ?></td>
+							<td class="middle"><?php echo $rs->CardName; ?></td>
 							<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
 							<td class="middle text-center"><?php echo $rs->payment_name; ?></td>
 							<td class="middle text-center">
@@ -203,12 +203,12 @@
 							</td>
 							<td class="middle"><?php echo $rs->uname; ?></td>
 							<td class="middle">
-								<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-eye"></i></button>
+								<button type="button" class="btn btn-minier btn-info" onclick="viewDetail('<?php echo $rs->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-eye"></i></button>
 								<?php if ($this->pm->can_edit && ($rs->Status != 1 && $rs->Status != 2)) : ?>
-									<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-pencil"></i></button>
+									<button type="button" class="btn btn-minier btn-warning" onclick="edit('<?php echo $rs->code; ?>', '<?php echo $pageNo; ?>')"><i class="fa fa-pencil"></i></button>
 								<?php endif; ?>
 								<?php if ($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
-									<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
+									<button type="button" class="btn btn-minier btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
 								<?php endif; ?>
 							</td>
 						</tr>

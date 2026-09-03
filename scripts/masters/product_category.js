@@ -1,24 +1,13 @@
-var HOME = BASE_URL + 'masters/product_category/';
+const addNew = () => {
+	window.location.href = `${HOME}add_new`;
+};
 
-function addNew() {
-  window.location.href = HOME + 'add_new';
-}
+const edit = (id, pageNo = 0) => {
+	window.location.href = `${HOME}edit/${id}/${pageNo}`;
+};
 
-
-
-function goBack() {
-  window.location.href = HOME;
-}
-
-
-
-function getEdit(id) {
-  window.location.href = HOME + 'edit/'+id;
-}
-
-
-function viewDetail(id) {
-	window.location.href = HOME + 'view_detail/'+id;
+const viewDetail = (id, pageNo = 0) => {
+	window.location.href = `${HOME}view_detail/${id}/${pageNo}`;
 }
 
 function update_sap() {
@@ -51,8 +40,6 @@ function update_sap() {
 	}, 200);
 }
 
-
-
 function create_sap() {
 	var id = $('#id').val();
 	setTimeout(function() {
@@ -83,8 +70,10 @@ function create_sap() {
 	}, 200);
 }
 
-
 function save() {
+	$('#code').clearError();
+	$('#name').clearError();
+	
 	let code = $('#code').val();
 	let name = $('#name').val();
 	let parent = $('input[name=tabs]:checked').val();
@@ -92,25 +81,19 @@ function save() {
 	parent = parent === undefined ? 0 : parent;
 
 	if(code.length === 0) {
-		set_error($('#code'), $('#code-error'), "Required");
+		$('#code').hasError("Required");
 		return false;
 	}
-	else {
-		clear_error($('#name'), $('#name-error'));
-	}
-
+	
 	if(name.length === 0) {
-		set_error($('#name'), $('#name-error'), "Required");
+		$('#name').hasError("Required");
 		return false;
 	}
-	else {
-		clear_error($('#name'), $('#name-error'));
-	}
-
+	
 	load_in();
 
 	$.ajax({
-		url:HOME + 'add',
+		url:`${HOME}add`,
 		type:'POST',
 		cache:false,
 		data:{
@@ -120,9 +103,8 @@ function save() {
 		},
 		success:function(rs) {
 			load_out();
-			var rs = $.trim(rs);
-
-			if(rs === 'success') {
+			
+			if(rs.trim() === 'success') {
 				swal({
 					title:'Success',
 					type:'success',
@@ -131,23 +113,21 @@ function save() {
 
 				setTimeout(function() {
 					addNew();
-				}, 1500);
+				}, 1200);
 
 			}
 			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error'
-				});
+				showError(rs);
 			}
+		},
+		error:function(rs) {
+			showError(rs);
 		}
 	});
 }
 
-
-
 function update() {
+	$('#name').clearError();
 	let id = $('#id').val();
 	let name = $('#name').val();
 	let parent = $('input[name=tabs]:checked').val();
@@ -155,17 +135,14 @@ function update() {
 	parent = parent === undefined ? 0 : parent;
 
 	if(name.length === 0) {
-		set_error($('#name'), $('#name-error'), "Required");
+		$('#name').hasError("Required");
 		return false;
-	}
-	else {
-		clear_error($('#name'), $('#name-error'));
-	}
+	}	
 
 	load_in();
 
 	$.ajax({
-		url:HOME + 'update',
+		url:`${HOME}update`,
 		type:'POST',
 		cache:false,
 		data:{
@@ -175,9 +152,8 @@ function update() {
 		},
 		success:function(rs) {
 			load_out();
-			var rs = $.trim(rs);
-
-			if(rs === 'success') {
+			
+			if(rs.trim() === 'success') {
 				swal({
 					title:'Success',
 					type:'success',
@@ -189,38 +165,28 @@ function update() {
 				}, 1200)
 			}
 			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error'
-				});
+				showError(rs);
 			}
 		}
 	});
 }
-
-
-
 
 function setActive(el) {
 	let id = el.data('id');
 	let active = el.is(':checked') ? 1 : 0;
 
 	$.ajax({
-		url:HOME + 'set_active/'+id+'/'+active,
+		url:`${HOME}set_active/${id}/${active}`,
 		type:'GET',
 		cache:false,
 		success:function(rs) {
-
+			console.log(rs);
+		},
+		error:function(rs) {
+			console.error(rs);
 		}
-	})
+	});
 }
-
-
-function clearFilter(){
-  goBack();
-}
-
 
 function getDelete(code, name){
   swal({
@@ -241,18 +207,8 @@ function getDelete(code, name){
   })
 }
 
-
-
-function getSearch(){
-  goBack();
-}
-
-
-
 function toggleTree(id) {
-
 	let ul = $('#catchild-'+id);
-
 	if(ul.hasClass('hide')) {
 		ul.removeClass('hide');
 		$('#catbox-'+id).removeClass('fa-plus-square-o');

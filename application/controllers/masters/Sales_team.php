@@ -5,6 +5,7 @@ class Sales_team extends PS_Controller{
 	public $menu_code = 'DBSTEAM'; //--- Add/Edit Profile
 	public $menu_group_code = 'SC'; //--- System security
 	public $title = 'Sales Team';
+	public $segment = 4; //--- url segment
 
   public function __construct()
   {
@@ -21,53 +22,44 @@ class Sales_team extends PS_Controller{
 			'code' => get_filter('code', 'st_code', '')
 		);
 
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_filter('set_rows', 'rows', 20);
-
-		if($perpage > 300)
+		if($this->input->post('search'))
 		{
-			$perpage = get_filter('rows', 'rows', 300);
+			redirect($this->home);
 		}
-
-		$segment = 4; //-- url segment
-		$rows = $this->sales_team_model->count_rows($filter);
-
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-
-		$rs = $this->sales_team_model->get_list($filter, $perpage, $this->uri->segment($segment));
-
-		if( ! empty($rs))
+		else 
 		{
-			foreach($rs as $rd)
+			$perpage = get_rows();
+			$rows = $this->sales_team_model->count_rows($filter);
+			$init	= pagination_config($this->home . '/index/', $rows, $perpage, $this->segment);
+			$rs = $this->sales_team_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+
+			if (! empty($rs))
 			{
-				$rd->member = $this->sales_team_model->count_member($rd->id);
+				foreach ($rs as $rd)
+				{
+					$rd->member = $this->sales_team_model->count_member($rd->id);
+				}
 			}
-		}
 
+			$filter['data'] = $rs;
+			$this->pagination->initialize($init);
 
-		$filter['data'] = $rs;
-
-		$this->pagination->initialize($init);
-
-    $this->load->view('masters/sale_team/team_list', $filter);
+			$this->load->view('masters/sale_team/team_list', $filter);
+		}		
   }
 
 
-
-
-  public function add_new()
-  {
-		$this->title = "Add Team";
+	public function add_new()
+	{
 		if($this->pm->can_add)
-		{
+		{			
 			$this->load->view('masters/sale_team/team_add');
 		}
 		else
 		{
 			$this->permission_deny();
 		}
-  }
+	}
 
 
 	public function add()
@@ -78,6 +70,9 @@ class Sales_team extends PS_Controller{
 		{
 			$code = trim($this->input->post('code'));
 			$name = trim($this->input->post('name'));
+			$amount = floatval($this->input->post('reserve_amount'));
+			$draft_age = intval($this->input->post('draft_age'));
+			$reserve_age = intval($this->input->post('reserve_age'));
 
 			if( ! empty($code) && ! empty($name))
 			{
@@ -87,7 +82,11 @@ class Sales_team extends PS_Controller{
 					{
 						$arr = array(
 							'code' => $code,
-							'name' => $name
+							'name' => $name,
+							'reserve_amount' => $amount,
+							'draft_age' => $draft_age,
+							'reserve_age' => $reserve_age,
+							'user' => $this->_user->uname
 						);
 
 						if( ! $this->sales_team_model->add($arr))
@@ -126,9 +125,7 @@ class Sales_team extends PS_Controller{
 
 
 	public function edit($id)
-	{
-		$this->title = "Edit Team";
-
+	{		
 		if($this->pm->can_edit)
 		{
 			$ds = $this->sales_team_model->get($id);
@@ -157,13 +154,21 @@ class Sales_team extends PS_Controller{
 		{
 			$id = $this->input->post('id');
 			$name = trim($this->input->post('name'));
+			$amount = floatval($this->input->post('reserve_amount'));
+			$draft_age = intval($this->input->post('draft_age'));
+			$reserve_age = intval($this->input->post('reserve_age'));
 
 			if( ! empty($id) && ! empty($name))
 			{
 				if( ! $this->sales_team_model->is_exists_name($name, $id))
 				{
 					$arr = array(
-						'name' => $name
+						'name' => $name,
+						'reserve_amount' => $amount,
+						'draft_age' => $draft_age,
+						'reserve_age' => $reserve_age,
+						'update_user' => $this->_user->uname,
+						'date_upd' => now()
 					);
 
 					if( ! $this->sales_team_model->update($id, $arr))
@@ -216,7 +221,7 @@ class Sales_team extends PS_Controller{
 				else
 				{
 					$sc = FALSE;
-					$this->error = "Delete failed because this team are linked to user(s) or approver(s)";
+					set_error('transaction');
 				}
 			}
 			else

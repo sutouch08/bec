@@ -1,17 +1,13 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
-    <h3 class="title">
-     <?php echo $this->title; ?>
-    </h3>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
+    <h3 class="title"><?php echo $this->title; ?></h3>
     </div>
-    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
-    	<p class="pull-right top-p">
-        <button type="button" class="btn btn-sm btn-info btn-100" onclick="syncData()">Sync</button>
-      </p>
+    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+        <button type="button" class="btn btn-white btn-info btn-100" onclick="syncData()">Sync</button>    	
     </div>
 </div><!-- End Row -->
-<hr class="padding-5"/>
+<hr />
 <form id="searchForm" method="post">
 <div class="row">
 	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
@@ -32,13 +28,13 @@
     <button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
   </div>
 </div>
-<hr class="margin-top-15 padding-5">
 </form>
+<hr class="margin-top-15 padding-5">
 <?php echo $this->pagination->create_links(); ?>
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped border-1 min-width-800">
+		<table class="table table-striped table-narrow border-1" style="min-width:590px;">
 			<thead>
 				<tr>
 					<th class="fix-width-60 middle text-center">#</th>

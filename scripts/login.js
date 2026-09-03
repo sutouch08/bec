@@ -20,17 +20,16 @@ function doLogin() {
 	}
 
 	$.ajax({
-		url:BASE_URL + 'users/authentication/validate_credentials',
+		url: `${BASE_URL}users/authentication/validate_credentials`,
 		type:'POST',
 		cache:false,
 		data:{
 			'uname' : uname,
-			'pwd' : ipwd
+			'pwd' : ipwd,
+			'remember' : remember
 		},
-		success:function(rs) {
-			rs = $.trim(rs);
-
-			if(rs === 'success') {
+		success:function(rs) {			
+			if(rs.trim() === 'success') {
 				window.location.href = BASE_URL;
 			}
 			else {
@@ -39,8 +38,6 @@ function doLogin() {
 		}
 	});
 }
-
-
 
 $('#pwd').keyup(function(e) {
 	if(e.keyCode === 13) {

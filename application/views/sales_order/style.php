@@ -1,12 +1,24 @@
-<style>
+<style>  
+  .input-icon>.ace-icon {
+    z-index: 1;
+  }
+
+  .bg-grey {
+    background-color: #e7e7e7;
+  }
+
   .form-horizontal .form-group {
     margin-bottom: 5px;
-    margin-left:0px;
-    margin-right:-5px;
+    margin-left: 0px;
+    margin-right: -5px;
   }
 
   .input-icon>.ace-icon {
     z-index: 1;
+  }
+
+  .tableFixHead thead tr th {
+   padding:3px;
   }
 
   .table>tr>td {

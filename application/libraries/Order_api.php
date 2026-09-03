@@ -6,7 +6,7 @@ class Order_api
 	public $error;
 	public $test = FALSE;
 	public $logJson = FALSE;
-  private $timeout = 3; //--- timeout in seconds;
+  private $timeout = 10; //--- timeout in seconds;
 	private $type = "SO";
 
   public function __construct()
@@ -15,23 +15,20 @@ class Order_api
     $this->url = getConfig('SAP_API_HOST');
 		$this->test = getConfig('TEST_INTERFACE') ? TRUE : FALSE;		
 		$this->logJson = getConfig('LOGS_JSON') ? TRUE : FALSE;
+		$this->ci->load->model('rest/api_logs_model');
   }
-
-
 
 	public function getCreditBalance($CardCode)
 	{
-		$arr = array(
-			'CardCode' => $CardCode
-		);
-
-		$url = $this->url .'GetCreditBalance';
+		$this->url = $this->url[-1] != '/' ? $this->url."/GetCreditBalance" : $this->url."GetCreditBalance";
+		$json = json_encode(array('CardCode' => $CardCode));
+		$this->timeout = 3; 
+				
 		$curl = curl_init();
-
-		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_URL, $this->url);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
     curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
@@ -60,55 +57,95 @@ class Order_api
     }
 	}
 
-
-	public function cancle_sap_order($arr)
+	public function cancle_sap_order(array $arr = array(), $code = NULL, $user = 'system')
 	{
-		$url = $this->url .'SalesOrder';
-		$curl = curl_init();
+		$sc = TRUE;
+		$this->url = $this->url[-1] != '/' ? $this->url."/SalesOrder" : $this->url."SalesOrder";
+		$this->type = "SO";
+		$this->action = "cancle";
+		$this->timeout = 10;		
+		$json = json_encode($arr);
 
-		curl_setopt($curl, CURLOPT_URL, $url);
-		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
-    curl_setopt($curl, CURLOPT_TIMEOUT, 0);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arr));
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
-
-		$response = curl_exec($curl);
-
-    if($response === FALSE)
-    {
-      $response = curl_error($curl);
-    }
-
-		curl_close($curl);
-
-		$rs = json_decode($response);
-
-		if(! empty($rs) && ! empty($rs->status))
+		if(! $this->test)
 		{
-			if($rs->status == 'success')
+			$curl = curl_init();
+			curl_setopt($curl, CURLOPT_URL, $this->url);
+			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
+			curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+			curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+
+			$req_start = now(TRUE);
+			$response = curl_exec($curl);
+			if($response === FALSE)
 			{
-				return TRUE;
+				$response = curl_error($curl);
 			}
-			else
+			curl_close($curl);
+			$req_end = now(TRUE);
+			$rs = json_decode($response);
+
+			if(empty($rs) OR $rs->status != 'success')
 			{
-				$this->error = $rs->error;
+				$sc = FALSE;
+				$this->error = ! empty($rs) ? $rs->error : "no data";				
+			}
+
+			if($this->logJson)
+			{
+				$this->ci->load->model('rest/api_logs_model');
+				$logs = array(
+					'trans_id' => genUid(),
+					'api_path' => $this->url,
+					'type' => $this->type,
+					'code' => $code,
+					'action' => $this->action,
+					'status' => $sc === TRUE ? 'success' : 'failed',
+					'message' => $sc === TRUE ? 'success' : $this->error,
+					'request_json' => $json,
+					'response_json' => $response,
+					'req_start' => $req_start,
+					'req_end' => $req_end,
+					'user' => $user
+				);
+
+				$this->ci->api_logs_model->add_logs($logs);
 			}
 		}
-    else
-    {
-      $this->error = "no data";
-    }
+		else
+		{
+			if($this->logJson)
+			{
+				$this->ci->load->model('rest/api_logs_model');
+				$logs = array(
+					'trans_id' => genUid(),
+					'api_path' => $this->url,
+					'type' => $this->type,
+					'code' => $code,
+					'action' => $this->action,
+					'status' => 'test',
+					'message' => 'success',
+					'request_json' => $json,
+					'response_json' => NULL,
+					'req_start' => now(TRUE),
+					'req_end' => now(TRUE),
+					'user' => $user
+				);
 
-    return FALSE;
+				$this->ci->api_logs_model->add_logs($logs);
+			}
+		}
+
+		return $sc;
 	}
-
-
+		
 	public function exportOrder($code)
 	{
 		$sc = TRUE;
-    $this->ci->load->model('rest/api_logs_model');
+		$this->url = $this->url[-1] != '/' ? $this->url."/SalesOrder" : $this->url."SalesOrder";
+    
 		$this->type = "SO";
 		$this->action = "create";				
 		$order = $this->ci->orders_model->get($code);
@@ -185,14 +222,7 @@ class Order_api
 			}
 
 			$ds['DocLine'] = $orderLine;
-			
-			if($this->url[-1] != '/')
-			{
-				$this->url .= '/';
-			}
-
-			$this->url .= "SalesOrder";
-
+						
       $json = json_encode($ds);
 
 			if( ! $this->test)
@@ -207,18 +237,13 @@ class Order_api
 				curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
 
 				$req_start = now(TRUE);
-
 				$response = curl_exec($curl);
-
 				if($response === FALSE)
 				{
 					$response = curl_error($curl);
 				}
-
 				curl_close($curl);
-
 				$req_end = now(TRUE);
-
 				$rs = json_decode($response);
 
 				if (! empty($rs) && ! empty($rs->status))
@@ -316,7 +341,6 @@ class Order_api
 
 		return $sc;
 	}
-
 
 	public function syncOrderStatus($OrderCode, $DocEntry, $DocNum)
 	{
@@ -438,7 +462,5 @@ class Order_api
 		return $sc;
 	}
 
-
-
 } //--- end class
-?>
+

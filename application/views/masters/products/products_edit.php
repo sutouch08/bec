@@ -1,15 +1,13 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
     <h3 class="title"><?php echo $this->title; ?></h3>
   </div>
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
-		<p class="pull-right top-p">
-			<button type="button" class="btn btn-sm btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> Back</button>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+			<button type="button" class="btn btn-white btn-default" onclick="goBack('<?php echo $backUrl; ?>')"><i class="fa fa-arrow-left"></i> Back</button>
 			<?php if($this->pm->can_edit) : ?>
-			<button type="button" class="btn btn-sm btn-success" onclick="checkEdit()"><i class="fa fa-save"></i> Save</button>
-			<?php endif; ?>
-		</p>
+			<button type="button" class="btn btn-white btn-success" onclick="update()"><i class="fa fa-save"></i>&nbsp; Save</button>
+			<?php endif; ?>		
 	</div>
 </div><!-- End Row -->
 <hr class="margin-bottom-15 padding-5"/>

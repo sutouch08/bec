@@ -3,18 +3,15 @@
 	input[type=radio].ace:checked + .lbl::before {
 		color:#32a3ce;
 	}
-
 </style>
 <div class="row">
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
     <h3 class="title"><?php echo $this->title; ?></h3>
   </div>
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
-		<p class="pull-right top-p">
-			<button type="button" class="btn btn-xs btn-warning" onclick="goBack()"><i class="fa fa-arrow-left"></i> Back</button>
-			<button type="button" class="btn btn-xs btn-primary" onclick="create_sap()"><i class="fa fa-send"></i> Create On SAP</button>
-			<button type="button" class="btn btn-xs btn-success" onclick="update_sap()"><i class="fa fa-send"></i> Update On SAP</button>
-		</p>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+			<button type="button" class="btn btn-white btn-default" onclick="goBack('<?php echo $backUrl; ?>')"><i class="fa fa-arrow-left"></i> Back</button>
+			<button type="button" class="btn btn-white btn-primary" onclick="create_sap()"><i class="fa fa-send"></i> Create On SAP</button>
+			<button type="button" class="btn btn-white btn-success" onclick="update_sap()"><i class="fa fa-send"></i> Update On SAP</button>
 	</div>
 </div><!-- End Row -->
 <hr class="padding-5"/>

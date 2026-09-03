@@ -21,7 +21,7 @@
       <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 sap-label">Payment</label>
       <div class="col-lg-3-harf col-md-4 col-sm-4-harf col-xs-12">
         <select class="form-control input-sm" id="payment" name="payment" onchange="recal_all_discount()">
-          <?php echo select_payment_term($order->payment); ?>
+          <?php echo select_payment_term($order->Payment); ?>
         </select>
       </div>
     </div>
@@ -30,7 +30,7 @@
       <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 sap-label">Channels</label>
       <div class="col-lg-3-harf col-md-4 col-sm-4-harf col-xs-12">
         <select class="form-control input-sm" id="channels" name="channels" onchange="recal_all_discount()">
-          <?php echo select_channels($order->channels); ?>
+          <?php echo select_channels($order->Channels); ?>
         </select>
       </div>
     </div>

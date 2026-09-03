@@ -1,46 +1,35 @@
-var HOME = BASE_URL + 'masters/products/';
+function getEdit(id, pageNo = 0) {
+	window.location.href = `${HOME}edit/${id}/${pageNo}`;
+}
 
-function goBack() {
-	window.location.href = HOME;
+function viewDetail(id, pageNo = 0) {
+	window.location.href = `${HOME}view_detail/${id}/${pageNo}`;
 }
 
 
-function getEdit(id) {
-	window.location.href = HOME + 'edit/'+id;
-}
-
-
-function viewDetail(id) {
-	window.location.href = HOME + 'view_detail/'+id;
-}
-
-
-function checkEdit(){
-	let id = $('#id').val();
-	let code = $('#code').val();
-	let model = $('#model').val();
-	let brand = $('#brand').val();
-	let category = $('#category').val();
-	let type = $('#type').val();
-	let cover = $('#is_cover').is(':checked') ? 1 : 0;
-
+function update() {
+	const h = {
+		'id' : $('#id').val(),
+		'code' : $('#code').val().trim(),
+		'model' : $('#model').val(),
+		'brand' : $('#brand').val(),
+		'category' : $('#category').val(),
+		'cateCode1' : $('#cateCode1').val(),
+		'cateCode2' : $('#cateCode2').val(),
+		'cateCode3' : $('#cateCode3').val(),
+		'cateCode4' : $('#cateCode4').val(),
+		'type' : $('#type').val(),
+		'is_cover' : $('#is_cover').is(':checked') ? 1 : 0
+	}
+	
 	load_in();
+
 	$.ajax({
-		url:HOME + 'update',
+		url: `${HOME}update`,
 		type:'POST',
 		cache:false,
 		data:{
-			"id" : id,
-			"code" : code,
-			"model" : model,
-			"brand" : brand,
-			"category" : category,
-			"cateCode1" : $('#cateCode1').val(),
-			"cateCode2" : $('#cateCode2').val(),
-			"cateCode3" : $('#cateCode3').val(),
-			"cateCode4" : $('#cateCode4').val(),
-			"type" : type,
-			"cover" : cover
+			'data' : JSON.stringify(h)
 		},
 		success:function(rs) {
 			load_out();
@@ -64,7 +53,6 @@ function checkEdit(){
 			}
 		}
 	});
-
 }
 
 
@@ -253,9 +241,8 @@ function getParentCate() {
 		$('#cateCode4').val("");
 	}
 	else {
-
 		$.ajax({
-			url:HOME + 'get_category_parent_list',
+			url: `${HOME}get_category_parent_list`,
 			type:'GET',
 			cache:false,
 			data:{

@@ -149,6 +149,27 @@ class Orders_model extends CI_Model
 		return 0.00;
 	}
 
+	public function get_reserve_used($user_id, $orderCode = NULL)
+	{
+		if( ! empty($orderCode))
+		{
+			$this->db->where('code !=', $orderCode);
+		}
+
+		$rs = $this->db
+		->select_sum('DocTotal')
+		->where('user_id', $user_id)
+		->where('Status', 4)		
+		->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return get_zero($rs->row()->DocTotal);
+		}
+
+		return 0.00;
+	}
+
 
 	public function update($code, array $ds = array())
 	{

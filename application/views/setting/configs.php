@@ -80,6 +80,6 @@ $system = $tab == 'system' ? 'active in' : '';
 </div><!--/ row  -->
 
 
-<script src="<?php echo base_url(); ?>scripts/setting/setting.js"></script>
-<script src="<?php echo base_url(); ?>scripts/setting/setting_document.js"></script>
+<script src="<?php echo base_url(); ?>scripts/setting/setting.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/setting/setting_document.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

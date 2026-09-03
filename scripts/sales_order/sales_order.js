@@ -31,7 +31,7 @@ function cancleOrder(code){
 		function(){
 			load_in();
 			$.ajax({
-				url:HOME + 'cancle_order',
+				url:`${HOME}cancle_order`,
 				type:'POST',
 				cache:false,
 				data:{
@@ -83,7 +83,7 @@ function toggleOnlyMe() {
 function doApprove(code) {
 
   $.ajax({
-    url:HOME + 'approve',
+    url:`${HOME}approve`,
     type:'POST',
     cache:false,
     data:{
@@ -116,7 +116,7 @@ function doApprove(code) {
 function doReject(code) {
 
   $.ajax({
-    url:HOME + 'reject',
+    url:`${HOME}reject`,
     type:'POST',
     cache:false,
     data:{
@@ -160,7 +160,7 @@ function cancleSap(code) {
   function(){
 		load_in();
 		$.ajax({
-			url:HOME + 'cancle_sap_order',
+			url:`${HOME}cancle_sap_order`,
 			type:'POST',
 			cache:false,
 			data: {
@@ -196,7 +196,7 @@ function sendToSap(code) {
   load_in();
 
   $.ajax({
-    url:HOME + 'send_to_sap',
+    url:`${HOME}send_to_sap`,
     type:'POST',
     cache:false,
     data:{
@@ -227,7 +227,7 @@ function sendToSap(code) {
   })
 }
 
-function leave(backUrl = null){
+function leave(backUrl = null) {
   swal({
     title:'คุณแน่ใจ ?',
     text:'รายการทั้งหมดจะไม่ถูกบันทึก ต้องการออกหรือไม่ ?',
@@ -248,7 +248,7 @@ function leave(backUrl = null){
 
 function showMessage(code) {
 	$.ajax({
-		url:HOME + 'get_order_message',
+		url:`${HOME}get_order_message`,
 		type:'GET',
 		cache:false,
 		data:{

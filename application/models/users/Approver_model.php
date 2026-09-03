@@ -228,6 +228,8 @@ class Approver_model extends CI_Model
 		->join('approver_team AS at', 'a.id = at.id_approver', 'left')
 		->where('a.user_id', $user_id)
 		->where('at.id_team', $team_id)
+		->where('a.ap_order', 1)
+		->where('a.status', 1)
 		->get();
 
 		if($rs->num_rows() > 0)
@@ -239,6 +241,10 @@ class Approver_model extends CI_Model
 	}
 
 
+	public function is_visible_gp_approver($user_id)
+	{
+		return $this->db->where('user_id', $user_id)->where('visible_gp', 1)->where('status', 1)->count_all_results($this->tb) > 0;
+	}
 
 	public function get_approver_team($id)
 	{

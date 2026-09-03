@@ -4,11 +4,11 @@ class Hana
   //private $host = "odbc:SAPHANA";
   private $user = "SYSTEM";
   private $pwd = "BXSbec2022";
-  private $dsn = "odbc:Driver={HDBODBC};ServerNode=192.168.201.19:30015;UID=SYSTEM;PWD=BXSbec2022;Database=BEC2;CHAR_AS_UTF8=TRUE;WString=True;";
+  private $dsn = "";
 
   public function __construct()
   {
-
+    $this->dsn = "odbc:Driver={HDBODBC};ServerNode=192.168.201.19:30015;UID={$this->user};PWD={$this->pwd};Database=BEC2;CHAR_AS_UTF8=TRUE;WString=True;";
   }
 
   public function connect()

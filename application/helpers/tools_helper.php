@@ -47,17 +47,37 @@ function limitText($str, $length)
 
 function is_selected($val, $select)
 {
-	return $val == $select ? 'selected' : '';
+	return strtolower(strval($val)) == strtolower(strval($select)) ? 'selected' : '';
 }
 
 function is_checked($val1, $val2)
 {
-	return $val1 == $val2 ? 'checked' : '';
+	return strtolower(strval($val1)) === strtolower(strval($val2)) ? 'checked' : '';
 }
 
-function is_active($val)
+function is_active($val, $icon = TRUE)
 {
-	return $val == 1 ? '<i class="fa fa-check green"></i>' : '<i class="fa fa-times red"></i>';
+	$val = strtolower(strval($val));
+	$active = FALSE;
+
+	if ($val === '1' or $val === 'y' or $val === 'true')
+	{
+		$active = TRUE;
+	}
+
+	return $active ? '<i class="fa fa-check green"></i>' : ($icon ? '<i class="fa fa-times red"></i>' : NULL);
+}
+
+function is_success($val)
+{
+	$val = strtolower(strval($val));
+	
+	if($val === 'success' OR $val === '1' OR $val === 'y' OR $val === 'true')
+	{
+		return TRUE;
+	}
+	
+	return FALSE;
 }
 
 function get_filter($postName, $cookieName, $defaultValue = "")
@@ -256,11 +276,16 @@ function set_error($key, $name = "data")
 		'delete' => "Delete {$name} failed.",
 		'permission' => "You don't have permission to perform this operation.",
 		'required' => "Missing required parameter.",
-		'exists' => "'{$name}' already exists."
+		'exists' => "'{$name}' already exists.",
+		'status' => "Invalid document status",
+		'notfound' => "Document number not found",
+		'not_found' => "Document number not found",
+		'transection' => "Unable to delete {$name} because transactions exists or link to other module.",
+		'transaction' => "Unable to delete {$name} because transactions exists or link to other module."
+
 	);
-
+	
 	$ci = &get_instance();
-
 	$ci->error = (!empty($error[$key]) ? $error[$key] : "Unknow error.");
 }
 
@@ -448,4 +473,18 @@ function no_value($val)
 function escape_str($str)
 {
 	return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+}
+
+function select_run_digit($se = "4")
+{
+	$min = 3;
+	$max = 7;
+	$sc = "";
+	while ($min <= $max)
+	{
+		$selected = $se == $min ? 'selected' : '';
+		$sc .= '<option value="'.$min.'" '.$selected.'>'.$min.'</option>';
+		$min++;
+	}
+	return $sc;
 }

@@ -19,11 +19,11 @@
 				<td class="no-border">Remark : <?php echo $order->Comments; ?></td>
 			</tr>
 		</table>
-  </div>
+	</div>
 
 
-  <!--- right column -->
-  <div class="col-lg-4 col-md-4 col-sm-5 col-xs-12 padding-5">
+	<!--- right column -->
+	<div class="col-lg-4 col-md-4 col-sm-5 col-xs-12 padding-5">
 		<table class="table table-striped table-bordered">
 			<tr>
 				<td class="width-60 xxx text-right">Total Before Discount</td>
@@ -41,42 +41,57 @@
 				<td class="width-60 xxx text-right">Total</td>
 				<td class="width-40 xxx text-right"><?php echo number($order->DocTotal, 2); ?></td>
 			</tr>
+
+			<?php if ($is_approver && $visible_gp) : ?>
+				<tr>
+					<td class="width-60 xxx text-right">Total GP</td>
+					<td class="width-40 xxx text-right"><?php echo number($order->totalGP, 2); ?> %</td>
+				</tr>
+			<?php endif; ?>
 		</table>
+	</div>
 
-  </div>
+	<div class="col-lg-8 col-md-8 col-sm-7 hidden-xs padding-5">
+		<p class="margin-top-15" id="promotions-applied">
+			Promotions applied :
+			<?php if (!empty($promotions)) : ?>
+				<?php foreach ($promotions as $promo) : ?>					
+					<span class="label label-info label-white middle pointer" title="<?php echo $promo->code; ?>">
+						<?php echo $promo->name; ?> @row : <?php echo implode(', ', $promo->rows); ?>
+					</span>
+				<?php endforeach; ?>
+			<?php else : ?>
+				<span class="red">No promotion applied</span>
+			<?php endif; ?>
+		</p>
+	</div>
 
-  <div class="divider-hidden hidden-xs"></div>
-  <div class="divider-hidden hidden-xs"></div>
-  <div class="divider-hidden"></div>
-
-	<div class="col-lg-8 col-md-8 col-sm-7 hidden-xs padding-5"></div>
-
-  <div class="col-lg-4 col-md-4 col-sm-5 col-xs-12 padding-5 text-right">
-		<?php if($order->Status == 0 && ($is_approver OR $this->_SuperAdmin)) : ?>
-			<?php if($order->must_approve == 1 && $order->Approved == 'P' && ($this->can_approve OR $this->_SuperAdmin) && ($this->readOnly === FALSE OR $this->_SuperAdmin)) : ?>
+	<div class="col-lg-4 col-md-4 col-sm-5 col-xs-12 padding-5 text-right">
+		<?php if ($order->Status == 0 && ($is_approver or $this->_SuperAdmin)) : ?>
+			<?php if ($order->must_approve == 1 && $order->Approved == 'P' && ($this->can_approve or $this->_SuperAdmin) && ($this->readOnly === FALSE or $this->_SuperAdmin)) : ?>
 				<button type="button" class="btn btn-sm btn-success btn-100" onclick="doApprove('<?php echo $order->code; ?>')">Approve</button>
 				<button type="button" class="btn btn-sm btn-danger btn-100" onclick="doReject('<?php echo $order->code; ?>')">Reject</button>
 			<?php else : ?>
-				<p class="red" >คุณต้องมีสิทธิ์ในการอนุมัติ</p>
-				<?php if(! empty($this->not_ap)) : ?>
-					<?php foreach($this->not_ap as $nap) : ?>
-						<p class="red"><?php echo $nap['name']; ?> : <?php echo $nap['disc'].' %'; ?></p>
+				<p class="red">คุณต้องมีสิทธิ์ในการอนุมัติ</p>
+				<?php if (! empty($this->not_ap)) : ?>
+					<?php foreach ($this->not_ap as $nap) : ?>
+						<p class="red"><?php echo $nap['name']; ?> : <?php echo $nap['disc'] . ' %'; ?></p>
 					<?php endforeach; ?>
 				<?php endif; ?>
 			<?php endif; ?>
 		<?php endif; ?>
-  </div>
+	</div>
 	<div class="divider-hidden visible-xs"></div>
 	<div class="divider-hidden visible-xs"></div>
 	<div class="divider-hidden visible-xs"></div>
 
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
-    <?php if(!empty($logs)) : ?>
-			<?php foreach($logs as $lg) : ?>
+		<?php if (!empty($logs)) : ?>
+			<?php foreach ($logs as $lg) : ?>
 				<p style="font-size:12px; font-style:italic; color:#729fe1;">
-					<?php echo action_name($lg->action); ?>  โดย <?php echo $lg->uname; ?> วันที่ <?php echo thai_date($lg->date_upd, TRUE); ?>
+					<?php echo action_name($lg->action); ?> โดย <?php echo $lg->uname; ?> วันที่ <?php echo thai_date($lg->date_upd, TRUE); ?>
 				</p>
 			<?php endforeach; ?>
 		<?php endif; ?>
-  </div>
+	</div>
 </div>

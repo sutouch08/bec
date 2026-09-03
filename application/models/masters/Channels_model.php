@@ -8,8 +8,6 @@ class Channels_model extends CI_Model
     parent::__construct();
   }
 
-
-
 	public function get($id)
 	{
 		$rs = $this->db->where('id', $id)->get($this->tb);
@@ -21,8 +19,6 @@ class Channels_model extends CI_Model
 		return FALSE;
 	}
 
-
-
   public function add(array $ds = array())
   {
     if(!empty($ds))
@@ -32,8 +28,6 @@ class Channels_model extends CI_Model
 
     return FALSE;
   }
-
-
 
   public function update($id, array $ds = array())
   {
@@ -46,21 +40,17 @@ class Channels_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function delete($id)
   {
     return $this->db->where('id', $id)->delete($this->tb);
   }
 
-
-
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
-		if( ! empty($ds['name']))
+		if( ! empty($ds['code']))
 		{
-			$this->db->like('name', $ds['name']);
-		}
+			$this->db->like('code', trim($ds['code']))->or_like('name', trim($ds['code']));
+		}			
 
 		$rs = $this->db->order_by('position', 'ASC')->limit($perpage, $offset)->get($this->tb);
 
@@ -72,19 +62,15 @@ class Channels_model extends CI_Model
 		return NULL;
 	}
 
-
-
   public function count_rows(array $ds = array())
   {
-		if( ! empty($ds['name']))
+		if( ! empty($ds['code']))
 		{
-			$this->db->like('name', $ds['name']);
+			$this->db->like('code', $ds['code'])->or_like('name', $ds['code']);
 		}
 
 		return $this->db->count_all_results($this->tb);
   }
-
-
 
   public function get_default()
   {
@@ -98,8 +84,6 @@ class Channels_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function get_name($id)
   {
     $rs = $this->db->select('name')->where('id', $id)->get($this->tb);
@@ -111,8 +95,6 @@ class Channels_model extends CI_Model
 
     return FALSE;
   }
-
-
 
 	public function get_all()
 	{
@@ -126,20 +108,15 @@ class Channels_model extends CI_Model
 		return NULL;
 	}
 
-
-	public function is_exists_code($code)
+	public function is_exists_code($code, $id = NULL)
 	{
-		$count = $this->db->where('code', $code)->count_all_results($this->tb);
-
-		if($count > 0)
+		if( ! empty($id))
 		{
-			return TRUE;
+			$this->db->where('id !=', $id);
 		}
 
-		return FALSE;
+		return $this->db->where('code', $code)->count_all_results($this->tb) > 0;
 	}
-
-
 
   public function is_exists($name, $id = NULL)
   {
@@ -148,17 +125,8 @@ class Channels_model extends CI_Model
 			$this->db->where('id !=', $id);
 		}
 
-		$count = $this->db->where('name', $name)->count_all_results($this->tb);
-
-		if($count > 0)
-		{
-			return TRUE;
-		}
-
-		return FALSE;
+		return $this->db->where('name', $name)->count_all_results($this->tb) > 0;
   }
-
-
 
 	public function get_top_position()
 	{
@@ -172,25 +140,19 @@ class Channels_model extends CI_Model
 		return 1;
 	}
 
-
-
 	public function unset_default()
 	{
 		return $this->db->set('is_default', 0)->where('is_default', 1)->update($this->tb);
 	}
-
-
 
 	public function set_default($id)
 	{
 		return $this->db->set('is_default', 1)->where('id', $id)->update($this->tb);
 	}
 
-
-
 	public function has_transection($id)
 	{
 		return TRUE;
 	}
 }
-?>
+

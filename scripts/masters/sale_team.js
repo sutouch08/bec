@@ -1,89 +1,115 @@
-function goBack(){
-  window.location.href = HOME;
+let click = 0;
+
+const addNew = () => {
+	window.location.href = `${HOME}add_new`;
 }
 
-function addNew(){
-	window.location.href = HOME + 'add_new';
+const edit = (id) => {
+	window.location.href = `${HOME}edit/${id}`;
 }
 
-function getEdit(id){
-  window.location.href = HOME + 'edit/'+id;
-}
+$('#reserve-amount').focusin(function() {
+	$(this).select();
+});
 
-function save() {
-	let code = $('#code').val();
-	let name = $('#name').val();
+$('#reserve-amount').focusout(function() {
+	let reserv_amount = parseDefaultFloat(removeCommas($(this).val()), 0);
+	$(this).val(addCommas(reserv_amount.toFixed(2)));
+});
 
-	if(code.length === 0) {
-		set_error($('#code'), $('#code-error'), 'Required');
-		return false;
-	}
-	else {
-		clear_error($('#code'), $('#code-error'));
-	}
+function add() {
+	if(click == 0) {
+		click = 1;
 
-	if(name.length === 0) {
-		set_error($('#name'), $('#name-error'), 'Required');
-		return false;
-	}
-	else {
-		clear_error($('#name'), $('#name-error'));
-	}
+		clearErrorByClass('r');
+		let code = $('#code').val().trim();
+		let name = $('#name').val().trim();
+		let reserve_amount = parseDefaultFloat(removeCommas($('#reserve-amount').val()), 0);
+		let draft_age = parseDefaultInt($('#draft-age').val(), 0);
+		let reserve_age = parseDefaultInt($('#reserve-age').val(), 0);
 
-	$.ajax({
-		url:HOME + 'add',
-		type:'POST',
-		cache:false,
-		data:{
-			'code' : code,
-			'name' : name
-		},
-		success:function(rs) {
-			if(rs == 'success') {
-				swal({
-					title:'Success',
-					type:'success',
-					timer:1000
-				});
-
-				setTimeout(function() {
-					addNew();
-				}, 1200);
-			}
-			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error'
-				})
-			}
+		if (code.length === 0) {
+			$('#code').hasError('Required');
+			click = 0;
+			return false;
 		}
-	})
+
+		if (name.length === 0) {
+			$('#name').hasError('Required');
+			click = 0;
+			return false;
+		}
+
+		load_in();
+
+		$.ajax({
+			url: `${HOME}add`,
+			type: 'POST',
+			cache: false,
+			data: {
+				'code': code,
+				'name': name,
+				'reserve_amount': reserve_amount,
+				'draft_age': draft_age,
+				'reserve_age': reserve_age
+			},
+			success: function (rs) {
+				click = 0;
+				load_out();
+				if (rs === 'success') {
+					swal({
+						title: 'Success',
+						type: 'success',
+						timer: 1000
+					});
+
+					setTimeout(() => {
+						addNew();
+					}, 1200);
+				}
+				else {
+					showError(rs);
+					click = 0;
+				}
+			},
+			error: function (rs) {
+				showError(rs);
+			}
+		});
+	}	
 }
 
 
 function update() {
-
+	clearErrorByClass('r');
 	let id = $('#id').val();
-	let name = $('#name').val();
+	let name = $('#name').val().trim();
+	let reserve_amount = parseDefaultFloat(removeCommas($('#reserve-amount').val()), 0);
+	let draft_age = parseDefaultInt($('#draft-age').val(), 0);
+	let reserve_age = parseDefaultInt($('#reserve-age').val(), 0);
 
 	if(name.length === 0) {
-		set_error($('#name'), $('#name-error'), 'Required');
+		$('#name').hasError('Required');
+		click = 0;
 		return false;
 	}
-	else {
-		clear_error($('#name'), $('#name-error'));
-	}
+
+	load_in();
 
 	$.ajax({
-		url:HOME + 'update',
+		url: `${HOME}update`,
 		type:'POST',
 		cache:false,
 		data:{
 			'id' : id,
-			'name' : name
+			'name' : name,
+			'reserve_amount' : reserve_amount,
+			'draft_age' : draft_age,
+			'reserve_age' : reserve_age
 		},
 		success:function(rs) {
+			click = 0;
+			load_out();
 			if(rs == 'success') {
 				swal({
 					title:'Success',
@@ -92,9 +118,12 @@ function update() {
 				});
 			}
 			else {
-				set_error($('#name'), $('#name-error'), rs);
-				return false;
+				showError(rs);
 			}
+		},
+		error:function(rs) {
+			showError(rs);
+			click = 0;
 		}
 	})
 }
@@ -126,7 +155,9 @@ function getDelete(id, name){
 						timer:1000
 					});
 
-					setTimeout(goBack(), 1500);
+					setTimeout(() => {
+						goBack();
+					}, 1200);
 				}
 				else {
 					swal({
@@ -135,19 +166,11 @@ function getDelete(id, name){
 						text:rs
 					});
 				}
+			},
+			error:function(rs) {
+				showError(rs);
 			}
 		})
   })
 }
 
-
-function clearFilter() {
-	$.get(BASE_URL + 'masters/sales_team/clear_filter', function() {
-		goBack();
-	})
-}
-
-
-function getSearch(){
-  $('#searchForm').submit();
-}

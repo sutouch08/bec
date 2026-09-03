@@ -24,66 +24,27 @@ class Product_brand extends PS_Controller
 			'code' => get_filter('code', 'brand_code', '')
 		);
 
-
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_rows();
-
-		$rows = $this->product_brand_model->count_rows($filter);
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-		$filter['data'] = $this->product_brand_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-		$this->pagination->initialize($init);
-    $this->load->view('masters/product_brand/product_brand_list', $filter);
+		if($this->input->post('search')) 
+		{
+			redirect($this->home);			
+		}
+		else 
+		{
+			$perpage = get_rows();
+			$rows = $this->product_brand_model->count_rows($filter);
+			$filter['data'] = $this->product_brand_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+			$init	= pagination_config($this->home . '/index/', $rows, $perpage, $this->segment);
+			$this->pagination->initialize($init);
+			$this->load->view('masters/product_brand/product_brand_list', $filter);
+		}
   }
 
-
-	public function add_new()
-	{
-		$this->load->view('masters/product_brand/product_brand_add');
-	}
-
-
-	public function add()
-	{
-		$sc = TRUE;
-		$name = trim($this->input->post('name'));
-
-		if( ! empty($name))
-		{
-			if( ! $this->product_brand_model->is_exists_name($name))
-			{
-				$arr = array(
-					'name' => $name
-				);
-
-				if( ! $this->product_brand_model->add($arr))
-				{
-					$sc = FALSE;
-					set_error('insert');
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				set_error('exists', $name);
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			set_error('required');
-		}
-
-		$this->_response($sc);
-	}
-
-
-	public function edit($id)
+	public function edit($id, $pageNo = 0)
   {
     $data = $this->product_brand_model->get($id);
+    $data->backUrl = $this->home.'/index/'.$pageNo;
     $this->load->view('masters/product_brand/product_brand_edit', $data);
   }
-
-
 
 	public function update()
 	{
@@ -117,8 +78,6 @@ class Product_brand extends PS_Controller
 
 		$this->_response($sc);
 	}
-
-
 
 	public function sync_data()
 	{
@@ -158,8 +117,6 @@ class Product_brand extends PS_Controller
 		$this->_response($sc);
 	}
 
-
-
 	private function update_sap($id)
 	{
 		$rs = $this->product_brand_model->get($id);
@@ -177,8 +134,6 @@ class Product_brand extends PS_Controller
 
 		return FALSE;
 	}
-
-
 
   public function clear_filter()
 	{

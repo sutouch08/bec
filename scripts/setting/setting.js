@@ -24,6 +24,13 @@ function updateConfig(formName)
 	});
 }
 
+function toggleOption(el) {
+	let name = el.data('name');
+	let option = el.is(':checked') ? 1 : 0;
+	$("input[name='" + name + "']").val(option);
+	console.log(name + ' : ' + $("input[name='" + name + "']").val());
+}
+
 
 
 function openSystem()

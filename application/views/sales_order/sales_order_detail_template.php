@@ -53,6 +53,7 @@
 						data-parent="{{uid}}"
 						data-pdcode="{{code}}"
 						data-pdname="{{name}}"
+						data-cost="{{cost}}"
 						data-stdprice="{{std_price}}"
 						data-price="{{price}}"
 						data-sellprice="{{sell_price}}"
@@ -66,6 +67,8 @@
 						data-rule="{{rule_id}}"
 						data-rulecode="{{rule_code}}"
 						data-policy="{{id_policy}}"
+						data-policycode="{{policy_code}}"
+						data-policyname="{{policy_name}}"
 						data-vatcode="{{vat_group}}"
 						data-vatrate="{{vat_rate}}"
 						data-qty="{{qty}}"
@@ -83,6 +86,8 @@
 <script id="row-template" type="text/x-handlebars-template">
 	<tr id="row-{{no}}">
 		<input type="hidden" id="product-id-{{no}}" value="0" />
+		<input type="hidden" id="cost-{{no}}" value="0" />
+		<input type="hidden" id="line-cost-{{no}}" value="0" />
 		<input type="hidden" id="stdPrice-{{no}}" value="0" />
 		<input type="hidden" id="price-{{no}}" value="0" />
 		<input type="hidden" id="sellPrice-{{no}}" value="0" />
@@ -99,7 +104,7 @@
 		<input type="hidden" id="uom-code-{{no}}" value="" />
 		<input type="hidden" class="disc-diff" id="disc-diff-{{no}}" value="0" />
 		<input type="hidden" id="rule-id-{{no}}" value="" />
-		<input type="hidden" class="policy" id="policy-id-{{no}}" value="" />
+		<input type="hidden" class="policy" id="policy-id-{{no}}" data-code="" data-name="" data-uid="{{no}}" value="" />
 		<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
 		<input type="hidden" class="is-free" id="is-free-{{no}}" value="0" data-id="{{no}}" data-parent="" data-parentrow=""/>
 		<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
@@ -107,7 +112,7 @@
 		<input type="hidden" id="count-stock-{{no}}" value="1" />
 		<input type="hidden" id="allow-change-discount-{{no}}" value="1" />
 
-		<td class="middle text-center fix-no no handle" scope="row"></td>
+		<td class="middle text-center fix-no no handle" id="no-{{no}}" scope="row"></td>
 		<td class="middle text-center fix-chk" scope="row">
 			<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 			<span class="lbl"></span>
@@ -128,7 +133,7 @@
 		</td>
 
 		<td class="middle">
-			<input type="text" class="form-control input-sm" id="instock-{{no}}" disabled/>
+			<input type="text" class="form-control input-sm text-right" id="instock-{{no}}" disabled/>
 		</td>
 
 		<td class="middle">
@@ -139,15 +144,19 @@
 		</td>
 
 		<td class="middle">
-			<input type="text" class="form-control input-sm" id="team-{{no}}" disabled/>
+			<input type="text" class="form-control input-sm text-right" id="team-{{no}}" disabled/>
 		</td>
 
 		<td class="middle">
-			<input type="text" class="form-control input-sm" id="commit-{{no}}" disabled/>
+			<input type="text" class="form-control input-sm text-right" id="commit-{{no}}" disabled/>
 		</td>
 
 		<td class="middle">
-			<input type="text" class="form-control input-sm" id="available-{{no}}" disabled/>
+			<input type="text" class="form-control input-sm text-right" id="available-{{no}}" disabled/>
+		</td>
+
+		<td class="middle">
+			<input type="text" class="form-control input-sm text-right" id="master-pack-{{no}}" value="{{masterPack}}" disabled />
 		</td>
 
 		<td class="middle">
@@ -191,6 +200,8 @@
 <script id="free-row-template" type="text/x-handlebars-template">
 	<tr id="row-{{no}}" class="free-row">
 		<input type="hidden" id="product-id-{{no}}" value="{{product_id}}" />
+		<input type="hidden" id="cost-{{no}}" value="{{cost}}" />
+		<input type="hidden" id="line-cost-{{no}}" value="{{lineCost}}" />
 		<input type="hidden" id="stdPrice-{{no}}" value="{{stdPrice}}" />
 		<input type="hidden" id="price-{{no}}" value="{{price}}" />
 		<input type="hidden" id="sellPrice-{{no}}" value="{{sellPrice}}" />
@@ -207,7 +218,7 @@
 		<input type="hidden" id="uom-code-{{no}}" value="{{uom_code}}" />
 		<input type="hidden" class="disc-diff" id="disc-diff-{{no}}" value="0" />
 		<input type="hidden" id="rule-id-{{no}}" value="{{rule_id}}" />
-		<input type="hidden" class="policy" id="policy-id-{{no}}" value="{{policy_id}}" />
+		<input type="hidden" class="policy" id="policy-id-{{no}}" data-code="{{policy_code}}" data-name="{{policy_name}}" data-uid="{{no}}" value="{{policy_id}}" />
 		<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
 		<input type="hidden" class="is-free" id="is-free-{{no}}" value="1" data-id="{{no}}" data-parent="{{parent_uid}}" data-parentrow="{{parent_row}}"/>
 		<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
@@ -216,7 +227,7 @@
 		<input type="hidden" id="allow-change-discount-{{no}}" value="0" />
 
 
-		<td class="middle text-center fix-no no handle" scope="row"></td>
+		<td class="middle text-center fix-no no handle" id="no-{{no}}" scope="row"></td>
 		<td class="middle text-center fix-chk" scope="row">
 			<input type="checkbox" class="ace del-chk" value="{{no}}"/>
 			<span class="lbl"></span>
@@ -260,6 +271,10 @@
 		</td>
 
 		<td class="middle">
+			<input type="text" class="form-control input-sm text-right" id="master-pack-{{no}}" value="{{masterPack}}" disabled />
+		</td>
+
+		<td class="middle">
 			<input type="number" class="form-control input-sm text-right line-qty" data-id="{{no}}" id="line-qty-{{no}}" value="{{qty}}" disabled/>
 		</td>
 		<td class="middle">
@@ -300,7 +315,7 @@
 </script>
 
 <script id="free-btn-template" type="text/x-handlebars-template">
-	<button type="button" class="btn btn-sm btn-primary free-btn" id="btn-free-{{rule_id}}" data-parent="{{uid}}" onclick="pickFreeItem('{{rule_id}}')">Free {{freeQty}}</button>
+	<button type="button" class="btn btn-sm btn-primary free-btn" id="btn-free-{{rule_id}}" data-parent="{{uid}}" onclick="pickFreeItem('{{rule_id}}')">Premium {{freeQty}}</button>
 </script>
 
 <script id="ship-to-template" type="text/x-handlebars-template">
@@ -336,6 +351,6 @@
 <script id="promotion-applied-template" type="text/x-handlebars-template">
 	Promotions applied : 
 	{{#each this}}
-		<span class="label label-info label-white middle pointer" title="{{name}}">{{code}}</span>
+		<span class="label label-info label-white middle pointer" title="{{code}}">{{name}} @row : {{#each rows}} {{no}},{{/each}}</span>
 	{{/each}}
 </script>

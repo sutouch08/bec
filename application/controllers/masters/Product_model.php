@@ -16,7 +16,6 @@ class Product_model extends PS_Controller
     $this->load->model('masters/product_model_model');
   }
 
-
   public function index()
   {
     $filter = array(
@@ -24,87 +23,52 @@ class Product_model extends PS_Controller
 			'code' => get_filter('code', 'model_code', '')
     );
 
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_rows();
-
-		$rows = $this->product_model_model->count_rows($filter);
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-		$filter['data'] = $this->product_model_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-
-		$this->pagination->initialize($init);
-    $this->load->view('masters/product_model/product_model_list', $filter);
+		if($this->input->post('search'))
+		{
+			redirect($this->home);
+		}
+		else 
+		{
+			$perpage = get_rows();
+			$rows = $this->product_model_model->count_rows($filter);
+			$filter['data'] = $this->product_model_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+			$init = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
+			$this->pagination->initialize($init);
+			$this->load->view('masters/product_model/product_model_list', $filter);
+		}		
   }
 
+	public function edit($id, $pageNo = 0)
+  {
+    $data = $this->product_model_model->get($id);
+		$data->backUrl = $this->home.'/index/'.$pageNo;
+    $this->load->view('masters/product_model/product_model_edit', $data);
+  }
 
-	public function add_new()
-	{
-		$this->load->view('masters/product_model/product_model_add');
-	}
-
-
-	public function add()
+	public function update()
 	{
 		$sc = TRUE;
-		$name = trim($this->input->post('name'));
+		$ds = json_decode(file_get_contents('php://input'));
 
-		if( ! empty($name))
-		{
-			if( ! $this->product_model_model->is_exists_name($name))
-			{
-				$arr = array(
-					'name' => $name
-				);
-
-				if( ! $this->product_model_model->add($arr))
-				{
-					$sc = FALSE;
-					set_error('insert');
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				set_error('exists', $name);
-			}
-		}
-		else
+		if(empty($ds) OR ! property_exists($ds, 'id') OR ! property_exists($ds, 'name'))
 		{
 			$sc = FALSE;
 			set_error('required');
 		}
 
-		$this->_response($sc);
-	}
-
-
-	public function edit($id)
-  {
-    $data = $this->product_model_model->get($id);
-    $this->load->view('masters/product_model/product_model_edit', $data);
-  }
-
-
-
-	public function update()
-	{
-		$sc = TRUE;
-
-		$id = $this->input->post('id');
-		$name = trim($this->input->post('name'));
-
-		if($this->product_model_model->is_exists_name($name, $id))
+		if($sc === TRUE && $this->product_model_model->is_exists_name($ds->name, $ds->id))
 		{
 			$sc = FALSE;
-			set_error('exists', $name);
+			set_error('exists', $ds->name);
 		}
-		else
+
+		if($sc === TRUE)
 		{
 			$arr = array(
-				'name' => $name
+				'name' => $ds->name
 			);
 
-			if( ! $this->product_model_model->update($id, $arr))
+			if( ! $this->product_model_model->update($ds->id, $arr))
 			{
 				$sc = FALSE;
 				set_error('update');
@@ -112,14 +76,12 @@ class Product_model extends PS_Controller
 			else
 			{
 				//--- send update to SAP
-				$this->update_sap($id);
+				$this->update_sap($ds->id);
 			}
 		}
 
 		$this->_response($sc);
 	}
-
-
 
 	public function sync_data()
 	{
@@ -127,6 +89,7 @@ class Product_model extends PS_Controller
 		$this->load->library('api');
 		
 		$date = $this->product_model_model->get_last_sync_date();
+		$date = empty($date) ? '2022-01-01 00:00:00' : from_date($date);
 
 		$res = $this->api->getProductModelUpdateData($date);
 
@@ -161,8 +124,6 @@ class Product_model extends PS_Controller
 		$this->_response($sc);
 	}
 
-
-
 	private function update_sap($id)
 	{
 		$rs = $this->product_model_model->get($id);
@@ -180,7 +141,6 @@ class Product_model extends PS_Controller
 
 		return FALSE;
 	}
-
 
   public function clear_filter()
 	{

@@ -1,77 +1,21 @@
-var HOME = BASE_URL + 'masters/product_type/';
-
-function addNew(){
-  window.location.href = HOME + 'add_new';
+const edit = (id, pageNo = 0) => {
+	window.location.href = `${HOME}edit/${id}/${pageNo}`;
 }
-
-
-
-function goBack(){
-  window.location.href = HOME;
-}
-
-
-function getEdit(id){
-  window.location.href = HOME + 'edit/'+id;
-}
-
-
-function save() {
-	let name = $('#name').val();
-
-	if(name.length == 0) {
-		set_error($('#name'), $('#name-error'), "Required");
-		return false;
-	}
-	else {
-		clear_error($('#name'), $('#name-error'));
-	}
-
-	$.ajax({
-		url:HOME + 'add',
-		type:'POST',
-		cache:false,
-		data: {
-			'name' : name
-		},
-		success:function(rs) {
-			if(rs === 'success') {
-				swal({
-					title:'Success',
-					type:'success',
-					timer:1000
-				});
-
-				setTimeout(function() {
-					addNew();
-				}, 1200)
-			}
-			else {
-				swal({
-					title:'Error',
-					text: rs,
-					type:'error'
-				});
-			}
-		}
-	});
-}
-
 
 function update() {
+	$('#name').clearError();
 	let id = $('#id').val();
 	let name = $('#name').val();
 
 	if(name.length == 0) {
-		set_error($('#name'), $('#name-error'), "Required");
+		$('#name').hasError('Required');
 		return false;
 	}
-	else {
-		clear_error($('#name'), $('#name-error'));
-	}
+	
+	load_in();
 
 	$.ajax({
-		url:HOME + 'update',
+		url:`${HOME}update`,
 		type:'POST',
 		cache:false,
 		data: {
@@ -79,7 +23,8 @@ function update() {
 			'name' : name
 		},
 		success:function(rs) {
-			if(rs === 'success') {
+			load_out();
+			if(rs.trim() === 'success') {
 				swal({
 					title:'Success',
 					type:'success',
@@ -87,22 +32,20 @@ function update() {
 				});
 			}
 			else {
-				swal({
-					title:'Error',
-					text: rs,
-					type:'error'
-				});
+				showError(rs);
 			}
+		},
+		error:function(rs) {
+			clearError(rs);
 		}
 	});
 }
-
 
 function syncData() {
 	load_in();
 
 	$.ajax({
-		url:HOME + 'sync_data',
+		url:`${HOME}sync_data`,
 		type:'GET',
 		cache:false,
 		success:function(rs) {
@@ -119,12 +62,12 @@ function syncData() {
 				}, 1200);
 			}
 			else {
-				swal({
-					title:'Error!',
-					text: rs,
-					type:'error'
-				});
+				showError(rs);
 			}
+		},
+		error:function(rs) {
+			load_out();
+			showError(rs);
 		}
 	});
 }

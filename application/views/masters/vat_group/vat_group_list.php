@@ -1,12 +1,10 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-8">
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
     <h3 class="title"><?php echo $this->title; ?></h3>
   </div>
-  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-4">
-    <p class="pull-right top-p">
-      <button type="button" class="btn btn-sm btn-info" onclick="syncData()"><i class="fa fa-refresh"></i> Sync</button>
-    </p>
+  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+    <button type="button" class="btn btn-white btn-info" onclick="syncData()"><i class="fa fa-refresh"></i> Sync</button>    
   </div>
 </div><!-- End Row -->
 <hr class="margin-bottom-10"/>
@@ -47,7 +45,7 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive">
-		<table class="table table-striped border-1">
+		<table class="table table-striped table-narrow border-1">
 			<thead>
 				<tr>
 					<th class="fix-width-60 middle text-center">#</th>

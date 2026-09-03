@@ -96,7 +96,7 @@ class Sales_team_model extends CI_Model
 			$this->db->like('name', $ds['name']);
 		}
 
-		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
+		$rs = $this->db->order_by('code', 'ASC')->limit($perpage, $offset)->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -112,6 +112,17 @@ class Sales_team_model extends CI_Model
 		return $this->db->where('team_id', $id)->count_all_results('user');
 	}
 
+	public function get_reserve_limit($id)
+	{
+		$rs = $this->db->select('reserve_amount')->where('id', $id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->reserve_amount;
+		}
+
+		return 0;
+	}
 
 	public function is_exists_code($code, $id = NULL)
 	{
@@ -152,9 +163,13 @@ class Sales_team_model extends CI_Model
 	public function is_linked($id)
 	{
 		$user = $this->db->where('team_id', $id)->count_all_results('user');
-		$approver = $this->db->where('team', $id)->count_all_results('approver');
+		$approver = $this->db->where('id_team', $id)->count_all_results('approver_team');
+		$so = $this->db->where('sale_team', $id)->count_all_results('orders');
+		$sq = $this->db->where('sale_team', $id)->count_all_results('quotation');
 
-		if($user > 0 OR $approver > 0)
+		$res = $user + $approver + $so + $sq;
+
+		if($res > 0)
 		{
 			return TRUE;
 		}

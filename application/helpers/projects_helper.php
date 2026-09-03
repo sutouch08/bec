@@ -19,3 +19,11 @@ function select_projects($code = '')
 
   return $options;
 }
+
+function project_name($code)
+{
+  $ci =& get_instance();
+  $ci->load->model('masters/project_model');
+
+  return $ci->project_model->get_name($code);
+}

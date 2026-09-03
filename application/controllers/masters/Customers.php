@@ -8,7 +8,6 @@ class Customers extends PS_Controller
 	public $title = 'Customers';
 	public $segment = 4;
 
-
   public function __construct()
   {
     parent::__construct();
@@ -16,7 +15,6 @@ class Customers extends PS_Controller
 		$this->load->model('masters/customers_model');
 		$this->load->helper('customer');
   }
-
 
   public function index()
   {
@@ -33,22 +31,20 @@ class Customers extends PS_Controller
 			'status' => get_filter('status', 'cs_status', 'all')
 		);
 
-
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_rows();
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
-
-		$rows = $this->customers_model->count_rows($filter);
-
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-		$filter['data'] = $this->customers_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-
-		$this->pagination->initialize($init);
-    $this->load->view('masters/customers/customers_list', $filter);
+		if($this->input->post('search'))
+		{
+			redirect($this->home);
+		}
+		else 
+		{			
+			$perpage = get_rows();			
+			$rows = $this->customers_model->count_rows($filter);
+			$filter['data'] = $this->customers_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+			$init = pagination_config($this->home . '/index/', $rows, $perpage, $this->segment);
+			$this->pagination->initialize($init);
+			$this->load->view('masters/customers/customers_list', $filter);
+		}		
   }
-
-
 
   public function edit($id)
   {
@@ -82,8 +78,6 @@ class Customers extends PS_Controller
 		}
   }
 
-
-
 	public function update()
 	{
 		$sc = TRUE;
@@ -113,14 +107,11 @@ class Customers extends PS_Controller
 		$this->_response($sc);
 	}
 
-
-
-	public function view_detail($id)
+	public function view_detail($id, $pageNo = 0)
 	{
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/customer_group_model');
 		$this->load->model('masters/payment_term_model');
-
 
 		$ds = $this->customers_model->get_by_id($id);
 
@@ -137,9 +128,10 @@ class Customers extends PS_Controller
 			$ds->group_name = NULL;
 		}
 
+		$ds->backUrl = $this->home.'/index/'.$pageNo;
+
 		$this->load->view('masters/customers/customers_detail', $ds);
 	}
-
 
   public function delete()
   {
@@ -172,7 +164,6 @@ class Customers extends PS_Controller
 
     echo $sc === TRUE ? 'success' : $this->error;
   }
-
 
 	public function update_sap($id)
 	{
@@ -207,7 +198,6 @@ class Customers extends PS_Controller
 		return FALSE;
 	}
 
-
 	public function get_customer_term()
 	{
 		$customer_code = $this->input->get('customer_code');
@@ -224,31 +214,23 @@ class Customers extends PS_Controller
 		}
 	}
 
-
 	public function get_last_sync_date()
 	{
 		$date = $this->customers_model->get_last_sync_date();
-
 		echo $date;
 	}
 
 	public function count_update_rows()
 	{
 		$date = $this->input->get('last_sync_date');
-
 		$this->load->library('api');
-
 		echo $this->api->countUpdateCustomer($date);
 	}
-
-
 
 	public function sync_data()
 	{
 		$this->load->library('api');
-
 		$sc = TRUE;
-
 		$last_sync = $this->input->get('last_sync');
 		$limit = $this->input->get('limit');
 		$offset = $this->input->get('offset');
@@ -324,8 +306,6 @@ class Customers extends PS_Controller
 		echo $sc === TRUE ? $i : $this->error;
 	}
 
-
-
   public function clear_filter()
 	{
 		$filter = array('cs_code', 'cs_name', 'cs_group', 'cs_type', 'cs_grade', 'cs_saleTeam', 'cs_area', 'cs_term', 'cs_slp', 'cs_status');
@@ -333,5 +313,3 @@ class Customers extends PS_Controller
 	}
 
 } //---
-
-?>

@@ -69,16 +69,14 @@ class Authentication extends CI_Controller
   {
     if(!empty($ds))
     {
-      $times = intval(86400); //-- 1 days
-
-			$times = $remember ? $time * 30 : $times;
+      $times = intval(86400); // 1 day
 
       foreach($ds as $key => $val)
       {
         $cookie = array(
           'name' => $key,
           'value' => $val,
-          'expire' => $times,
+          'expire' => $remember ? $times * 30 : $times,
           'path' => '/'
         );
 

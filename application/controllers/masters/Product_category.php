@@ -29,18 +29,19 @@ class Product_category extends PS_Controller
 			'active' => get_filter('active', 'caActive', 'all')
 		);
 
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_rows();
-
-		$rows = $this->product_category_model->count_rows($filter);
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-
-		$filter['data'] = $this->product_category_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-
-		$this->pagination->initialize($init);
-
-    $this->load->view('masters/product_category/category_list', $filter);
+		if($this->input->post('search'))
+		{
+			redirect($this->home);
+		}
+		else 
+		{			
+			$perpage = get_rows();
+			$rows = $this->product_category_model->count_rows($filter);
+			$filter['data'] = $this->product_category_model->get_list($filter, $perpage, $this->uri->segment($this->segment));			
+			$init	= pagination_config($this->home . '/index/', $rows, $perpage, $this->segment);
+			$this->pagination->initialize($init);
+			$this->load->view('masters/product_category/category_list', $filter);
+		}		
   }
 
 
@@ -50,14 +51,14 @@ class Product_category extends PS_Controller
     $this->load->view('masters/product_category/category_add');
   }
 
-
-	public function edit($id)
+	public function edit($id, $pageNo = 0)
   {
     $this->title = 'Edit Category';
 
 		if($this->pm->can_edit)
 		{
 			$data = $this->product_category_model->get($id);
+			$data->backUrl = $this->home.'/index/'.$pageNo;
 			$this->load->view('masters/product_category/category_edit', $data);
 		}
 		else
@@ -66,16 +67,13 @@ class Product_category extends PS_Controller
 		}
   }
 
-
-
-	public function view_detail($id)
+	public function view_detail($id, $pageNo = 0)
 	{
 		$data = $this->product_category_model->get($id);
+		$data->backUrl = $this->home.'/index/'.$pageNo;
 		$this->load->view('masters/product_category/category_detail', $data);
 	}
-
-
-
+	
 	public function add()
 	{
 		$sc = TRUE;
