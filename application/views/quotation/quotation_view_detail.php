@@ -1,18 +1,12 @@
-<style>
-  .table > tr > td {
-    padding:3px;
-  }
-</style>
-
 <div class="row">
-  <div class="col-sm-12 col-xs-12 padding-5 table-responsive">
-    <table class="table table-striped border-1" style="min-width:1300px;">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
+    <table class="table table-striped border-1 table-narrow" style="min-width:1250px;">
       <thead>
-        <tr class="font-size-10">
+        <tr>
 					<th class="fix-width-40 text-center">#</th>
-					<th class="fix-width-100 middle text-center">Type</th>
-          <th class="fix-width-60 middle text-center"></th>
-          <th class="fix-width-150 middle">Item Code</th>
+					<th class="fix-width-60 middle text-center">Type</th>
+          <th class="fix-width-50 middle text-center">Image</th>
+          <th class="fix-width-100 middle">Item Code</th>
           <th class="min-width-250 middle">Description.</th>
           <th class="fix-width-100 middle text-right">Quantity</th>
           <th class="fix-width-100 middle text-center">Uom</th>
@@ -20,7 +14,7 @@
           <th class="fix-width-150 middle text-center">Discount(%)</th>
           <th class="fix-width-80 middle text-center">Tax Code</th>
 					<th class="fix-width-100 middle text-right">Price after discount</th>
-          <th class="fix-width-150 middle text-right">Amount before tax</th>
+          <th class="fix-width-120 middle text-right">Amount before tax</th>
         </tr>
       </thead>
       <tbody id="details-template">

@@ -61,18 +61,18 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive padding-5">
-		<table class="table table-striped border-1" style="min-width:1130px;">
+		<table class="table table-striped border-1 table-narrow" style="min-width:1020px;">
 			<thead>
 				<tr class="font-size-11">
+					<th class="fix-width-40"></th>
 					<th class="fix-width-40 middle text-center">#</th>
 					<th class="fix-width-150 middle">Date</th>
-					<th class="fix-width-200 middle">Code/Document No.</th>					
+					<th class="fix-width-150 middle">Code/Document No.</th>					
 					<th class="fix-width-80 middle text-center">Type</th>
 					<th class="fix-width-80 middle text-center">Action</th>
 					<th class="fix-width-80 middle text-center">Status</th>
-					<th class="fix-width-150 middle">API Path</th>
+					<th class="fix-width-250 middle">API Path</th>
 					<th class="min-width-150 middle">Message</th>
-					<th class="fix-width-100"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -80,6 +80,7 @@
 					<?php $no = $this->uri->segment($this->segment) + 1; ?>					
 					<?php foreach ($logs as $rs) : ?>						
 						<tr class="font-size-11">
+							<td class="middle"><button type="button" class="btn btn-minier btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button></td>
 							<td class="middle text-center"><?php echo $no; ?></td>
 							<td class="middle"><?php echo thai_date($rs->date_upd, TRUE, '/'); ?></td>
 							<td class="middle"><?php echo $rs->code; ?></td>
@@ -88,9 +89,6 @@
 							<td class="middle text-center"><?php echo $rs->status; ?></td>
 							<td class="middle"><?php echo $rs->api_path; ?></td>
 							<td class="middle"><?php echo $rs->message; ?></td>
-							<td class="middle">
-								<button type="button" class="btn btn-minier btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)">View detail</button>
-							</td>
 						</tr>
 						<?php $no++; ?>
 					<?php endforeach; ?>

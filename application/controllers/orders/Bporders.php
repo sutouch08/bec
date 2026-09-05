@@ -76,8 +76,6 @@ class Bporders extends CI_Controller
     $this->showAvailableStock = getConfig('GET_STOCK_ON_CUSTOMER_ORDER') ? TRUE : FALSE;
   }
 
-
-
 	public function index()
 	{
 		$this->show_cart = TRUE;
@@ -111,7 +109,6 @@ class Bporders extends CI_Controller
 		$this->load->view('bp_order/bp_home', $ds);
 	}
 
-
   public function get_cart_avalible()
   {
     $sc = TRUE;
@@ -139,7 +136,6 @@ class Bporders extends CI_Controller
     echo json_encode($ds);
   }
 
-
   public function get_favorite_available($id)
   {
     $sc = TRUE;
@@ -161,8 +157,6 @@ class Bporders extends CI_Controller
 
     echo json_encode($ds);
   }
-
-
 
   public function items()
 	{
@@ -210,7 +204,6 @@ class Bporders extends CI_Controller
 
 		$this->load->view('bp_order/bp_items', $filter);
 	}
-
 
   public function favorite()
 	{
@@ -269,7 +262,6 @@ class Bporders extends CI_Controller
 		$this->load->view('bp_order/bp_favorite', $ds);
 	}
 
-
   public function get_item()
 	{
 		$sc = TRUE;
@@ -325,7 +317,6 @@ class Bporders extends CI_Controller
 
 		echo json_encode($ds);
 	}
-
 
 	public function get_category_items()
 	{
@@ -392,7 +383,6 @@ class Bporders extends CI_Controller
 		echo json_encode($ds);
 	}
 
-
   public function checkout()
   {
     $this->load->model('masters/customer_address_model');
@@ -448,7 +438,6 @@ class Bporders extends CI_Controller
     }
   }
 
-
 	public function confirm_order()
 	{
 		$sc = TRUE;
@@ -458,8 +447,7 @@ class Bporders extends CI_Controller
 		$PayToCode = $this->input->post('PayToCode');
 		$Address = $this->input->post('Address');
 		$ShipToCode = $this->input->post('ShipToCode');
-		$Address2 = $this->input->post('Address2');
-		$PriceList = $this->input->post('PriceList');
+		$Address2 = $this->input->post('Address2');		
 		$Payment = $this->input->post('Payment');
 		$Channels = $this->input->post('Channels');
 		$remark = get_null(trim($this->input->post('remark')));
@@ -473,12 +461,9 @@ class Bporders extends CI_Controller
       if( ! empty($cart))
       {
         $hd = $this->cart_model->get_header($CardCode, $this->_user->id);
-        $orders = array();
-        $pages = $limit > 0 ? ceil($this->cart_model->cart_rows($CardCode, $this->_user->id) / $limit) : 1;
+        $orders = array();        
         $page = 0;
-        $i = 0;
-
-        //$code = $this->get_new_code();
+        $i = 0;        
 
         foreach($cart as $rs)
         {
@@ -497,11 +482,15 @@ class Bporders extends CI_Controller
 
         if( ! empty($orders))
         {
-
           $this->db->trans_begin();
 
           foreach($orders as $order)
           {
+						if($sc === FALSE)
+						{
+							break;
+						}
+
             if( ! empty($order))
             {
               $code = $this->get_new_code();
@@ -545,12 +534,28 @@ class Bporders extends CI_Controller
       					'OwnerCode' => NULL
       				);
 
-              if($this->orders_model->add($arr))
+              if(! $this->orders_model->add($arr))
       				{
+								$sc = FALSE;
+								$this->error = "Insert Order Header Failed";
+							}
+
+							if($sc === TRUE)
+							{
                 $lineNum = 0;
+								$totalCost = 0;
+								$totalBefTax = 0;
 
       					foreach($order as $rs)
       					{
+									if($sc === FALSE)
+									{
+										break;
+									}
+
+									$cost = $this->products_model->get_sap_item_avg_cost($rs->ItemCode);
+									$lineCost = $cost * $rs->Qty;
+									
       						$arr = array(
       							'order_code' => $code,
       							'LineNum' => $lineNum,
@@ -558,7 +563,7 @@ class Bporders extends CI_Controller
       							'ItemName' => $rs->ItemName,
       							'Qty' => $rs->Qty,
       							'UomCode' => $rs->UomCode,
-      							'UomEntry' => $rs->UomEntry,
+      							'UomEntry' => $rs->UomEntry,										
       							'Price' => $rs->Price,
       							'SellPrice' => $rs->SellPrice,
       							'sysSellPrice' => $rs->sysSellPrice,
@@ -583,6 +588,8 @@ class Bporders extends CI_Controller
       							'VatAmount' => $rs->VatAmount,
       							'totalVatAmount' => $rs->totalVatAmount,
       							'LineTotal' => $rs->LineTotal,
+										'Cost' => $cost,
+										'totalCost' => $lineCost,
       							'policy_id' => $rs->policy_id,
       							'rule_id' => $rs->rule_id,
       							'WhsCode' => $rs->WhsCode,
@@ -616,27 +623,29 @@ class Bporders extends CI_Controller
       							$sc = FALSE;
       							$this->error = "Insert Order Line Failed";
       						}
-                  else
-                  {
-                    $docTotal += ($rs->LineTotal + $rs->totalVatAmount);
-                    $vatSum += $rs->totalVatAmount;
-                  }
 
+									$totalCost += $lineCost;
+									$totalBefTax += $rs->LineTotal;
+									$docTotal += ($rs->LineTotal + $rs->totalVatAmount);
+									$vatSum += $rs->totalVatAmount;
                   $lineNum++;
       					} //--- end foreach $order
+								
+								if($sc === TRUE)
+								{
+									$margin = $totalBefTax - $totalCost;
+									$totalGP = $totalBefTax != 0 ? round(($margin / $totalBefTax) * 100, 2) : 0;
 
-                $arr = array(
-                  'DocTotal' => $docTotal,
-                  'VatSum' => $vatSum
-                );
-
-                $this->orders_model->update($code, $arr);
-      				}
-      				else
-      				{
-      					$sc = FALSE;
-      					$this->error = "Insert Order Header Failed";
-      				}
+									$arr = array(
+										"totalCost" => $totalCost,
+										"totalGP" => $totalGP,
+										"DocTotal" => $docTotal,
+										"VatSum" => $vatSum
+									);
+                	
+									$this->orders_model->update($code, $arr);
+								}
+      				}      				
             } //--- end if ! empty($order)
 
           } //-- end foreach $orders
@@ -686,6 +695,8 @@ class Bporders extends CI_Controller
 		$quotaNo = $this->input->post('quotaNo');
 		$whsCode = empty($this->_user->warehouse_code) ? getConfig('DEFAULT_WAREHOUSE') : $this->_user->warehouse_code;
 
+		$today = today();
+
 		$customer = $this->customers_model->get($cardCode);
 
 		if( ! empty($customer))
@@ -705,14 +716,14 @@ class Bporders extends CI_Controller
 
 						if(empty($detail))
 						{
-							$price = $pd->price;
-							$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, today());
+							$price = $pd->price;							
+							$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $today);
 
 							if( ! empty($disc))
 							{
 								$lineNum = $this->cart_model->get_new_line($cardCode, $this->_user->id);
 								$discLabel = discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5);
-								$uid = uniqid(rand(1,100));
+								$uid = genUid(8);
 
                 $vatAmount = get_vat_amount($disc->sellPrice, $pd->vat_rate);
 
@@ -723,7 +734,7 @@ class Bporders extends CI_Controller
 									'ItemName' => $pd->name,
 									'Qty' => $qty,
 									'UomCode' => $pd->uom_code,
-									'UomEntry' => $pd->uom_id,
+									'UomEntry' => $pd->uom_id,									
 									'Price' => $price,
 									'SellPrice' => $disc->sellPrice,
 									'sysSellPrice' => $disc->sellPrice,
@@ -786,9 +797,9 @@ class Bporders extends CI_Controller
 						else
 						{
 							//---- Update detail
-							$qty = $qty + $detail->Qty;
+							$qty = $qty + $detail->Qty;						
 							$price = $pd->price;
-							$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, today());
+							$disc = $this->discount_model->get_item_discount($itemCode, $cardCode, $price, $qty, $payment, $channels, $today);
 
 							if( ! empty($disc))
 							{
@@ -818,7 +829,7 @@ class Bporders extends CI_Controller
 									'totalDiscAmount' => $disc->totalDiscAmount,
 									'VatAmount' => $vatAmount,
 									'totalVatAmount' => ($vatAmount * $qty),
-									'LineTotal' => $disc->sellPrice * $qty,
+									'LineTotal' => $disc->sellPrice * $qty,								
 									'policy_id' => $disc->policy_id,
 									'rule_id' => $disc->rule_id,
 									'free_item' => $disc->freeQty,

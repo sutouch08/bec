@@ -6,7 +6,7 @@
 			<div class="form-group">
         <label class="col-lg-3 col-md-4 col-sm-4 control-label no-padding-right">Sales Employee</label>
         <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-          <select class="width-100" id="sale_id">
+          <select class="form-control input-sm r" id="sale_id">
 						<option value=""></option>
             <?php echo select_saleman($this->_user->sale_id); ?>
 					</select>
@@ -17,7 +17,7 @@
         <label class="col-lg-3 col-md-4 col-sm-4 col-xs-12 control-label no-padding-right">Owner</label>
         <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
           <?php $active = 1; ?>
-          <select class="width-100" id="owner">
+          <select class="form-control input-sm r" id="owner">
 						<option value=""></option>
             <?php echo select_employee($this->_user->emp_id, $active); ?>
 					</select>
@@ -27,7 +27,7 @@
       <div class="form-group">
         <label class="col-lg-3 col-md-4 col-sm-4 col-xs-12 control-label no-padding-right">Remark</label>
         <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12">
-          <textarea id="comments" maxlength="254" class="form-control" style="height:100px;"></textarea>
+          <textarea id="comments" maxlength="254" class="form-control r" style="height:100px;"></textarea>
         </div>
       </div>
 
@@ -90,9 +90,9 @@
   <div class="divider-hidden"></div>
 
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-right">
-    <button type="button" class="btn btn-sm btn-primary btn-100 btn-save" id="btn-save" onclick="saveAdd()">Save</button>
-    <button type="button" class="btn btn-sm btn-warning btn-100 btn-save" onclick="leave()">Cancel</button>
-    <button type="button" class="btn btn-sm btn-info btn-100 btn-save" id="btn-draft" onclick="saveAsDraft()">Save AS Draft</button>
+    <button type="button" class="btn btn-white btn-primary btn-100 btn-save" id="btn-save" onclick="save(0)">Save</button>
+    <button type="button" class="btn btn-white btn-warning btn-100 btn-save" onclick="leave()">Cancel</button>
+    <button type="button" class="btn btn-white btn-info btn-100 btn-save" id="btn-draft" onclick="save(1)">Save AS Draft</button>
   </div>
 </div>
 

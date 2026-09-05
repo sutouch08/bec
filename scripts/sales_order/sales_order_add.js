@@ -536,7 +536,6 @@ function add(data) {
 	});
 }
 
-
 async function saveUpdate() {
 	if (click == 0) {
 		click = 1;
@@ -1012,7 +1011,7 @@ async function addRow(no = null) {
 
 	reIndex();
 	await init();
-	$('#itemCode-' + no).focus();
+	$(`#itemCode-${no}`).focus();
 	return;
 }
 
@@ -1020,22 +1019,22 @@ function removeRow() {
 	$('.del-chk').each(function () {
 		if ($(this).is(':checked')) {
 			var no = $(this).val();
-			var is_free = $('#is-free-' + no).val();
-			var rule_id = $('#rule-id-' + no).val();
+			var is_free = $(`#is-free-${no}`).val();
+			var rule_id = $(`#rule-id-${no}`).val();
 
 			if (is_free) {
-				var pno = $('#is-free-' + no).data('parentrow');
-				el = $('#free-' + pno);
-				qty = parseDefault(parseInt($('#line-qty-' + no).val()), 0);
-				picked = parseDefault(parseInt(el.data('picked')), 0);
+				var pno = $(`#is-free-${no}`).data('parentrow');
+				let el = $(`#free-${pno}`);
+				let qty = parseDefault(parseInt($(`#line-qty-${no}`).val()), 0);
+				let picked = parseDefault(parseInt(el.data('picked')), 0);
 				picked = picked - qty;
 
 				if (picked >= 0) {
 					freeQty = el.val();
 					balance = freeQty - picked;
 					el.data('picked', picked);
-					$('#btn-free-' + pno).text("Free " + balance);
-					$('#btn-free-' + pno).removeClass('hide');
+					$(`#btn-free-${pno}`).text("Free " + balance);
+					$(`#btn-free-${pno}`).removeClass('hide');
 				}
 			}
 
@@ -1043,7 +1042,7 @@ function removeRow() {
 				removeFreeRow();
 			}
 
-			$('#row-' + no).remove();
+			$(`#row-${no}`).remove();
 		}
 	});
 
@@ -1058,7 +1057,7 @@ async function removeEmptyRow() {
 		let no = $(this).data('id');
 		let itemCode = $(this).val();
 		if (itemCode === '') {
-			$('#row-' + no).remove();
+			$(`#row-${no}`).remove();
 		}
 	});
 
@@ -1193,17 +1192,20 @@ function updateDiscountRule(no) {
 }
 
 function getItemData(no) {
-	let itemCode = $(`#itemCode-${no}`).val();
-	let cardCode = $(`#CardCode`).val();
-	let priceList = $(`#priceList`).val();
-	let docDate = $(`#DocDate`).val();
-	let payment = $(`#payment`).val();
-	let channels = $(`#channels`).val();
-	let whs = $(`#whs-${no}`).val();
-	let quotaNo = $(`#quota-${no}`).val();
+	let h = {
+		'ItemCode': $(`#itemCode-${no}`).val(),
+		'CardCode': $(`#CardCode`).val(),
+		'PriceList': $(`#priceList`).val(),
+		'DocDate': $(`#DocDate`).val(),
+		'Payment': $(`#payment`).val(),
+		'Channels': $(`#channels`).val(),
+		'whsCode': $(`#whs-${no}`).val(),
+		'quotaNo': $(`#quota-${no}`).val()
+	};
+
 
 	setTimeout(function () {
-		if (cardCode == "") {
+		if (h.CardCode == "") {
 			swal('กรุณาระบุลูกค้า');
 			return false;
 		}
@@ -1223,23 +1225,13 @@ function getItemData(no) {
 				$(`#free-item-${no}`).data('picked', picked);
 				$(`#row-${rowNo}`).remove();
 			}
-		})
-
+		});
 
 		$.ajax({
 			url: `${HOME}get_item_data`,
 			type: "GET",
 			cache: false,
-			data: {
-				'ItemCode': itemCode,
-				'CardCode': cardCode,
-				'PriceList': priceList,
-				'DocDate': docDate,
-				'Payment': payment,
-				'Channels': channels,
-				'whsCode': whs,
-				'quotaNo': quotaNo
-			},
+			data: h,
 			success: function (rs) {
 				load_out();
 				if (isJson(rs)) {
@@ -1808,7 +1800,7 @@ function recalTotal() {
 	let taxAmount = roundNumber(amountToPayTax * taxRate, 2);
 	let docTotal = roundNumber(amountAfterDisc + taxAmount + rounding, 2);
 	let totalProfit = roundNumber(amountAfterDisc - totalCost, 2);
-	let gp = roundNumber((totalProfit / amountAfterDisc) * 100, 2);
+	let gp = amountAfterDisc != 0 ? roundNumber((totalProfit / amountAfterDisc) * 100, 2) : 0;
 	let creditBalance = roundNumber(availableCredit - docTotal, 2);
 
 	$('#totalAmount').val(total);
@@ -1879,7 +1871,7 @@ async function init() {
 		let no = $(this).data('id');
 		updateDiscountRule(no);
 
-		setTimeout(async () => {			
+		setTimeout(async () => {
 			if ($(`#itemCode-${no}`).length && $(`#itemCode-${no}`).val() == "") {
 				$(`#itemCode-${no}`).focus();
 			}
@@ -1895,7 +1887,7 @@ async function init() {
 				});
 
 				if (count == 0) {
-					await addRow();					
+					await addRow();
 				}
 			}
 		}, 200)

@@ -7,6 +7,10 @@
     z-index: 1;
   }
 
+  .bg-grey {
+    background-color: #e7e7e7;
+  }
+
   .table>tr>td {
     padding: 3px;
   }
@@ -37,24 +41,29 @@
     }
 
     .fix-type {
-			left: 80px;
-			position: sticky !important;
-		}
+      left: 70px;
+      position: sticky !important;
+    }
 
     .fix-img {
-			left: 180px;
-			position: sticky !important;
-		}
+      left: 130px;
+      position: sticky !important;
+    }
 
     .fix-code {
-			left: 240px;
-			position: sticky !important;
-		}
+      left: 180px;
+      position: sticky !important;
+    }
 
-		.fix-desc {
-			left: 390px;
-			position: sticky !important;
-		}
+    .fix-desc {
+      left: 280px;
+      position: sticky !important;
+    }
+
+    .fix-text {
+      left: 130px;
+      position: sticky !important;
+    }
 
     td[scope=row] {
       background-color: #f8f8f8;

@@ -76,46 +76,6 @@ async function importSalesOrder(file) {
   }
 }
 
-function getSkuList() {
-  const file = skuFile.files[0];
-
-  if (!file) {
-    swal("กรุณาเลือกไฟล์ก่อน", "", "warning");
-    return false;
-  }
-
-  const fd = new FormData();
-  fd.append('uploadFile', file);
-
-  load_in();
-
-  $.ajax({
-    url: `${HOME}get_sku_list`,
-    type: "POST",
-    cache: false,
-    data: fd,
-    processData: false,
-    contentType: false,
-    success: function (rs) {
-      load_out();
-      if (isJson(rs)) {
-        const res = JSON.parse(rs);
-        if (res.status === 'success') {
-          const skus = res.data;
-          skus.forEach(sku => {
-            addIncludeProduct(sku);
-          });
-          clearImportFile();
-        } else {
-          showError(res.message);
-        }
-      } else {
-        showError(rs);
-      }
-    }
-  })
-}
-
 function getTemplateFile() {
   window.location.href = `${HOME}get_template_file`;
 }

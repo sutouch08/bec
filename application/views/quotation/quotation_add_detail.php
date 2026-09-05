@@ -1,27 +1,35 @@
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
-		<button type="button" class="btn btn-sm btn-info" onclick="addRow()">Add Row</button>
-		<button type="button" class="btn btn-sm btn-warning" onclick="removeRow()">Delete Row</button>
+		<button type="button" class="btn btn-white btn-info" onclick="addRow()">Add Row</button>
+		<button type="button" class="btn btn-white btn-warning" onclick="removeRow()">Delete Row</button>
+		<button type="button" class="btn btn-white btn-success" onclick="getImportFile()">Import Excel</button>
+		<button type="button" class="btn btn-white btn-purple" onclick="getTemplateFile()">Download Template</button>
 	</div>
-	<div class="divider-hidden">
 
-	</div>
+	<div class="divider-hidden"></div>
+
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 border-1 table-responsive" style="padding:0px; margin-left:5px; height:400px; overflow:auto;">
-		<table class="table table-bordered border-1 tableFixHead" style="min-width:1790px;">
+		<table class="table table-bordered border-1 tableFixHead table-narrow" style="width:2080px;">
 			<thead>
-				<tr class="font-size-10 freez">
+				<tr class="freez">
 					<th class="fix-width-40 middle text-center fix-header fix-no">#</th>
-					<th class="fix-width-40 middle text-center fix-header fix-chk"></th>
-					<th class="fix-width-100 middle text-center fix-header fix-type">Type</th>
-					<th class="fix-width-60 middle text-center fix-header fix-img">Image</th>
-					<th class="fix-width-150 middle text-center fix-header fix-code">Item Code</th>
-					<th class="fix-width-250 middle text-center fix-header fix-desc">Description.</th>
+					<th class="fix-width-30 middle text-center fix-header fix-chk">
+						<label>
+							<input type="checkbox" class="ace" id="chk-all" onchange="toggleCheckAll(this)" />
+							<span class="lbl"></span>
+						</label>
+					</th>
+					<th class="fix-width-60 middle text-center fix-header fix-type">Type</th>
+					<th class="fix-width-50 middle text-center fix-header fix-img">Image</th>
+					<th class="fix-width-100 middle text-center fix-header fix-code">Item Code</th>
+					<th class="fix-width-300 middle text-center fix-header fix-desc">Description.</th>
 					<th class="fix-width-100 middle text-center">Warehouse</th>
 					<th class="fix-width-80 middle text-center">In Stock</th>
 					<th class="fix-width-100 middle text-center">Quota No.</th>
 					<th class="fix-width-80 middle text-center">Quota</th>
 					<th class="fix-width-80 middle text-center">Commited</th>
 					<th class="fix-width-80 middle text-center">Available</th>
+					<th class="fix-width-100 middle text-center">Master pack</th>
 					<th class="fix-width-100 middle text-center">Quantity</th>
 					<th class="fix-width-100 middle text-center">Uom</th>
 					<th class="fix-width-100 middle text-center">Price</th>
@@ -33,344 +41,126 @@
 			</thead>
 			<tbody id="details-template">
 				<?php $no = 1; ?>
-				<?php $dwh = getConfig('DEFAULT_WAREHOUSE'); ?>
-				<?php $whs = select_listed_warehouse($dwh); ?>
-				<?php $qn = select_listed_quota($this->_user->quota_no); ?>
-				<?php $uuid = uniqid(rand(1, 100)); ?>
-				<tr id="row-<?php echo $no; ?>">
-					<input type="hidden" id="price-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="stdPrice-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="sellPrice-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="sysSellPrice-<?php echo $no; ?>" value="0" />
-					<input type="hidden" class="line-num" id="line-num-<?php echo $no; ?>" value="<?php echo $no; ?>" />
-					<input type="hidden" id="disc-amount-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="line-disc-amount-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="totalDiscPercent-<?php echo $no; ?>" value="0.00" />
-					<input type="hidden" id="line-total-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="vat-rate-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="vat-amount-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="vat-total-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="sys-disc-label-<?php echo $no; ?>" value="" />
-					<input type="hidden" id="uom-code-<?php echo $no; ?>" value="" />
-					<input type="hidden" class="disc-diff" id="disc-diff-<?php echo $no; ?>" value="0" />
-					<input type="hidden" id="rule-id-<?php echo $no; ?>" value="" />
-					<input type="hidden" id="policy-id-<?php echo $no; ?>" value="" />
-					<input type="hidden" class="disc-error" id="disc-error-<?php echo $no; ?>" value="0" data-id="<?php echo $no; ?>" />
-					<input type="hidden" class="free-item" id="free-item-<?php echo $no; ?>" value="" data-id="<?php echo $no; ?>"
+				<?php $uid = genUid(8); ?>
+				<?php $uuid = genUid(8); ?>
+				<tr id="row-<?php echo $uid; ?>">
+					<input type="hidden" id="price-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="stdPrice-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="sellPrice-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="sysSellPrice-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" class="line-num" id="line-num-<?php echo $uid; ?>" value="<?php echo $uid; ?>" />
+					<input type="hidden" id="disc-amount-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="line-disc-amount-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="totalDiscPercent-<?php echo $uid; ?>" value="0.00" />
+					<input type="hidden" id="line-total-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="vat-rate-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="vat-amount-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="vat-total-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="sys-disc-label-<?php echo $uid; ?>" value="" />
+					<input type="hidden" id="uom-code-<?php echo $uid; ?>" value="" />
+					<input type="hidden" class="disc-diff" id="disc-diff-<?php echo $uid; ?>" value="0" />
+					<input type="hidden" id="rule-id-<?php echo $uid; ?>" value="" />
+					<input type="hidden" id="policy-id-<?php echo $uid; ?>" value="" />
+					<input type="hidden" class="disc-error" id="disc-error-<?php echo $uid; ?>" value="0" data-id="<?php echo $uid; ?>" />
+					<input type="hidden" class="free-item" id="free-item-<?php echo $uid; ?>" value="" data-id="<?php echo $uid; ?>"
 						data-valid="0" data-rule="" data-picked="0"
 						data-uid="<?php echo $uuid; ?>" data-parent="" />
-					<input type="hidden" class="is-free" id="is-free-<?php echo $no; ?>"
-						value="0" data-id="<?php echo $no; ?>"
+					<input type="hidden" class="is-free" id="is-free-<?php echo $uid; ?>"
+						value="0" data-id="<?php echo $uid; ?>"
 						data-parent="" data-parentrow="" />
-					<input type="hidden" id="<?php echo $uuid; ?>" data-id="<?php echo $no; ?>" value="<?php echo $no; ?>" />
-					<input type="hidden" id="disc-type-<?php echo $no; ?>" value="P" />
+					<input type="hidden" id="<?php echo $uuid; ?>" data-id="<?php echo $uid; ?>" value="<?php echo $uid; ?>" />
+					<input type="hidden" id="disc-type-<?php echo $uid; ?>" value="P" />
 
 					<td class="middle text-center fix-no no handle" scope="row"><?php echo $no; ?></td>
 					<td class="middle text-center fix-chk" scope="row">
-						<input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>" />
+						<input type="checkbox" class="ace del-chk" value="<?php echo $uid; ?>" />
 						<span class="lbl"></span>
 					</td>
 					<td class="middle text-center fix-type" scope="row">
-						<select class="form-control input-sm toggle-text" id="type-1" onchange="toggleText($(this))" data-id="<?php echo $no; ?>">
+						<select class="form-control input-sm toggle-text" id="type-1" onchange="toggleText($(this))" data-id="<?php echo $uid; ?>">
 							<option value="0">-</option>
 							<option value="1">Text</option>
 						</select>
 					</td>
-					<td class="middle text-center fix-img" scope="row" id="img-<?php echo $no; ?>">
+					<td class="middle text-center fix-img" scope="row" id="img-<?php echo $uid; ?>">
 					</td>
 					<td class="middle fix-code" scope="row">
-						<input type="text" class="form-control input-sm item-code" data-id="<?php echo $no; ?>" id="itemCode-<?php echo $no; ?>" value="" />
+						<input type="text" class="form-control input-sm item-code" data-id="<?php echo $uid; ?>" id="itemCode-<?php echo $uid; ?>" value="" />
 					</td>
 					<td class="middle fix-desc" scope="row">
-						<input type="text" class="form-control input-sm item-name" data-id="<?php echo $no; ?>" id="itemName-<?php echo $no; ?>" value="" />
+						<input type="text" class="form-control input-sm item-name" data-id="<?php echo $uid; ?>" id="itemName-<?php echo $uid; ?>" value="" />
 					</td>
 
 					<td class="middle">
-						<select class="form-control input-sm whs" data-id="<?php echo $no; ?>" id="whs-<?php echo $no; ?>" onchange="getStock(<?php echo $no; ?>)">
+						<select class="form-control input-sm whs" data-id="<?php echo $uid; ?>" id="whs-<?php echo $uid; ?>" onchange="getStock('<?php echo $uid; ?>')">
 							<option value=""></option>
 							<?php echo $whs; ?>
 						</select>
 					</td>
 
 					<td class="middle">
-						<input type="text" class="form-control input-sm" id="instock-<?php echo $no; ?>" value="" disabled />
+						<input type="text" class="form-control input-sm text-right" id="instock-<?php echo $uid; ?>" value="" disabled />
 					</td>
 
 					<td class="middle">
-						<select class="form-control input-sm quota" data-id="<?php echo $no; ?>" id="quota-<?php echo $no; ?>" onchange="getStock(<?php echo $no; ?>)">
+						<select class="form-control input-sm quota" data-id="<?php echo $uid; ?>" id="quota-<?php echo $uid; ?>" onchange="getStock('<?php echo $uid; ?>')">
 							<option value=""></option>
 							<?php echo $qn; ?>
 						</select>
 					</td>
 
 					<td class="middle">
-						<input type="text" class="form-control input-sm" id="team-<?php echo $no; ?>" value="" disabled />
+						<input type="text" class="form-control input-sm text-right" id="team-<?php echo $uid; ?>" value="" disabled />
 					</td>
 
 					<td class="middle">
-						<input type="text" class="form-control input-sm" id="commit-<?php echo $no; ?>" value="" disabled />
+						<input type="text" class="form-control input-sm text-right" id="commit-<?php echo $uid; ?>" value="" disabled />
 					</td>
 
 					<td class="middle">
-						<input type="text" class="form-control input-sm" id="available-<?php echo $no; ?>" value="" disabled />
+						<input type="text" class="form-control input-sm text-right" id="available-<?php echo $uid; ?>" value="" disabled />
+					</td>
+
+					<td class="middle">
+						<input type="text" class="form-control input-sm text-right" id="master-pack-<?php echo $uid; ?>" value="" disabled />
 					</td>
 
 					<td class="middle">
 						<input type="number" class="form-control input-sm text-right line-qty"
-							data-id="<?php echo $no; ?>" id="line-qty-<?php echo $no; ?>"
+							data-id="<?php echo $uid; ?>" id="line-qty-<?php echo $uid; ?>"
 							value="" />
 					</td>
 					<td class="middle">
-						<input type="text" class="form-control input-sm text-center" id="uom-<?php echo $no; ?>" value="" disabled />
+						<input type="text" class="form-control input-sm text-center" id="uom-<?php echo $uid; ?>" value="" disabled />
 					</td>
 					<td class="middle">
 						<input type="text" class="form-control input-sm text-right number price"
-							data-id="<?php echo $no; ?>"
-							id="price-label-<?php echo $no; ?>"
-							onchange="recalAmount(<?php echo $no; ?>)"
+							data-id="<?php echo $uid; ?>"
+							id="price-label-<?php echo $uid; ?>"
+							onchange="recalAmount('<?php echo $uid; ?>')"
 							value="" />
 					</td>
 
 					<td class="middle">
-						<input type="text" class="form-control input-sm text-right disc" id="disc-label-<?php echo $no; ?>"
-							value="" onchange="recalDiscount(<?php echo $no; ?>)" />
+						<input type="text" class="form-control input-sm text-right disc" id="disc-label-<?php echo $uid; ?>"
+							value="" onchange="recalDiscount('<?php echo $uid; ?>')" />
 					</td>
 					<td class="middle">
-						<input type="text" class="form-control input-sm text-center" id="vat-code-<?php echo $no; ?>" value="" disabled />
-					</td>
-
-					<td class="middle">
-						<input type="text" class="form-control input-sm text-right" id="sell-price-<?php echo $no; ?>" value="" readonly disabled>
+						<input type="text" class="form-control input-sm text-center" id="vat-code-<?php echo $uid; ?>" value="" disabled />
 					</td>
 
 					<td class="middle">
-						<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-<?php echo $no; ?>" value="" readonly disabled />
+						<input type="text" class="form-control input-sm text-right" id="sell-price-<?php echo $uid; ?>" value="" readonly disabled>
+					</td>
+
+					<td class="middle">
+						<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-<?php echo $uid; ?>" value="" readonly disabled />
 					</td>
 				</tr>
 				<?php $no++; ?>
 			</tbody>
 		</table>
-
-		<input type="hidden" id="row-no" value="<?php echo $no; ?>" />
 	</div>
+	<input type="hidden" id="first-uid" value="<?php echo $uid; ?>" />	
 </div>
-<hr class="padding-5" />
-<script id="row-template" type="text/x-handlebarsTemplate">
-	<tr id="row-{{no}}">
-		<input type="hidden" id="price-{{no}}" value="0" />
-  	<input type="hidden" id="stdPrice-{{no}}" value="0" />
-		<input type="hidden" id="sellPrice-{{no}}" value="0" />
-		<input type="hidden" id="sysSellPrice-{{no}}" value="0" />
-		<input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
-		<input type="hidden" id="disc-amount-{{no}}" value="0"/>
-		<input type="hidden" id="line-disc-amount-{{no}}" value="0" />
-		<input type="hidden" id="totalDiscPercent-{{no}}" value="0.00" />
-		<input type="hidden" id="line-total-{{no}}" value="0" />
-		<input type="hidden" id="vat-rate-{{no}}" value="0" />
-		<input type="hidden" id="vat-amount-{{no}}" value="0" />
-		<input type="hidden" id="vat-total-{{no}}" value="0" />
-		<input type="hidden" id="sys-disc-label-{{no}}"  value="0" />
-		<input type="hidden" id="uom-code-{{no}}" value="" />
-		<input type="hidden" class="disc-diff" id="disc-diff-{{no}}" value="0" />
-		<input type="hidden" id="rule-id-{{no}}" value="" />
-		<input type="hidden" id="policy-id-{{no}}" value="" />
-		<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
-		<input type="hidden" class="free-item" id="free-item-{{no}}" value="0" data-id="{{no}}"
-			data-rule="0" data-valid="0" data-picked="0" data-uid="{{uid}}" data-parent=""/>
-		<input type="hidden" class="is-free" id="is-free-{{no}}" value="0" data-id="{{no}}" data-parent="" data-parentrow=""/>
-		<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
-		<input type="hidden" id="disc-type-{{no}}" value="{{discType}}" />
-
-		<td class="middle text-center fix-no no handle" scope="row"></td>
-		<td class="middle text-center fix-chk" scope="row">
-			<input type="checkbox" class="ace del-chk" value="{{no}}"/>
-			<span class="lbl"></span>
-		</td>
-		<td class="middle text-center fix-type" scope="row">
-			<select class="form-control input-sm toggle-text" id="type-{{no}}" onchange="toggleText($(this))" data-id="{{no}}">
-				<option value="0">-</option>
-				<option value="1">Text</option>
-			</select>
-		</td>
-		<td class="middle text-center fix-img" scope="row" id="img-{{no}}"></td>
-		<td class="middle fix-code" scope="row">
-			<input type="text" class="form-control input-sm item-code" data-id="{{no}}" id="itemCode-{{no}}" />
-		</td>
-		<td class="middle fix-desc" scope="row">
-			<input type="text" class="form-control input-sm item-name" data-id="{{no}}" id="itemName-{{no}}" />
-		</td>
-
-		<td class="middle">
-			<select class="form-control input-sm whs" data-id="{{no}}" id="whs-{{no}}" onchange="getStock({{no}})">
-				<option value=""></option>
-				<?php echo $whs; ?>
-			</select>
-		</td>
-
-		<td class="middle">
-			<input type="text" class="form-control input-sm" id="instock-{{no}}" disabled/>
-		</td>
-
-		<td class="middle">
-			<select class="form-control input-sm quota" data-id="{{no}}" id="quota-{{no}}" onchange="getStock({{no}})">
-				<option value=""></option>
-				<?php echo $qn; ?>
-			</select>
-		</td>
-
-		<td class="middle">
-			<input type="text" class="form-control input-sm" id="team-{{no}}" disabled/>
-		</td>
-
-		<td class="middle">
-			<input type="text" class="form-control input-sm" id="commit-{{no}}" disabled/>
-		</td>
-
-		<td class="middle">
-			<input type="text" class="form-control input-sm" id="available-{{no}}" disabled/>
-		</td>
-
-		<td class="middle">
-			<input type="number" class="form-control input-sm text-right line-qty" data-id="{{no}}" id="line-qty-{{no}}" />
-		</td>
-		<td class="middle">
-			<input type="text" class="form-control input-sm text-center" id="uom-{{no}}" disabled/>
-		</td>
-		<td class="middle">
-			<input type="text" class="form-control input-sm text-right number price" data-id="{{no}}" id="price-label-{{no}}" value=""/>
-		</td>
-
-		<td class="middle">
-			<input type="text" class="form-control input-sm text-right disc" id="disc-label-{{no}}" onchange="recalDiscount({{no}})"/>
-		</td>
-		<td class="middle">
-			<input type="text" class="form-control input-sm text-center" id="vat-code-{{no}}" value="" disabled/>
-		</td>
-
-		<td class="middle">
-			<input type="text" class="form-control input-sm text-right" id="sell-price-{{no}}" value="" readonly disabled>
-		</td>
-
-		<td class="middle">
-			<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-{{no}}" readonly disabled />
-		</td>
-	</tr>
-</script>
-
-
-<script id="normal-template" type="text/x-handlebarsTemplate">
-	<input type="hidden" id="price-{{no}}" value="0" />
-	<input type="hidden" id="stdPrice-{{no}}" value="0" />
-	<input type="hidden" id="sellPrice-{{no}}" value="0" />
-	<input type="hidden" id="sysSellPrice-{{no}}" value="0" />
-	<input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
-	<input type="hidden" id="disc-amount-{{no}}" value="0"/>
-	<input type="hidden" id="line-disc-amount-{{no}}" value="0" />
-	<input type="hidden" id="totalDiscPercent-{{no}}" value="0.00" />
-	<input type="hidden" id="line-total-{{no}}" value="0" />
-	<input type="hidden" id="vat-rate-{{no}}" value="0" />
-	<input type="hidden" id="vat-amount-{{no}}" value="0" />
-	<input type="hidden" id="vat-total-{{no}}" value="0" />
-	<input type="hidden" id="sys-disc-label-{{no}}"  value="0" />
-	<input type="hidden" id="uom-code-{{no}}" value="" />
-	<input type="hidden" class="disc-diff" id="disc-diff-{{no}}" value="0" />
-	<input type="hidden" id="rule-id-{{no}}" value="" />
-	<input type="hidden" id="policy-id-{{no}}" value="" />
-	<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
-	<input type="hidden" class="free-item" id="free-item-{{no}}" value="0" data-id="{{no}}"
-		data-rule="0" data-valid="0" data-picked="0" data-uid="{{uid}}" data-parent=""/>
-	<input type="hidden" class="is-free" id="is-free-{{no}}" value="0" data-id="{{no}}" data-parent="" data-parentrow=""/>
-	<input type="hidden" id="{{uid}}" data-id="{{no}}" value="{{no}}"/>
-	<input type="hidden" id="disc-type-{{no}}" value="{{discType}}" />
-
-	<td class="middle text-center fix-no no handle" scope="row"></td>
-	<td class="middle text-center fix-chk" scope="row">
-		<input type="checkbox" class="ace del-chk" value="{{no}}"/>
-		<span class="lbl"></span>
-	</td>
-	<td class="middle text-center fix-type" scope="row">
-		<select class="form-control input-sm toggle-text" id="type-{{no}}" onchange="toggleText($(this))" data-id="{{no}}">
-			<option value="0" selected>-</option>
-			<option value="1">Text</option>
-		</select>
-	</td>
-	<td class="middle text-center fix-img" scope="row" id="img-{{no}}"></td>
-	<td class="middle fix-code" scope="row">
-		<input type="text" class="form-control input-sm item-code" data-id="{{no}}" id="itemCode-{{no}}" />
-	</td>
-	<td class="middle fix-desc" scope="row">
-		<input type="text" class="form-control input-sm item-name" data-id="{{no}}" id="itemName-{{no}}" />
-	</td>
-
-	<td class="middle">
-		<select class="form-control input-sm whs" data-id="{{no}}" id="whs-{{no}}" onchange="getStock({{no}})">
-			<option value=""></option>
-			<?php echo $whs; ?>
-		</select>
-	</td>
-
-	<td class="middle">
-		<input type="text" class="form-control input-sm" id="instock-{{no}}" disabled/>
-	</td>
-
-	<td class="middle">
-		<select class="form-control input-sm quota" data-id="{{no}}" id="quota-{{no}}" onchange="getStock({{no}})">
-			<option value=""></option>
-			<?php echo $qn; ?>
-		</select>
-	</td>
-
-	<td class="middle">
-		<input type="text" class="form-control input-sm" id="team-{{no}}" disabled/>
-	</td>
-
-	<td class="middle">
-		<input type="text" class="form-control input-sm" id="commit-{{no}}" disabled/>
-	</td>
-
-	<td class="middle">
-		<input type="text" class="form-control input-sm" id="available-{{no}}" disabled/>
-	</td>
-
-	<td class="middle">
-		<input type="number" class="form-control input-sm text-right line-qty" data-id="{{no}}" id="line-qty-{{no}}" />
-	</td>
-	<td class="middle">
-		<input type="text" class="form-control input-sm text-center" id="uom-{{no}}" disabled/>
-	</td>
-	<td class="middle">
-		<input type="text" class="form-control input-sm text-right number price" data-id="{{no}}" id="price-label-{{no}}" value=""/>
-	</td>
-
-	<td class="middle">
-		<input type="text" class="form-control input-sm text-right disc" id="disc-label-{{no}}" onchange="recalDiscount({{no}})"/>
-	</td>
-	<td class="middle">
-		<input type="text" class="form-control input-sm text-center" id="vat-code-{{no}}" value="" disabled/>
-	</td>
-
-	<td class="middle">
-		<input type="text" class="form-control input-sm text-right" id="sell-price-{{no}}" value="" readonly disabled>
-	</td>
-
-	<td class="middle">
-		<input type="text" class="form-control input-sm text-right number input-amount" id="total-label-{{no}}" readonly disabled />
-	</td>
-</script>
-
-<script id="text-template" type="text/x-handlebarsTemplate">
-	<td class="middle text-center fix-no no handle" scope="row"></td>
-	<td class="middle text-center fix-chk" scope="row">
-		<input type="checkbox" class="ace del-chk" value="{{no}}"/>
-		<span class="lbl"></span>
-	</td>
-	<td class="middle text-center fix-type" scope="row">
-		<select class="form-control input-sm toggle-text" id="type-{{no}}" onchange="toggleText($(this))" data-id="{{no}}">
-			<option value="0">-</option>
-			<option value="1" selected>Text</option>
-		</select>
-	</td>
-	<td colspan="18">
-    <textarea id="text-{{no}}" class="autosize autosize-transition" style="height:150px; width:800px;"></textarea>
-  </td>
-</script>
+<hr />

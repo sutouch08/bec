@@ -3,14 +3,14 @@
     <div class="form-group">
       <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12 sap-label">Customer</label>
       <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-        <input type="text" id="CardCode" class="form-control input-sm" value="<?php echo $order->CardCode; ?>" />
+        <input type="text" id="CardCode" class="form-control input-sm r" value="<?php echo $order->CardCode; ?>" />
       </div>
     </div>
 
     <div class="form-group">
       <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12 sap-label">Name</label>
       <div class="col-lg-7 col-md-7 col-sm-8 col-xs-12">
-        <input type="text" id="CardName" class="form-control input-sm" value="<?php echo $order->CardName; ?>" />
+        <input type="text" id="CardName" class="form-control input-sm r" value="<?php echo $order->CardName; ?>" />
       </div>
     </div>
 
@@ -58,6 +58,21 @@
       <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12"></label>
       <div class="col-lg-7 col-md-7 col-sm-8 col-xs-12">
         <textarea id="BillTo" class="autosize autosize-transition form-control"><?php echo $order->Address; ?></textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12 sap-label">Ship To</label>
+      <div class="col-lg-3-harf col-md-4 col-sm-4-harf col-xs-12">
+        <select class="form-control input-sm" id="shipToCode" onchange="get_address_ship_to()">
+          <?php echo select_ship_to_code($order->CardCode, $order->ShipToCode); ?>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12"></label>
+      <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12">
+        <textarea id="ShipTo" class="autosize autosize-transition form-control"><?php echo $order->Address2; ?></textarea>
       </div>
     </div>
 

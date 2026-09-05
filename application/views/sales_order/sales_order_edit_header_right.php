@@ -7,10 +7,22 @@
 			</div>
 		</div>
 
+		<?php if (! empty($order->SqNo)) : ?>
+			<div class="form-group">
+				<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">SQ No.</label>
+				<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
+					<div class="input-group">
+						<input type="text" id="sqNo" class="form-control input-sm" value="<?php echo $order->SqNo; ?>" disabled />
+						<span class="input-group-addon pointer" onclick="viewSQ('<?php echo $order->SqNo; ?>')"><i class="fa fa-info-circle"></i></span>
+					</div>
+				</div>
+			</div>
+		<?php endif; ?>
+
 		<div class="form-group">
 			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Status</label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
-				<input type="text" id="status" class="form-control input-sm" value="<?php echo order_status_name($order->Status, $order->Approved); ?>" disabled />
+				<input type="text" id="status" class="form-control input-sm" value="<?php echo order_status_name($order->Status, $order->Approved); ?>" disabled />				
 			</div>
 		</div>
 

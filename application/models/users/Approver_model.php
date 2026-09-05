@@ -9,7 +9,6 @@ class Approver_model extends CI_Model
 		parent::__construct();
 	}
 
-
 	public function get($id)
 	{
 		$rs = $this->db->where('id', $id)->get($this->tb);
@@ -21,7 +20,6 @@ class Approver_model extends CI_Model
 
 		return NULL;
 	}
-
 
 	public function add(array $ds = array())
 	{
@@ -38,8 +36,6 @@ class Approver_model extends CI_Model
 		return FALSE;
 	}
 
-
-
 	public function add_team(array $ds = array())
 	{
 		return $this->db->insert('approver_team', $ds);
@@ -49,7 +45,6 @@ class Approver_model extends CI_Model
 	{
 		return $this->db->insert_batch('approver_team', $ds);
 	}
-
 
 	public function add_brand(array $ds = array())
 	{
@@ -61,18 +56,15 @@ class Approver_model extends CI_Model
 		return $this->db->insert_batch('approver_brand', $ds);
 	}
 
-
 	public function drop_team($id_approver)
 	{
 		return $this->db->where('id_approver', $id_approver)->delete("approver_team");
 	}
 
-
 	public function drop_brand($id_approver)
 	{
 		return $this->db->where('id_approver', $id_approver)->delete("approver_brand");
 	}
-
 
 	public function update($id, array $ds = array())
 	{
@@ -83,8 +75,6 @@ class Approver_model extends CI_Model
 
 		return FALSE;
 	}
-
-
 
 	public function delete($id)
 	{
@@ -105,7 +95,6 @@ class Approver_model extends CI_Model
 			$this->ids = empty($this->ids) ? $tids : array_intersect($this->ids, $tids);
 		}			
 	}
-
 
 	public function count_rows(array $ds = array())
 	{
@@ -218,7 +207,6 @@ class Approver_model extends CI_Model
 		return $this->db->where('user_id', $user_id)->where('ap_promotion', 1)->where('status', 1)->count_all_results($this->tb) > 0;
 	}
 
-
 	public function is_approver($user_id, $team_id)
 	{
 		$rs = $this->db
@@ -240,7 +228,6 @@ class Approver_model extends CI_Model
 		return FALSE;
 	}
 
-
 	public function is_visible_gp_approver($user_id)
 	{
 		return $this->db->where('user_id', $user_id)->where('visible_gp', 1)->where('status', 1)->count_all_results($this->tb) > 0;
@@ -257,7 +244,6 @@ class Approver_model extends CI_Model
 
 		return NULL;
 	}
-
 
 	public function get_approver_brand($id)
 	{

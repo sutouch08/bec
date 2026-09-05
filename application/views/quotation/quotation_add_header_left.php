@@ -3,20 +3,20 @@
     <div class="form-group">
       <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12 sap-label">Customer</label>
       <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-        <input type="text" id="CardCode" class="form-control input-sm" value="" />
+        <input type="text" id="CardCode" class="form-control input-sm r" value="" />
       </div>
     </div>
 
     <div class="form-group">
       <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12 sap-label">Name</label>
       <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12">
-        <input type="text" id="CardName" class="form-control input-sm" value="" />
+        <input type="text" id="CardName" class="form-control input-sm r" value="" />
       </div>
-    </div>    
+    </div>
 
     <div class="form-group">
       <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12 sap-label">Contact Person</label>
-      <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12">
+      <div class="col-lg-3-harf col-md-4 col-sm-4-harf col-xs-12">
         <input type="text" id="contact" class="form-control input-sm" maxlength="100" value="" />
       </div>
     </div>
@@ -31,7 +31,7 @@
     <div class="form-group">
       <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12 sap-label">Payment</label>
       <div class="col-lg-3-harf col-md-4 col-sm-4-harf col-xs-12">
-        <select class="form-control input-sm" id="payment" name="payment" onchange="recal_all_discount()">
+        <select class="form-control input-sm" id="payment" name="payment">
           <?php echo select_payment_term(); ?>
         </select>
       </div>
@@ -57,6 +57,20 @@
       <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12"></label>
       <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12">
         <textarea id="BillTo" class="autosize autosize-transition form-control"></textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12 sap-label">Ship To</label>
+      <div class="col-lg-3-harf col-md-4 col-sm-4-harf col-xs-12">
+        <select class="form-control input-sm" id="shipToCode" onchange="get_address_ship_to()">
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-lg-2-harf col-md-3 col-sm-3 col-xs-12"></label>
+      <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12">
+        <textarea id="ShipTo" class="autosize autosize-transition form-control"></textarea>
       </div>
     </div>
   </div>

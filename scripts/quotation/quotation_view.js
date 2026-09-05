@@ -8,63 +8,54 @@ function createSO(code) {
     confirmButtonText:'ใช่ ฉันต้องการ',
 		closeOnConfirm:true
   },
-  function(){
+  function() {
 		load_in();
-		$.ajax({
-			url: BASE_URL + 'orders/orders/create_from_sq',
-			type:'POST',
-			cache:false,
-			data:{
-				'sq_code' : code
-			},
-			success:function(rs) {
-				load_out();
-				var rs = $.trim(rs);
-				if(isJson(rs)) {
-					var ds = $.parseJSON(rs);
-					if(ds.status === 'success') {
-						setTimeout(function() {
+		setTimeout(() => {
+			$.ajax({
+				url: `${BASE_URL}orders/orders/create_from_sq`,
+				type: 'POST',
+				cache: false,
+				data: {
+					'sq_code': code
+				},
+				success: function (rs) {
+					load_out();
+					if (isJson(rs)) {
+						let ds = JSON.parse(rs);
+						if (ds.status === 'success') {
 							swal({
-								title:'Success',
+								title: 'Success',
 								text: 'Sale Order Created Successfull : ' + ds.code,
-								type:'success',
-								timer:1000
+								type: 'success',
+								timer: 1000
 							});
 
-							setTimeout(function(){
-								window.location.href = BASE_URL + 'orders/orders/edit/'+ds.code;
-							},1200)
-						}, 500)
-
+							setTimeout(function () {
+								window.location.href = `${BASE_URL}orders/orders/edit/${ds.code}/0`;
+							}, 1200);
+						}
+						else {
+							showError(ds.error);
+						}
 					}
 					else {
-						swal({
-							title:"Error!",
-							text:ds.error,
-							type:'error'
-						});
+						showError(rs);
 					}
+				},
+				error: function (rs) {
+					showError(rs);
 				}
-				else {
-					swal({
-						title:'Error!',
-						text:rs,
-						type:'error'
-					})
-				}
-			}
-		})
+			});
+		}, 100);		
   });
 }
 
-
-
 function printSQ() {
-	let code  = $("#order_code").val();
-	let width = 1200;
-	let height = 950;
-	let left = (window.innerWidth - width) / 2;
-	let target = HOME + 'print_sq/'+code;
-	let prop = `width=${width}, height=${height}, left=${left}, scrollbars=yes`;
+	const code  = $("#order_code").val();
+	const width = 1200;
+	const height = 950;
+	const left = (window.innerWidth - width) / 2;
+	const target = `${HOME}print_sq/${code}`;
+	const prop = `width=${width}, height=${height}, left=${left}, scrollbars=yes`;
 	window.open(target, '_blank', prop);
 }

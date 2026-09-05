@@ -22,7 +22,9 @@ class Quotation extends PS_Controller
 		$this->load->model('masters/channels_model');
 		$this->load->model('orders/discount_model');
 		$this->load->model('masters/warehouse_model');
+		$this->load->model('masters/quota_model');
 		$this->load->model('masters/cost_center_model');
+		$this->load->model('masters/sales_person_model');
 		$this->load->helper('order');
 		$this->load->helper('customer');
 		$this->load->helper('product_images');
@@ -34,7 +36,6 @@ class Quotation extends PS_Controller
 
 		$this->readOnly = getConfig('CLOSE_SYSTEM') == 2 ? TRUE : FALSE;
   }
-
 
   public function index()
   {
@@ -62,15 +63,10 @@ class Quotation extends PS_Controller
 		}
 		else
 		{
-
-
-			//--- แสดงผลกี่รายการต่อหน้า
 			$perpage = get_rows();
-
 			$rows = $this->quotation_model->count_rows($filter);
-			//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
+	    $filter['data'] = $this->quotation_model->get_list($filter, $perpage, $this->uri->segment($this->segment));			
 			$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-	    $filter['data'] = $this->quotation_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
 			$filter['channels'] = channels_array();
 			$filter['payments'] = payments_array();
 			$this->pagination->initialize($init);
@@ -79,9 +75,10 @@ class Quotation extends PS_Controller
   }
 
   public function add_new()
-  {
-		$this->load->model('masters/sales_person_model');
+  {		
 		$ds = array(
+			'whs' => select_listed_warehouse(getConfig('DEFAULT_WAREHOUSE')),
+			'qn' => select_listed_quota($this->_user->quota_no),
 			'sale_name' => $this->sales_person_model->get_name($this->_user->sale_id),
 			'default_channels' => $this->channels_model->get_default()
 		);
@@ -89,28 +86,23 @@ class Quotation extends PS_Controller
     $this->load->view('quotation/quotation_add', $ds);
   }
 
-
 	public function add()
 	{
 		$sc = TRUE;
+		$ex = 0;
 
 		if($this->pm->can_add)
 		{
-			$json = file_get_contents('php://input');
+			$hd = json_decode(file_get_contents('php://input'));
 
-			$data = json_decode($json);
-
-
-			if(! empty($data))
-			{
-				$hd = $data->header;
-				$details = $data->details;
-
+			if(! empty($hd))
+			{				
+				$details = $hd->details;
 				$docDate = db_date($hd->DocDate, FALSE);
 				$customer = $this->customers_model->get($hd->CardCode);
 				$code = $this->get_new_code($docDate);
 
-				if( ! empty($customer))
+				if (! empty($customer))
 				{
 					$arr = array(
 						'code' => $code,
@@ -122,6 +114,7 @@ class Quotation extends PS_Controller
 						'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
 						'Channels' => $hd->Channels,
 						'Payment' => $hd->Payment,
+						'projectCode' => get_null($hd->ProjectCode),
 						'DocCur' => getConfig('DEFAULT_CURRENCY'),
 						'DocRate' => 1,
 						'DocTotal' => $hd->docTotal,
@@ -146,11 +139,7 @@ class Quotation extends PS_Controller
 						'VatRate' => $hd->VatRate,
 						'Status' => $hd->isDraft == 1 ? -1 : ($hd->mustApprove == 1 ? 0 : 1),
 						'Approved' => $hd->isDraft == 1 ? 'P' : ($hd->mustApprove == 1 ? 'P' : 'S'),
-						'OwnerCode' => $hd->OwnerCode,
-						'dimCode1' => $hd->dimCode1,
-						'dimCode2' => $hd->dimCode2,
-						'dimCode3' => $hd->dimCode3,
-						'dimCode4' => $hd->dimCode4,
+						'OwnerCode' => $hd->OwnerCode,						
 						'dimCode5' => $hd->dimCode5
 					);
 
@@ -206,7 +195,7 @@ class Quotation extends PS_Controller
 											'discLabel' => $rs->discLabel,
 											'sysDiscLabel' => $rs->sysDiscLabel,
 											'discDiff' => $rs->discDiff,
-											'DiscPrcnt' => $rs->DiscPrcnt, //discountAmountToPercent($rs->discAmount, 1, $rs->Price),
+											'DiscPrcnt' => $rs->DiscPrcnt, 
 											'discAmount' => $rs->discAmount,
 											'totalDiscAmount' => $rs->totalDiscAmount,
 											'VatGroup' => $pd->vat_group,
@@ -270,8 +259,15 @@ class Quotation extends PS_Controller
 
 					if($sc === TRUE)
 					{
-						$this->db->trans_commit();
+						$this->db->trans_commit();						
+					}
+					else
+					{
+						$this->db->trans_rollback();
+					}
 
+					if($sc === TRUE)
+					{
 						$arr = array(
 							'code' => $code,
 							'user_id' => $this->_user->id,
@@ -281,22 +277,16 @@ class Quotation extends PS_Controller
 
 						$this->quotation_model->add_logs($arr);
 
-						if($hd->isDraft == 0)
+						if ($hd->isDraft == 0)
 						{
-							if($hd->mustApprove == 0)
+							if ($hd->mustApprove == 0)
 							{
-								$rs = $this->do_export($code);
-
-								if(! $rs)
+								if( ! $this->do_export($code))
 								{
-									$sc = FALSE;
+									$ex = 1;
 								}
 							}
 						}
-					}
-					else
-					{
-						$this->db->trans_rollback();
 					}
 				}
 				else
@@ -317,17 +307,18 @@ class Quotation extends PS_Controller
 			set_error('permission');
 		}
 
-		echo $sc === TRUE ? json_encode(array('status' => 'success', 'code' => $code)) : $this->error;
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'error',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'code' => $sc === TRUE ? $code : NULL,
+			'ex' => $ex
+		);
+
+		echo json_encode($arr);
 	}
-
-
-
+	
   public function edit($code, $pageNo = 0)
-  {
-		$this->load->model('masters/sales_person_model');
-		$this->load->model('masters/customer_address_model');
-		$this->load->model('masters/quota_model');
-
+  {		
 		if($this->pm->can_edit OR $this->pm->can_add)
 		{
 			$totalAmount = 0;
@@ -345,6 +336,8 @@ class Quotation extends PS_Controller
 					{
 						if($rs->type == 0)
 						{
+							$pd = $this->products_model->get($rs->ItemCode);
+							$rs->master_pack = !empty($pd) ? ac_format($pd->min_order_qty, 2) : '-';
 							$totalAmount += $rs->LineTotal;
 							$totalVat += $rs->totalVatAmount;
 							$stock = $this->getStock($rs->ItemCode, $rs->WhsCode, $rs->QuotaNo);
@@ -362,8 +355,10 @@ class Quotation extends PS_Controller
 					'details' => $details,
 					'totalAmount' => $totalAmount,
 					'totalVat' => $totalVat,
-					'whsList' => $this->warehouse_model->get_listed(),
+					'whsList' => $this->warehouse_model->get_listed(getConfig('DEFAULT_WAREHOUSE')),
+					'whs' => select_listed_warehouse(getConfig('DEFAULT_WAREHOUSE')),
 					'quotaList' => $this->quota_model->get_all_listed(),
+					'qn' => select_listed_quota($this->_user->quota_no),
 					'logs' => $this->quotation_model->get_logs($code),
 					'backUrl' => $this->home.'/index/'.$pageNo,
 				);
@@ -382,32 +377,24 @@ class Quotation extends PS_Controller
 
   }
 
-
-
 	public function update()
 	{
 		$sc = TRUE;
+		$ex = 0;
 
-		if($this->pm->can_edit)
+		if($this->pm->can_edit OR $this->pm->can_add)
 		{
-			$json = file_get_contents('php://input');
+			$hd = json_decode(file_get_contents('php://input'));
 
-			$data = json_decode($json);
-
-
-			if(! empty($data))
-			{
-				$hd = $data->header;
-				$details = $data->details;
-
-				//print_r($hd); exit();
+			if(! empty($hd))
+			{				
+				$details = $hd->details;
 
 				if(!empty($hd->code))
 				{
 					$docDate = db_date($hd->DocDate, FALSE);
 					$customer = $this->customers_model->get($hd->CardCode);
 					$code = $hd->code;
-
 					$order = $this->quotation_model->get($code);
 
 					if(! empty($order))
@@ -425,6 +412,7 @@ class Quotation extends PS_Controller
 									'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
 									'Channels' => $hd->Channels,
 									'Payment' => $hd->Payment,
+									'projectCode' => get_null($hd->ProjectCode),
 									'DocCur' => getConfig('DEFAULT_CURRENCY'),
 									'DocRate' => 1,
 									'DocDate' => $docDate,
@@ -436,7 +424,7 @@ class Quotation extends PS_Controller
 									'Address' => $hd->BillTo,
 									'Address2' => $hd->ShipTo,
 									'DiscPrcnt' => $hd->discPrcnt,
-									'DiscAmount' => $hd->disAmount,
+									'DiscAmount' => $hd->discAmount,
 									'VatSum' => $hd->tax,
 									'RoundDif' => $hd->roundDif,
 									'sale_team' => $hd->sale_team,
@@ -450,11 +438,7 @@ class Quotation extends PS_Controller
 									'Status' => ($hd->isDraft == 1 ? -1 : ($hd->mustApprove == 1 ? 0 : 1)),
 									'Approved' => ($hd->isDraft == 1 ? 'P' : ($hd->mustApprove == 1 ? 'P' : 'S')),
 									'upd_user_id' => $this->_user->id,
-									'OwnerCode' => $hd->OwnerCode,
-									'dimCode1' => $hd->dimCode1,
-									'dimCode2' => $hd->dimCode2,
-									'dimCode3' => $hd->dimCode3,
-									'dimCode4' => $hd->dimCode4,
+									'OwnerCode' => $hd->OwnerCode,									
 									'dimCode5' => $hd->dimCode5
 								);
 
@@ -465,9 +449,16 @@ class Quotation extends PS_Controller
 									$sc = FALSE;
 									$this->error = "Update Order failed";
 								}
-								else
+
+								if($sc === TRUE)
 								{
-									if($this->quotation_model->drop_details($code))
+									if( ! $this->quotation_model->drop_details($code))
+									{
+										$sc = FALSE;
+										$this->error = "Drop current order details failed";
+									}
+
+									if($sc === TRUE)
 									{
 										if( ! empty($details))
 										{
@@ -512,7 +503,7 @@ class Quotation extends PS_Controller
 															'discLabel' => $rs->discLabel,
 															'sysDiscLabel' => $rs->sysDiscLabel,
 															'discDiff' => $rs->discDiff,
-															'DiscPrcnt' => $rs->DiscPrcnt, //discountAmountToPercent($rs->discAmount, 1, $rs->Price),
+															'DiscPrcnt' => $rs->DiscPrcnt, 
 															'discAmount' => $rs->discAmount,
 															'totalDiscAmount' => $rs->totalDiscAmount,
 															'VatGroup' => $pd->vat_group,
@@ -569,17 +560,20 @@ class Quotation extends PS_Controller
 												}
 											}
 										} //--- end if ! empty($details)
-									}
-									else
-									{
-										$sc = FALSE;
-										$this->error = "Drop current order details failed";
-									}
+									}									
 								}
 
-								if($sc === TRUE)
+								if ($sc === TRUE)
 								{
 									$this->db->trans_commit();
+								}
+								else
+								{
+									$this->db->trans_rollback();
+								}
+
+								if ($sc === TRUE)
+								{
 									$arr = array(
 										'code' => $code,
 										'user_id' => $this->_user->id,
@@ -589,22 +583,16 @@ class Quotation extends PS_Controller
 
 									$this->quotation_model->add_logs($arr);
 
-									if($hd->isDraft == 0)
+									if ($hd->isDraft == 0)
 									{
-										if($hd->mustApprove == 0)
+										if ($hd->mustApprove == 0)
 										{
-											$rs = $this->do_export($code);
-
-											if(! $rs)
+											if (! $this->do_export($code))
 											{
-												$sc = FALSE;
+												$ex = 1;
 											}
 										}
 									}
-								}
-								else
-								{
-									$this->db->trans_rollback();
 								}
 							}
 							else
@@ -644,201 +632,15 @@ class Quotation extends PS_Controller
 			set_error('permission');
 		}
 
-		echo $sc === TRUE ? json_encode(array('status' => 'success', 'code' => $code)) : $this->error;
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'error',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'code' => $sc === TRUE ? $code : NULL,
+			'ex' => $ex
+		);
+
+		echo json_encode($arr);
 	}
-
-
-
-	public function approve()
-	{
-		$sc = TRUE;
-		$code = trim($this->input->post('code'));
-
-		if(!empty($code))
-		{
-			$rs = $this->do_approve($code);
-
-			if($rs === TRUE)
-			{
-				if(! $this->do_export($code))
-				{
-					$sc = FALSE;
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			set_error('required');
-		}
-
-		$this->_response($sc);
-	}
-
-
-
-
-	public function do_approve($code)
-	{
-		$sc = TRUE;
-		$this->load->model('users/approver_model');
-		$doc = $this->quotation_model->get($code);
-
-		if(!empty($doc))
-		{
-			//--- ตัองยังไม่ได้อนุมัติ และ ยังไม่เข้า SAP และ ยังไม่มีเลขที่เอกสารใน SAP
-			if($doc->Approved === 'P' && $doc->Status == 0 && $doc->DocNum === NULL)
-			{
-				//--- ตรวจสอบสิทธิ์ในการอนุาัติ
-				$approver = $this->approver_model->get_approve_right($this->_user->id, $doc->sale_team);
-
-				if(! empty($approver))
-				{
-					if($doc->disc_diff <= $approver->max_disc)
-					{
-						$arr = array(
-							'Approved' => 'A',
-							'Approver' => $this->_user->uname
-						);
-
-						if(! $this->quotation_model->update($code, $arr))
-						{
-							$sc = FALSE;
-							$this->error = "Approve failed";
-						}
-						else
-						{
-							$arr = array(
-								'code' => $code,
-								'user_id' => $this->_user->id,
-								'uname' => $this->_user->uname,
-								'action' => 'approve'
-							);
-
-							$this->quotation_model->add_logs($arr);
-						}
-					}
-					else
-					{
-						$sc = FALSE;
-						set_error('permission');
-					}
-				}
-				else
-				{
-					$sc = FALSE;
-					set_error('permission');
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				$this->error = "Invalid Document Status";
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			$this->error = "Document not found";
-		}
-
-		return $sc;
-	}
-
-
-
-	public function reject()
-	{
-		$sc = TRUE;
-		$code = trim($this->input->post('code'));
-
-		if(!empty($code))
-		{
-			if( ! $this->do_reject($code))
-			{
-				$sc = FALSE;
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			set_error('required');
-		}
-
-		$this->_response($sc);
-	}
-
-
-
-
-	public function do_reject($code)
-	{
-		$sc = TRUE;
-
-		$this->load->model('users/approver_model');
-		$order = $this->quotation_model->get($code);
-
-		if(! empty($order))
-		{
-			if($order->Status == 0 && $order->Approved == 'P')
-			{
-				$approve = $this->approver_model->get_approve_right($this->_user->id, $order->sale_team);
-
-				if( ! empty($approve))
-				{
-					if($order->disc_diff <= $approve->max_disc)
-					{
-						$arr = array(
-							'Approved' => 'R',
-							'Approver' => $this->_user->uname
-						);
-
-						if( ! $this->quotation_model->update($code, $arr))
-						{
-							$sc = FALSE;
-							$this->error = "Reject failed";
-						}
-						else
-						{
-							$arr = array(
-								'code' => $code,
-								'user_id' => $this->_user->id,
-								'uname' => $this->_user->uname,
-								'action' => 'reject'
-							);
-
-							$this->quotation_model->add_logs($arr);
-						}
-					}
-				}
-				else
-				{
-					$sc = FALSE;
-					set_error('permission');
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				$this->error = "Invalid document status";
-			}
-
-		}
-		else
-		{
-			$sc = FALSE;
-			$this->error = "Document not found";
-		}
-
-
-		return $sc;
-	}
-
-
 
 	public function view_detail($code, $pageNo = 0)
 	{
@@ -914,7 +716,6 @@ class Quotation extends PS_Controller
 			if(! empty($hd))
 			{
 				$details = $this->quotation_model->get_details($original);
-
 				$docDate = db_date($hd->DocDate, FALSE);
 				$code = $this->get_new_code($docDate);
 
@@ -928,6 +729,7 @@ class Quotation extends PS_Controller
 					'SlpCode' => $hd->SlpCode,
 					'Channels' => $hd->Channels,
 					'Payment' => $hd->Payment,
+					'projectCode' => $hd->projectCode,
 					'DocCur' => $hd->DocCur,
 					'DocRate' => $hd->DocRate,
 					'DocTotal' => $hd->DocTotal,
@@ -1049,15 +851,21 @@ class Quotation extends PS_Controller
 								$sc = FALSE;
 								$this->error = "Insert detail failed";
 							}
-
 						}
 					}
 				}
 
 				if($sc === TRUE)
 				{
-					$this->db->trans_commit();
+					$this->db->trans_commit();					
+				}
+				else
+				{
+					$this->db->trans_rollback();
+				}
 
+				if($sc === TRUE)
+				{
 					$arr = array(
 						'code' => $code,
 						'user_id' => $this->_user->id,
@@ -1066,10 +874,6 @@ class Quotation extends PS_Controller
 					);
 
 					$this->quotation_model->add_logs($arr);
-				}
-				else
-				{
-					$this->db->trans_rollback();
 				}
 			}
 			else
@@ -1087,187 +891,14 @@ class Quotation extends PS_Controller
 		echo $sc === TRUE ? json_encode(array('status' => 'success', 'code' => $code)) : $this->error;
 	}
 
-
-
 	public function do_export($code)
-	{
-		$sc = TRUE;
-		$order = $this->quotation_model->get($code);
-		$details = $this->quotation_model->get_order_line($code);
-		$text_line = $this->quotation_model->get_order_line_text($code);
-
-		if(! empty($order) && ! empty($details))
-		{
-			$ds = array(
-				"WEBORDER" => $order->code,
-				"CardCode" => $order->CardCode,
-				"CardName" => $order->CardName,
-				"SlpCode" => intval($order->SlpCode),
-				"GroupNum" => intval($order->Payment),
-				"DocCur" => $order->DocCur,
-				"DocRate" => round($order->DocRate, 2),
-				"DocTotal" => NULL, //round($order->DocTotal, 2),
-				"DocDate" => $order->DocDate,
-				"DocDueDate" => $order->DocDueDate,
-				"TaxDate" => $order->TextDate,
-				"PayToCode" => $order->PayToCode,
-				"ShipToCode" => $order->ShipToCode,
-				"Address" => $order->Address,
-				"Address2" => $order->Address2,
-				"DiscPrcnt" => round($order->DiscPrcnt, 2),
-				"RoundDif" => round($order->RoundDif, 2),
-				"Comments" => $order->Comments,
-				"OwnerCode" => intval($order->OwnerCode),
-				"OcrCode" => $order->dimCode1,
-				"OcrCode2" => $order->dimCode2,
-				"OcrCode3" => $order->dimCode3,
-				"OcrCode4" => $order->dimCode4,
-				"OcrCode5" => $order->dimCode5
-			);
-
-
-			$orderLine = array();
-
-			foreach($details AS $rs)
-			{
-				$line = array(
-					"LineNum" => intval($rs->LineNum),
-					"ItemCode" => $rs->ItemCode,
-					"ItemName" => $rs->ItemName,
-					"Quantity" => round($rs->Qty, 2),
-					"UomEntry" => intval($rs->UomEntry),
-					"Price" => round($rs->Price, 2),
-					"LineTotal" => NULL, //round($rs->LineTotal, 2),
-					"DiscPrcnt" => round($rs->DiscPrcnt, 2),
-					"PriceBefDi" => round($rs->Price, 2),
-					"Currency" => $order->DocCur,
-					"Rate" => round($order->DocRate, 2),
-					"VatGroup" => $rs->VatGroup,
-					"VatPrcnt" => round($rs->VatRate, 2),
-					"PriceAfVAT" => round(add_vat($rs->SellPrice, $rs->VatRate), 2),
-					"VatSum" => round($rs->totalVatAmount, 2),
-					"SlpCode" => intval($order->SlpCode),
-					"U_DISC_LABEL" => get_null($rs->discLabel),
-					"Sale_Discount1" => round($rs->disc1, 2),
-					"Sale_Discount2" => round($rs->disc2, 2),
-					"Sale_Discount3" => round($rs->disc3, 2),
-					"Sale_Discount4" => round($rs->disc4, 2),
-					"Sale_Discount5" => round($rs->disc5, 2),
-					"WhsCode" => $rs->WhsCode,
-					"Quota" => $rs->QuotaNo,
-					"OcrCode" => $order->dimCode1,
-					"OcrCode2" => $order->dimCode2,
-					"OcrCode3" => $order->dimCode3,
-					"OcrCode4" => $order->dimCode4,
-					"OcrCode5" => $order->dimCode5,
-					"SaleTeam" => $rs->team_code
-				);
-
-				array_push($orderLine, $line);
-			}
-
-			$ds['DocLine'] = $orderLine;
-
-			$lineText = array();
-
-			if(!empty($text_line))
-			{
-				$LineSeq = 0;
-				foreach($text_line as $rs)
-				{
-					$arr = array(
-						'LineSeq' => $LineSeq,
-						'AfLineNum' => $rs->AfLineNum,
-						'LineText' => $rs->LineText
-					);
-
-					array($lineText, $arr);
-					$LineSeq++;
-				}
-			}
-
-			$ds['TextLine'] = $lineText;
-
-
-			$url = getConfig('SAP_API_HOST');
-			if($url[-1] != '/')
-			{
-				$url .'/';
-			}
-
-			$url = $url."SalesQuotation";
-
-			$curl = curl_init();
-			curl_setopt($curl, CURLOPT_URL, $url);
-			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
-			curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($ds));
-			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-			curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
-
-			$response = curl_exec($curl);
-
-			if($response === FALSE)
-			{
-				$response = curl_error($curl);
-			}
-
-			curl_close($curl);
-
-			$rs = json_decode($response);
-
-			if(! empty($rs) && ! empty($rs->status))
-			{
-				if($rs->status == 'success')
-				{
-					$arr = array(
-						'Status' => 1,
-						'DocEntry' => $rs->DocEntry,
-						'DocNum' => $rs->DocNum
-					);
-
-					$this->quotation_model->update($code, $arr);
-				}
-				else
-				{
-					$arr = array(
-						'Status' => 3,
-						'message' => $rs->error
-					);
-
-					$this->quotation_model->update($code, $arr);
-
-					$sc = FALSE;
-					$this->error = $rs->error;
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				$this->error = "Export order failed";
-
-				$arr = array(
-					'Status' => 3,
-					'message' => $response //$this->error
-				);
-
-				$this->quotation_model->update($code, $arr);
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			$this->error = "No data found";
-		}
-
-		return $sc;
+	{		
+		$this->load->library('order_api');
+		return $this->order_api->exportQuotation($code);
 	}
 
-
 	public function getJson()
-	{
-		$sc = TRUE;
+	{		
 		$code = $this->input->get('code');
 		$order = $this->quotation_model->get($code);
 		$details = $this->quotation_model->get_order_line($code);
@@ -1285,6 +916,7 @@ class Quotation extends PS_Controller
 				"CardName" => $order->CardName,
 				"SlpCode" => intval($order->SlpCode),
 				"GroupNum" => intval($order->Payment),
+				"ProjectCode" => $order->projectCode,
 				"DocCur" => $order->DocCur,
 				"DocRate" => round($order->DocRate, 2),
 				"DocTotal" => NULL, //round($order->DocTotal, 2),
@@ -1303,15 +935,14 @@ class Quotation extends PS_Controller
 				"OcrCode2" => $order->dimCode2,
 				"OcrCode3" => $order->dimCode3,
 				"OcrCode4" => $order->dimCode4,
-				"OcrCode5" => $order->dimCode5
+				"OcrCode5" => $order->dimCode5,
+				"DocLine" => [],
+				"TextLine" => []
 			);
-
-
-			$orderLine = array();
 
 			foreach($details AS $rs)
 			{
-				$line = array(
+				$ds['DocLine'][] = array(
 					"LineNum" => intval($rs->LineNum),
 					"ItemCode" => $rs->ItemCode,
 					"ItemName" => $rs->ItemName,
@@ -1345,88 +976,32 @@ class Quotation extends PS_Controller
 					"SaleTeam" => $rs->team_code
 				);
 
-				array_push($orderLine, $line);
+				// array_push($orderLine, $line);
 			}
 
-			$ds['DocLine'] = $orderLine;
+			// $ds['DocLine'] = $orderLine;
 
-			$lineText = array();
+			//$lineText = array();
 
 			if(!empty($text_line))
 			{
 				$LineSeq = 0;
 				foreach($text_line as $rs)
 				{
-					$arr = array(
+					$ds['TextLine'][] = array(
 						'LineSeq' => $LineSeq,
 						'AfLineNum' => $rs->AfLineNum,
 						'LineText' => $rs->LineText
 					);
 
-					array($lineText, $arr);
+					// array($lineText, $arr);
 					$LineSeq++;
 				}
 			}
-
-			$ds['TextLine'] = $lineText;
 		}
 
 		echo json_encode($ds);
 	}
-
-
-
-	public function cancle_sap_order()
-	{
-		$sc = TRUE;
-		$code = $this->input->post('code');
-		$this->load->library('order_api');
-
-		$order = $this->quotation_model->get($code);
-
-		if( ! empty($order))
-		{
-			if( ! empty($order->DocEntry) && !empty($order->DocNum) && $order->Status == 1)
-			{
-				$arr = array(
-					'DocEntry' => $order->DocEntry,
-					'DocNum' => $order->DocNum
-				);
-
-				$rs = $this->order_api->cancle_sap_order($arr);
-
-				if(! $rs)
-				{
-					$sc = FALSE;
-					$this->error = $this->order_api->error;
-				}
-				else
-				{
-					$arr = array(
-						'Status' => 0,
-						'DocEntry' => NULL,
-						'DocNum' => NULL
-					);
-
-					$this->quotation_model->update($code, $arr);
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				$this->error = "Invalid document status";
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			$this->error = "Invalid document No.";
-		}
-
-		$this->_response($sc);
-	}
-
-
 
 	public function cancle_order()
 	{
@@ -1495,24 +1070,16 @@ class Quotation extends PS_Controller
 		$this->_response($sc);
 	}
 
-
-
-
 	public function send_to_sap()
 	{
 		$sc = TRUE;
-
 		$code = $this->input->post('code');
-
 		$order = $this->quotation_model->get($code);
 		if(!empty($order))
 		{
 			if(empty($order->DocEntry) && empty($order->DocNum))
-			{
-				//--- check document
-				$rs = $this->do_export($code);
-
-				if( ! $rs)
+			{				
+				if( ! $this->do_export($code))
 				{
 					$sc = FALSE;
 				}
@@ -1531,9 +1098,6 @@ class Quotation extends PS_Controller
 
 		$this->_response($sc);
 	}
-
-
-
 
 	public function print_sq($code)
 	{
@@ -1589,18 +1153,10 @@ class Quotation extends PS_Controller
 		$this->load->view('print/print_quotation', $ds);
 	}
 
-
-
 	public function get_item_data()
 	{
-
 		$sc = TRUE;
-		$itemCode = $this->input->get('ItemCode');
-		$cardCode = $this->input->get('CardCode');
-		$priceList = $this->input->get('PriceList');
-		$docDate = db_date($this->input->get('DocDate'));
-		$payment = $this->input->get('Payment');
-		$channels = $this->input->get('Channels');
+		$itemCode = $this->input->get('ItemCode');		
 		$whsCode = $this->input->get('WhsCode');
 		$whsCode = empty($whsCode) ? getConfig('DEFAULT_WAREHOUSE') : $whsCode;
 		$quotaNo = $this->input->get('quotaNo');
@@ -1610,7 +1166,7 @@ class Quotation extends PS_Controller
 
 		if(! empty($pd))
 		{
-			$price = $pd->price; //$this->getPrice($itemCode, $priceList);
+			$price = $pd->price; 
 			$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
 
 			$ds = array(
@@ -1621,22 +1177,23 @@ class Quotation extends PS_Controller
 				'team' => $stock['QuotaQty'],
 				'commit' => $stock['Committed'],
 				'available' => $stock['Available'],
+				'master_pack' => ac_format($pd->min_order_qty, 2),
 				'Qty' => $qty,
 				'UomCode' => $pd->uom_code,
 				'UomName' => $pd->uom,
 				'StdPrice' => $price,
 				'Price' => $price,
-				'SellPrice' => $price, //$disc->sellPrice,
-				'sysSellPrice' => $price, //$disc->sellPrice,
-				'sysDiscLabel' => 0, //discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
-				'discLabel' => 0, //discountLabel($disc->disc1, $disc->disc2, $disc->disc3, $disc->disc4, $disc->disc5),
-				'DiscPrcnt' => 0, //$disc->totalDiscPrecent,
-				'discAmount' => 0,//$disc->discAmount,
-				'totalDiscAmount' => 0, //$disc->totalDiscAmount,
+				'SellPrice' => $price, 
+				'sysSellPrice' => $price,
+				'sysDiscLabel' => 0,
+				'discLabel' => 0,
+				'DiscPrcnt' => 0,
+				'discAmount' => 0,
+				'totalDiscAmount' => 0,
 				'VatGroup' => $pd->vat_group,
 				'VatRate' => $pd->vat_rate,
-				'VatAmount' => get_vat_amount($price, $pd->vat_rate), //get_vat_amount($disc->sellPrice, $pd->vat_rate),
-				'TotalVatAmount' => (get_vat_amount($price, $pd->vat_rate) * $qty), //(get_vat_amount($disc->sellPrice, $pd->vat_rate) * $qty),
+				'VatAmount' => get_vat_amount($price, $pd->vat_rate),
+				'TotalVatAmount' => (get_vat_amount($price, $pd->vat_rate) * $qty), 
 				'LineTotal' => ($price * $qty),
 				'image' => get_image_path($pd->id, 'mini'),
 				'rule_id' => NULL,
@@ -1654,8 +1211,7 @@ class Quotation extends PS_Controller
 
 		echo $sc === TRUE ? json_encode($ds) : $this->error;
 	}
-
-
+	
 	public function get_discount_data()
 	{
 		$sc = TRUE;
@@ -2000,6 +1556,182 @@ class Quotation extends PS_Controller
 		{
 			echo "No data";
 		}
+	}
+
+	public function get_template_file()
+	{
+		$this->load->helper('download');
+		$file = 'templates/import-sq-template.xlsx';
+
+		if (file_exists($file))
+		{
+			force_download($file, NULL);
+		}
+		else
+		{
+			$this->page_error();
+		}
+	}
+
+	private function getItemData($pd, $qty, $price, $discLabel, $whsCode, $quotaNo)
+	{
+		$sc = TRUE;		
+		$ds = [];
+
+		if (! empty($pd))
+		{
+			$stdPrice = $pd->price;
+			$stock = $this->getStock($pd->code, $whsCode, $quotaNo);
+			$disc = !empty($discLabel) && $price > 0 ? parse_discount_text($discLabel, $price) : 0;
+			$discAmount = empty($disc) ? 0 : $disc['discount_amount'];
+			$discPercent = empty($disc) ? 0 : discountAmountToPercent($discAmount, 1, $price);
+			$sellPrice = round($price - $discAmount, 2);
+
+			$ds = array(
+				'ItemCode' => $pd->code,
+				'ItemName' => $pd->name,
+				'whsCode' => $whsCode,
+				'instock' => $stock['OnHand'],
+				'team' => $stock['QuotaQty'],
+				'commit' => $stock['Committed'],
+				'available' => $stock['Available'],
+				'master_pack' => ac_format($pd->min_order_qty, 2),
+				'Qty' => $qty,
+				'UomCode' => $pd->uom_code,
+				'UomName' => $pd->uom,
+				'StdPrice' => $stdPrice,
+				'Price' => $price,
+				'SellPrice' => $sellPrice,
+				'sysSellPrice' => $sellPrice,
+				'sysDiscLabel' => $discLabel,
+				'discLabel' => $discLabel,
+				'DiscPrcnt' => $discPercent,
+				'discAmount' => $discAmount,
+				'totalDiscAmount' => $discAmount * $qty,
+				'VatGroup' => $pd->vat_group,
+				'VatRate' => $pd->vat_rate,
+				'VatAmount' => get_vat_amount($sellPrice, $pd->vat_rate),
+				'TotalVatAmount' => (get_vat_amount($sellPrice, $pd->vat_rate) * $qty),
+				'LineTotal' => ($sellPrice * $qty),
+				'image' => get_image_path($pd->id, 'mini'),
+				'rule_id' => NULL,
+				'policy_id' => NULL,
+				'freeQty' => 0,
+				'discType' => 'P'
+			);
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "Item Not found";
+		}
+
+		return $sc === TRUE ? (object) $ds : FALSE;
+	}
+
+	public function import_items()
+	{
+		$sc = TRUE;		
+		$whsCode = getConfig('DEFAULT_WAREHOUSE');
+		$quotaNo = $this->_user->quota_no;
+
+		$this->load->library('excel');
+		$file = isset($_FILES['uploadFile']) ? $_FILES['uploadFile'] : FALSE;
+		$ds = array(); //---- ไว้เก็บรายการสินค้า
+
+		if ($file !== FALSE)
+		{
+			$path = $this->config->item('upload_path') . 'quotation/';
+			$file	= 'uploadFile';
+
+			$config = array(   // initial config for upload class
+				"allowed_types" => "xlsx",
+				"upload_path" => $path,
+				"file_name"	=> 'Import-quotation',
+				"max_size" => 5120,
+				"overwrite" => TRUE
+			);
+
+			$this->load->library("upload", $config);
+
+			if (! $this->upload->do_upload($file))
+			{
+				$sc = FALSE;
+				$this->error = $this->upload->display_errors();
+			}
+
+			if ($sc === TRUE)
+			{
+				$info = $this->upload->data();
+				$excel = PHPExcel_IOFactory::load($info['full_path']);
+				$excel->setActiveSheetIndex(0);
+
+				$sheet	= $excel->getSheet(0);
+
+				if (empty($sheet))
+				{
+					$sc = FALSE;
+					$this->error = "Cannot read file or file not contain any data";
+				}
+
+				if ($sc === TRUE)
+				{
+					$rows = $sheet->getHighestRow();
+					$i = 1;
+					
+					while ($i <= $rows)
+					{
+						if ($i > 1)
+						{
+							$code = $sheet->getCell("A{$i}")->getValue();
+							$qty = floatval(str_replace(',', '', $sheet->getCell("B{$i}")->getValue()));
+							$price = floatval(str_replace(',', '', $sheet->getCell("C{$i}")->getValue()));
+							$discLabel = $sheet->getCell("D{$i}")->getValue();
+
+							if (! empty($code))
+							{
+								$pd = $this->products_model->get($code);
+
+								if (!empty($pd))
+								{
+									$res = $this->getItemData($pd, $qty, $price, $discLabel, $whsCode, $quotaNo);
+
+									if ($res !== FALSE)
+									{
+										$ds[] = $res;
+									}
+									else
+									{
+										$sc = FALSE;
+										$this->error = "Item {$code} : {$this->error}";
+										break;
+									}
+								}
+							}
+
+							$i++;
+						}
+						else
+						{
+							$i++;
+						}
+					}
+				} //--- $sc
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "Upload file not found";
+		}
+
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'failed',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'data' => $ds
+		);
+
+		echo json_encode($arr);
 	}
 
 

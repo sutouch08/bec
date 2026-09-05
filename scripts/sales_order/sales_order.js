@@ -17,6 +17,14 @@ const viewDetail = (code, pageNo = 0) => {
 	window.location.href = `${HOME}view_detail/${code}/${pageNo}`;
 }
 
+function viewSQ(sqNo) {
+	const url = `${BASE_URL}orders/quotation/view_detail/${sqNo}`;	
+	const width = 1500;
+	const height = 800;
+	const left = (screen.width - width) / 2;
+	window.open(url, '_blank', `width=${width},height=${height},left=${left},top=100`);
+}
+
 function cancleOrder(code){
 	swal({
 		title: "คุณแน่ใจ ?",
@@ -81,7 +89,6 @@ function toggleOnlyMe() {
 }
 
 function doApprove(code) {
-
   $.ajax({
     url:`${HOME}approve`,
     type:'POST',
@@ -89,9 +96,8 @@ function doApprove(code) {
     data:{
       'code' : code
     },
-    success:function(rs) {
-      var rs = $.trim(rs);
-      if(rs === 'success') {
+    success:function(rs) {      
+      if(rs.trim() === 'success') {
         swal({
           title:'Success',
           type:'success',
@@ -103,18 +109,16 @@ function doApprove(code) {
         }, 1200);
       }
       else {
-        swal({
-          title:'Error',
-          text:rs,
-          type:'error'
-        })
+        showError(rs);
       }
-    }
-  })
+    },
+		error:function(rs) {
+			showError(rs);
+		}
+  });
 }
 
 function doReject(code) {
-
   $.ajax({
     url:`${HOME}reject`,
     type:'POST',
@@ -122,9 +126,8 @@ function doReject(code) {
     data:{
       'code' : code
     },
-    success:function(rs) {
-      var rs = $.trim(rs);
-      if(rs === 'success') {
+    success:function(rs) {     
+      if(rs.trim() === 'success') {
         swal({
           title:'Success',
           type:'success',
@@ -136,14 +139,13 @@ function doReject(code) {
         }, 1200);
       }
       else {
-        swal({
-          title:'Error',
-          text:rs,
-          type:'error'
-        })
+        showError(rs);
       }
-    }
-  })
+    },
+		error:function(rs) {
+			showError(rs);
+		}
+  });
 }
 
 function cancleSap(code) {

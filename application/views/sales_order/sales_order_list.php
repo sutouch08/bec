@@ -156,11 +156,10 @@
 					<th class="fix-width-100 middle"></th>
 				</tr>
 			</thead>
-			<tbody style="font-size:12px;">
-				<?php if (! empty($data)) : ?>
-					<?php $segment = $this->uri->segment($this->segment); ?>
-					<?php $no = ($segment == "" OR $segment == 'undefined') ? 1 : $segment + 1; ?>
-					<?php $pageNo = $segment; ?>
+			<tbody>
+				<?php if (! empty($data)) : ?>					
+					<?php $pageNo = get_zero($this->uri->segment($this->segment)); ?>
+					<?php $no = $pageNo + 1; ?>
 					<?php foreach ($data as $rs) : ?>
 						<tr>
 							<td class="middle text-center no"><?php echo $no; ?></td>
@@ -225,7 +224,7 @@
 		<div class="modal-content">
 			<div class="modal-header" style="padding-bottom:0px;">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h4 class="modal-title" style="font-size: 24px; font-weight: bold; padding-bottom: 10px; color:#428bca; border-bottom:solid 2px #428bca">Interface Status</h4>
+				<h4 class="modal-title" style="font-size: 24px; font-weight: bold; padding-bottom: 10px; color:#428bca;">Interface Status</h4>
 			</div>
 			<div class="modal-body" style="padding-top:5px;">
 				<div class="row">
