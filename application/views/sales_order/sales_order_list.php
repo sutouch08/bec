@@ -1,19 +1,15 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
-		<h3 class="title">
-			<?php echo $this->title; ?>
-		</h3>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
+		<h3 class="title"><?php echo $this->title; ?></h3>
 	</div>
-	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
-		<p class="pull-right top-p">
-			<?php if ($this->pm->can_add) : ?>
-				<button type="button" class="btn btn-white btn-success" onclick="addNew()"><i class="fa fa-plus"></i> Add New</button>
-			<?php endif; ?>
-		</p>
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
+		<?php if ($this->pm->can_add) : ?>
+			<button type="button" class="btn btn-white btn-success" onclick="addNew()"><i class="fa fa-plus"></i> Add New</button>
+		<?php endif; ?>
 	</div>
 </div><!-- End Row -->
-<hr class="padding-5" />
+<hr />
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 	<div class="row">
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
@@ -157,7 +153,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php if (! empty($data)) : ?>					
+				<?php if (! empty($data)) : ?>
 					<?php $pageNo = get_zero($this->uri->segment($this->segment)); ?>
 					<?php $no = $pageNo + 1; ?>
 					<?php foreach ($data as $rs) : ?>
@@ -173,7 +169,7 @@
 							<td class="middle text-center">
 								<?php if ($rs->Status == -1) : ?>
 									<span class="purple">Draft</span>
-									<?php elseif ($rs->Status == 4) : ?>
+								<?php elseif ($rs->Status == 4) : ?>
 									<span class="purple">Reserved</span>
 								<?php elseif ($rs->Status == 1) : ?>
 									<span class="green">Success</span>
@@ -257,7 +253,7 @@
 	$('#user_id').select2();
 	$('#channels').select2();
 	$('#project').select2();
-	$('#payment').select2();	
+	$('#payment').select2();
 </script>
 
 <?php $this->load->view('include/footer'); ?>

@@ -27,3 +27,22 @@ function project_name($code)
 
   return $ci->project_model->get_name($code);
 }
+
+function project_array()
+{
+  $ci =& get_instance();
+  $ci->load->model('masters/project_model');
+
+  $list = $ci->project_model->get_all();
+  $array = [];
+
+  if(!empty($list))
+  {
+    foreach($list as $rs)
+    {
+      $array[$rs->code] = $rs->name;
+    }
+  }
+
+  return $array;
+}
