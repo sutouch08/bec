@@ -20,11 +20,22 @@
 				<option value="test" <?php echo is_selected('test', $status); ?>>TEST</option>
 			</select>
 		</div>
-		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>Type</label>
 			<select class="width-100 filter" name="type">
 				<option value="all">All</option>
+				<option value="SQ" <?php echo is_selected('SQ', $type); ?>>Sales Quotation</option>
 				<option value="SO" <?php echo is_selected('SO', $type); ?>>Sales Order</option>
+				<option value="pd-item" <?php echo is_selected('pd-item', $type); ?>>Product Item</option>
+				<option value="pd-model" <?php echo is_selected('pd-model', $type); ?>>Product Model</option>
+				<option value="pd-category" <?php echo is_selected('pd-category', $type); ?>>Product Category</option>
+				<option value="pd-type" <?php echo is_selected('pd-type', $type); ?>>Product Type</option>
+				<option value="pd-brand" <?php echo is_selected('pd-brand', $type); ?>>Product Brand</option>
+				<option value="customer" <?php echo is_selected('customer', $type); ?>>Customer</option>
+				<option value="customer-area" <?php echo is_selected('customer-area', $type); ?>>Customer Area</option>
+				<option value="customer-grade" <?php echo is_selected('customer-grade', $type); ?>>Customer Grade</option>
+				<option value="customer-type" <?php echo is_selected('customer-type', $type); ?>>Customer Type</option>
+				<option value="customer-region" <?php echo is_selected('customer-region', $type); ?>>Customer Region</option>
 			</select>
 		</div>
 
