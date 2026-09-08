@@ -356,13 +356,17 @@ class Customers_model extends CI_Model
 
 	public function get_credit_details($CardCode)
 	{
-		$qr = "SELECT [CardCode], [CreditLine], [Balance], [DNotesBal], [OrdersBal] FROM BEC2.OCRD WHERE [CardCode] = '{$CardCode}'";
-		$rs = $this->conn->query($this->hana->SQLtoHANA($qr));		
-		$res = $rs->fetchAll();
+		$db = $this->config->item('hana_database'); 
+		$qr = "SELECT [CardCode], [CreditLine], [Balance], [DNotesBal], [OrdersBal] FROM {$db}.OCRD WHERE [CardCode] = '{$CardCode}'";
+		$rs = odbc_exec($this->conn, $this->hana->SQLtoHANA($qr));
+		$res = [];
+		while($row = odbc_fetch_object($rs)) {
+			$res[] = $row;
+		}
 
 		if(!empty($res) && count($res) === 1)
 		{
-			return (object) $res[0];
+			return $res[0];
 		}
 		
 		return NULL;

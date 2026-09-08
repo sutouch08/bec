@@ -22,7 +22,8 @@ class Check_transection_document extends PS_Controller
   }
 
   public function getReport()
-  {    
+  {
+    $sc = TRUE;
     $ds = array();
     $from_date = $this->input->post('from_date');
     $to_date = $this->input->post('to_date');
@@ -30,9 +31,8 @@ class Check_transection_document extends PS_Controller
     $soCode = $this->input->post('soCode');
     $saleId = $this->input->post('saleId');
     $customerCode = $this->input->post('customerCode');
-    $db = $this->config->item('hana_database');
 
-    $qr = $this->select_query($db);
+    $qr = $this->select_query();
 
     if( ! empty($from_date) && ! empty($to_date))
     {
@@ -67,33 +67,37 @@ class Check_transection_document extends PS_Controller
 
     $qr .= $this->group_by_query();
 
-    $this->load->library('hana');
-    $conn = $this->hana->connect();
-    $result = odbc_exec($conn, $this->hana->SQLtoHANA($qr));
-    
-    if($result)
+    $conn = $this->dbConnect();
+    $result = $conn->query($this->SQLtoHANA($qr));
+
+    $rows = $result->fetchAll();
+    $count = count($rows);
+
+    if($count > 0)
     {
       $no = 1;
-      while($row = odbc_fetch_object($result))
+      foreach($rows as $rs)
       {
-        $ds[] = array(
+        $row = array(
           'no' => $no,
-          'U_WEBORDER' => $row->U_WEBORDER,
-          'soPrefix' => $row->SOPREFIX,
-          'soCode' => $row->SOCODE,
-          'doPrefix' => $row->PKPREFIX,
-          'doCode' => $row->PKCODE,
-          'ivDate' => thai_date($row->IVDATE),
-          'ivPrefix' => $row->IVPREFIX,
-          'ivCode' => $row->IVCODE,
-          'customerCode' => $row->CODE,
-          'customerName' => $row->CUSTOMER,
-          'subTotal' => number($row->SUBTOTAL, 2),
-          'vatTotal' => number($row->VATTOTAL, 2),
-          'grandTotal' => number($row->GRANDTOTAL, 2),
-          'slpCode' => $row->SlpCode,
-          'saleEmployee' => $row->SLPNAME
-        );        
+          'U_WEBORDER' => $rs['U_WEBORDER'],
+          'soPrefix' => $rs['SOPREFIX'],
+          'soCode' => $rs['SOCODE'],
+          'doPrefix' => $rs['PKPREFIX'],
+          'doCode' => $rs['PKCODE'],
+          'ivDate' => thai_date($rs['IVDATE']),
+          'ivPrefix' => $rs['IVPREFIX'],
+          'ivCode' => $rs['IVCODE'],
+          'customerCode' => $rs['CODE'],
+          'customerName' => $rs['CUSTOMER'],
+          'subTotal' => number($rs['SUBTOTAL'], 2),
+          'vatTotal' => number($rs['VATTOTAL'], 2),
+          'grandTotal' => number($rs['GRANDTOTAL'], 2),
+          'slpCode' => $rs['SlpCode'],
+          'saleEmployee' => $rs['SLPNAME']
+        );
+
+        array_push($ds, $row);
 
         $no++;
       }
@@ -102,7 +106,7 @@ class Check_transection_document extends PS_Controller
 
     $arr = array(
       'status' => 'success',
-      'data' => ! empty($ds) ? $ds : array(['nodata' => 'nodata'])
+      'data' => $count > 0 ? $ds : array(['nodata' => 'nodata'])
     );
 
     echo json_encode($arr);
@@ -119,7 +123,7 @@ class Check_transection_document extends PS_Controller
     $customerCode = $this->input->post('customerCode');
     $token = $this->input->post('token');
 
-    $qr = $this->select_query($this->config->item('hana_database'));
+    $qr = $this->select_query();
 
     if( ! empty($from_date) && ! empty($to_date))
     {
@@ -154,10 +158,12 @@ class Check_transection_document extends PS_Controller
 
     $qr .= $this->group_by_query();
 
-    $this->load->library('hana');
-    $conn = $this->hana->connect();
-    $result = odbc_exec($conn, $this->hana->SQLtoHANA($qr));
-            
+    $conn = $this->dbConnect();
+    $result = $conn->query($this->SQLtoHANA($qr));
+
+    $rows = $result->fetchAll();
+    $count = count($rows);
+
 		//---  Report title
     $report_title = "Report Check Transection Document : ".date('d/m/Y H:i').")";
     //--- load excel library
@@ -202,38 +208,37 @@ class Check_transection_document extends PS_Controller
 
 		$row++;
 
-    if ($result)
-    {
-      $no = 0;
 
-      while ($rs = odbc_fetch_object($result))
-      {        
+    if($count > 0)
+    {
+      $no = 1;
+
+      foreach($rows as $rs)
+      {
+        $this->excel->getActiveSheet()->setCellValue('A'.$row, $no);
+        $this->excel->getActiveSheet()->setCellValue('B'.$row, $rs['U_WEBORDER']);
+        $this->excel->getActiveSheet()->setCellValue('C'.$row, $rs['SOPREFIX'].' '.$rs['SOCODE']);
+        $this->excel->getActiveSheet()->setCellValue('D'.$row, $rs['PKPREFIX'].' '.$rs['PKCODE']);
+        $this->excel->getActiveSheet()->setCellValue('E'.$row, thai_date($rs['IVDATE'], FALSE, '.'));
+        $this->excel->getActiveSheet()->setCellValue('F'.$row, $rs['IVPREFIX']);
+        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs['IVCODE']);
+        $this->excel->getActiveSheet()->setCellValue('H'.$row, $rs['CODE']);
+        $this->excel->getActiveSheet()->setCellValue('I'.$row, $rs['CUSTOMER']);
+        $this->excel->getActiveSheet()->setCellValue('J'.$row, $rs['SUBTOTAL']);
+        $this->excel->getActiveSheet()->setCellValue('K'.$row, $rs['VATTOTAL']);
+        $this->excel->getActiveSheet()->setCellValue('L'.$row, $rs['GRANDTOTAL']);
+        $this->excel->getActiveSheet()->setCellValue('M'.$row, $rs['SlpName']);
+
         $no++;
-        $this->excel->getActiveSheet()->setCellValue('A' . $row, $no);
-        $this->excel->getActiveSheet()->setCellValue('B' . $row, $rs->U_WEBORDER);
-        $this->excel->getActiveSheet()->setCellValue('C' . $row, $rs->SOPREFIX . ' ' . $rs->SOCODE);
-        $this->excel->getActiveSheet()->setCellValue('D' . $row, $rs->PKPREFIX . ' ' . $rs->PKCODE);
-        $this->excel->getActiveSheet()->setCellValue('E' . $row, thai_date($rs->IVDATE, FALSE, '.'));
-        $this->excel->getActiveSheet()->setCellValue('F' . $row, $rs->IVPREFIX);
-        $this->excel->getActiveSheet()->setCellValue('G' . $row, $rs->IVCODE);
-        $this->excel->getActiveSheet()->setCellValue('H' . $row, $rs->CODE);
-        $this->excel->getActiveSheet()->setCellValue('I' . $row, $rs->CUSTOMER);
-        $this->excel->getActiveSheet()->setCellValue('J' . $row, $rs->SUBTOTAL);
-        $this->excel->getActiveSheet()->setCellValue('K' . $row, $rs->VATTOTAL);
-        $this->excel->getActiveSheet()->setCellValue('L' . $row, $rs->GRANDTOTAL);
-        $this->excel->getActiveSheet()->setCellValue('M' . $row, $rs->SLPNAME);
         $row++;
       }
 
-      if($no > 0)
-      {
-        $this->excel->getActiveSheet()->getStyle("J3:L{$row}")->getNumberFormat()->setFormatCode('#,##0.00');
-      }
-      else 
-      {
-        $this->excel->getActiveSheet()->setCellValue('A'.$row, "ไม่พบข้อมูลตามเงื่อนไขที่ระบุ");
-      }
-    }    
+      $this->excel->getActiveSheet()->getStyle("J3:L{$row}")->getNumberFormat()->setFormatCode('#,##0.00');
+    }
+		else
+		{
+			$this->excel->getActiveSheet()->setCellValue('A'.$row, "ไม่พบข้อมูลตามเงื่อนไขที่ระบุ");
+		}
 
     setToken($token);
     $file_name = "ReportCheckTransectionDocument-".date('dmY').".xlsx";
@@ -244,7 +249,8 @@ class Check_transection_document extends PS_Controller
 
   }
 
-  private function select_query($db = 'BEC2')
+
+  private function select_query()
   {
     $sql = "SELECT
     T5.[U_WEBORDER],
@@ -255,18 +261,18 @@ class Check_transection_document extends PS_Controller
     CAST(T5.[CardName] AS NVARCHAR(255)) AS customer,
     (T5.[DocTotal] - T5.[VatSum]) AS subTotal, T5.[VatSum] AS vatTotal, T5.[DocTotal] AS grandTotal,
     T1.[SlpCode], CAST(T6.[SlpName] AS NVARCHAR(100)) AS SlpName
-    FROM {$db}.RDR1 T0
-    INNER JOIN {$db}.ORDR T1 ON T0.[DocEntry] = T1.[DocEntry]
-    LEFT OUTER JOIN {$db}.DLN1 T2 ON T2.[BaseEntry] = T0.[DocEntry] AND T2.[BaseLine] = T0.[LineNum]
-    LEFT OUTER JOIN {$db}.ODLN T3 ON T2.[DocEntry] = T3.[DocEntry]
-    LEFT OUTER JOIN {$db}.INV1 T4 ON T4.[BaseEntry] = T3.[DocEntry]
+    FROM BEC2.RDR1 T0
+    INNER JOIN BEC2.ORDR T1 ON T0.[DocEntry] = T1.[DocEntry]
+    LEFT OUTER JOIN BEC2.DLN1 T2 ON T2.[BaseEntry] = T0.[DocEntry] AND T2.[BaseLine] = T0.[LineNum]
+    LEFT OUTER JOIN BEC2.ODLN T3 ON T2.[DocEntry] = T3.[DocEntry]
+    LEFT OUTER JOIN BEC2.INV1 T4 ON T4.[BaseEntry] = T3.[DocEntry]
     AND T4.[BaseLine] = T2.[LineNum] AND T4.[BaseType] = 15
     OR (T4.[BaseType] = 17 AND T4.[BaseEntry] = 	T0.[DocEntry] AND T4.[BaseLine] = T0.[LineNum])
-    LEFT OUTER JOIN {$db}.OINV T5 ON T5.[DocEntry] = T4.[DocEntry]
-    LEFT OUTER JOIN {$db}.OSLP T6 ON T1.[SlpCode] = T6.[SlpCode]
-    LEFT OUTER JOIN {$db}.NNM1 T7 ON T1.[ObjType] = T7.[ObjectCode] AND T1.[Series] = T7.[Series]
-    LEFT OUTER JOIN {$db}.NNM1 T8 ON T3.[ObjType] = T8.[ObjectCode] AND T3.[Series] = T8.[Series]
-    LEFT OUTER JOIN {$db}.NNM1 T9 ON T5.[ObjType] = T9.[ObjectCode] AND T5.[Series] = T9.[Series]
+    LEFT OUTER JOIN BEC2.OINV T5 ON T5.[DocEntry] = T4.[DocEntry]
+    LEFT OUTER JOIN BEC2.OSLP T6 ON T1.[SlpCode] = T6.[SlpCode]
+    LEFT OUTER JOIN BEC2.NNM1 T7 ON T1.[ObjType] = T7.[ObjectCode] AND T1.[Series] = T7.[Series]
+    LEFT OUTER JOIN BEC2.NNM1 T8 ON T3.[ObjType] = T8.[ObjectCode] AND T3.[Series] = T8.[Series]
+    LEFT OUTER JOIN BEC2.NNM1 T9 ON T5.[ObjType] = T9.[ObjectCode] AND T5.[Series] = T9.[Series]
     WHERE T5.[CANCELED] = 'N' ";
 
     return $sql;
@@ -279,7 +285,24 @@ class Check_transection_document extends PS_Controller
     ORDER BY T5.[DocDate] ASC";
 
     return $sql;
-  }  
+  }
+
+  public function dbConnect()
+  {
+    $conn = new PDO ($this->host, $this->user, $this->pwd);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_CURSOR, PDO::CURSOR_SCROLL);
+
+    return $conn;
+  }
+
+  public function SQLtoHANA($SQL)
+  {
+    $query = str_replace(["[","]"], ["\"", "\""], $SQL);
+
+    return $query;
+  }
+
 }
 
  ?>

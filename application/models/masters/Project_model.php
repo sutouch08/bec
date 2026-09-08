@@ -197,30 +197,63 @@ class Project_model extends CI_Model
 	}
 
 
+	// public function countUpdateProject($last_sync)
+	// {
+	// 	$qr = "SELECT COUNT(*) AS num_rows FROM BEC2.OPRJ WHERE [UpdateDate] >= '{$last_sync}'";
+	// 	$result = $this->conn->query($this->hana->SQLtoHANA($qr));
+	// 	$rows = $result->fetchAll();
+
+	// 	if (count($rows) === 1)
+	// 	{
+	// 		return $rows[0][0];
+	// 	}
+
+	// 	return 0;
+	// }
+
+
+	// public function getUpdateProject($last_sync, $limit = 100, $offset = 0)
+	// {
+	// 	$qr = "SELECT [PrjCode], [PrjName], [Active] 
+	//         FROM BEC2.OPRJ 
+	//         WHERE [UpdateDate] >= '{$last_sync}' 
+	//         ORDER BY [PrjCode] ASC 
+	//         LIMIT {$limit} OFFSET {$offset}";
+	// 	$result = $this->conn->query($this->hana->SQLtoHANA($qr));
+	// 	return $result->fetchAll(PDO::FETCH_ASSOC);
+	// }
+
 	public function countUpdateProject($last_sync)
 	{
-		$qr = "SELECT COUNT(*) AS num_rows FROM BEC2.OPRJ WHERE [UpdateDate] >= '{$last_sync}'";
-		$result = $this->conn->query($this->hana->SQLtoHANA($qr));
-		$rows = $result->fetchAll();
-
-		if (count($rows) === 1)
-		{
-			return $rows[0][0];
-		}
-
-		return 0;
+		$db = $this->config->item('hana_database');
+		$qr = "SELECT COUNT(*) AS num_rows FROM {$db}.OPRJ WHERE [UpdateDate] >= '{$last_sync}'";
+		$result = odbc_exec($this->conn, $this->hana->SQLtoHANA($qr));
+		return odbc_fetch_array($result)['NUM_ROWS'];		
 	}
 
-
 	public function getUpdateProject($last_sync, $limit = 100, $offset = 0)
-	{
+	{		
+		$db = $this->config->item('hana_database');
+
 		$qr = "SELECT [PrjCode], [PrjName], [Active] 
-          FROM BEC2.OPRJ 
-          WHERE [UpdateDate] >= '{$last_sync}' 
-          ORDER BY [PrjCode] ASC 
-          LIMIT {$limit} OFFSET {$offset}";
-		$result = $this->conn->query($this->hana->SQLtoHANA($qr));
-		return $result->fetchAll(PDO::FETCH_ASSOC);
+		      FROM {$db}.OPRJ 
+		      WHERE [UpdateDate] >= '{$last_sync}' 
+		      ORDER BY [PrjCode] ASC 
+		      LIMIT {$limit} OFFSET {$offset}";
+		$result = odbc_exec($this->conn, $this->hana->SQLtoHANA($qr));
+
+		if($result)
+		{
+			$rows = [];
+			while ($row = odbc_fetch_object($result))
+			{
+				$rows[] = $row;
+			}
+
+			return $rows;
+		}
+		
+		return NULL;
 	}
 }
 ?>

@@ -497,12 +497,16 @@ class Products_model extends CI_Model
 	public function get_sap_item_avg_cost($code)
 	{
 		$this->load->library('hana');
-		$qr = "SELECT [AvgPrice] AS [cost] FROM BEC2.OITM WHERE [ItemCode] = '{$code}'";
-		$qs = $this->hana->connect()->query($this->hana->SQLtoHANA($qr));
+		$conn = $this->hana->connect();
+		$db = $this->config->item('hana_database'); 
+		$qr = "SELECT [AvgPrice] AS [cost] FROM {$db}.OITM WHERE [ItemCode] = '{$code}'";
+		$qs = odbc_exec($conn, $this->hana->SQLtoHANA($qr));
 
-		if ($qs->rowCount() === 1)
+		$row = odbc_fetch_object($qs);
+
+		if($row)
 		{
-			return $qs->fetch(PDO::FETCH_OBJ)->cost;
+			return $row->cost;
 		}
 
 		return 0;
@@ -511,19 +515,22 @@ class Products_model extends CI_Model
 	public function get_sync_item($code)
 	{
 		$this->load->library('hana');
+		$conn = $this->hana->connect();
+		$db = $this->config->item('hana_database'); 
 		$qr = "SELECT T0.[ItemCode], T0.[ItemName], T0.[CodeBars], T0.[VatGourpSa], T0.[validFor], 
 						T0.[U_Product_Model], T0.[U_Product_Category], T0.[U_Product_Brand], T0.[U_Product_Type], 						
 						T0.[MinOrdrQty], T0.[SUoMEntry], T1.[Price], T2.[Price] AS [Cost]
-					FROM BEC2.OITM T0 
-					LEFT JOIN BEC2.ITM1 T1 ON T0.[ItemCode] = T1.[ItemCode] AND T1.[PriceList] = 1 
-					LEFT JOIN BEC2.ITM1 T2 ON T0.[ItemCode] = T2.[ItemCode] AND T2.[PriceList] = 15
+					FROM {$db}.OITM T0 
+					LEFT JOIN {$db}.ITM1 T1 ON T0.[ItemCode] = T1.[ItemCode] AND T1.[PriceList] = 1 
+					LEFT JOIN {$db}.ITM1 T2 ON T0.[ItemCode] = T2.[ItemCode] AND T2.[PriceList] = 15
 					WHERE T0.[ItemCode] = '{$code}'";					
 
-		$qs = $this->hana->connect()->query($this->hana->SQLtoHANA($qr));
+		$qs = odbc_exec($conn, $this->hana->SQLtoHANA($qr));
+		$rs = odbc_fetch_object($qs);
 
-		if ($qs->rowCount() === 1)
+		if ($rs)
 		{
-			return $qs->fetch(PDO::FETCH_OBJ);
+			return $rs;
 		}
 
 		return NULL;
@@ -532,30 +539,41 @@ class Products_model extends CI_Model
 	public function get_sync_items($last_sync, $limit=1000, $offset=0)
 	{
 		$this->load->library('hana');
+		$conn = $this->hana->connect();
+		$db = $this->config->item('hana_database'); 
 		$qr = "SELECT T0.[ItemCode], T0.[ItemName], T0.[CodeBars], T0.[VatGourpSa], T0.[validFor], 
 						T0.[U_Product_Model], T0.[U_Product_Category], T0.[U_Product_Brand], T0.[U_Product_Type], 						
 						T0.[MinOrdrQty], T0.[SUoMEntry], T1.[Price], T2.[Price] AS [Cost]
-					FROM BEC2.OITM T0 
-					LEFT JOIN BEC2.ITM1 T1 ON T0.[ItemCode] = T1.[ItemCode] AND T1.[PriceList] = 1 
-					LEFT JOIN BEC2.ITM1 T2 ON T0.[ItemCode] = T2.[ItemCode] AND T2.[PriceList] = 15
+					FROM {$db}.OITM T0 
+					LEFT JOIN {$db}.ITM1 T1 ON T0.[ItemCode] = T1.[ItemCode] AND T1.[PriceList] = 1 
+					LEFT JOIN {$db}.ITM1 T2 ON T0.[ItemCode] = T2.[ItemCode] AND T2.[PriceList] = 15
 					WHERE T0.[CreateDate] >= '{$last_sync}' OR T0.[UpdateDate] >= '{$last_sync}'
 					ORDER BY T0.[ItemCode] ASC
 					LIMIT {$limit} OFFSET {$offset}";					
 
-		$qs = $this->hana->connect()->query($this->hana->SQLtoHANA($qr));
+		$qs = odbc_exec($conn, $this->hana->SQLtoHANA($qr));
 
-		return $qs->fetchAll(PDO::FETCH_OBJ);		
+		$res = [];
+		while($row = odbc_fetch_object($qs)) {
+			$res[] = $row;
+		}
+
+		return $res;
 	}
 
 	public function count_update_rows($last_sync)
 	{
 		$this->load->library('hana');
-		$qr = "SELECT COUNT(*) AS [count] FROM BEC2.OITM WHERE [CreateDate] >= '{$last_sync}' OR [UpdateDate] >= '{$last_sync}'";
-		$qs = $this->hana->connect()->query($this->hana->SQLtoHANA($qr));
+		$conn = $this->hana->connect();
+		$db = $this->config->item('hana_database'); 
+		$qr = "SELECT COUNT(*) AS [count] FROM {$db}.OITM WHERE [CreateDate] >= '{$last_sync}' OR [UpdateDate] >= '{$last_sync}'";
+		$qs = odbc_exec($conn, $this->hana->SQLtoHANA($qr));
 
-		if ($qs->rowCount() === 1)
+		$row = odbc_fetch_object($qs);
+
+		if($row)
 		{
-			return $qs->fetch(PDO::FETCH_OBJ)->count;
+			return $row->count;
 		}
 
 		return 0;

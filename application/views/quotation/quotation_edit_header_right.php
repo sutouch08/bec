@@ -43,14 +43,7 @@
 				</span>
 			</div>
 		</div>
-
-		<div class="form-group">
-			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 sap-label">Available Credit</label>
-			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
-				<input type="text" id="available-credit" class="form-control input-sm" value="" disabled />
-			</div>
-		</div>
-
+		
 		<div class="form-group">
 			<label class="col-lg-5 col-md-4 col-sm-4 col-xs-12 sap-label">Projects</label>
 			<div class="col-lg-7 col-md-8 col-sm-8 col-xs-12">

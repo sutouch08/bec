@@ -37,7 +37,7 @@ class Projects extends PS_Controller
   }
   
   public function sync_data()
-  {
+  {   
     $sc = TRUE;
     $message = NULL;
     $update = 0;
@@ -49,27 +49,27 @@ class Projects extends PS_Controller
     $this->conn = $this->hana->connect();
     $last_sync = from_date($this->project_model->get_last_sync_date());
     $count = $this->project_model->countUpdateProject($last_sync);
-
+    
     if ($count > 0)
     {
       $total = $count;      
-
+       
       while ($total > $update)
       {
-        $ds = $this->project_model->getUpdateProject($last_sync, $limit, $offset);       
+        $ds = $this->project_model->getUpdateProject($last_sync, $limit, $offset);            
 
         if (! empty($ds))
         {
           foreach ($ds as $rs)
           {
-            $id = $this->project_model->get_id($rs['PrjCode']);
+            $id = $this->project_model->get_id($rs->PrjCode);
 
             if ($id)
             {
               $arr = array(
-                'code' => $rs['PrjCode'],
-                'name' => $rs['PrjName'],
-                'active' => $rs['Active'] == 'Y' ? 1 : 0,
+                'code' => $rs->PrjCode,
+                'name' => $rs->PrjName,
+                'active' => $rs->Active == 'Y' ? 1 : 0,
                 'last_sync' => now()
               );
 
@@ -78,9 +78,9 @@ class Projects extends PS_Controller
             else
             {
               $arr = array(
-                'code' => $rs['PrjCode'],
-                'name' => $rs['PrjName'],
-                'active' => $rs['Active'] == 'Y' ? 1 : 0,
+                'code' => $rs->PrjCode,
+                'name' => $rs->PrjName,
+                'active' => $rs->Active == 'Y' ? 1 : 0,
                 'last_sync' => now()
               );
 
