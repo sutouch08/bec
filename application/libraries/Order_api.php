@@ -167,6 +167,7 @@ class Order_api
 				"TaxDate" => $order->TextDate,
 				"PayToCode" => $order->PayToCode,
 				"ShipToCode" => $order->ShipToCode,
+				"ProjectCode" => $order->projectCode,
 				"Address" => NULL,//$order->Address,
 				"Address2" => NULL, //$order->Address2,
 				"DiscPrcnt" => round($order->DiscPrcnt, 2),
