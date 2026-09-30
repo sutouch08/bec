@@ -10,6 +10,16 @@ class Orders_model extends CI_Model
     parent::__construct();
   }
 
+	public function is_exists_doc_num($doc_num, $code = NULL)
+	{		
+		if( ! empty($code))
+		{
+			$this->db->where('code !=', $code);
+		}
+
+		return empty($doc_num) ? FALSE : $this->db->where('DocNum', $doc_num)->count_all_results($this->tb) > 0;
+	}
+
 	public function add(array $ds = array())
 	{
 		if( ! empty($ds))
@@ -19,7 +29,6 @@ class Orders_model extends CI_Model
 
 		return FALSE;
 	}
-
 
 	public function add_detail(array $ds = array())
 	{
@@ -36,7 +45,6 @@ class Orders_model extends CI_Model
 		return FALSE;
 	}
 
-
 	public function get($code)
 	{
 		$rs = $this->db->where('code', $code)->get($this->tb);
@@ -48,7 +56,6 @@ class Orders_model extends CI_Model
 
 		return NULL;
 	}
-
 
 	public function get_header($code)
 	{
@@ -70,7 +77,6 @@ class Orders_model extends CI_Model
 		return NULL;
 	}
 
-
 	public function get_detail($id)
 	{
 		$rs = $this->db
@@ -88,7 +94,6 @@ class Orders_model extends CI_Model
 		return NULL;
 	}
 
-
 	public function get_detail_by_item_line($code, $itemCode, $lineNum)
 	{
 		$rs = $this->db
@@ -104,7 +109,6 @@ class Orders_model extends CI_Model
 
 		return NULL;
 	}
-
 
 	public function get_details($code)
 	{
@@ -125,7 +129,6 @@ class Orders_model extends CI_Model
 
 		return NULL;
 	}
-
 
 	public function get_credit_used($CardCode, $orderCode = NULL)
 	{
@@ -170,7 +173,6 @@ class Orders_model extends CI_Model
 		return 0.00;
 	}
 
-
 	public function update($code, array $ds = array())
 	{
 		if(!empty($ds))
@@ -180,7 +182,6 @@ class Orders_model extends CI_Model
 
 		return FALSE;
 	}
-
 
 	public function cancle_order($code)
 	{
@@ -192,7 +193,6 @@ class Orders_model extends CI_Model
 		return $this->db->where('code', $code)->update($this->tb, $arr);
 	}
 
-
 	public function update_detail($id, array $ds = array())
 	{
 		if( ! empty($ds))
@@ -203,26 +203,20 @@ class Orders_model extends CI_Model
 		return FALSE;
 	}
 
-
-
 	public function cancle_details($code)
 	{
 		return $this->db->set('LineStatus', 'D')->where('order_code', $code)->update($this->td);
 	}
-
 
 	public function delete_detail($id)
 	{
 		return $this->db->where('id', $id)->delete($this->td);
 	}
 
-
 	public function drop_details($order_code)
 	{
 		return $this->db->where('order_code', $order_code)->delete($this->td);
 	}
-
-
 
 	public function update_doc_total($code)
 	{
@@ -249,7 +243,6 @@ class Orders_model extends CI_Model
 
 		return FALSE;
 	}
-
 
 	public function get_order_disc_percent($code)
 	{
@@ -281,7 +274,6 @@ class Orders_model extends CI_Model
 		return 0;
 	}
 
-
 	public function get_max_code($pre)
   {
     $rs = $this->db
@@ -297,7 +289,6 @@ class Orders_model extends CI_Model
 
 		return NULL;
   }
-
 
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
@@ -397,8 +388,6 @@ class Orders_model extends CI_Model
 		return NULL;
 	}
 
-
-
 	public function count_rows(array $ds = array())
 	{
 		if( isset($ds['code']) && $ds['code'] != '')
@@ -486,7 +475,6 @@ class Orders_model extends CI_Model
 		return $this->db->count_all_results($this->tb);
 	}
 
-
 	public function get_new_line($code)
 	{
 		$rs = $this->db->select_max('LineNum')->where('order_code', $code)->get($this->td);
@@ -498,7 +486,6 @@ class Orders_model extends CI_Model
 
 		return 0;
 	}
-
 
 	//---- use to find min qty and min amount for discount rule
 	public function get_sum_item($code, $product_id)
@@ -525,7 +512,6 @@ class Orders_model extends CI_Model
 		return $result;
 	}
 
-
 	public function add_logs(array $ds = array())
 	{
 		if(!empty($ds))
@@ -535,7 +521,6 @@ class Orders_model extends CI_Model
 
 		return FALSE;
 	}
-
 
 	public function get_logs($code)
 	{
@@ -549,19 +534,15 @@ class Orders_model extends CI_Model
 		return NULL;
 	}
 
-
-
 	public function complete_details($code)
 	{
 		return $this->db->set('is_complete', 1)->where('order_code', $code)->update($this->td);
 	}
 
-
 	public function un_complete_details($code)
 	{
 		return $this->db->set('is_complete', 0)->where('order_code', $code)->update($this->td);
 	}
-
 
 	//---- get order to sync status
 	public function get_sync_list($limit = 100)
@@ -584,13 +565,11 @@ class Orders_model extends CI_Model
 		return NULL;
 	}
 
-
 	public function update_all_line_status($code, $status)
 	{
 		//---- O = Open, C = Closed, D = Canceled
 		return $this->db->set('LineStatus', $status)->where('order_code', $code)->update($this->td);
 	}
-
 
 	///-----------------   BP order -------------------------///
 
@@ -614,7 +593,6 @@ class Orders_model extends CI_Model
 
 		return NULL;
 	}
-
 
 	public function get_last_sale_order($cardCode)
 	{

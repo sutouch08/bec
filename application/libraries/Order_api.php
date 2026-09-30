@@ -144,6 +144,7 @@ class Order_api
 	public function exportOrder($code)
 	{
 		$sc = TRUE;
+		$isExistsDocNum = FALSE;
 		$this->url = $this->url[-1] != '/' ? $this->url."/SalesOrder" : $this->url."SalesOrder";
     
 		$this->type = "SO";
@@ -251,6 +252,8 @@ class Order_api
 				{
 					if ($rs->status == 'success')
 					{
+						$isExistsDocNum = $this->ci->orders_model->is_exists_doc_num($rs->DocNum, $code);
+						
 						$arr = array(
 							'Status' => 1,
 							'DocEntry' => $rs->DocEntry,
@@ -270,7 +273,7 @@ class Order_api
 
 						$sc = FALSE;
 						$this->error = $rs->error;						
-					}					
+					}
 				}
 				else
 				{
@@ -302,6 +305,11 @@ class Order_api
 					);
 
 					$this->ci->api_logs_model->add_logs($logs);
+				}
+
+				if($isExistsDocNum)
+				{
+					$this->updateOrderDocNum($code, $json);
 				}
 			}
 			else 
@@ -338,6 +346,87 @@ class Order_api
 		{
 			$sc = FALSE;
 			$this->error = "No data found";
+		}
+
+		return $sc;
+	}
+
+	public function updateOrderDocNum($code, $json)
+	{
+		$sc = TRUE;		
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $this->url);
+		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+		curl_setopt($curl, CURLOPT_TIMEOUT, 0);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+
+		$req_start = now(TRUE);
+		$response = curl_exec($curl);
+		if ($response === FALSE)
+		{
+			$response = curl_error($curl);
+		}
+		curl_close($curl);
+		$req_end = now(TRUE);
+		$rs = json_decode($response);
+		if (! empty($rs) && ! empty($rs->status))
+		{
+			if ($rs->status == 'success')
+			{				
+				$arr = array(
+					'Status' => 1,
+					'DocEntry' => $rs->DocEntry,
+					'DocNum' => $rs->DocNum
+				);
+
+				$this->ci->orders_model->update($code, $arr);
+			}
+			else
+			{
+				$arr = array(
+					'Status' => 3,
+					'message' => $rs->error
+				);
+
+				$this->ci->orders_model->update($code, $arr);
+
+				$sc = FALSE;
+				$this->error = $rs->error;
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "Export failed : {$response}";
+
+			$arr = array(
+				'Status' => 3,
+				'message' => $response
+			);
+
+			$this->ci->orders_model->update($code, $arr);
+		}
+
+		if ($this->logJson)
+		{
+			$logs = array(
+				'trans_id' => genUid(),
+				'api_path' => $this->url,
+				'type' => $this->type,
+				'code' => $code,
+				'action' => $this->action,
+				'status' => $sc === TRUE ? 'success' : 'failed',
+				'message' => $sc === TRUE ? 'success' : $this->error,
+				'request_json' => $json,
+				'response_json' => $response,
+				'req_start' => $req_start,
+				'req_end' => $req_end
+			);
+
+			$this->ci->api_logs_model->add_logs($logs);
 		}
 
 		return $sc;
